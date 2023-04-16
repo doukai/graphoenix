@@ -8,6 +8,7 @@ import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.core.utils.CodecUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -27,12 +28,14 @@ import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 public class GrpcObjectHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final GraphQLConfig graphQLConfig;
     private final GrpcNameUtil grpcNameUtil;
 
     @Inject
-    public GrpcObjectHandlerBuilder(IGraphQLDocumentManager manager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
+    public GrpcObjectHandlerBuilder(IGraphQLDocumentManager manager, PackageManager packageManager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.grpcNameUtil = grpcNameUtil;
         this.graphQLConfig = graphQLConfig;
     }
@@ -72,20 +75,16 @@ public class GrpcObjectHandlerBuilder {
     private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         String objectParameterName = grpcNameUtil.getLowerCamelName(objectTypeDefinitionContext);
         String grpcTypeName = grpcNameUtil.getGrpcTypeName(objectTypeDefinitionContext);
-
-        ClassName className = manager.getClassName(objectTypeDefinitionContext)
-                .map(TYPE_NAME_UTIL::toClassName)
-                .orElseGet(() -> ClassName.get(manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.concat(".dto.objectType")).orElseGet(graphQLConfig::getObjectTypePackageName), objectTypeDefinitionContext.name().getText()));
-
-        String grpcObjectPackageName = manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.concat(".dto.objectType.grpc")).orElseGet(graphQLConfig::getGrpcObjectTypePackageName);
-        ClassName grpcObjectClassName = ClassName.get(grpcObjectPackageName, grpcTypeName);
+        ClassName className = TYPE_NAME_UTIL.toClassName(packageManager.getClassName(objectTypeDefinitionContext));
+        String grpcObjectPackageName = packageManager.getGrpcClassName(objectTypeDefinitionContext);
+        ClassName grpcObjectClassName = TYPE_NAME_UTIL.toClassName(grpcObjectPackageName);
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder(objectParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(grpcObjectClassName)
                 .addParameter(className, objectParameterName)
                 .addStatement("$T builder = $T.newBuilder()",
-                        ClassName.get(grpcObjectPackageName, grpcTypeName, "Builder"),
+                        ClassName.get(grpcObjectPackageName, "Builder"),
                         grpcObjectClassName
                 );
 
@@ -95,32 +94,39 @@ public class GrpcObjectHandlerBuilder {
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContexts) {
             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
             String fieldGetterName = grpcNameUtil.getGetMethodName(fieldDefinitionContext);
-            String fieldRpcObjectName = grpcNameUtil.getGrpcTypeName(fieldDefinitionContext.type());
             String objectFieldMethodName = grpcNameUtil.getLowerCamelName(fieldDefinitionContext.type());
             CodeBlock codeBlock;
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                 String grpcAddAllMethodName = grpcNameUtil.getGrpcAddAllMethodName(fieldDefinitionContext);
                 if (manager.isScalar(fieldTypeName)) {
-                    if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
-                        codeBlock = CodeBlock.of("builder.$L($L.$L().stream().map(item -> $T.CODEC_UTIL.encode(item)).collect($T.toList()))",
-                                grpcAddAllMethodName,
-                                objectParameterName,
-                                fieldGetterName,
-                                ClassName.get(CodecUtil.class)
-                        );
-                    } else {
-                        codeBlock = CodeBlock.of("builder.$L($L.$L())",
-                                grpcAddAllMethodName,
-                                objectParameterName,
-                                fieldGetterName
-                        );
+                    switch (fieldTypeName) {
+                        case "DateTime":
+                        case "Timestamp":
+                        case "Date":
+                        case "Time":
+                        case "BigInteger":
+                        case "BigDecimal":
+                            codeBlock = CodeBlock.of("builder.$L($L.$L().stream().map(item -> $T.CODEC_UTIL.encode(item)).collect($T.toList()))",
+                                    grpcAddAllMethodName,
+                                    objectParameterName,
+                                    fieldGetterName,
+                                    ClassName.get(CodecUtil.class)
+                            );
+                            break;
+                        default:
+                            codeBlock = CodeBlock.of("builder.$L($L.$L())",
+                                    grpcAddAllMethodName,
+                                    objectParameterName,
+                                    fieldGetterName
+                            );
+                            break;
                     }
                 } else if (manager.isEnum(fieldTypeName)) {
                     codeBlock = CodeBlock.of("builder.$L($L.$L().stream().map(item -> $T.forNumber(item.ordinal())).collect($T.toList()))",
                             grpcAddAllMethodName,
                             objectParameterName,
                             fieldGetterName,
-                            ClassName.get(manager.getPackageName(fieldDefinitionContext.type()).map(packageName -> packageName.concat(".dto.enumType.grpc")).orElseGet(graphQLConfig::getGrpcEnumTypePackageName), fieldRpcObjectName),
+                            TYPE_NAME_UTIL.toClassName(packageManager.getGrpcClassName(fieldDefinitionContext.type())),
                             ClassName.get(Collectors.class)
                     );
                 } else if (manager.isObject(fieldTypeName)) {
@@ -168,7 +174,7 @@ public class GrpcObjectHandlerBuilder {
                 } else if (manager.isEnum(fieldTypeName)) {
                     codeBlock = CodeBlock.of("builder.$L($T.forNumber($L.$L().ordinal()))",
                             grpcSetMethodName,
-                            ClassName.get(manager.getPackageName(fieldDefinitionContext.type()).map(packageName -> packageName.concat(".dto.enumType.grpc")).orElseGet(graphQLConfig::getGrpcEnumTypePackageName), fieldRpcObjectName),
+                            TYPE_NAME_UTIL.toClassName(packageManager.getGrpcClassName(fieldDefinitionContext.type())),
                             objectParameterName,
                             fieldGetterName
                     );

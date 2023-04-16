@@ -311,6 +311,7 @@ public class BaseTask extends DefaultTask {
                                                                             .addDirective(
                                                                                     new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                                                                                             .addArgument("packageName", graphQLConfig.getPackageName())
+                                                                                            .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
                                                                             )
                                                             );
                                                     manager.mergeDocument(objectType.toString());
@@ -366,6 +367,7 @@ public class BaseTask extends DefaultTask {
                                                                             .addDirective(
                                                                                     new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                                                                                             .addArgument("packageName", graphQLConfig.getPackageName())
+                                                                                            .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
                                                                             )
                                                             );
                                                     manager.mergeDocument(objectType.toString());
@@ -449,10 +451,10 @@ public class BaseTask extends DefaultTask {
                         new Directive()
                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", resolvedReferenceTypeDeclaration.getQualifiedName())
+                                .addArgument("grpcClassName", graphQLConfig.getGrpcObjectTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(resolvedReferenceTypeDeclaration.getClassName())))
                 )
                 .addDirective(
-                        new Directive()
-                                .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                        new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
                 );
     }
 
@@ -469,10 +471,10 @@ public class BaseTask extends DefaultTask {
                         new Directive()
                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", resolvedReferenceTypeDeclaration.getQualifiedName())
+                                .addArgument("grpcClassName", graphQLConfig.getGrpcInterfaceTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(resolvedReferenceTypeDeclaration.getClassName())))
                 )
                 .addDirective(
-                        new Directive()
-                                .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                        new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
                 );
     }
 
@@ -488,10 +490,10 @@ public class BaseTask extends DefaultTask {
                         new Directive()
                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", resolvedReferenceTypeDeclaration.getQualifiedName())
+                                .addArgument("grpcClassName", graphQLConfig.getGrpcEnumTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(resolvedReferenceTypeDeclaration.getClassName())))
                 )
                 .addDirective(
-                        new Directive()
-                                .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                        new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
                 );
     }
 

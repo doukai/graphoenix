@@ -9,6 +9,7 @@ import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.handler.GraphQLFieldFormatter;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -33,12 +34,14 @@ import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 public class SelectionFilterBuilder {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final TypeManager typeManager;
     private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public SelectionFilterBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
+    public SelectionFilterBuilder(IGraphQLDocumentManager manager, PackageManager packageManager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.typeManager = typeManager;
         this.graphQLConfig = graphQLConfig;
     }
@@ -109,13 +112,7 @@ public class SelectionFilterBuilder {
 
     private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
-        ClassName typeClassName;
-        Optional<String> className = manager.getClassName(objectTypeDefinitionContext);
-        if (className.isPresent()) {
-            typeClassName = TYPE_NAME_UTIL.toClassName(className.get());
-        } else {
-            typeClassName = ClassName.get(manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.concat(".dto.objectType")).orElseGet(graphQLConfig::getObjectTypePackageName), objectTypeDefinitionContext.name().getText());
-        }
+        ClassName typeClassName = TYPE_NAME_UTIL.toClassName(packageManager.getClassName(objectTypeDefinitionContext));
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(JsonValue.class))
@@ -237,13 +234,7 @@ public class SelectionFilterBuilder {
     private MethodSpec buildListTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
         String listTypeParameterName = typeParameterName.concat("List");
-        ClassName typeClassName;
-        Optional<String> className = manager.getClassName(objectTypeDefinitionContext);
-        if (className.isPresent()) {
-            typeClassName = TYPE_NAME_UTIL.toClassName(className.get());
-        } else {
-            typeClassName = ClassName.get(manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.concat(".dto.objectType")).orElseGet(graphQLConfig::getObjectTypePackageName), objectTypeDefinitionContext.name().getText());
-        }
+        ClassName typeClassName = TYPE_NAME_UTIL.toClassName(packageManager.getClassName(objectTypeDefinitionContext));
         MethodSpec.Builder builder = MethodSpec.methodBuilder(listTypeParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(JsonValue.class))

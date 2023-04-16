@@ -682,27 +682,23 @@ public class ProtobufFileBuilder {
             }
         } else if (manager.isEnum(fieldTypeName)) {
             return manager.getEnum(fieldTypeName)
-                    .flatMap(manager::getPackageName)
                     .filter(packageManager::isNotOwnPackage)
-                    .map(packageName -> packageName.concat(".grpc.").concat(getName(fieldTypeName)))
+                    .flatMap(manager::getGrpcPackageName)
                     .orElseGet(() -> getName(fieldTypeName));
         } else if (manager.isObject(fieldTypeName)) {
             return manager.getObject(fieldTypeName)
-                    .flatMap(manager::getPackageName)
                     .filter(packageManager::isNotOwnPackage)
-                    .map(packageName -> packageName.concat(".grpc.").concat(getName(fieldTypeName)))
+                    .flatMap(manager::getGrpcPackageName)
                     .orElseGet(() -> getName(fieldTypeName));
         } else if (manager.isInterface(fieldTypeName)) {
             return manager.getInterface(fieldTypeName)
-                    .flatMap(manager::getPackageName)
                     .filter(packageManager::isNotOwnPackage)
-                    .map(packageName -> packageName.concat(".grpc.").concat(getName(fieldTypeName)))
+                    .flatMap(manager::getGrpcPackageName)
                     .orElseGet(() -> getName(fieldTypeName));
         } else if (manager.isInputObject(fieldTypeName)) {
             return manager.getInputObject(fieldTypeName)
-                    .flatMap(manager::getPackageName)
                     .filter(packageManager::isNotOwnPackage)
-                    .map(packageName -> packageName.concat(".grpc.").concat(getName(fieldTypeName)))
+                    .flatMap(manager::getGrpcPackageName)
                     .orElseGet(() -> getName(fieldTypeName));
         } else {
             throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));

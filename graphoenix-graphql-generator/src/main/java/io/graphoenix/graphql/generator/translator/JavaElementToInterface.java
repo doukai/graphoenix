@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.translator;
 
+import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.document.Field;
 import io.graphoenix.core.document.InterfaceType;
@@ -16,16 +17,19 @@ import javax.lang.model.util.Types;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
+import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME;
 
 @ApplicationScoped
 public class JavaElementToInterface {
 
+    private final GraphQLConfig graphQLConfig;
     private final ElementManager elementManager;
 
     @Inject
-    public JavaElementToInterface(ElementManager elementManager) {
+    public JavaElementToInterface(GraphQLConfig graphQLConfig, ElementManager elementManager) {
+        this.graphQLConfig = graphQLConfig;
         this.elementManager = elementManager;
     }
 
@@ -73,6 +77,7 @@ public class JavaElementToInterface {
                 .addDirective(
                         new Directive(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", typeElement.getQualifiedName().toString())
+                                .addArgument("grpcClassName", graphQLConfig.getGrpcInterfaceTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(typeElement.getSimpleName().toString())))
                 )
                 .addDirective(
                         new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)

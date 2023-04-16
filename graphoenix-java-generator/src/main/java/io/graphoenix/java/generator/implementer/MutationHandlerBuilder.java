@@ -79,9 +79,7 @@ public class MutationHandlerBuilder {
     private List<MethodSpec> buildTypeMethods(boolean anchor) {
         return manager.getObjects()
                 .filter(manager::isNotOperationType)
-                .filter(objectTypeDefinitionContext -> !manager.hasClassName(objectTypeDefinitionContext))
-                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
-                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
                                 buildTypeMethod(objectTypeDefinitionContext, anchor),

@@ -204,6 +204,8 @@ public interface IGraphQLDocumentManager {
 
     boolean hasClassName(GraphqlParser.TypeContext typeContext);
 
+    boolean hasClassName(GraphqlParser.DirectivesContext directivesContext);
+
     boolean hasClassName(String typeName);
 
     Optional<String> getClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
@@ -214,7 +216,33 @@ public interface IGraphQLDocumentManager {
 
     Optional<String> getClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
 
+    Optional<String> getClassName(GraphqlParser.TypeContext typeContext);
+
+    Optional<String> getClassName(GraphqlParser.DirectivesContext directivesContext);
+
     String getClassName(String typeName);
+
+    Optional<String> getAnnotationName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+
+    Optional<String> getAnnotationName(GraphqlParser.TypeContext typeContext);
+
+    Optional<String> getAnnotationName(GraphqlParser.DirectivesContext directivesContext);
+
+    String getAnnotationName(String typeName);
+
+    Optional<String> getGrpcClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+
+    Optional<String> getGrpcClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
+
+    Optional<String> getGrpcClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+
+    Optional<String> getGrpcClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
+
+    Optional<String> getGrpcClassName(GraphqlParser.DirectivesContext directivesContext);
+
+    Optional<String> getGrpcClassName(GraphqlParser.TypeContext typeContext);
+
+    String getGrpcClassName(String typeName);
 
     Optional<String> getPackageName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
 
@@ -233,6 +261,24 @@ public interface IGraphQLDocumentManager {
     Optional<String> getPackageName(GraphqlParser.TypeContext typeContext);
 
     String getPackageName(String typeName);
+
+    Optional<String> getGrpcPackageName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+
+    Optional<String> getGrpcPackageName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
+
+    Optional<String> getGrpcPackageName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+
+    Optional<String> getGrpcPackageName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
+
+    Optional<String> getGrpcPackageName(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
+
+    Optional<String> getGrpcPackageName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    Optional<String> getGrpcPackageName(GraphqlParser.DirectivesContext directivesContext);
+
+    Optional<String> getGrpcPackageName(GraphqlParser.TypeContext typeContext);
+
+    String getGrpcPackageName(String typeName);
 
     String getProtocol(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 

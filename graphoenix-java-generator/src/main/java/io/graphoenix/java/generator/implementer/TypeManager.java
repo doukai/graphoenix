@@ -7,6 +7,7 @@ import com.squareup.javapoet.TypeName;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
@@ -26,17 +27,20 @@ import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.CLASS_NAME_ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.METHOD_NAME_ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class TypeManager {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public TypeManager(IGraphQLDocumentManager manager, GraphQLConfig graphQLConfig) {
+    public TypeManager(IGraphQLDocumentManager manager, PackageManager packageManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.graphQLConfig = graphQLConfig;
     }
 
@@ -123,7 +127,7 @@ public class TypeManager {
                 case "Timestamp":
                     return TypeName.get(LocalDateTime.class);
                 default:
-                    return ClassName.get(manager.getPackageName(typeContext).map(packageName -> packageName.concat(".dto.objectType")).orElseGet(graphQLConfig::getObjectTypePackageName), fieldTypeName);
+                    return TYPE_NAME_UTIL.toClassName(packageManager.getClassName(typeContext));
             }
         }
     }

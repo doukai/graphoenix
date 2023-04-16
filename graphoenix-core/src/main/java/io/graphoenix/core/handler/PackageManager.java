@@ -3,6 +3,7 @@ package io.graphoenix.core.handler;
 import com.google.common.reflect.ClassPath;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.annotation.Package;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,6 +14,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static io.graphoenix.core.error.GraphQLErrorType.*;
 
 @ApplicationScoped
 public class PackageManager {
@@ -163,5 +166,77 @@ public class PackageManager {
                 Stream.of(Optional.ofNullable(graphQLConfig.getPackageName()).orElseGet(this::getDefaultPackageName)),
                 Stream.ofNullable(graphQLConfig.getLocalPackageNames()).flatMap(Collection::stream)
         );
+    }
+
+    public String getClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return manager.getClassName(objectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()));
+    }
+
+    public String getClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return manager.getClassName(enumTypeDefinitionContext).orElseGet(() -> graphQLConfig.getEnumTypePackageName().concat(".").concat(enumTypeDefinitionContext.name().getText()));
+    }
+
+    public String getClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return manager.getClassName(interfaceTypeDefinitionContext).orElseGet(() -> graphQLConfig.getInterfaceTypePackageName().concat(".").concat(interfaceTypeDefinitionContext.name().getText()));
+    }
+
+    public String getClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return manager.getClassName(inputObjectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getInputObjectTypePackageName().concat(".").concat(inputObjectTypeDefinitionContext.name().getText()));
+    }
+
+    public String getClassName(GraphqlParser.TypeContext typeContext) {
+        String fieldTypeName = manager.getFieldTypeName(typeContext);
+        if (manager.isObject(fieldTypeName)) {
+            return manager.getObject(fieldTypeName).map(this::getClassName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(fieldTypeName)));
+        } else if (manager.isInterface(fieldTypeName)) {
+            return manager.getInterface(fieldTypeName).map(this::getClassName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(fieldTypeName)));
+        } else if (manager.isEnum(fieldTypeName)) {
+            return manager.getEnum(fieldTypeName).map(this::getClassName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(fieldTypeName)));
+        } else if (manager.isInputObject(fieldTypeName)) {
+            return manager.getInputObject(fieldTypeName).map(this::getClassName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(fieldTypeName)));
+        }
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+    }
+
+    public String getAnnotationName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return manager.getAnnotationName(inputObjectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getAnnotationPackageName().concat(".").concat(inputObjectTypeDefinitionContext.name().getText()));
+    }
+
+    public String getAnnotationName(GraphqlParser.TypeContext typeContext) {
+        String fieldTypeName = manager.getFieldTypeName(typeContext);
+        if (manager.isInputObject(fieldTypeName)) {
+            return manager.getInputObject(fieldTypeName).map(this::getAnnotationName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(fieldTypeName)));
+        }
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+    }
+
+    public String getGrpcClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return manager.getGrpcClassName(objectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getGrpcObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()));
+    }
+
+    public String getGrpcClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return manager.getGrpcClassName(enumTypeDefinitionContext).orElseGet(() -> graphQLConfig.getGrpcEnumTypePackageName().concat(".").concat(enumTypeDefinitionContext.name().getText()));
+    }
+
+    public String getGrpcClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return manager.getGrpcClassName(interfaceTypeDefinitionContext).orElseGet(() -> graphQLConfig.getGrpcInterfaceTypePackageName().concat(".").concat(interfaceTypeDefinitionContext.name().getText()));
+    }
+
+    public String getGrpcClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return manager.getGrpcClassName(inputObjectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getGrpcInputObjectTypePackageName().concat(".").concat(inputObjectTypeDefinitionContext.name().getText()));
+    }
+
+    public String getGrpcClassName(GraphqlParser.TypeContext typeContext) {
+        String fieldTypeName = manager.getFieldTypeName(typeContext);
+        if (manager.isObject(fieldTypeName)) {
+            return manager.getObject(fieldTypeName).map(this::getGrpcClassName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(fieldTypeName)));
+        } else if (manager.isInterface(fieldTypeName)) {
+            return manager.getInterface(fieldTypeName).map(this::getGrpcClassName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(fieldTypeName)));
+        } else if (manager.isEnum(fieldTypeName)) {
+            return manager.getEnum(fieldTypeName).map(this::getGrpcClassName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(fieldTypeName)));
+        } else if (manager.isInputObject(fieldTypeName)) {
+            return manager.getInputObject(fieldTypeName).map(this::getGrpcClassName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(fieldTypeName)));
+        }
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
     }
 }

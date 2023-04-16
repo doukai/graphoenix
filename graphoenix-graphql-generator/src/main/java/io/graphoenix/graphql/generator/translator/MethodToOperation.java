@@ -85,6 +85,7 @@ public class MethodToOperation {
                 .addDirective(
                         new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                                 .addArgument("packageName", graphQLConfig.getPackageName())
+                                .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
                 );
         Field field = new Field().setName(fieldName);
 

@@ -36,36 +36,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
-import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
-import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.CONNECTION_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.CONNECTION_SUFFIX;
-import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.CURSOR_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.DENY_ALL;
-import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.EDGE_SUFFIX;
-import static io.graphoenix.spi.constant.Hammurabi.EXPRESSION_SUFFIX;
-import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.FUNC_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.GROUP_BY_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
-import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
-import static io.graphoenix.spi.constant.Hammurabi.LAST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.META_INTERFACE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.OFFSET_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.ORDER_BY_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.ORDER_BY_SUFFIX;
-import static io.graphoenix.spi.constant.Hammurabi.PACKAGE_INFO_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.PERMIT_ALL;
-import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.ROLES_ALLOWED;
-import static io.graphoenix.spi.constant.Hammurabi.SORT_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
+import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class DocumentBuilder {
@@ -224,6 +196,15 @@ public class DocumentBuilder {
             objectType.addDirective(
                     new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                             .addArgument("packageName", graphQLConfig.getPackageName())
+                            .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
+            );
+        }
+
+        if (!manager.hasClassName(objectTypeDefinitionContext)) {
+            objectType.addDirective(
+                    new Directive(CLASS_INFO_DIRECTIVE_NAME)
+                            .addArgument("className", graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
+                            .addArgument("grpcClassName", graphQLConfig.getGrpcObjectTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(objectTypeDefinitionContext.name().getText())))
             );
         }
 
@@ -276,8 +257,19 @@ public class DocumentBuilder {
             inputObjectType.addDirective(
                     new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                             .addArgument("packageName", graphQLConfig.getPackageName())
+                            .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
             );
         }
+
+        if (!manager.hasClassName(inputObjectTypeDefinitionContext)) {
+            inputObjectType.addDirective(
+                    new Directive(CLASS_INFO_DIRECTIVE_NAME)
+                            .addArgument("className", graphQLConfig.getInputObjectTypePackageName().concat(".").concat(inputObjectTypeDefinitionContext.name().getText()))
+                            .addArgument("annotationName", graphQLConfig.getAnnotationPackageName().concat(".").concat(inputObjectTypeDefinitionContext.name().getText()))
+                            .addArgument("grpcClassName", graphQLConfig.getGrpcInputObjectTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(inputObjectTypeDefinitionContext.name().getText())))
+            );
+        }
+
         return inputObjectType;
     }
 
@@ -288,8 +280,18 @@ public class DocumentBuilder {
             interfaceType.addDirective(
                     new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                             .addArgument("packageName", graphQLConfig.getPackageName())
+                            .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
             );
         }
+
+        if (!manager.hasClassName(interfaceTypeDefinitionContext)) {
+            interfaceType.addDirective(
+                    new Directive(CLASS_INFO_DIRECTIVE_NAME)
+                            .addArgument("className", graphQLConfig.getInterfaceTypePackageName().concat(".").concat(interfaceTypeDefinitionContext.name().getText()))
+                            .addArgument("grpcClassName", graphQLConfig.getGrpcInterfaceTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(interfaceTypeDefinitionContext.name().getText())))
+            );
+        }
+
         return interfaceType;
     }
 
@@ -319,6 +321,15 @@ public class DocumentBuilder {
             enumType.addDirective(
                     new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                             .addArgument("packageName", graphQLConfig.getPackageName())
+                            .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
+            );
+        }
+
+        if (!manager.hasClassName(enumTypeDefinitionContext)) {
+            enumType.addDirective(
+                    new Directive(CLASS_INFO_DIRECTIVE_NAME)
+                            .addArgument("className", graphQLConfig.getEnumTypePackageName().concat(".").concat(enumTypeDefinitionContext.name().getText()))
+                            .addArgument("grpcClassName", graphQLConfig.getGrpcEnumTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(enumTypeDefinitionContext.name().getText())))
             );
         }
         return enumType;
@@ -463,6 +474,7 @@ public class DocumentBuilder {
                 .addDirective(
                         new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                                 .addArgument("packageName", graphQLConfig.getPackageName())
+                                .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
                 );
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"));
@@ -480,6 +492,7 @@ public class DocumentBuilder {
                 .addDirective(
                         new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                                 .addArgument("packageName", graphQLConfig.getPackageName())
+                                .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
                 );
 
         if (inputType.equals(InputType.EXPRESSION)) {
@@ -519,6 +532,7 @@ public class DocumentBuilder {
                 .addDirective(
                         new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                                 .addArgument("packageName", graphQLConfig.getPackageName())
+                                .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
                 );
 
         if (inputType.equals(InputType.EXPRESSION)) {

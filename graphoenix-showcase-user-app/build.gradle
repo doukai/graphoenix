@@ -24,6 +24,7 @@ dependencies {
     implementation project(':graphoenix-grpc-client')
     implementation project(':graphoenix-gossip')
 
+    annotationProcessor project(':graphoenix-core')
     annotationProcessor project(":graphoenix-showcase-user")
     annotationProcessor project(":graphoenix-introspection")
     annotationProcessor project(':graphoenix-annotation-processor')

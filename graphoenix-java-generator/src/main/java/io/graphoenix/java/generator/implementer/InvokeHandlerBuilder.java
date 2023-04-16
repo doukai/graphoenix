@@ -11,6 +11,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -38,13 +39,15 @@ import static io.graphoenix.java.generator.utils.TypeUtil.TYPE_UTIL;
 public class InvokeHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final TypeManager typeManager;
     private final GraphQLConfig graphQLConfig;
     private Map<String, Map<String, List<Map.Entry<String, String>>>> invokeMethods;
 
     @Inject
-    public InvokeHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
+    public InvokeHandlerBuilder(IGraphQLDocumentManager manager, PackageManager packageManager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.typeManager = typeManager;
         this.graphQLConfig = graphQLConfig;
     }
@@ -157,9 +160,7 @@ public class InvokeHandlerBuilder {
     }
 
     private MethodSpec buildTypeInvokeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        ClassName typeClassName = manager.getClassName(objectTypeDefinitionContext)
-                .map(TYPE_NAME_UTIL::toClassName)
-                .orElseGet(() -> ClassName.get(manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.concat(".dto.objectType")).orElseGet(graphQLConfig::getObjectTypePackageName), objectTypeDefinitionContext.name().getText()));
+        ClassName typeClassName = TYPE_NAME_UTIL.toClassName(packageManager.getClassName(objectTypeDefinitionContext));
         String typeParameterName = getParameterName(objectTypeDefinitionContext);
 
         return MethodSpec.methodBuilder(typeParameterName)
@@ -185,103 +186,103 @@ public class InvokeHandlerBuilder {
                                                         .beginControlFlow("switch (fieldName)")
                                                         .indent()
                                                         .add(CodeBlock.join(
-                                                                        Streams.concat(
-                                                                                Stream.ofNullable(invokeMethods.get(objectTypeDefinitionContext.name().getText()))
-                                                                                        .flatMap(map -> map.entrySet().stream())
-                                                                                        .flatMap(entry ->
-                                                                                                entry.getValue().stream()
-                                                                                                        .map(methodEntry -> {
-                                                                                                                    String apiVariableName = typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(entry.getKey()).simpleName());
-                                                                                                                    String invokeFieldName = typeManager.getInvokeFieldName(methodEntry.getKey());
-                                                                                                                    String fieldSetterMethodName = typeManager.getFieldSetterMethodName(invokeFieldName);
-                                                                                                                    CodeBlock caseCodeBlock = CodeBlock.of("case $S:\n", invokeFieldName);
-                                                                                                                    CodeBlock invokeCodeBlock;
-                                                                                                                    if (TYPE_UTIL.getClassName(methodEntry.getValue()).canonicalName().equals(PublisherBuilder.class.getCanonicalName())) {
-                                                                                                                        invokeCodeBlock = CodeBlock.of("return $T.from($L.get().$L($L).buildRs()).doOnNext(result -> $L.$L(result));",
-                                                                                                                                ClassName.get(Mono.class),
-                                                                                                                                apiVariableName,
-                                                                                                                                methodEntry.getKey(),
-                                                                                                                                typeParameterName,
-                                                                                                                                typeParameterName,
-                                                                                                                                fieldSetterMethodName
-                                                                                                                        );
-                                                                                                                    } else if (TYPE_UTIL.getClassName(methodEntry.getValue()).canonicalName().equals(Mono.class.getCanonicalName())) {
-                                                                                                                        invokeCodeBlock = CodeBlock.of("return $L.get().$L($L).doOnNext(result -> $L.$L(result));",
-                                                                                                                                apiVariableName,
-                                                                                                                                methodEntry.getKey(),
-                                                                                                                                typeParameterName,
-                                                                                                                                typeParameterName,
-                                                                                                                                fieldSetterMethodName
-                                                                                                                        );
-                                                                                                                    } else if (TYPE_UTIL.getClassName(methodEntry.getValue()).canonicalName().equals(Flux.class.getCanonicalName())) {
-                                                                                                                        invokeCodeBlock = CodeBlock.of("return $L.get().$L($L).collectList().doOnNext(result -> $L.$L(result));",
-                                                                                                                                apiVariableName,
-                                                                                                                                methodEntry.getKey(),
-                                                                                                                                typeParameterName,
-                                                                                                                                typeParameterName,
-                                                                                                                                fieldSetterMethodName
-                                                                                                                        );
-                                                                                                                    } else {
-                                                                                                                        invokeCodeBlock = CodeBlock.of("return $T.justOrEmpty($L.get().$L($L)).doOnNext(result -> $L.$L(result));",
-                                                                                                                                ClassName.get(Mono.class),
-                                                                                                                                apiVariableName,
-                                                                                                                                methodEntry.getKey(),
-                                                                                                                                typeParameterName,
-                                                                                                                                typeParameterName,
-                                                                                                                                fieldSetterMethodName
-                                                                                                                        );
-                                                                                                                    }
-                                                                                                                    return CodeBlock.builder().add(caseCodeBlock).indent().add(invokeCodeBlock).unindent().build();
-                                                                                                                }
-                                                                                                        )
-                                                                                        ),
-                                                                                manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                                                        .filter(manager::isNotInvokeField)
-                                                                                        .filter(manager::isNotFetchField)
-                                                                                        .filter(manager::isNotFunctionField)
-                                                                                        .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                                                        .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
-                                                                                        .map(fieldDefinitionContext -> {
-                                                                                                    CodeBlock caseCodeBlock = CodeBlock.of("case $S:\n", fieldDefinitionContext.name().getText());
-                                                                                                    CodeBlock invokeCodeBlock = CodeBlock.of("return $T.justOrEmpty($L.$L()).flatMap(field -> $L(field, selectionContext.field().selectionSet())).doOnNext($L -> $L.$L($L));",
-                                                                                                            ClassName.get(Mono.class),
-                                                                                                            typeParameterName,
-                                                                                                            typeManager.getFieldGetterMethodName(fieldDefinitionContext),
-                                                                                                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
-                                                                                                            fieldDefinitionContext.name().getText(),
-                                                                                                            typeParameterName,
-                                                                                                            typeManager.getFieldSetterMethodName(fieldDefinitionContext),
-                                                                                                            fieldDefinitionContext.name().getText()
-                                                                                                    );
-                                                                                                    return CodeBlock.builder().add(caseCodeBlock).indent().add(invokeCodeBlock).unindent().build();
-                                                                                                }
-                                                                                        ),
-                                                                                manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                                                        .filter(manager::isNotInvokeField)
-                                                                                        .filter(manager::isNotFetchField)
-                                                                                        .filter(manager::isNotFunctionField)
-                                                                                        .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                                                        .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
-                                                                                        .map(fieldDefinitionContext -> {
-                                                                                                    CodeBlock caseCodeBlock = CodeBlock.of("case $S:\n", fieldDefinitionContext.name().getText());
-                                                                                                    CodeBlock invokeCodeBlock = CodeBlock.of("return $T.from($T.justOrEmpty($L.$L())).flatMap($T::fromIterable).flatMap(item-> $L(item, selectionContext.field().selectionSet())).collectList().doOnNext($L -> $L.$L($L));",
-                                                                                                            ClassName.get(Flux.class),
-                                                                                                            ClassName.get(Mono.class),
-                                                                                                            typeParameterName,
-                                                                                                            typeManager.getFieldGetterMethodName(fieldDefinitionContext),
-                                                                                                            ClassName.get(Flux.class),
-                                                                                                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
-                                                                                                            fieldDefinitionContext.name().getText(),
-                                                                                                            typeParameterName,
-                                                                                                            typeManager.getFieldSetterMethodName(fieldDefinitionContext),
-                                                                                                            fieldDefinitionContext.name().getText()
-                                                                                                    );
-                                                                                                    return CodeBlock.builder().add(caseCodeBlock).indent().add(invokeCodeBlock).unindent().build();
-                                                                                                }
-                                                                                        ),
-                                                                                Stream.of(CodeBlock.builder().add(CodeBlock.of("default:\n")).indent().add(CodeBlock.of("return $T.empty();\n", ClassName.get(Flux.class))).unindent().build())
-                                                                        ).collect(Collectors.toList()),
-                                                                        System.lineSeparator()
+                                                                Streams.concat(
+                                                                        Stream.ofNullable(invokeMethods.get(objectTypeDefinitionContext.name().getText()))
+                                                                                .flatMap(map -> map.entrySet().stream())
+                                                                                .flatMap(entry ->
+                                                                                        entry.getValue().stream()
+                                                                                                .map(methodEntry -> {
+                                                                                                            String apiVariableName = typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(entry.getKey()).simpleName());
+                                                                                                            String invokeFieldName = typeManager.getInvokeFieldName(methodEntry.getKey());
+                                                                                                            String fieldSetterMethodName = typeManager.getFieldSetterMethodName(invokeFieldName);
+                                                                                                            CodeBlock caseCodeBlock = CodeBlock.of("case $S:\n", invokeFieldName);
+                                                                                                            CodeBlock invokeCodeBlock;
+                                                                                                            if (TYPE_UTIL.getClassName(methodEntry.getValue()).canonicalName().equals(PublisherBuilder.class.getCanonicalName())) {
+                                                                                                                invokeCodeBlock = CodeBlock.of("return $T.from($L.get().$L($L).buildRs()).doOnNext(result -> $L.$L(result));",
+                                                                                                                        ClassName.get(Mono.class),
+                                                                                                                        apiVariableName,
+                                                                                                                        methodEntry.getKey(),
+                                                                                                                        typeParameterName,
+                                                                                                                        typeParameterName,
+                                                                                                                        fieldSetterMethodName
+                                                                                                                );
+                                                                                                            } else if (TYPE_UTIL.getClassName(methodEntry.getValue()).canonicalName().equals(Mono.class.getCanonicalName())) {
+                                                                                                                invokeCodeBlock = CodeBlock.of("return $L.get().$L($L).doOnNext(result -> $L.$L(result));",
+                                                                                                                        apiVariableName,
+                                                                                                                        methodEntry.getKey(),
+                                                                                                                        typeParameterName,
+                                                                                                                        typeParameterName,
+                                                                                                                        fieldSetterMethodName
+                                                                                                                );
+                                                                                                            } else if (TYPE_UTIL.getClassName(methodEntry.getValue()).canonicalName().equals(Flux.class.getCanonicalName())) {
+                                                                                                                invokeCodeBlock = CodeBlock.of("return $L.get().$L($L).collectList().doOnNext(result -> $L.$L(result));",
+                                                                                                                        apiVariableName,
+                                                                                                                        methodEntry.getKey(),
+                                                                                                                        typeParameterName,
+                                                                                                                        typeParameterName,
+                                                                                                                        fieldSetterMethodName
+                                                                                                                );
+                                                                                                            } else {
+                                                                                                                invokeCodeBlock = CodeBlock.of("return $T.justOrEmpty($L.get().$L($L)).doOnNext(result -> $L.$L(result));",
+                                                                                                                        ClassName.get(Mono.class),
+                                                                                                                        apiVariableName,
+                                                                                                                        methodEntry.getKey(),
+                                                                                                                        typeParameterName,
+                                                                                                                        typeParameterName,
+                                                                                                                        fieldSetterMethodName
+                                                                                                                );
+                                                                                                            }
+                                                                                                            return CodeBlock.builder().add(caseCodeBlock).indent().add(invokeCodeBlock).unindent().build();
+                                                                                                        }
+                                                                                                )
+                                                                                ),
+                                                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                                                .filter(manager::isNotInvokeField)
+                                                                                .filter(manager::isNotFetchField)
+                                                                                .filter(manager::isNotFunctionField)
+                                                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                                                .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
+                                                                                .map(fieldDefinitionContext -> {
+                                                                                            CodeBlock caseCodeBlock = CodeBlock.of("case $S:\n", fieldDefinitionContext.name().getText());
+                                                                                            CodeBlock invokeCodeBlock = CodeBlock.of("return $T.justOrEmpty($L.$L()).flatMap(field -> $L(field, selectionContext.field().selectionSet())).doOnNext($L -> $L.$L($L));",
+                                                                                                    ClassName.get(Mono.class),
+                                                                                                    typeParameterName,
+                                                                                                    typeManager.getFieldGetterMethodName(fieldDefinitionContext),
+                                                                                                    getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                                                                                    fieldDefinitionContext.name().getText(),
+                                                                                                    typeParameterName,
+                                                                                                    typeManager.getFieldSetterMethodName(fieldDefinitionContext),
+                                                                                                    fieldDefinitionContext.name().getText()
+                                                                                            );
+                                                                                            return CodeBlock.builder().add(caseCodeBlock).indent().add(invokeCodeBlock).unindent().build();
+                                                                                        }
+                                                                                ),
+                                                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                                                .filter(manager::isNotInvokeField)
+                                                                                .filter(manager::isNotFetchField)
+                                                                                .filter(manager::isNotFunctionField)
+                                                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                                                .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
+                                                                                .map(fieldDefinitionContext -> {
+                                                                                            CodeBlock caseCodeBlock = CodeBlock.of("case $S:\n", fieldDefinitionContext.name().getText());
+                                                                                            CodeBlock invokeCodeBlock = CodeBlock.of("return $T.from($T.justOrEmpty($L.$L())).flatMap($T::fromIterable).flatMap(item-> $L(item, selectionContext.field().selectionSet())).collectList().doOnNext($L -> $L.$L($L));",
+                                                                                                    ClassName.get(Flux.class),
+                                                                                                    ClassName.get(Mono.class),
+                                                                                                    typeParameterName,
+                                                                                                    typeManager.getFieldGetterMethodName(fieldDefinitionContext),
+                                                                                                    ClassName.get(Flux.class),
+                                                                                                    getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                                                                                    fieldDefinitionContext.name().getText(),
+                                                                                                    typeParameterName,
+                                                                                                    typeManager.getFieldSetterMethodName(fieldDefinitionContext),
+                                                                                                    fieldDefinitionContext.name().getText()
+                                                                                            );
+                                                                                            return CodeBlock.builder().add(caseCodeBlock).indent().add(invokeCodeBlock).unindent().build();
+                                                                                        }
+                                                                                ),
+                                                                        Stream.of(CodeBlock.builder().add(CodeBlock.of("default:\n")).indent().add(CodeBlock.of("return $T.empty();\n", ClassName.get(Flux.class))).unindent().build())
+                                                                ).collect(Collectors.toList()),
+                                                                System.lineSeparator()
                                                                 )
                                                         )
                                                         .unindent()

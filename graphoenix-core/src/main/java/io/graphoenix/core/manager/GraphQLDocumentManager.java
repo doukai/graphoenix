@@ -28,11 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.CLASS_NAME_ARGUMENT_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.PACKAGE_NAME_ARGUMENT_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.utils.FilerUtil.FILER_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
@@ -839,6 +835,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(getFieldTypeName(typeContext)));
     }
 
+    @Override
     public boolean hasClassName(GraphqlParser.DirectivesContext directivesContext) {
         return directivesContext.directive().stream()
                 .anyMatch(directiveContext -> directiveContext.name().getText().equals(CLASS_INFO_DIRECTIVE_NAME));
@@ -878,6 +875,22 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).flatMap(this::getClassName);
     }
 
+    @Override
+    public Optional<String> getClassName(GraphqlParser.TypeContext typeContext) {
+        String fieldTypeName = getFieldTypeName(typeContext);
+        if (isObject(fieldTypeName)) {
+            return getObject(fieldTypeName).flatMap(this::getClassName);
+        } else if (isInterface(fieldTypeName)) {
+            return getInterface(fieldTypeName).flatMap(this::getClassName);
+        } else if (isEnum(fieldTypeName)) {
+            return getEnum(fieldTypeName).flatMap(this::getClassName);
+        } else if (isInputObject(fieldTypeName)) {
+            return getInputObject(fieldTypeName).flatMap(this::getClassName);
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<String> getClassName(GraphqlParser.DirectivesContext directivesContext) {
         return directivesContext.directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals(CLASS_INFO_DIRECTIVE_NAME))
@@ -901,6 +914,101 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             return getInputObject(typeName).flatMap(this::getClassName).orElseThrow(() -> new GraphQLErrors(CLASS_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
         }
         throw new GraphQLErrors(CLASS_NAME_ARGUMENT_NOT_EXIST.bind(typeName));
+    }
+
+    @Override
+    public Optional<String> getAnnotationName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getAnnotationName);
+    }
+
+    @Override
+    public Optional<String> getAnnotationName(GraphqlParser.TypeContext typeContext) {
+        String fieldTypeName = getFieldTypeName(typeContext);
+        if (isInputObject(fieldTypeName)) {
+            return getInputObject(fieldTypeName).flatMap(this::getAnnotationName);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> getAnnotationName(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals(CLASS_INFO_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
+                .flatMap(argumentsContext -> argumentsContext.argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("annotationName"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                .findFirst()
+                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
+    }
+
+    @Override
+    public String getAnnotationName(String typeName) {
+        if (isInputObject(typeName)) {
+            return getInputObject(typeName).flatMap(this::getAnnotationName).orElseThrow(() -> new GraphQLErrors(ANNOTATION_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
+        }
+        throw new GraphQLErrors(ANNOTATION_NAME_ARGUMENT_NOT_EXIST.bind(typeName));
+    }
+
+    @Override
+    public Optional<String> getGrpcClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getGrpcClassName);
+    }
+
+    @Override
+    public Optional<String> getGrpcClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return Optional.ofNullable(enumTypeDefinitionContext.directives()).flatMap(this::getGrpcClassName);
+    }
+
+    @Override
+    public Optional<String> getGrpcClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getGrpcClassName);
+    }
+
+    @Override
+    public Optional<String> getGrpcClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).flatMap(this::getGrpcClassName);
+    }
+
+    @Override
+    public Optional<String> getGrpcClassName(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals(CLASS_INFO_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
+                .flatMap(argumentsContext -> argumentsContext.argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("grpcClassName"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                .findFirst()
+                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
+    }
+
+    @Override
+    public Optional<String> getGrpcClassName(GraphqlParser.TypeContext typeContext) {
+        String fieldTypeName = getFieldTypeName(typeContext);
+        if (isObject(fieldTypeName)) {
+            return getObject(fieldTypeName).flatMap(this::getGrpcClassName);
+        } else if (isInterface(fieldTypeName)) {
+            return getInterface(fieldTypeName).flatMap(this::getGrpcClassName);
+        } else if (isEnum(fieldTypeName)) {
+            return getEnum(fieldTypeName).flatMap(this::getGrpcClassName);
+        } else if (isInputObject(fieldTypeName)) {
+            return getInputObject(fieldTypeName).flatMap(this::getGrpcClassName);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public String getGrpcClassName(String typeName) {
+        if (isObject(typeName)) {
+            return getObject(typeName).flatMap(this::getGrpcClassName).orElseThrow(() -> new GraphQLErrors(GRPC_CLASS_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
+        } else if (isInterface(typeName)) {
+            return getInterface(typeName).flatMap(this::getGrpcClassName).orElseThrow(() -> new GraphQLErrors(GRPC_CLASS_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
+        } else if (isEnum(typeName)) {
+            return getEnum(typeName).flatMap(this::getGrpcClassName).orElseThrow(() -> new GraphQLErrors(GRPC_CLASS_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
+        } else if (isInputObject(typeName)) {
+            return getInputObject(typeName).flatMap(this::getGrpcClassName).orElseThrow(() -> new GraphQLErrors(GRPC_CLASS_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
+        }
+        throw new GraphQLErrors(GRPC_CLASS_NAME_ARGUMENT_NOT_EXIST.bind(typeName));
     }
 
     @Override
@@ -972,6 +1080,77 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             return getInputObject(typeName).flatMap(this::getPackageName).orElseThrow(() -> new GraphQLErrors(PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
         }
         throw new GraphQLErrors(PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName));
+    }
+
+    @Override
+    public Optional<String> getGrpcPackageName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getGrpcPackageName);
+    }
+
+    @Override
+    public Optional<String> getGrpcPackageName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return Optional.ofNullable(enumTypeDefinitionContext.directives()).flatMap(this::getGrpcPackageName);
+    }
+
+    @Override
+    public Optional<String> getGrpcPackageName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getGrpcPackageName);
+    }
+
+    @Override
+    public Optional<String> getGrpcPackageName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).flatMap(this::getGrpcPackageName);
+    }
+
+    @Override
+    public Optional<String> getGrpcPackageName(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return Optional.ofNullable(operationDefinitionContext.directives()).flatMap(this::getGrpcPackageName);
+    }
+
+    @Override
+    public Optional<String> getGrpcPackageName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Optional.ofNullable(fieldDefinitionContext.directives()).flatMap(this::getGrpcPackageName);
+    }
+
+    @Override
+    public Optional<String> getGrpcPackageName(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals(PACKAGE_INFO_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
+                .flatMap(argumentsContext -> argumentsContext.argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("grpcPackageName"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                .findFirst()
+                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
+    }
+
+    @Override
+    public Optional<String> getGrpcPackageName(GraphqlParser.TypeContext typeContext) {
+        String typeName = getFieldTypeName(typeContext);
+        if (isObject(typeName)) {
+            return getObject(typeName).flatMap(this::getGrpcPackageName);
+        } else if (isInterface(typeName)) {
+            return getInterface(typeName).flatMap(this::getGrpcPackageName);
+        } else if (isEnum(typeName)) {
+            return getEnum(typeName).flatMap(this::getGrpcPackageName);
+        } else if (isInputObject(typeName)) {
+            return getInputObject(typeName).flatMap(this::getGrpcPackageName);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public String getGrpcPackageName(String typeName) {
+        if (isObject(typeName)) {
+            return getObject(typeName).flatMap(this::getGrpcPackageName).orElseThrow(() -> new GraphQLErrors(GRPC_PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
+        } else if (isInterface(typeName)) {
+            return getInterface(typeName).flatMap(this::getGrpcPackageName).orElseThrow(() -> new GraphQLErrors(GRPC_PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
+        } else if (isEnum(typeName)) {
+            return getEnum(typeName).flatMap(this::getGrpcPackageName).orElseThrow(() -> new GraphQLErrors(GRPC_PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
+        } else if (isInputObject(typeName)) {
+            return getInputObject(typeName).flatMap(this::getGrpcPackageName).orElseThrow(() -> new GraphQLErrors(GRPC_PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
+        }
+        throw new GraphQLErrors(GRPC_PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName));
     }
 
     @Override

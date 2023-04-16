@@ -58,6 +58,7 @@ public class GraphQLApiBuilder {
                 .addDirective(
                         new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                                 .addArgument("packageName", graphQLConfig.getPackageName())
+                                .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
                 );
         if (executableElement.getAnnotation(PermitAll.class) != null) {
             field.addDirective(new Directive(PERMIT_ALL));

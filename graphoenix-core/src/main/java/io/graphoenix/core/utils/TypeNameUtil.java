@@ -9,6 +9,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.*;
 
+import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
+
 public enum TypeNameUtil {
     TYPE_NAME_UTIL;
 
@@ -19,6 +21,10 @@ public enum TypeNameUtil {
         } else {
             return typeName;
         }
+    }
+
+    public String getGrpcTypeName(String name) {
+        return name.replaceFirst(INTROSPECTION_PREFIX, "Intro");
     }
 
     public String[] getArgumentTypeNames(String typeName) {

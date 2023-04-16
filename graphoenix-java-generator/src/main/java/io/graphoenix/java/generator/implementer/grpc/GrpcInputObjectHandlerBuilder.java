@@ -9,6 +9,7 @@ import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.core.operation.ObjectValueWithVariable;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -22,17 +23,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 
 @ApplicationScoped
 public class GrpcInputObjectHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final GrpcNameUtil grpcNameUtil;
     private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public GrpcInputObjectHandlerBuilder(IGraphQLDocumentManager manager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
+    public GrpcInputObjectHandlerBuilder(IGraphQLDocumentManager manager, PackageManager packageManager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.grpcNameUtil = grpcNameUtil;
         this.graphQLConfig = graphQLConfig;
     }
@@ -78,7 +82,7 @@ public class GrpcInputObjectHandlerBuilder {
 
     private MethodSpec buildTypeMethod(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         String inputObjectParameterName = grpcNameUtil.getLowerCamelName(inputObjectTypeDefinitionContext);
-        ClassName typeClassName = ClassName.get(manager.getPackageName(inputObjectTypeDefinitionContext).map(packageName -> packageName.concat(".dto.inputObjectType.grpc")).orElseGet(graphQLConfig::getGrpcInputObjectTypePackageName), grpcNameUtil.getGrpcTypeName(inputObjectTypeDefinitionContext));
+        ClassName typeClassName = TYPE_NAME_UTIL.toClassName(packageManager.getGrpcClassName(inputObjectTypeDefinitionContext));
         MethodSpec.Builder builder = MethodSpec.methodBuilder(inputObjectParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(ObjectValueWithVariable.class))

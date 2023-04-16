@@ -97,7 +97,7 @@ public class QueryHandlerBuilder {
     private List<MethodSpec> buildTypeMethods() {
         return manager.getObjects()
                 .filter(manager::isNotOperationType)
-                .filter(objectTypeDefinitionContext -> !manager.hasClassName(objectTypeDefinitionContext))
+                .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
                                 buildTypeMethod(objectTypeDefinitionContext),
