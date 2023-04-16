@@ -47,11 +47,11 @@ public enum GraphQLErrorType {
     MAP_WITH_TO_FIELD_NOT_EXIST(-62, "map with type to field not exist: %s"),
 
     CLASS_NAME_ARGUMENT_NOT_EXIST(-71, "className not exist in @classInfo directive: %s"),
-    ANNOTATION_NAME_ARGUMENT_NOT_EXIST(-71, "annotationName not exist in @classInfo directive: %s"),
-    GRPC_CLASS_NAME_ARGUMENT_NOT_EXIST(-72, "grpcClassName not exist in @classInfo directive: %s"),
-    METHOD_NAME_ARGUMENT_NOT_EXIST(-73, "methodName not exist in @invoke directive: %s"),
-    PACKAGE_NAME_ARGUMENT_NOT_EXIST(-74, "packageName not exist in @packageInfo directive: %s"),
-    GRPC_PACKAGE_NAME_ARGUMENT_NOT_EXIST(-75, "grpcPackageName not exist in @packageInfo directive: %s"),
+    ANNOTATION_NAME_ARGUMENT_NOT_EXIST(-72, "annotationName not exist in @classInfo directive: %s"),
+    GRPC_CLASS_NAME_ARGUMENT_NOT_EXIST(-73, "grpcClassName not exist in @classInfo directive: %s"),
+    METHOD_NAME_ARGUMENT_NOT_EXIST(-74, "methodName not exist in @invoke directive: %s"),
+    PACKAGE_NAME_ARGUMENT_NOT_EXIST(-75, "packageName not exist in @packageInfo directive: %s"),
+    GRPC_PACKAGE_NAME_ARGUMENT_NOT_EXIST(-76, "grpcPackageName not exist in @packageInfo directive: %s"),
 
     FUNC_NAME_NOT_EXIST(-81, "@func name argument not exist in function filed: %s"),
     FUNC_FIELD_NOT_EXIST(-82, "@func field argument not exist in function filed: %s"),
