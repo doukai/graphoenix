@@ -1,52 +1,8 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        jcenter()
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
-    }
-}
-
 plugins {
     id 'java'
-    id 'com.google.protobuf' version '0.9.1'
 }
 
 compileJava.options.sourcepath = files('src/main/resources')
-
-apply plugin: 'io.graphoenix'
-
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:3.21.7"
-    }
-    plugins {
-        grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.52.1'
-        }
-        reactor {
-            artifact = "com.salesforce.servicelibs:reactor-grpc:1.2.3"
-        }
-    }
-    generateProtoTasks {
-        all()*.plugins {
-            grpc {}
-            reactor {}
-        }
-    }
-}
-
-sourceSets {
-    main {
-        java {
-            srcDirs 'build/generated/source/proto/main/java'
-            srcDirs 'build/generated/source/proto/main/grpc'
-            srcDirs 'build/generated/source/proto/main/reactor'
-        }
-    }
-}
 
 group 'io.graphoenix'
 version '0.0.1-SNAPSHOT'
@@ -57,9 +13,10 @@ repositories {
 }
 
 dependencies {
+    implementation project(':graphoenix-core')
     implementation project(":graphoenix-showcase-user")
     implementation project(":graphoenix-showcase-order")
-    implementation project(':graphoenix-core')
+    implementation project(":graphoenix-introspection")
     implementation project(':graphoenix-interceptor')
     implementation project(':graphoenix-json')
     implementation project(":graphoenix-mysql")
@@ -68,15 +25,10 @@ dependencies {
     implementation project(':graphoenix-grpc-client')
     implementation project(':graphoenix-gossip')
 
-    runtimeOnly 'io.grpc:grpc-netty-shaded:1.52.1'
-    implementation 'io.grpc:grpc-protobuf:1.52.1'
-    implementation 'io.grpc:grpc-stub:1.52.1'
-    implementation 'com.salesforce.servicelibs:reactor-grpc-stub:1.2.3'
-
-    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
-
+    annotationProcessor project(':graphoenix-core')
     annotationProcessor project(":graphoenix-showcase-user")
     annotationProcessor project(":graphoenix-showcase-order")
+    annotationProcessor project(":graphoenix-introspection")
     annotationProcessor project(':graphoenix-annotation-processor')
     annotationProcessor project(':graphoenix-inject')
     annotationProcessor project(':graphoenix-interceptor')

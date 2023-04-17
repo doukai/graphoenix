@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.showcase.order.grpc";
+
+package io.graphoenix.showcase.order.grpc;
+
+import "io/graphoenix/showcase/order/enums.proto";
+import "io/graphoenix/showcase/order/objects.proto";
+import "io/graphoenix/showcase/order/interfaces.proto";
+import "io/graphoenix/showcase/order/input_objects.proto";
+import "io/graphoenix/showcase/user/enums.proto";
+import "io/graphoenix/showcase/user/input_objects.proto";
+import "google/protobuf/timestamp.proto";
+
+message MutationIsDeprecatedResponse {
+    optional bool is_deprecated = 1;
+}
+message MutationVersionResponse {
+    optional int32 version = 1;
+}
+message MutationRealmIdResponse {
+    optional string realm_id = 1;
+}
+message MutationCreateUserIdResponse {
+    optional string create_user_id = 1;
+}
+message MutationCreateTimeResponse {
+    optional google.protobuf.Timestamp create_time = 1;
+}
+message MutationUpdateUserIdResponse {
+    optional string update_user_id = 1;
+}
+message MutationUpdateTimeResponse {
+    optional google.protobuf.Timestamp update_time = 1;
+}
+message MutationCreateGroupIdResponse {
+    optional string create_group_id = 1;
+}
+message MutationOrderResponse {
+    optional Order order = 1;
+}
+message MutationOrderListResponse {
+    repeated Order order_list = 1;
+}
+message MutationGoodResponse {
+    optional Good good = 1;
+}
+message MutationGoodListResponse {
+    repeated Good good_list = 1;
+}
+message MutationProductResponse {
+    optional Product product = 1;
+}
+message MutationProductListResponse {
+    repeated Product product_list = 1;
+}
+message MutationMerchantResponse {
+    optional Merchant merchant = 1;
+}
+message MutationMerchantListResponse {
+    repeated Merchant merchant_list = 1;
+}

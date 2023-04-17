@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.showcase.order.grpc";
+
+package io.graphoenix.showcase.order.grpc;
+
+import "io/graphoenix/showcase/order/enums.proto";
+import "io/graphoenix/showcase/order/objects.proto";
+import "io/graphoenix/showcase/order/interfaces.proto";
+import "io/graphoenix/showcase/order/input_objects.proto";
+import "io/graphoenix/showcase/order/mutation_requests.proto";
+import "io/graphoenix/showcase/order/mutation_responses.proto";
+
+service MutationTypeService {
+    rpc IsDeprecated (MutationIsDeprecatedRequest) returns (MutationIsDeprecatedResponse);
+    rpc Version (MutationVersionRequest) returns (MutationVersionResponse);
+    rpc RealmId (MutationRealmIdRequest) returns (MutationRealmIdResponse);
+    rpc CreateUserId (MutationCreateUserIdRequest) returns (MutationCreateUserIdResponse);
+    rpc CreateTime (MutationCreateTimeRequest) returns (MutationCreateTimeResponse);
+    rpc UpdateUserId (MutationUpdateUserIdRequest) returns (MutationUpdateUserIdResponse);
+    rpc UpdateTime (MutationUpdateTimeRequest) returns (MutationUpdateTimeResponse);
+    rpc CreateGroupId (MutationCreateGroupIdRequest) returns (MutationCreateGroupIdResponse);
+    rpc Order (MutationOrderRequest) returns (MutationOrderResponse);
+    rpc OrderList (MutationOrderListRequest) returns (MutationOrderListResponse);
+    rpc Good (MutationGoodRequest) returns (MutationGoodResponse);
+    rpc GoodList (MutationGoodListRequest) returns (MutationGoodListResponse);
+    rpc Product (MutationProductRequest) returns (MutationProductResponse);
+    rpc ProductList (MutationProductListRequest) returns (MutationProductListResponse);
+    rpc Merchant (MutationMerchantRequest) returns (MutationMerchantResponse);
+    rpc MerchantList (MutationMerchantListRequest) returns (MutationMerchantListResponse);
+}

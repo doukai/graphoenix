@@ -6,5 +6,4 @@ option java_package = "io.graphoenix.showcase.user.dto.objectType.grpc";
 package io.graphoenix.showcase.user.grpc;
 
 import "io/graphoenix/showcase/user/enums.proto";
-import "google/protobuf/timestamp.proto";
 

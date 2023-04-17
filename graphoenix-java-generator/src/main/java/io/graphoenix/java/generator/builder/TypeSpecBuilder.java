@@ -51,6 +51,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
+import static io.graphoenix.java.generator.utils.TypeUtil.TYPE_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
@@ -94,13 +95,17 @@ public class TypeSpecBuilder {
     }
 
     public TypeSpec buildClass(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return buildClass(objectTypeDefinitionContext, objectTypeDefinitionContext.fieldsDefinition().fieldDefinition());
+    }
+
+    public TypeSpec buildClass(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList) {
         TypeSpec.Builder builder = TypeSpec.classBuilder(objectTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Type.class)
                 .addAnnotation(CompiledJson.class)
                 .addAnnotation(getGeneratedAnnotationSpec())
                 .addAnnotation(getSchemaBeanAnnotationSpec());
-        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
+        fieldDefinitionContextList
                 .forEach(fieldDefinitionContext -> {
                             FieldSpec fieldSpec = buildField(fieldDefinitionContext);
                             builder.addField(fieldSpec);
@@ -603,9 +608,9 @@ public class TypeSpecBuilder {
                     return ClassName.get(graphQLConfig.getAnnotationPackageName(), "Float".concat(EXPRESSION_SUFFIX));
             }
         } else if (manager.isEnum(fieldTypeName)) {
-            Optional<GraphqlParser.EnumTypeDefinitionContext> enumType = manager.getEnum(fieldTypeName);
-            if (enumType.isPresent()) {
-                return TYPE_NAME_UTIL.toClassName(packageManager.getClassName(enumType.get()).concat(fieldTypeName.concat(EXPRESSION_SUFFIX)));
+            Optional<GraphqlParser.InputObjectTypeDefinitionContext> enumExpression = manager.getInputObject(fieldTypeName.concat(EXPRESSION_SUFFIX));
+            if (enumExpression.isPresent()) {
+                return TYPE_NAME_UTIL.toClassName(packageManager.getAnnotationName(enumExpression.get()));
             }
         }
         throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
@@ -809,7 +814,7 @@ public class TypeSpecBuilder {
     public Stream<TypeSpec> buildEnumTypeExpressionAnnotations() {
         return manager.getEnums()
                 .filter(packageManager::isOwnPackage)
-                .filter(enumTypeDefinitionContext -> manager.getClassName(enumTypeDefinitionContext).isEmpty())
+                .filter(enumTypeDefinitionContext -> manager.getClassName(enumTypeDefinitionContext).map(TYPE_UTIL::classNotExists).orElse(true))
                 .map(this::enumTypeToInputExpressionAnnotation);
     }
 
@@ -905,7 +910,7 @@ public class TypeSpecBuilder {
         return manager.getObjects()
                 .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
-                .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).isEmpty())
+                .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).map(TYPE_UTIL::classNotExists).orElse(false))
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .map(objectTypeDefinitionContext -> {
@@ -1092,7 +1097,7 @@ public class TypeSpecBuilder {
         return manager.getObjects()
                 .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
-                .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).isEmpty())
+                .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).map(TYPE_UTIL::classNotExists).orElse(true))
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .map(objectTypeDefinitionContext -> {
@@ -1138,24 +1143,24 @@ public class TypeSpecBuilder {
                                     );
                             if (layer < graphQLConfig.getInputLayers() - 1) {
                                 builder.addMethods(
-                                        manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
-                                                .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-                                                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
-                                                .map(fieldDefinitionContext ->
-                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
-                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(
-                                                                        manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
-                                                                                ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))) :
-                                                                                ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))
-                                                                )
-                                                                .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type(), layer + 1))
-                                                                .build()
-                                                )
-                                                .collect(Collectors.toList())
-                                )
+                                                manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                        .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                        .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
+                                                        .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                                                        .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                                                        .map(fieldDefinitionContext ->
+                                                                MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                        .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                        .returns(
+                                                                                manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
+                                                                                        ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))) :
+                                                                                        ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))
+                                                                        )
+                                                                        .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type(), layer + 1))
+                                                                        .build()
+                                                        )
+                                                        .collect(Collectors.toList())
+                                        )
                                         .addMethod(
                                                 MethodSpec.methodBuilder(LIST_INPUT_NAME)
                                                         .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -1187,7 +1192,7 @@ public class TypeSpecBuilder {
         return manager.getObjects()
                 .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
-                .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).isEmpty())
+                .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).map(TYPE_UTIL::classNotExists).orElse(true))
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .map(objectTypeDefinitionContext -> {

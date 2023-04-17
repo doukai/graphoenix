@@ -1,0 +1,330 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.showcase.order.grpc";
+
+package io.graphoenix.showcase.order.grpc;
+
+import "io/graphoenix/showcase/order/enums.proto";
+import "io/graphoenix/showcase/order/objects.proto";
+import "io/graphoenix/showcase/order/interfaces.proto";
+import "io/graphoenix/showcase/order/input_objects.proto";
+import "io/graphoenix/core/enums.proto";
+import "io/graphoenix/core/input_objects.proto";
+import "io/graphoenix/showcase/user/input_objects.proto";
+import "google/protobuf/timestamp.proto";
+
+message QueryIsDeprecatedRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message QueryVersionRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message QueryRealmIdRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message QueryCreateUserIdRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message QueryCreateTimeRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message QueryUpdateUserIdRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message QueryUpdateTimeRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message QueryCreateGroupIdRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message QueryOrderRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional io.graphoenix.core.grpc.StringExpression id = 3;
+    optional io.graphoenix.core.grpc.StringExpression number = 4;
+    optional io.graphoenix.core.grpc.StringExpression buyer_id = 5;
+    optional GoodExpression goods = 6;
+    optional bool include_deprecated = 7;
+    optional io.graphoenix.core.grpc.IntExpression version = 8;
+    optional io.graphoenix.core.grpc.StringExpression realm_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 10;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 12;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 13;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 14;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
+    optional io.graphoenix.core.grpc.Conditional cond = 16;
+}
+message QueryOrderListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional io.graphoenix.core.grpc.StringExpression id = 3;
+    optional io.graphoenix.core.grpc.StringExpression number = 4;
+    optional io.graphoenix.core.grpc.StringExpression buyer_id = 5;
+    optional GoodExpression goods = 6;
+    optional bool include_deprecated = 7;
+    optional io.graphoenix.core.grpc.IntExpression version = 8;
+    optional io.graphoenix.core.grpc.StringExpression realm_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 10;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 12;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 13;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 14;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
+    optional OrderOrderBy order_by = 16;
+    repeated string group_by = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
+}
+message QueryOrderConnectionRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional io.graphoenix.core.grpc.StringExpression id = 3;
+    optional io.graphoenix.core.grpc.StringExpression number = 4;
+    optional io.graphoenix.core.grpc.StringExpression buyer_id = 5;
+    optional GoodExpression goods = 6;
+    optional bool include_deprecated = 7;
+    optional io.graphoenix.core.grpc.IntExpression version = 8;
+    optional io.graphoenix.core.grpc.StringExpression realm_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 10;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 12;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 13;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 14;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
+    optional OrderOrderBy order_by = 16;
+    repeated string group_by = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated OrderExpression exs = 19;
+    optional int32 first = 20;
+    optional int32 last = 21;
+    optional int32 offset = 22;
+    optional string after = 23;
+    optional string before = 24;
+}
+message QueryGoodRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional io.graphoenix.core.grpc.StringExpression id = 3;
+    optional io.graphoenix.core.grpc.IntExpression quantity = 4;
+    optional io.graphoenix.core.grpc.IntExpression order_id = 5;
+    optional OrderExpression order = 6;
+    optional io.graphoenix.core.grpc.IntExpression product_id = 7;
+    optional ProductExpression product = 8;
+    optional io.graphoenix.core.grpc.IntExpression merchant_id = 9;
+    optional MerchantExpression merchant = 10;
+    optional bool include_deprecated = 11;
+    optional io.graphoenix.core.grpc.IntExpression version = 12;
+    optional io.graphoenix.core.grpc.StringExpression realm_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 14;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 15;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 16;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 17;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 18;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 19;
+    optional io.graphoenix.core.grpc.Conditional cond = 20;
+}
+message QueryGoodListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional io.graphoenix.core.grpc.StringExpression id = 3;
+    optional io.graphoenix.core.grpc.IntExpression quantity = 4;
+    optional io.graphoenix.core.grpc.IntExpression order_id = 5;
+    optional OrderExpression order = 6;
+    optional io.graphoenix.core.grpc.IntExpression product_id = 7;
+    optional ProductExpression product = 8;
+    optional io.graphoenix.core.grpc.IntExpression merchant_id = 9;
+    optional MerchantExpression merchant = 10;
+    optional bool include_deprecated = 11;
+    optional io.graphoenix.core.grpc.IntExpression version = 12;
+    optional io.graphoenix.core.grpc.StringExpression realm_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 14;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 15;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 16;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 17;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 18;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 19;
+    optional GoodOrderBy order_by = 20;
+    repeated string group_by = 21;
+    optional io.graphoenix.core.grpc.Conditional cond = 22;
+    optional int32 first = 23;
+    optional int32 last = 24;
+    optional int32 offset = 25;
+    optional string after = 26;
+    optional string before = 27;
+}
+message QueryGoodConnectionRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional io.graphoenix.core.grpc.StringExpression id = 3;
+    optional io.graphoenix.core.grpc.IntExpression quantity = 4;
+    optional io.graphoenix.core.grpc.IntExpression order_id = 5;
+    optional OrderExpression order = 6;
+    optional io.graphoenix.core.grpc.IntExpression product_id = 7;
+    optional ProductExpression product = 8;
+    optional io.graphoenix.core.grpc.IntExpression merchant_id = 9;
+    optional MerchantExpression merchant = 10;
+    optional bool include_deprecated = 11;
+    optional io.graphoenix.core.grpc.IntExpression version = 12;
+    optional io.graphoenix.core.grpc.StringExpression realm_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 14;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 15;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 16;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 17;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 18;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 19;
+    optional GoodOrderBy order_by = 20;
+    repeated string group_by = 21;
+    optional io.graphoenix.core.grpc.Conditional cond = 22;
+    repeated GoodExpression exs = 23;
+    optional int32 first = 24;
+    optional int32 last = 25;
+    optional int32 offset = 26;
+    optional string after = 27;
+    optional string before = 28;
+}
+message QueryProductRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional io.graphoenix.core.grpc.StringExpression id = 3;
+    optional io.graphoenix.core.grpc.StringExpression name = 4;
+    optional io.graphoenix.core.grpc.FloatExpression price = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional io.graphoenix.core.grpc.Conditional cond = 15;
+}
+message QueryProductListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional io.graphoenix.core.grpc.StringExpression id = 3;
+    optional io.graphoenix.core.grpc.StringExpression name = 4;
+    optional io.graphoenix.core.grpc.FloatExpression price = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional ProductOrderBy order_by = 15;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    optional int32 first = 18;
+    optional int32 last = 19;
+    optional int32 offset = 20;
+    optional string after = 21;
+    optional string before = 22;
+}
+message QueryProductConnectionRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional io.graphoenix.core.grpc.StringExpression id = 3;
+    optional io.graphoenix.core.grpc.StringExpression name = 4;
+    optional io.graphoenix.core.grpc.FloatExpression price = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional ProductOrderBy order_by = 15;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated ProductExpression exs = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
+}
+message QueryMerchantRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional io.graphoenix.core.grpc.StringExpression id = 3;
+    optional io.graphoenix.core.grpc.StringExpression name = 4;
+    optional io.graphoenix.core.grpc.IntExpression organization_id = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional io.graphoenix.core.grpc.Conditional cond = 15;
+}
+message QueryMerchantListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional io.graphoenix.core.grpc.StringExpression id = 3;
+    optional io.graphoenix.core.grpc.StringExpression name = 4;
+    optional io.graphoenix.core.grpc.IntExpression organization_id = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional MerchantOrderBy order_by = 15;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    optional int32 first = 18;
+    optional int32 last = 19;
+    optional int32 offset = 20;
+    optional string after = 21;
+    optional string before = 22;
+}
+message QueryMerchantConnectionRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional io.graphoenix.core.grpc.StringExpression id = 3;
+    optional io.graphoenix.core.grpc.StringExpression name = 4;
+    optional io.graphoenix.core.grpc.IntExpression organization_id = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional MerchantOrderBy order_by = 15;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated MerchantExpression exs = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
+}

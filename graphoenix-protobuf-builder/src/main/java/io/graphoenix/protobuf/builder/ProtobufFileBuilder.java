@@ -50,13 +50,13 @@ public class ProtobufFileBuilder {
                 )
                 .addImports(
                         io.vavr.collection.List
-                                .ofAll(manager.getObjects().flatMap(objectTypeDefinitionContext -> getImportPath(objectTypeDefinitionContext.fieldsDefinition())))
+                                .ofAll(manager.getObjects().filter(packageManager::isOwnPackage).flatMap(objectTypeDefinitionContext -> getImportPath(objectTypeDefinitionContext.fieldsDefinition())))
                                 .distinctBy(Import::getName)
                                 .toJavaList()
                 )
                 .addImports(
                         io.vavr.collection.List
-                                .ofAll(manager.getObjects().flatMap(objectTypeDefinitionContext -> getImportScalarTypePath(objectTypeDefinitionContext.fieldsDefinition())))
+                                .ofAll(manager.getObjects().filter(packageManager::isOwnPackage).flatMap(objectTypeDefinitionContext -> getImportScalarTypePath(objectTypeDefinitionContext.fieldsDefinition())))
                                 .distinctBy(Import::getName)
                                 .toJavaList()
                 )
@@ -76,13 +76,13 @@ public class ProtobufFileBuilder {
                 )
                 .addImports(
                         io.vavr.collection.List
-                                .ofAll(manager.getInterfaces().flatMap(interfaceTypeDefinitionContext -> getImportPath(interfaceTypeDefinitionContext.fieldsDefinition())))
+                                .ofAll(manager.getInterfaces().filter(packageManager::isOwnPackage).flatMap(interfaceTypeDefinitionContext -> getImportPath(interfaceTypeDefinitionContext.fieldsDefinition())))
                                 .distinctBy(Import::getName)
                                 .toJavaList()
                 )
                 .addImports(
                         io.vavr.collection.List
-                                .ofAll(manager.getInterfaces().flatMap(interfaceTypeDefinitionContext -> getImportScalarTypePath(interfaceTypeDefinitionContext.fieldsDefinition())))
+                                .ofAll(manager.getInterfaces().filter(packageManager::isOwnPackage).flatMap(interfaceTypeDefinitionContext -> getImportScalarTypePath(interfaceTypeDefinitionContext.fieldsDefinition())))
                                 .distinctBy(Import::getName)
                                 .toJavaList()
                 )
@@ -102,13 +102,13 @@ public class ProtobufFileBuilder {
                 )
                 .addImports(
                         io.vavr.collection.List
-                                .ofAll(manager.getInputObjects().flatMap(inputObjectTypeDefinitionContext -> getImportPath(inputObjectTypeDefinitionContext.inputObjectValueDefinitions())))
+                                .ofAll(manager.getInputObjects().filter(packageManager::isOwnPackage).flatMap(inputObjectTypeDefinitionContext -> getImportPath(inputObjectTypeDefinitionContext.inputObjectValueDefinitions())))
                                 .distinctBy(Import::getName)
                                 .toJavaList()
                 )
                 .addImports(
                         io.vavr.collection.List
-                                .ofAll(manager.getInputObjects().flatMap(inputObjectTypeDefinitionContext -> getImportScalarTypePath(inputObjectTypeDefinitionContext.inputObjectValueDefinitions())))
+                                .ofAll(manager.getInputObjects().filter(packageManager::isOwnPackage).flatMap(inputObjectTypeDefinitionContext -> getImportScalarTypePath(inputObjectTypeDefinitionContext.inputObjectValueDefinitions())))
                                 .distinctBy(Import::getName)
                                 .toJavaList()
                 )
@@ -683,22 +683,22 @@ public class ProtobufFileBuilder {
         } else if (manager.isEnum(fieldTypeName)) {
             return manager.getEnum(fieldTypeName)
                     .filter(packageManager::isNotOwnPackage)
-                    .flatMap(manager::getGrpcPackageName)
+                    .flatMap(enumTypeDefinitionContext -> manager.getGrpcPackageName(enumTypeDefinitionContext).map(packageName -> packageName.concat(".").concat(getName(fieldTypeName))))
                     .orElseGet(() -> getName(fieldTypeName));
         } else if (manager.isObject(fieldTypeName)) {
             return manager.getObject(fieldTypeName)
                     .filter(packageManager::isNotOwnPackage)
-                    .flatMap(manager::getGrpcPackageName)
+                    .flatMap(objectTypeDefinitionContext -> manager.getGrpcPackageName(objectTypeDefinitionContext).map(packageName -> packageName.concat(".").concat(getName(fieldTypeName))))
                     .orElseGet(() -> getName(fieldTypeName));
         } else if (manager.isInterface(fieldTypeName)) {
             return manager.getInterface(fieldTypeName)
                     .filter(packageManager::isNotOwnPackage)
-                    .flatMap(manager::getGrpcPackageName)
+                    .flatMap(interfaceTypeDefinitionContext -> manager.getGrpcPackageName(interfaceTypeDefinitionContext).map(packageName -> packageName.concat(".").concat(getName(fieldTypeName))))
                     .orElseGet(() -> getName(fieldTypeName));
         } else if (manager.isInputObject(fieldTypeName)) {
             return manager.getInputObject(fieldTypeName)
                     .filter(packageManager::isNotOwnPackage)
-                    .flatMap(manager::getGrpcPackageName)
+                    .flatMap(inputObjectTypeDefinitionContext -> manager.getGrpcPackageName(inputObjectTypeDefinitionContext).map(packageName -> packageName.concat(".").concat(getName(fieldTypeName))))
                     .orElseGet(() -> getName(fieldTypeName));
         } else {
             throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
@@ -744,6 +744,7 @@ public class ProtobufFileBuilder {
     private Stream<Import> getImportPath(GraphqlParser.FieldsDefinitionContext fieldsDefinitionContext) {
         return Streams.concat(
                 fieldsDefinitionContext.fieldDefinition().stream()
+                        .filter(packageManager::isOwnPackage)
                         .map(GraphqlParser.FieldDefinitionContext::type)
                         .filter(packageManager::isNotOwnPackage)
                         .filter(typeContext -> manager.isEnum(manager.getFieldTypeName(typeContext)))
@@ -752,6 +753,7 @@ public class ProtobufFileBuilder {
                         .map(packageName -> getPath(packageName, "enums.proto"))
                         .map(path -> new Import().setName(path)),
                 fieldsDefinitionContext.fieldDefinition().stream()
+                        .filter(packageManager::isOwnPackage)
                         .map(GraphqlParser.FieldDefinitionContext::type)
                         .filter(packageManager::isNotOwnPackage)
                         .filter(typeContext -> manager.isObject(manager.getFieldTypeName(typeContext)))
@@ -760,6 +762,7 @@ public class ProtobufFileBuilder {
                         .map(packageName -> getPath(packageName, "objects.proto"))
                         .map(path -> new Import().setName(path)),
                 fieldsDefinitionContext.fieldDefinition().stream()
+                        .filter(packageManager::isOwnPackage)
                         .map(GraphqlParser.FieldDefinitionContext::type)
                         .filter(packageManager::isNotOwnPackage)
                         .filter(typeContext -> manager.isInterface(manager.getFieldTypeName(typeContext)))
@@ -815,26 +818,31 @@ public class ProtobufFileBuilder {
     private Stream<Import> getImportScalarTypePath(GraphqlParser.FieldsDefinitionContext fieldsDefinitionContext) {
         return Streams.concat(
                 fieldsDefinitionContext.fieldDefinition().stream()
+                        .filter(packageManager::isOwnPackage)
                         .map(GraphqlParser.FieldDefinitionContext::type)
                         .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
                         .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("Date"))
                         .map(path -> new Import().setName("google/type/date.proto")),
                 fieldsDefinitionContext.fieldDefinition().stream()
+                        .filter(packageManager::isOwnPackage)
                         .map(GraphqlParser.FieldDefinitionContext::type)
                         .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
                         .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("Time"))
                         .map(path -> new Import().setName("google/type/timeofday.proto")),
                 fieldsDefinitionContext.fieldDefinition().stream()
+                        .filter(packageManager::isOwnPackage)
                         .map(GraphqlParser.FieldDefinitionContext::type)
                         .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
                         .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("DateTime"))
                         .map(path -> new Import().setName("google/type/datetime.proto")),
                 fieldsDefinitionContext.fieldDefinition().stream()
+                        .filter(packageManager::isOwnPackage)
                         .map(GraphqlParser.FieldDefinitionContext::type)
                         .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
                         .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("Timestamp"))
                         .map(path -> new Import().setName("google/protobuf/timestamp.proto")),
                 fieldsDefinitionContext.fieldDefinition().stream()
+                        .filter(packageManager::isOwnPackage)
                         .map(GraphqlParser.FieldDefinitionContext::type)
                         .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
                         .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("BigInteger") || manager.getFieldTypeName(typeContext).equals("BigDecimal"))

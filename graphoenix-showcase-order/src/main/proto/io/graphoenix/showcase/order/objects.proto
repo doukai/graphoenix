@@ -1,0 +1,169 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.showcase.order.dto.objectType.grpc";
+
+package io.graphoenix.showcase.order.grpc;
+
+import "io/graphoenix/showcase/order/enums.proto";
+import "io/graphoenix/showcase/user/objects.proto";
+import "io/graphoenix/core/objects.proto";
+import "google/protobuf/timestamp.proto";
+
+message Order {
+    optional string id = 1;
+    string number = 2;
+    string buyer_id = 3;
+    io.graphoenix.showcase.user.grpc.User buyer = 4;
+    repeated Good goods = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional google.protobuf.Timestamp create_time = 10;
+    optional string update_user_id = 11;
+    optional google.protobuf.Timestamp update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional int32 id_count = 15;
+    optional string id_max = 16;
+    optional string id_min = 17;
+    optional int32 number_count = 18;
+    optional string number_max = 19;
+    optional string number_min = 20;
+    optional int32 buyer_id_count = 21;
+    optional string buyer_id_max = 22;
+    optional string buyer_id_min = 23;
+    optional Good goods_aggregate = 24;
+    optional GoodConnection goods_connection = 25;
+}
+message Good {
+    optional string id = 1;
+    int32 quantity = 2;
+    int32 order_id = 3;
+    Order order = 4;
+    int32 product_id = 5;
+    Product product = 6;
+    int32 merchant_id = 7;
+    Merchant merchant = 8;
+    optional bool is_deprecated = 9;
+    optional int32 version = 10;
+    optional string realm_id = 11;
+    optional string create_user_id = 12;
+    optional google.protobuf.Timestamp create_time = 13;
+    optional string update_user_id = 14;
+    optional google.protobuf.Timestamp update_time = 15;
+    optional string create_group_id = 16;
+    optional string intro_typename = 17;
+    optional int32 id_count = 18;
+    optional string id_max = 19;
+    optional string id_min = 20;
+    optional int32 quantity_count = 21;
+    optional int32 quantity_sum = 22;
+    optional int32 quantity_avg = 23;
+    optional int32 quantity_max = 24;
+    optional int32 quantity_min = 25;
+    optional int32 order_id_count = 26;
+    optional int32 order_id_sum = 27;
+    optional int32 order_id_avg = 28;
+    optional int32 order_id_max = 29;
+    optional int32 order_id_min = 30;
+    optional int32 product_id_count = 31;
+    optional int32 product_id_sum = 32;
+    optional int32 product_id_avg = 33;
+    optional int32 product_id_max = 34;
+    optional int32 product_id_min = 35;
+    optional int32 merchant_id_count = 36;
+    optional int32 merchant_id_sum = 37;
+    optional int32 merchant_id_avg = 38;
+    optional int32 merchant_id_max = 39;
+    optional int32 merchant_id_min = 40;
+}
+message Product {
+    optional string id = 1;
+    string name = 2;
+    float price = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional google.protobuf.Timestamp create_time = 8;
+    optional string update_user_id = 9;
+    optional google.protobuf.Timestamp update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+    optional int32 id_count = 13;
+    optional string id_max = 14;
+    optional string id_min = 15;
+    optional int32 name_count = 16;
+    optional string name_max = 17;
+    optional string name_min = 18;
+    optional int32 price_count = 19;
+    optional float price_sum = 20;
+    optional float price_avg = 21;
+    optional float price_max = 22;
+    optional float price_min = 23;
+}
+message Merchant {
+    optional string id = 1;
+    string name = 2;
+    optional int32 organization_id = 3;
+    optional io.graphoenix.showcase.user.grpc.Organization organization = 4;
+    repeated io.graphoenix.showcase.user.grpc.User customer_services = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional google.protobuf.Timestamp create_time = 10;
+    optional string update_user_id = 11;
+    optional google.protobuf.Timestamp update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional int32 id_count = 15;
+    optional string id_max = 16;
+    optional string id_min = 17;
+    optional int32 name_count = 18;
+    optional string name_max = 19;
+    optional string name_min = 20;
+    optional int32 organization_id_count = 21;
+    optional int32 organization_id_sum = 22;
+    optional int32 organization_id_avg = 23;
+    optional int32 organization_id_max = 24;
+    optional int32 organization_id_min = 25;
+}
+message OrderConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated OrderEdge edges = 3;
+}
+message OrderEdge {
+    optional Order node = 1;
+    optional string cursor = 2;
+}
+message GoodConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated GoodEdge edges = 3;
+}
+message GoodEdge {
+    optional Good node = 1;
+    optional string cursor = 2;
+}
+message ProductConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated ProductEdge edges = 3;
+}
+message ProductEdge {
+    optional Product node = 1;
+    optional string cursor = 2;
+}
+message MerchantConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated MerchantEdge edges = 3;
+}
+message MerchantEdge {
+    optional Merchant node = 1;
+    optional string cursor = 2;
+}

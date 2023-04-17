@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.showcase.order.grpc";
+
+package io.graphoenix.showcase.order.grpc;
+
+import "io/graphoenix/showcase/order/enums.proto";
+import "io/graphoenix/showcase/order/objects.proto";
+import "io/graphoenix/showcase/order/interfaces.proto";
+import "io/graphoenix/showcase/order/input_objects.proto";
+import "io/graphoenix/showcase/order/query_requests.proto";
+import "io/graphoenix/showcase/order/query_responses.proto";
+
+service QueryTypeService {
+    rpc IsDeprecated (QueryIsDeprecatedRequest) returns (QueryIsDeprecatedResponse);
+    rpc Version (QueryVersionRequest) returns (QueryVersionResponse);
+    rpc RealmId (QueryRealmIdRequest) returns (QueryRealmIdResponse);
+    rpc CreateUserId (QueryCreateUserIdRequest) returns (QueryCreateUserIdResponse);
+    rpc CreateTime (QueryCreateTimeRequest) returns (QueryCreateTimeResponse);
+    rpc UpdateUserId (QueryUpdateUserIdRequest) returns (QueryUpdateUserIdResponse);
+    rpc UpdateTime (QueryUpdateTimeRequest) returns (QueryUpdateTimeResponse);
+    rpc CreateGroupId (QueryCreateGroupIdRequest) returns (QueryCreateGroupIdResponse);
+    rpc Order (QueryOrderRequest) returns (QueryOrderResponse);
+    rpc OrderList (QueryOrderListRequest) returns (QueryOrderListResponse);
+    rpc OrderConnection (QueryOrderConnectionRequest) returns (QueryOrderConnectionResponse);
+    rpc Good (QueryGoodRequest) returns (QueryGoodResponse);
+    rpc GoodList (QueryGoodListRequest) returns (QueryGoodListResponse);
+    rpc GoodConnection (QueryGoodConnectionRequest) returns (QueryGoodConnectionResponse);
+    rpc Product (QueryProductRequest) returns (QueryProductResponse);
+    rpc ProductList (QueryProductListRequest) returns (QueryProductListResponse);
+    rpc ProductConnection (QueryProductConnectionRequest) returns (QueryProductConnectionResponse);
+    rpc Merchant (QueryMerchantRequest) returns (QueryMerchantResponse);
+    rpc MerchantList (QueryMerchantListRequest) returns (QueryMerchantListResponse);
+    rpc MerchantConnection (QueryMerchantConnectionRequest) returns (QueryMerchantConnectionResponse);
+}

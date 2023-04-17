@@ -73,13 +73,12 @@ public class GrpcObjectHandlerBuilder {
     }
 
     private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        String objectParameterName = grpcNameUtil.getLowerCamelName(objectTypeDefinitionContext);
-        String grpcTypeName = grpcNameUtil.getGrpcTypeName(objectTypeDefinitionContext);
+        String objectParameterName = grpcNameUtil.getLowerCamelName(objectTypeDefinitionContext.name().getText());
         ClassName className = TYPE_NAME_UTIL.toClassName(packageManager.getClassName(objectTypeDefinitionContext));
         String grpcObjectPackageName = packageManager.getGrpcClassName(objectTypeDefinitionContext);
         ClassName grpcObjectClassName = TYPE_NAME_UTIL.toClassName(grpcObjectPackageName);
 
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(objectParameterName)
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(grpcNameUtil.getLowerCamelName(objectTypeDefinitionContext))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(grpcObjectClassName)
                 .addParameter(className, objectParameterName)

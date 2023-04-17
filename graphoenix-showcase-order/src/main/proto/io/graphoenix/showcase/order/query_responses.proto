@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.showcase.order.grpc";
+
+package io.graphoenix.showcase.order.grpc;
+
+import "io/graphoenix/showcase/order/enums.proto";
+import "io/graphoenix/showcase/order/objects.proto";
+import "io/graphoenix/showcase/order/interfaces.proto";
+import "io/graphoenix/showcase/order/input_objects.proto";
+import "io/graphoenix/core/enums.proto";
+import "io/graphoenix/core/input_objects.proto";
+import "io/graphoenix/showcase/user/input_objects.proto";
+import "google/protobuf/timestamp.proto";
+
+message QueryIsDeprecatedResponse {
+    optional bool is_deprecated = 1;
+}
+message QueryVersionResponse {
+    optional int32 version = 1;
+}
+message QueryRealmIdResponse {
+    optional string realm_id = 1;
+}
+message QueryCreateUserIdResponse {
+    optional string create_user_id = 1;
+}
+message QueryCreateTimeResponse {
+    optional google.protobuf.Timestamp create_time = 1;
+}
+message QueryUpdateUserIdResponse {
+    optional string update_user_id = 1;
+}
+message QueryUpdateTimeResponse {
+    optional google.protobuf.Timestamp update_time = 1;
+}
+message QueryCreateGroupIdResponse {
+    optional string create_group_id = 1;
+}
+message QueryOrderResponse {
+    optional Order order = 1;
+}
+message QueryOrderListResponse {
+    repeated Order order_list = 1;
+}
+message QueryOrderConnectionResponse {
+    optional OrderConnection order_connection = 1;
+}
+message QueryGoodResponse {
+    optional Good good = 1;
+}
+message QueryGoodListResponse {
+    repeated Good good_list = 1;
+}
+message QueryGoodConnectionResponse {
+    optional GoodConnection good_connection = 1;
+}
+message QueryProductResponse {
+    optional Product product = 1;
+}
+message QueryProductListResponse {
+    repeated Product product_list = 1;
+}
+message QueryProductConnectionResponse {
+    optional ProductConnection product_connection = 1;
+}
+message QueryMerchantResponse {
+    optional Merchant merchant = 1;
+}
+message QueryMerchantListResponse {
+    repeated Merchant merchant_list = 1;
+}
+message QueryMerchantConnectionResponse {
+    optional MerchantConnection merchant_connection = 1;
+}

@@ -13,7 +13,9 @@ import java.lang.annotation.Target;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.FIELD,ElementType.METHOD,ElementType.TYPE})
+@Target({ElementType.METHOD,ElementType.FIELD,ElementType.TYPE})
 public @interface PackageInfo {
   String packageName();
+
+  String grpcPackageName();
 }

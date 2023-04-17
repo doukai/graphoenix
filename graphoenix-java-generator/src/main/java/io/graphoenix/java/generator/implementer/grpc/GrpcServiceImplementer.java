@@ -600,7 +600,7 @@ public class GrpcServiceImplementer {
                             Streams.concat(
                                     Stream.of(CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, grpcHandlerMethodName)),
                                     Stream.of(CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class))),
-                                    Stream.of(CodeBlock.of(".doOnSuccess(validator.get()::validateOperation)")),
+                                    Stream.of(CodeBlock.of(".doOnNext(validator.get()::validateOperation)")),
                                     Stream.of(
                                             CodeBlock.builder()
                                                     .add(".flatMap(operationDefinitionContext -> \n")

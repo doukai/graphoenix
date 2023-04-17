@@ -16,4 +16,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 public @interface ClassInfo {
   String className();
+
+  String annotationName();
+
+  String grpcClassName();
 }
