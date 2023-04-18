@@ -25,8 +25,6 @@ import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 import io.graphoenix.inject.error.InjectionProcessErrorType;
 import io.graphoenix.inject.error.InjectionProcessException;
-import io.graphoenix.spi.annotation.Application;
-import io.graphoenix.spi.annotation.Package;
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.tinylog.Logger;
 
@@ -120,22 +118,6 @@ public class ProcessorManager {
         Path sourcePath = generatedSourcePath.getParent().getParent().getParent().getParent().getParent().getParent().resolve("src/main/java");
         Logger.info("source path: {}", sourcePath.toString());
         return sourcePath;
-    }
-
-    public Optional<String> getDefaultPackageName() {
-        return roundEnv.getElementsAnnotatedWith(Package.class).stream()
-                .filter(element -> element.getKind().equals(ElementKind.PACKAGE))
-                .findFirst()
-                .map(element -> (PackageElement) element)
-                .map(packageElement -> packageElement.getQualifiedName().toString());
-    }
-
-    public Optional<String> getDefaultApplicationPackageName() {
-        return roundEnv.getElementsAnnotatedWith(Application.class).stream()
-                .filter(element -> element.getKind().equals(ElementKind.CLASS))
-                .findFirst()
-                .map(element -> (TypeElement) element)
-                .map(typeElement -> processingEnv.getElementUtils().getPackageOf(typeElement).getQualifiedName().toString());
     }
 
     public String getRootPackageName() {
