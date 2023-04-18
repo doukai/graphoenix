@@ -25,6 +25,8 @@ import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 import io.graphoenix.inject.error.InjectionProcessErrorType;
 import io.graphoenix.inject.error.InjectionProcessException;
+import io.graphoenix.spi.annotation.Application;
+import io.graphoenix.spi.annotation.Package;
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.tinylog.Logger;
 
@@ -120,8 +122,24 @@ public class ProcessorManager {
         return sourcePath;
     }
 
+    public Optional<String> getDefaultPackageName() {
+        return roundEnv.getElementsAnnotatedWith(Package.class).stream()
+                .filter(element -> element.getKind().equals(ElementKind.PACKAGE))
+                .findFirst()
+                .map(element -> (PackageElement) element)
+                .map(packageElement -> packageElement.getQualifiedName().toString());
+    }
+
+    public Optional<String> getDefaultApplicationPackageName() {
+        return roundEnv.getElementsAnnotatedWith(Application.class).stream()
+                .filter(element -> element.getKind().equals(ElementKind.CLASS))
+                .findFirst()
+                .map(element -> (TypeElement) element)
+                .map(typeElement -> processingEnv.getElementUtils().getPackageOf(typeElement).getQualifiedName().toString());
+    }
+
     public String getRootPackageName() {
-        String rootPackageName = roundEnv.getRootElements().stream()
+        return roundEnv.getRootElements().stream()
                 .filter(element -> element.getKind().equals(ElementKind.PACKAGE))
                 .map(element -> (PackageElement) element)
                 .reduce((left, right) -> left.getQualifiedName().toString().length() < right.getQualifiedName().length() ? left : right)
@@ -137,8 +155,6 @@ public class ProcessorManager {
                                 .map(packageElement -> packageElement.getQualifiedName().toString())
                                 .orElseThrow(() -> new InjectionProcessException(InjectionProcessErrorType.ROOT_PACKAGE_NOT_EXIST))
                 );
-        Logger.info("root package: {}", rootPackageName);
-        return rootPackageName;
     }
 
     public Optional<CompilationUnit> parse(TypeElement typeElement) {
@@ -286,8 +302,14 @@ public class ProcessorManager {
     }
 
     public String getQualifiedNameByType(Type type) {
-        ResolvedReferenceType resolvedReferenceType = javaSymbolSolver.toResolvedType(type, ResolvedReferenceType.class);
-        return resolvedReferenceType.getQualifiedName();
+        if (type.isClassOrInterfaceType()) {
+            return getQualifiedNameByType(type.asClassOrInterfaceType());
+        } else if (type.isPrimitiveType()) {
+            return getQualifiedNameByType(type.asPrimitiveType().toBoxedType());
+        } else if (type.isArrayType()) {
+            return getQualifiedNameByType(type.asArrayType().getElementType()).concat("[]");
+        }
+        return type.asString();
     }
 
     public String getQualifiedNameByType(ClassOrInterfaceType type) {

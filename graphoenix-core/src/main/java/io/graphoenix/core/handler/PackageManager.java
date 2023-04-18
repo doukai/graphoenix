@@ -29,7 +29,7 @@ public class PackageManager {
         this.manager = manager;
     }
 
-    public String getDefaultPackageName() {
+    public Optional<String> getDefaultPackageName() {
         try {
             ClassPath classPath = ClassPath.from(Thread.currentThread().getContextClassLoader());
             return classPath.getTopLevelClasses()
@@ -37,12 +37,11 @@ public class PackageManager {
                     .filter(classInfo -> classInfo.getSimpleName().equals("package-info"))
                     .filter(classInfo -> classInfo.load().getPackage().isAnnotationPresent(Package.class))
                     .findFirst()
-                    .map(ClassPath.ClassInfo::getPackageName)
-                    .orElseThrow(() -> new RuntimeException("package name not exist"));
+                    .map(ClassPath.ClassInfo::getPackageName);
         } catch (IOException e) {
             Logger.error(e);
         }
-        throw new RuntimeException("package name not exist");
+        return Optional.empty();
     }
 
     public boolean isOwnPackage(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -98,7 +97,7 @@ public class PackageManager {
     }
 
     public boolean isOwnPackage(String packageName) {
-        return Optional.ofNullable(graphQLConfig.getPackageName()).orElseGet(this::getDefaultPackageName).equals(packageName);
+        return graphQLConfig.getPackageName().equals(packageName);
     }
 
     public boolean isLocalPackage(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -163,7 +162,7 @@ public class PackageManager {
 
     public Stream<String> getLocalPackages() {
         return Stream.concat(
-                Stream.of(Optional.ofNullable(graphQLConfig.getPackageName()).orElseGet(this::getDefaultPackageName)),
+                Stream.ofNullable(graphQLConfig.getPackageName()),
                 Stream.ofNullable(graphQLConfig.getLocalPackageNames()).flatMap(Collection::stream)
         );
     }

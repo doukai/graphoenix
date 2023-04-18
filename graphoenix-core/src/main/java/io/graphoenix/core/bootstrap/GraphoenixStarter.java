@@ -1,6 +1,8 @@
 package io.graphoenix.core.bootstrap;
 
+import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.spi.handler.ScopeEventResolver;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.tinylog.Logger;
@@ -22,6 +24,10 @@ public class GraphoenixStarter {
     private List<Runnable> serverList;
 
     private GraphoenixStarter() {
+        GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
+        if (graphQLConfig.getPackageName() == null) {
+            BeanContext.get(PackageManager.class).getDefaultPackageName().ifPresent(graphQLConfig::setPackageName);
+        }
     }
 
     public GraphoenixStarter addServers(Runnable... servers) {

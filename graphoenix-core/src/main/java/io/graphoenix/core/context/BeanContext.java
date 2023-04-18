@@ -323,4 +323,12 @@ public class BeanContext {
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
+
+    public static <T> void set(Class<T> beanClass, Object object) {
+        set(beanClass, beanClass.getName(), object);
+    }
+
+    public static <T> void set(Class<T> beanClass, String name, Object object) {
+        CONTEXT_CACHE.get(beanClass).put(name, () -> object);
+    }
 }

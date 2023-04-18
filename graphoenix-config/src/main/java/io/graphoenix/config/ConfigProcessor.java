@@ -2,27 +2,21 @@ package io.graphoenix.config;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
-import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.MethodReferenceExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
-import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.ast.type.Type;
 import com.google.auto.service.AutoService;
 import com.google.common.base.CaseFormat;
 import dagger.Component;
@@ -40,7 +34,6 @@ import org.eclipse.microprofile.config.spi.Converter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.inject.error.InjectionProcessErrorType.COMPONENT_GET_METHOD_NOT_EXIST;
 import static io.graphoenix.inject.error.InjectionProcessErrorType.CONFIG_PROPERTIES_PREFIX_NOT_EXIST;
 import static io.graphoenix.inject.error.InjectionProcessErrorType.CONFIG_PROPERTY_NOT_EXIST;
 
@@ -50,8 +43,6 @@ public class ConfigProcessor implements ComponentProxyProcessor {
     private ProcessorManager processorManager;
 
     private List<CompilationUnit> configPropertiesCompilationUnitLis;
-
-    private List<CompilationUnit> configPropertiesComponentCompilationUnitLis;
 
     @Override
     public void init(ProcessorManager processorManager) {
@@ -115,13 +106,13 @@ public class ConfigProcessor implements ComponentProxyProcessor {
     public void processModule(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
         configPropertiesCompilationUnitLis
                 .forEach(compilationUnit -> {
-                            moduleCompilationUnit.addImport(Config.class).addImport(ConfigProvider.class);
+                    moduleCompilationUnit.addImport(Config.class).addImport(ConfigProvider.class);
                             ClassOrInterfaceDeclaration configClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit);
 
-                            MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, configClassDeclaration.getNameAsString()), Modifier.Keyword.PUBLIC)
+                            MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, configClassDeclaration.getFullyQualifiedName().orElseGet(configClassDeclaration::getNameAsString).replaceAll("\\.", "_")), Modifier.Keyword.PUBLIC)
                                     .addAnnotation(Provides.class)
                                     .addAnnotation(javax.inject.Singleton.class)
-                                    .setType(configClassDeclaration.getNameAsString());
+                                    .setType(configClassDeclaration.getFullyQualifiedName().orElseGet(configClassDeclaration::getNameAsString));
 
                             StringLiteralExpr propertyName = configClassDeclaration.getAnnotationByClass(ConfigProperties.class)
                                     .flatMap(annotationExpr ->
@@ -136,17 +127,17 @@ public class ConfigProcessor implements ComponentProxyProcessor {
                                     .addStatement(
                                             new ReturnStmt(
                                                     getConfigMethodCall(
-                                                            configClassDeclaration.getNameAsString(),
+                                                            configClassDeclaration.getFullyQualifiedName().orElseGet(configClassDeclaration::getNameAsString),
                                                             propertyName,
                                                             new StringLiteralExpr(Try.of(() -> (String) ConfigProperties.class.getMethod("prefix").getDefaultValue()).get())
                                                     )
                                             )
                                     );
-                            processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, configClassDeclaration);
+//                            processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, configClassDeclaration);
                         }
                 );
 
-        configPropertiesComponentCompilationUnitLis = configPropertiesCompilationUnitLis.stream()
+        List<CompilationUnit> configPropertiesComponentCompilationUnitLis = configPropertiesCompilationUnitLis.stream()
                 .map(compilationUnit -> buildConfigComponent(compilationUnit, moduleClassDeclaration))
                 .collect(Collectors.toList());
 
@@ -196,55 +187,6 @@ public class ConfigProcessor implements ComponentProxyProcessor {
                                                                                     .setValue(getConfigWithDefaultMethodCall(fieldDeclaration.getCommonType().asString(), name, defaultValue))
                                                                     )
                                                     )
-                                    );
-                        }
-                );
-    }
-
-    @Override
-    public void processModuleContext(CompilationUnit moduleContextCompilationUnit, BlockStmt moduleContextStaticInitializer) {
-        configPropertiesComponentCompilationUnitLis
-                .forEach(compilationUnit -> {
-                            ClassOrInterfaceDeclaration configPropertiesComponentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit);
-                            String daggerClassName = "Dagger".concat(configPropertiesComponentClassDeclaration.getNameAsString());
-                            String daggerVariableName = "dagger".concat(configPropertiesComponentClassDeclaration.getNameAsString());
-
-                            ClassOrInterfaceType componentType = configPropertiesComponentClassDeclaration.getMembers().stream()
-                                    .filter(BodyDeclaration::isMethodDeclaration)
-                                    .map(BodyDeclaration::asMethodDeclaration)
-                                    .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals("get"))
-                                    .map(MethodDeclaration::getType)
-                                    .filter(Type::isClassOrInterfaceType)
-                                    .map(Type::asClassOrInterfaceType)
-                                    .findFirst()
-                                    .orElseThrow(() -> new InjectionProcessException(COMPONENT_GET_METHOD_NOT_EXIST.bind(configPropertiesComponentClassDeclaration.getNameAsString())));
-
-                            moduleContextStaticInitializer.addStatement(new VariableDeclarationExpr()
-                                    .addVariable(
-                                            new VariableDeclarator()
-                                                    .setType(configPropertiesComponentClassDeclaration.getNameAsString())
-                                                    .setName(daggerVariableName)
-                                                    .setInitializer(
-                                                            new MethodCallExpr()
-                                                                    .setName("create")
-                                                                    .setScope(new NameExpr().setName(daggerClassName))
-                                                    )
-                                    )
-                            );
-
-                            moduleContextStaticInitializer.addStatement(
-                                    new MethodCallExpr()
-                                            .setName("put")
-                                            .addArgument(new ClassExpr().setType(componentType.getNameAsString()))
-                                            .addArgument(new MethodReferenceExpr().setIdentifier("get").setScope(new NameExpr().setName(daggerVariableName)))
-                            );
-
-                            moduleContextCompilationUnit.addImport(processorManager.getQualifiedNameByType(componentType));
-                            compilationUnit.getPackageDeclaration()
-                                    .ifPresent(packageDeclaration -> {
-                                                moduleContextCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(configPropertiesComponentClassDeclaration.getNameAsString()));
-                                                moduleContextCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(daggerClassName));
-                                            }
                                     );
                         }
                 );

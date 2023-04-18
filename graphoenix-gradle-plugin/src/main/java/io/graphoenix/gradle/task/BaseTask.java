@@ -2,7 +2,6 @@ package io.graphoenix.gradle.task;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MemberValuePair;
@@ -100,19 +99,18 @@ public class BaseTask extends DefaultTask {
     protected void init() {
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         String resourcePath = sourceSet.getResources().getSourceDirectories().getAsPath();
-        ClassLoader classLoader = createClassLoader();
-        CONFIG_UTIL.load(resourcePath);
-        BeanContext.load(classLoader);
-        graphQLConfig = BeanContext.get(GraphQLConfig.class);
-        manager = BeanContext.get(IGraphQLDocumentManager.class);
-        GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
-        documentBuilder = BeanContext.get(DocumentBuilder.class);
-        IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
 
         try {
-            if (graphQLConfig.getPackageName() == null) {
-                findDefaultPackageName().ifPresent(graphQLConfig::setPackageName);
-            }
+            CONFIG_UTIL.load(resourcePath);
+            ClassLoader classLoader = createClassLoader();
+            BeanContext.load(classLoader);
+            graphQLConfig = BeanContext.get(GraphQLConfig.class);
+            findDefaultPackageName().ifPresent(graphQLConfig::setPackageName);
+            manager = BeanContext.get(IGraphQLDocumentManager.class);
+            GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
+            documentBuilder = BeanContext.get(DocumentBuilder.class);
+            IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
+
             manager.clearAll();
             configRegister.registerConfig(resourcePath);
             mapper.registerFieldMaps();

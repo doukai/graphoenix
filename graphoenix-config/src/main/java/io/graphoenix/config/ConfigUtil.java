@@ -10,6 +10,7 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,10 +32,20 @@ public enum ConfigUtil {
     }
 
     public TypesafeConfig load(ClassLoader classLoader) {
+        typesafeConfig.setConfig(ConfigFactory.empty());
+        return merge(classLoader);
+    }
+
+    public TypesafeConfig merge(ClassLoader classLoader) {
         return typesafeConfig.mergeConfig(ConfigFactory.load(classLoader));
     }
 
     public TypesafeConfig load(String path) {
+        typesafeConfig.setConfig(ConfigFactory.empty());
+        return merge(path);
+    }
+
+    public TypesafeConfig merge(String path) {
         try {
             Files.list(Paths.get(path))
                     .filter(filePath -> filePath.toString().endsWith(".conf") || filePath.toString().endsWith(".json") || filePath.toString().endsWith(".properties"))
@@ -43,6 +54,15 @@ public enum ConfigUtil {
             Logger.error(e);
         }
         return typesafeConfig;
+    }
+
+    public <T> T getConfig(Class<T> tClass) {
+        try {
+            return typesafeConfig.getOptionalValue(tClass.getAnnotation(ConfigProperties.class).prefix(), tClass).orElse(tClass.getDeclaredConstructor().newInstance());
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            Logger.error(e);
+            return null;
+        }
     }
 
     public TypesafeConfig load(Filer filer) {
