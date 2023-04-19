@@ -578,7 +578,7 @@ public class DocumentBuilder {
         if (inputType.equals(InputType.ORDER_BY)) {
             return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                     .filter(manager::isNotInvokeField)
-                    .filter(manager::isNotFetchField)
+//                    .filter(manager::isNotFetchField)
                     .filter(manager::isNotFunctionField)
                     .filter(manager::isNotConnectionField)
                     .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
@@ -589,7 +589,7 @@ public class DocumentBuilder {
         } else {
             return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                     .filter(manager::isNotInvokeField)
-                    .filter(manager::isNotFetchField)
+//                    .filter(manager::isNotFetchField)
                     .filter(manager::isNotFunctionField)
                     .filter(manager::isNotConnectionField)
                     .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))

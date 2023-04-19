@@ -43,6 +43,7 @@ import net.sf.jsqlparser.util.cnfexpression.MultiOrExpression;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -1623,7 +1624,9 @@ public class GraphQLArgumentsToWhere {
                 .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(WHERE_INPUT_NAME))
                 .findFirst()
                 .flatMap(inputValueDefinitionContext ->
-                        argumentsContext.argument().stream()
+                        Stream.ofNullable(argumentsContext)
+                                .map(GraphqlParser.ArgumentsContext::argument)
+                                .flatMap(Collection::stream)
                                 .filter(argumentContext -> argumentContext.name().getText().equals(inputValueDefinitionContext.name().getText()))
                                 .filter(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable() != null)
                                 .findFirst()
