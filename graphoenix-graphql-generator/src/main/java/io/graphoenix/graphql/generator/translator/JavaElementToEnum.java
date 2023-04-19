@@ -47,6 +47,7 @@ public class JavaElementToEnum {
                 .addDirective(
                         new Directive(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", typeElement.getQualifiedName().toString())
+                                .addArgument("exists", true)
                                 .addArgument("grpcClassName", graphQLConfig.getGrpcEnumTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(typeElement.getSimpleName().toString())))
                 )
                 .addDirective(

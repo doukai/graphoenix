@@ -1,12 +1,15 @@
 package io.graphoenix.showcase.order.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
+import io.graphoenix.showcase.user.dto.inputObjectType.OrganizationInput;
+import io.graphoenix.showcase.user.dto.inputObjectType.UserInput;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
@@ -20,6 +23,10 @@ public class MerchantInput {
   private String name;
 
   private Integer organizationId;
+
+  private OrganizationInput organization;
+
+  private Collection<UserInput> customerServices;
 
   private Boolean isDeprecated;
 
@@ -62,6 +69,22 @@ public class MerchantInput {
 
   public void setOrganizationId(Integer organizationId) {
     this.organizationId = organizationId;
+  }
+
+  public OrganizationInput getOrganization() {
+    return this.organization;
+  }
+
+  public void setOrganization(OrganizationInput organization) {
+    this.organization = organization;
+  }
+
+  public Collection<UserInput> getCustomerServices() {
+    return this.customerServices;
+  }
+
+  public void setCustomerServices(Collection<UserInput> customerServices) {
+    this.customerServices = customerServices;
   }
 
   public Boolean getIsDeprecated() {

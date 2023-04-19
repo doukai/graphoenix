@@ -917,6 +917,77 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public boolean classExists(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return Optional.ofNullable(objectTypeDefinitionContext.directives()).map(this::classExists).orElse(false);
+    }
+
+    @Override
+    public boolean classExists(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return Optional.ofNullable(enumTypeDefinitionContext.directives()).map(this::classExists).orElse(false);
+    }
+
+    @Override
+    public boolean classExists(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).map(this::classExists).orElse(false);
+    }
+
+    @Override
+    public boolean classExists(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).map(this::classExists).orElse(false);
+    }
+
+    @Override
+    public boolean classExists(GraphqlParser.TypeContext typeContext) {
+        String fieldTypeName = getFieldTypeName(typeContext);
+        if (isObject(fieldTypeName)) {
+            return getObject(fieldTypeName).map(this::classExists).orElse(false);
+        } else if (isInterface(fieldTypeName)) {
+            return getInterface(fieldTypeName).map(this::classExists).orElse(false);
+        } else if (isEnum(fieldTypeName)) {
+            return getEnum(fieldTypeName).map(this::classExists).orElse(false);
+        } else if (isInputObject(fieldTypeName)) {
+            return getInputObject(fieldTypeName).map(this::classExists).orElse(false);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean classNotExists(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return !classExists(objectTypeDefinitionContext);
+    }
+
+    @Override
+    public boolean classNotExists(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return !classExists(enumTypeDefinitionContext);
+    }
+
+    @Override
+    public boolean classNotExists(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return !classExists(inputObjectTypeDefinitionContext);
+    }
+
+    @Override
+    public boolean classNotExists(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return !classExists(interfaceTypeDefinitionContext);
+    }
+
+    @Override
+    public boolean classNotExists(GraphqlParser.TypeContext typeContext) {
+        return !classExists(typeContext);
+    }
+
+    @Override
+    public boolean classExists(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals(CLASS_INFO_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
+                .flatMap(argumentsContext -> argumentsContext.argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("exists"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().BooleanValue() != null)
+                .anyMatch(argumentContext -> Boolean.parseBoolean(argumentContext.valueWithVariable().BooleanValue().getText()));
+    }
+
+    @Override
     public Optional<String> getAnnotationName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getAnnotationName);
     }

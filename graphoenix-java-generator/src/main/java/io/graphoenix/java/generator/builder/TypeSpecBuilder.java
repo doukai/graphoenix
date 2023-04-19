@@ -814,7 +814,7 @@ public class TypeSpecBuilder {
     public Stream<TypeSpec> buildEnumTypeExpressionAnnotations() {
         return manager.getEnums()
                 .filter(packageManager::isOwnPackage)
-                .filter(enumTypeDefinitionContext -> manager.getClassName(enumTypeDefinitionContext).map(TYPE_UTIL::classNotExists).orElse(true))
+                .filter(manager::classNotExists)
                 .map(this::enumTypeToInputExpressionAnnotation);
     }
 
@@ -910,7 +910,7 @@ public class TypeSpecBuilder {
         return manager.getObjects()
                 .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
-                .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).map(TYPE_UTIL::classNotExists).orElse(false))
+                .filter(manager::classNotExists)
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .map(objectTypeDefinitionContext -> {
@@ -1097,7 +1097,7 @@ public class TypeSpecBuilder {
         return manager.getObjects()
                 .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
-                .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).map(TYPE_UTIL::classNotExists).orElse(true))
+                .filter(manager::classNotExists)
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .map(objectTypeDefinitionContext -> {
@@ -1192,7 +1192,7 @@ public class TypeSpecBuilder {
         return manager.getObjects()
                 .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
-                .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).map(TYPE_UTIL::classNotExists).orElse(true))
+                .filter(manager::classNotExists)
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .map(objectTypeDefinitionContext -> {

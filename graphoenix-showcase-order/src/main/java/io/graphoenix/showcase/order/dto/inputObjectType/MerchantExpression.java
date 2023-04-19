@@ -4,6 +4,8 @@ import com.dslplatform.json.CompiledJson;
 import io.graphoenix.core.dto.enumType.Conditional;
 import io.graphoenix.core.dto.inputObjectType.IntExpression;
 import io.graphoenix.core.dto.inputObjectType.StringExpression;
+import io.graphoenix.showcase.user.dto.inputObjectType.OrganizationExpression;
+import io.graphoenix.showcase.user.dto.inputObjectType.UserExpression;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -21,6 +23,10 @@ public class MerchantExpression {
   private StringExpression name;
 
   private IntExpression organizationId;
+
+  private OrganizationExpression organization;
+
+  private UserExpression customerServices;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -68,6 +74,22 @@ public class MerchantExpression {
 
   public void setOrganizationId(IntExpression organizationId) {
     this.organizationId = organizationId;
+  }
+
+  public OrganizationExpression getOrganization() {
+    return this.organization;
+  }
+
+  public void setOrganization(OrganizationExpression organization) {
+    this.organization = organization;
+  }
+
+  public UserExpression getCustomerServices() {
+    return this.customerServices;
+  }
+
+  public void setCustomerServices(UserExpression customerServices) {
+    this.customerServices = customerServices;
   }
 
   public Boolean getIncludeDeprecated() {

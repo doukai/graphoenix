@@ -4,6 +4,7 @@ import com.dslplatform.json.CompiledJson;
 import io.graphoenix.core.dto.enumType.Conditional;
 import io.graphoenix.core.dto.inputObjectType.IntExpression;
 import io.graphoenix.core.dto.inputObjectType.StringExpression;
+import io.graphoenix.showcase.user.dto.inputObjectType.UserExpression;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -21,6 +22,8 @@ public class OrderExpression {
   private StringExpression number;
 
   private StringExpression buyerId;
+
+  private UserExpression buyer;
 
   private GoodExpression goods;
 
@@ -70,6 +73,14 @@ public class OrderExpression {
 
   public void setBuyerId(StringExpression buyerId) {
     this.buyerId = buyerId;
+  }
+
+  public UserExpression getBuyer() {
+    return this.buyer;
+  }
+
+  public void setBuyer(UserExpression buyer) {
+    this.buyer = buyer;
   }
 
   public GoodExpression getGoods() {

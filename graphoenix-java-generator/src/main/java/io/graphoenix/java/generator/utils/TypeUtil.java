@@ -26,17 +26,4 @@ public enum TypeUtil {
     public ClassName getClassName(String typeName) {
         return TYPE_NAME_UTIL.toClassName(TYPE_NAME_UTIL.getClassName(typeName));
     }
-
-    public boolean classExists(String className) {
-        try {
-            Class.forName(className, false, Thread.currentThread().getContextClassLoader());
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-
-    public boolean classNotExists(String className) {
-        return !classExists(className);
-    }
 }

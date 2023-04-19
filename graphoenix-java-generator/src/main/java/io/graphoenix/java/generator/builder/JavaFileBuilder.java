@@ -15,8 +15,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.java.generator.utils.TypeUtil.TYPE_UTIL;
-
 @ApplicationScoped
 public class JavaFileBuilder {
 
@@ -54,23 +52,23 @@ public class JavaFileBuilder {
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getAnnotationPackageName(), typeSpec).build()),
                 manager.getEnums()
                         .filter(packageManager::isOwnPackage)
-                        .filter(enumTypeDefinitionContext -> manager.getClassName(enumTypeDefinitionContext).map(TYPE_UTIL::classNotExists).orElse(true))
+                        .filter(manager::classNotExists)
                         .map(typeSpecBuilder::buildEnum)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getEnumTypePackageName(), typeSpec).build()),
                 manager.getInterfaces()
                         .filter(packageManager::isOwnPackage)
-                        .filter(interfaceTypeDefinitionContext -> manager.getClassName(interfaceTypeDefinitionContext).map(TYPE_UTIL::classNotExists).orElse(true))
+                        .filter(manager::classNotExists)
                         .map(typeSpecBuilder::buildInterface)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getInterfaceTypePackageName(), typeSpec).build()),
                 manager.getInputObjects()
                         .filter(packageManager::isOwnPackage)
-                        .filter(inputObjectTypeDefinitionContext -> manager.getClassName(inputObjectTypeDefinitionContext).map(TYPE_UTIL::classNotExists).orElse(true))
+                        .filter(manager::classNotExists)
                         .map(typeSpecBuilder::buildClass)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getInputObjectTypePackageName(), typeSpec).build()),
                 manager.getObjects()
                         .filter(manager::isNotOperationType)
                         .filter(packageManager::isOwnPackage)
-                        .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).map(TYPE_UTIL::classNotExists).orElse(true))
+                        .filter(manager::classNotExists)
                         .map(typeSpecBuilder::buildClass)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getObjectTypePackageName(), typeSpec).build()),
                 manager.getObjects()

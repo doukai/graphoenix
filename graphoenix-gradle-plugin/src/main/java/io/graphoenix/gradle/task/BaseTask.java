@@ -449,6 +449,7 @@ public class BaseTask extends DefaultTask {
                         new Directive()
                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", resolvedReferenceTypeDeclaration.getQualifiedName())
+                                .addArgument("exists", true)
                                 .addArgument("grpcClassName", graphQLConfig.getGrpcObjectTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(resolvedReferenceTypeDeclaration.getClassName())))
                 )
                 .addDirective(
@@ -469,6 +470,7 @@ public class BaseTask extends DefaultTask {
                         new Directive()
                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", resolvedReferenceTypeDeclaration.getQualifiedName())
+                                .addArgument("exists", true)
                                 .addArgument("grpcClassName", graphQLConfig.getGrpcInterfaceTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(resolvedReferenceTypeDeclaration.getClassName())))
                 )
                 .addDirective(
@@ -488,6 +490,7 @@ public class BaseTask extends DefaultTask {
                         new Directive()
                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", resolvedReferenceTypeDeclaration.getQualifiedName())
+                                .addArgument("exists", true)
                                 .addArgument("grpcClassName", graphQLConfig.getGrpcEnumTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(resolvedReferenceTypeDeclaration.getClassName())))
                 )
                 .addDirective(

@@ -222,6 +222,28 @@ public interface IGraphQLDocumentManager {
 
     String getClassName(String typeName);
 
+    boolean classExists(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+
+    boolean classExists(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
+
+    boolean classExists(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+
+    boolean classExists(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
+
+    boolean classExists(GraphqlParser.TypeContext typeContext);
+
+    boolean classNotExists(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+
+    boolean classNotExists(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
+
+    boolean classNotExists(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+
+    boolean classNotExists(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
+
+    boolean classNotExists(GraphqlParser.TypeContext typeContext);
+
+    boolean classExists(GraphqlParser.DirectivesContext directivesContext);
+
     Optional<String> getAnnotationName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
 
     Optional<String> getAnnotationName(GraphqlParser.TypeContext typeContext);

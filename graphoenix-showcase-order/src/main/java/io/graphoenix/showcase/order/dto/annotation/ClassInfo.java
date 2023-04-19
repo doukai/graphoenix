@@ -17,6 +17,8 @@ import java.lang.annotation.Target;
 public @interface ClassInfo {
   String className();
 
+  boolean exists();
+
   String annotationName();
 
   String grpcClassName();

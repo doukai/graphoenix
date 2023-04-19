@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.order.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
+import io.graphoenix.showcase.user.dto.inputObjectType.UserInput;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -21,6 +22,8 @@ public class OrderInput {
   private String number;
 
   private String buyerId;
+
+  private UserInput buyer;
 
   private Collection<GoodInput> goods;
 
@@ -65,6 +68,14 @@ public class OrderInput {
 
   public void setBuyerId(String buyerId) {
     this.buyerId = buyerId;
+  }
+
+  public UserInput getBuyer() {
+    return this.buyer;
+  }
+
+  public void setBuyer(UserInput buyer) {
+    this.buyer = buyer;
   }
 
   public Collection<GoodInput> getGoods() {

@@ -51,6 +51,7 @@ public class JavaElementToInputType {
                 .addDirective(
                         new Directive(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", typeElement.getQualifiedName().toString())
+                                .addArgument("exists", true)
                                 .addArgument("annotationName", graphQLConfig.getAnnotationPackageName().concat(".").concat(typeElement.getSimpleName().toString()))
                                 .addArgument("grpcClassName", graphQLConfig.getGrpcInputObjectTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(typeElement.getSimpleName().toString())))
                 )
