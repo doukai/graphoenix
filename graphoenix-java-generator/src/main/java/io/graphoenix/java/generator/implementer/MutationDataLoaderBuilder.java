@@ -18,13 +18,13 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.json.JsonValue;
 import org.tinylog.Logger;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -98,40 +98,25 @@ public class MutationDataLoaderBuilder {
     }
 
     private MethodSpec buildDispatchMethod() {
-        List<CodeBlock> monoList = new ArrayList<>();
-        int index = 0;
-        for (Tuple2<String, String> protocol : fetchTypeMap.entrySet().stream()
+
+        List<CodeBlock> monoList = fetchTypeMap.entrySet().stream()
                 .flatMap(packageEntry ->
                         packageEntry.getValue().keySet().stream()
                                 .map(protocol -> Tuple.of(packageEntry.getKey(), protocol))
-                ).collect(Collectors.toList())) {
-            if (index == 0) {
-                monoList.add(
-                        CodeBlock.of("return fetch($S, $S)",
+                )
+                .map(protocol ->
+                        CodeBlock.of("fetch($S, $S)",
                                 protocol._1(),
                                 protocol._2()
                         )
-                );
-            } else {
-                monoList.add(
-                        CodeBlock.of(".then(fetch($S, $S))",
-                                protocol._1(),
-                                protocol._2()
-                        )
-                );
-            }
-            index++;
-        }
+                )
+                .collect(Collectors.toList());
+
         CodeBlock codeBlock;
         if (monoList.size() > 0) {
-            monoList.add(
-                    CodeBlock.of(".thenReturn(dispatch(jsonValue.asJsonObject()))",
-                            ClassName.get(Mono.class)
-                    )
-            );
-            codeBlock = CodeBlock.join(monoList, System.lineSeparator());
+            codeBlock = CodeBlock.of("return $T.concat($L).collectList().map(list -> dispatch(jsonValue.asJsonObject()))", ClassName.get(Flux.class), CodeBlock.join(monoList, ","));
         } else {
-            codeBlock = CodeBlock.of("return Mono.just(jsonValue)");
+            codeBlock = CodeBlock.of("return $T.just(jsonValue)", ClassName.get(Mono.class));
         }
         return MethodSpec.methodBuilder("load")
                 .addModifiers(Modifier.PUBLIC)
@@ -143,36 +128,25 @@ public class MutationDataLoaderBuilder {
     }
 
     private MethodSpec buildLoadMethod() {
-        List<CodeBlock> monoList = new ArrayList<>();
-        int index = 0;
-        for (Tuple2<String, String> protocol : fetchTypeMap.entrySet().stream()
+
+        List<CodeBlock> monoList = fetchTypeMap.entrySet().stream()
                 .flatMap(packageEntry ->
                         packageEntry.getValue().keySet().stream()
                                 .map(protocol -> Tuple.of(packageEntry.getKey(), protocol))
-                ).collect(Collectors.toList())) {
-            if (index == 0) {
-                monoList.add(
-                        CodeBlock.of("return fetch($S, $S)",
+                )
+                .map(protocol ->
+                        CodeBlock.of("fetch($S, $S)",
                                 protocol._1(),
                                 protocol._2()
                         )
-                );
-            } else {
-                monoList.add(
-                        CodeBlock.of(".then(fetch($S, $S))",
-                                protocol._1(),
-                                protocol._2()
-                        )
-                );
-            }
-            index++;
-        }
+                )
+                .collect(Collectors.toList());
+
         CodeBlock codeBlock;
         if (monoList.size() > 0) {
-            monoList.add(CodeBlock.of(".then()"));
-            codeBlock = CodeBlock.join(monoList, System.lineSeparator());
+            codeBlock = CodeBlock.of("return $T.concat($L).collectList().then()", ClassName.get(Flux.class), CodeBlock.join(monoList, ","));
         } else {
-            codeBlock = CodeBlock.of("return Mono.empty()");
+            codeBlock = CodeBlock.of("return $T.empty()", ClassName.get(Mono.class));
         }
         return MethodSpec.methodBuilder("load")
                 .addModifiers(Modifier.PUBLIC)
