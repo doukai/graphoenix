@@ -1293,10 +1293,9 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public Optional<GraphqlParser.ArgumentContext> getArgumentFromInputValueDefinition(GraphqlParser.ArgumentsContext argumentsContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        if (argumentsContext == null) {
-            return Optional.empty();
-        }
-        return argumentsContext.argument().stream()
+        return Stream.ofNullable(argumentsContext)
+                .map(GraphqlParser.ArgumentsContext::argument)
+                .flatMap(Collection::stream)
                 .filter(argumentContext -> argumentContext.name().getText().equals(inputValueDefinitionContext.name().getText()))
                 .filter(argumentContext -> !(argumentContext.valueWithVariable().NullValue() != null && inputValueDefinitionContext.type().nonNullType() != null))
                 .findFirst();
@@ -1304,10 +1303,9 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public Optional<GraphqlParser.ObjectFieldWithVariableContext> getObjectFieldWithVariableFromInputValueDefinition(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        if (objectValueWithVariableContext == null) {
-            return Optional.empty();
-        }
-        return objectValueWithVariableContext.objectFieldWithVariable().stream()
+        return Stream.ofNullable(objectValueWithVariableContext)
+                .map(GraphqlParser.ObjectValueWithVariableContext::objectFieldWithVariable)
+                .flatMap(Collection::stream)
                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(inputValueDefinitionContext.name().getText()))
                 .filter(objectFieldWithVariableContext -> !(objectFieldWithVariableContext.valueWithVariable().NullValue() != null && inputValueDefinitionContext.type().nonNullType() != null))
                 .findFirst();
@@ -1315,10 +1313,9 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public Optional<GraphqlParser.ObjectFieldContext> getObjectFieldFromInputValueDefinition(GraphqlParser.ObjectValueContext objectValueContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        if (objectValueContext == null) {
-            return Optional.empty();
-        }
-        return objectValueContext.objectField().stream()
+        return Stream.ofNullable(objectValueContext)
+                .map(GraphqlParser.ObjectValueContext::objectField)
+                .flatMap(Collection::stream)
                 .filter(objectFieldContext -> objectFieldContext.name().getText().equals(inputValueDefinitionContext.name().getText()))
                 .filter(objectFieldContext -> !(objectFieldContext.value().NullValue() != null && inputValueDefinitionContext.type().nonNullType() != null))
                 .findFirst();

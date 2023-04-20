@@ -8,6 +8,7 @@ import io.graphoenix.core.operation.Field;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.constant.Hammurabi;
+import io.graphoenix.spi.handler.FetchHandler;
 import io.graphoenix.spi.handler.OperationHandler;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
@@ -267,9 +268,17 @@ public abstract class MutationDataLoader {
         indexMap.get(packageName).get(protocol).get(typeName).get(index).add(Tuple.of(jsonPointer, from));
     }
 
+    protected Mono<Void> fetch(String packageName, String protocol) {
+        return build(packageName, protocol)
+                .flatMap(operation -> BeanContext.get(FetchHandler.class, protocol).operation(packageName, operation.toString()))
+                .doOnSuccess(response -> addResult(packageName, protocol, response))
+                .then();
+    }
+
     protected void addResult(String packageName, String protocol, String response) {
         JsonObject jsonObject = jsonProvider.createReader(new StringReader(response)).readObject().get("data").asJsonObject();
-        resultMap.put(packageName, jsonObject);
+        resultMap.computeIfAbsent(packageName, k -> new ConcurrentHashMap<>());
+        resultMap.get(packageName).put(protocol, jsonObject);
     }
 
     protected JsonValue dispatch(JsonObject jsonObject) {

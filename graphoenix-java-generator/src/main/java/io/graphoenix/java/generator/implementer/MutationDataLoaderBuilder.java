@@ -2,18 +2,15 @@ package io.graphoenix.java.generator.implementer;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.MutationDataLoader;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.handler.FetchHandler;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -34,7 +31,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
-import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 
 @ApplicationScoped
 public class MutationDataLoaderBuilder {
@@ -92,65 +88,13 @@ public class MutationDataLoaderBuilder {
 
     private TypeSpec buildMutationDataLoader() {
 
-        TypeSpec.Builder builder = TypeSpec.classBuilder("MutationDataLoaderImpl")
+        return TypeSpec.classBuilder("MutationDataLoaderImpl")
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ClassName.get(MutationDataLoader.class))
                 .addAnnotation(Dependent.class)
-                .addMethod(buildConstructor())
                 .addMethod(buildDispatchMethod())
-                .addMethod(buildLoadMethod());
-
-        fetchTypeMap.entrySet().stream()
-                .flatMap(packageEntry ->
-                        packageEntry.getValue().keySet().stream()
-                                .map(protocol -> Tuple.of(packageEntry.getKey(), protocol))
-                )
-                .forEach(protocol ->
-                        builder.addField(
-                                FieldSpec.builder(
-                                        ParameterizedTypeName.get(Mono.class, String.class),
-                                        String.join(
-                                                "_",
-                                                TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
-                                                protocol._2(),
-                                                "JsonMono"
-                                        ),
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL
-                                ).build()
-                        )
-                );
-        return builder.build();
-    }
-
-    private MethodSpec buildConstructor() {
-        MethodSpec.Builder builder = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Inject.class);
-
-        fetchTypeMap.entrySet().stream()
-                .flatMap(packageEntry ->
-                        packageEntry.getValue().keySet().stream()
-                                .map(protocol -> Tuple.of(packageEntry.getKey(), protocol))
-                )
-                .forEach(protocol ->
-                        builder.addStatement("this.$L = build($S, $S).flatMap(operation -> $T.get($T.class, $S).operation($S, operation.toString()))",
-                                String.join(
-                                        "_",
-                                        TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
-                                        protocol._2(),
-                                        "JsonMono"
-                                ),
-                                protocol._1(),
-                                protocol._2(),
-                                ClassName.get(BeanContext.class),
-                                ClassName.get(FetchHandler.class),
-                                protocol._2(),
-                                protocol._1()
-
-                        )
-                );
-        return builder.build();
+                .addMethod(buildLoadMethod())
+                .build();
     }
 
     private MethodSpec buildDispatchMethod() {
@@ -163,26 +107,14 @@ public class MutationDataLoaderBuilder {
                 ).collect(Collectors.toList())) {
             if (index == 0) {
                 monoList.add(
-                        CodeBlock.of("return this.$L.doOnNext(response -> addResult($S, $S, response))",
-                                String.join(
-                                        "_",
-                                        TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
-                                        protocol._2(),
-                                        "JsonMono"
-                                ),
+                        CodeBlock.of("return fetch($S, $S)",
                                 protocol._1(),
                                 protocol._2()
                         )
                 );
             } else {
                 monoList.add(
-                        CodeBlock.of(".then(this.$L.doOnNext(response -> addResult($S, $S, response)))",
-                                String.join(
-                                        "_",
-                                        TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
-                                        protocol._2(),
-                                        "JsonMono"
-                                ),
+                        CodeBlock.of(".then(fetch($S, $S))",
                                 protocol._1(),
                                 protocol._2()
                         )
@@ -220,26 +152,14 @@ public class MutationDataLoaderBuilder {
                 ).collect(Collectors.toList())) {
             if (index == 0) {
                 monoList.add(
-                        CodeBlock.of("return this.$L.doOnNext(response -> addResult($S, $S, response))",
-                                String.join(
-                                        "_",
-                                        TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
-                                        protocol._2(),
-                                        "JsonMono"
-                                ),
+                        CodeBlock.of("return fetch($S, $S)",
                                 protocol._1(),
                                 protocol._2()
                         )
                 );
             } else {
                 monoList.add(
-                        CodeBlock.of(".then(this.$L.doOnNext(response -> addResult($S, $S, response)))",
-                                String.join(
-                                        "_",
-                                        TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
-                                        protocol._2(),
-                                        "JsonMono"
-                                ),
+                        CodeBlock.of(".then(fetch($S, $S))",
                                 protocol._1(),
                                 protocol._2()
                         )

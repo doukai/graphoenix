@@ -2,7 +2,9 @@ package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
+import jakarta.json.JsonArray;
 import jakarta.json.JsonException;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -198,6 +200,16 @@ public class ValueWithVariable implements JsonValue {
 
     public String getEnum() {
         return ((EnumValue) valueWithVariable).getValue();
+    }
+
+    @Override
+    public JsonObject asJsonObject() {
+        return asObject().asJsonObject();
+    }
+
+    @Override
+    public JsonArray asJsonArray() {
+        return asArray().asJsonArray();
     }
 
     @Override

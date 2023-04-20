@@ -5,12 +5,14 @@ import io.graphoenix.spi.handler.RunningServer;
 import io.grpc.Server;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 @ApplicationScoped
+@Named("grpc")
 public class GraphQLGrpcGraphoenixServer implements Runnable, RunningServer {
 
     private final Server server;

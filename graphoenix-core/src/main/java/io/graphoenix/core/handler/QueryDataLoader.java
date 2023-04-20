@@ -5,6 +5,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.operation.*;
+import io.graphoenix.spi.handler.FetchHandler;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.json.JsonObject;
@@ -106,6 +107,13 @@ public abstract class QueryDataLoader {
         conditionMap.get(packageName).get(protocol).get(typeName).get(fieldName).computeIfAbsent(key, k -> new ConcurrentHashMap<>());
         conditionMap.get(packageName).get(protocol).get(typeName).get(fieldName).get(key).computeIfAbsent(valueType, k -> new LinkedHashSet<>());
         conditionMap.get(packageName).get(protocol).get(typeName).get(fieldName).get(key).get(valueType).add(Tuple.of(jsonPointer, selectionSetContext));
+    }
+
+    protected Mono<Void> fetch(String packageName, String protocol) {
+        return build(packageName, protocol)
+                .flatMap(operation -> BeanContext.get(FetchHandler.class, protocol).operation(packageName, operation.toString()))
+                .doOnSuccess(response -> addResult(packageName, protocol, response))
+                .then();
     }
 
     protected void addResult(String packageName, String protocol, String response) {

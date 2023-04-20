@@ -13,12 +13,14 @@ import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 
 import static io.graphoenix.http.handler.SchemaRequestHandler.SCHEMA_PARAM_NAME;
 
 @ApplicationScoped
+@Named("http")
 public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
 
     private final HttpServerConfig httpServerConfig;

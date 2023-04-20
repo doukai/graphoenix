@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.graphoenix.spi.dto.PackageURL.PORT_NAME;
+import static io.graphoenix.spi.dto.PackageURL.PROTOCOL_NAME;
 import static io.graphoenix.spi.handler.PackageRegister.*;
 
 @ApplicationScoped
@@ -82,14 +84,7 @@ public class GossipPackageCluster implements Runnable {
                                             metadata.forEach(packageData -> {
                                                         String packageName = (String) packageData.get(PACKAGE_NAME);
                                                         List<Map<String, Object>> services = (List<Map<String, Object>>) packageData.get(SERVICES_NAME);
-                                                        services.forEach(service -> {
-                                                                    String protocol = (String) service.get(PROTOCOL_NAME);
-                                                                    String host = (String) service.getOrDefault(HOST_NAME, event.member().address().host());
-                                                                    int port = (int) service.getOrDefault(PORT_NAME, -1);
-                                                                    String file = (String) service.getOrDefault(FILE_NAME, "");
-                                                                    gossipPackageRegister.mergeMemberURLs(event.member().address().toString(), packageName, protocol, host, port, file);
-                                                                }
-                                                        );
+                                                        services.forEach(service -> gossipPackageRegister.mergeMemberURLs(event.member().address(), packageName, service));
                                                         if (services.size() > 0) {
                                                             gossipPackageRegister.mergeMemberProtocolURLList(packageName);
                                                             if (graphQLConfig.getPackageLoadBalance().equals(LOAD_BALANCE_ROUND_ROBIN)) {

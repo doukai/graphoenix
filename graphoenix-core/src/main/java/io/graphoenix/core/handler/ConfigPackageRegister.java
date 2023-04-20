@@ -3,12 +3,12 @@ package io.graphoenix.core.handler;
 import com.google.common.collect.Iterators;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.config.PackageConfig;
+import io.graphoenix.spi.dto.PackageURL;
 import io.graphoenix.spi.handler.PackageRegister;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 
-import java.net.URL;
 import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.List;
@@ -22,9 +22,9 @@ public class ConfigPackageRegister implements PackageRegister {
 
     private final GraphQLConfig graphQLConfig;
 
-    private final Map<String, Map<String, List<URL>>> packageProtocolURLListMap;
+    private final Map<String, Map<String, List<PackageURL>>> packageProtocolURLListMap;
 
-    private final Map<String, Map<String, Iterator<URL>>> packageProtocolURLIteratorMap;
+    private final Map<String, Map<String, Iterator<PackageURL>>> packageProtocolURLIteratorMap;
 
     @SuppressWarnings("unchecked")
     @Inject
@@ -38,17 +38,17 @@ public class ConfigPackageRegister implements PackageRegister {
                                 .map(url -> new AbstractMap.SimpleEntry<>(packageEntry.getKey(), new AbstractMap.SimpleEntry<>(url.getProtocol(), url)))
                 )
                 .collect(Collectors.groupingBy(
-                        Map.Entry<String, AbstractMap.SimpleEntry<String, URL>>::getKey,
-                        Collectors.mapping(
-                                Map.Entry<String, AbstractMap.SimpleEntry<String, URL>>::getValue,
-                                Collectors.groupingBy(
-                                        Map.Entry<String, URL>::getKey,
-                                        Collectors.mapping(
-                                                Map.Entry<String, URL>::getValue,
-                                                Collectors.toList()
+                                Map.Entry<String, AbstractMap.SimpleEntry<String, PackageURL>>::getKey,
+                                Collectors.mapping(
+                                        Map.Entry<String, AbstractMap.SimpleEntry<String, PackageURL>>::getValue,
+                                        Collectors.groupingBy(
+                                                Map.Entry<String, PackageURL>::getKey,
+                                                Collectors.mapping(
+                                                        Map.Entry<String, PackageURL>::getValue,
+                                                        Collectors.toList()
+                                                )
                                         )
                                 )
-                        )
                         )
                 );
         if (graphQLConfig.getPackageLoadBalance().equals(LOAD_BALANCE_ROUND_ROBIN)) {
@@ -60,9 +60,9 @@ public class ConfigPackageRegister implements PackageRegister {
                                     .map(url -> new AbstractMap.SimpleEntry<>(url.getProtocol(), url))
                                     .collect(
                                             Collectors.groupingBy(
-                                                    Map.Entry<String, URL>::getKey,
+                                                    Map.Entry<String, PackageURL>::getKey,
                                                     Collectors.mapping(
-                                                            Map.Entry<String, URL>::getValue,
+                                                            Map.Entry<String, PackageURL>::getValue,
                                                             Collectors.toList()
                                                     )
                                             )
@@ -71,14 +71,14 @@ public class ConfigPackageRegister implements PackageRegister {
                                     .map(protocolEntry -> new AbstractMap.SimpleEntry<>(packageEntry.getKey(), new AbstractMap.SimpleEntry<>(protocolEntry.getKey(), Iterators.cycle(protocolEntry.getValue()))))
                     )
                     .collect(Collectors.groupingBy(
-                            Map.Entry<String, AbstractMap.SimpleEntry<String, Iterator<URL>>>::getKey,
-                            Collectors.mapping(
-                                    Map.Entry<String, AbstractMap.SimpleEntry<String, Iterator<URL>>>::getValue,
-                                    Collectors.toMap(
-                                            Map.Entry<String, Iterator<URL>>::getKey,
-                                            Map.Entry<String, Iterator<URL>>::getValue
+                                    Map.Entry<String, AbstractMap.SimpleEntry<String, Iterator<PackageURL>>>::getKey,
+                                    Collectors.mapping(
+                                            Map.Entry<String, AbstractMap.SimpleEntry<String, Iterator<PackageURL>>>::getValue,
+                                            Collectors.toMap(
+                                                    Map.Entry<String, Iterator<PackageURL>>::getKey,
+                                                    Map.Entry<String, Iterator<PackageURL>>::getValue
+                                            )
                                     )
-                            )
                             )
                     );
         } else {
@@ -92,12 +92,12 @@ public class ConfigPackageRegister implements PackageRegister {
     }
 
     @Override
-    public List<URL> getProtocolURLList(String packageName, String protocol) {
+    public List<PackageURL> getProtocolURLList(String packageName, String protocol) {
         return packageProtocolURLListMap.get(packageName).get(protocol);
     }
 
     @Override
-    public Iterator<URL> getProtocolURLIterator(String packageName, String protocol) {
+    public Iterator<PackageURL> getProtocolURLIterator(String packageName, String protocol) {
         return packageProtocolURLIteratorMap.get(packageName).get(packageName);
     }
 }

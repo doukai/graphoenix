@@ -2,6 +2,7 @@ package io.graphoenix.grpc.client;
 
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.spi.dto.PackageURL;
 import io.graphoenix.spi.handler.PackageRegister;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -9,7 +10,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 
-import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
@@ -26,7 +26,7 @@ public class ChannelManager {
     }
 
     public ManagedChannel getChannel(String packageName) {
-        URL url = packageRegisterProvider.get().getURL(packageName, PROTOCOL);
+        PackageURL url = packageRegisterProvider.get().getURL(packageName, PROTOCOL);
         return channelMap.computeIfAbsent(packageName, key -> ManagedChannelBuilder.forAddress(url.getHost(), url.getPort()).usePlaintext().build());
     }
 }
