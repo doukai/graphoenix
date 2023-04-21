@@ -25,7 +25,7 @@ public class Arguments extends AbstractMap<String, JsonValue> implements JsonObj
 
     public Arguments(JsonObject jsonObject) {
         this.arguments = jsonObject.entrySet().stream()
-                .map(entry -> new SimpleEntry<>(entry.getKey(), (ValueWithVariable) entry.getValue()))
+                .map(entry -> new SimpleEntry<>(entry.getKey(), new ValueWithVariable(entry.getValue())))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 

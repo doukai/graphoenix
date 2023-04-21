@@ -109,10 +109,10 @@ public abstract class QueryDataLoader {
         conditionMap.get(packageName).get(protocol).get(typeName).get(fieldName).get(key).get(valueType).add(Tuple.of(jsonPointer, selectionSetContext));
     }
 
-    protected Mono<String> fetch(String packageName, String protocol) {
+    protected Mono<Void> fetch(String packageName, String protocol) {
         return build(packageName, protocol)
                 .flatMap(operation -> BeanContext.get(FetchHandler.class, protocol).operation(packageName, operation.toString()))
-                .doOnSuccess(response -> addResult(packageName, protocol, response));
+                .flatMap(response -> Mono.fromRunnable(() -> addResult(packageName, protocol, response)));
     }
 
     protected void addResult(String packageName, String protocol, String response) {

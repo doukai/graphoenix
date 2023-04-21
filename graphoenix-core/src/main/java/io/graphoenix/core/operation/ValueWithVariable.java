@@ -4,7 +4,9 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonException;
+import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -26,7 +28,9 @@ public class ValueWithVariable implements JsonValue {
     private final JsonValue valueWithVariable;
 
     public ValueWithVariable(Object value) {
-        if (value instanceof BooleanValue) {
+        if (value instanceof ValueWithVariable) {
+            this.valueWithVariable = ((ValueWithVariable) value).getValueWithVariable();
+        } else if (value instanceof BooleanValue) {
             this.valueWithVariable = (BooleanValue) value;
         } else if (value instanceof IntValue) {
             this.valueWithVariable = (IntValue) value;
@@ -44,8 +48,6 @@ public class ValueWithVariable implements JsonValue {
             this.valueWithVariable = (ArrayValueWithVariable) value;
         } else if (value instanceof Variable) {
             this.valueWithVariable = (Variable) value;
-        } else if (value instanceof JsonValue) {
-            this.valueWithVariable = (JsonValue) value;
         } else if (value instanceof GraphqlParser.ValueWithVariableContext) {
             this.valueWithVariable = getValueWithVariable((GraphqlParser.ValueWithVariableContext) value);
         } else {
@@ -78,6 +80,25 @@ public class ValueWithVariable implements JsonValue {
 
     private JsonValue getValueWithVariable(Object value) {
         if (value == null) {
+            return new NullValue();
+        } else if (value.equals(JsonValue.TRUE)) {
+            return new BooleanValue(true);
+        } else if (value.equals(JsonValue.FALSE)) {
+            return new BooleanValue(false);
+        } else if (value instanceof JsonNumber) {
+            JsonNumber jsonNumber = (JsonNumber) value;
+            if (jsonNumber.isIntegral()) {
+                return new IntValue(jsonNumber.intValue());
+            } else {
+                return new FloatValue(jsonNumber.doubleValue());
+            }
+        } else if (value instanceof JsonString) {
+            return new StringValue(((JsonString) value).getString());
+        } else if (value instanceof JsonArray) {
+            return new ArrayValueWithVariable((JsonArray) value);
+        } else if (value instanceof JsonObject) {
+            return new ObjectValueWithVariable((JsonObject) value);
+        } else if (value.equals(JsonValue.NULL)) {
             return new NullValue();
         } else if (value instanceof VariableElement) {
             return new Variable(((VariableElement) value).getSimpleName().toString());
@@ -116,6 +137,10 @@ public class ValueWithVariable implements JsonValue {
         } else {
             return new ObjectValueWithVariable(value);
         }
+    }
+
+    public JsonValue getValueWithVariable() {
+        return valueWithVariable;
     }
 
     public boolean isBoolean() {

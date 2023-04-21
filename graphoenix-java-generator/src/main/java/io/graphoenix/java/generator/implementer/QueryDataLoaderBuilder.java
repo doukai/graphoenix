@@ -114,7 +114,7 @@ public class QueryDataLoaderBuilder {
 
         CodeBlock codeBlock;
         if (monoList.size() > 0) {
-            codeBlock = CodeBlock.of("return $T.concat($L).collectList().map(list -> dispatch(jsonValue.asJsonObject()))", ClassName.get(Flux.class), CodeBlock.join(monoList, ","));
+            codeBlock = CodeBlock.of("return $T.concat($L).then(Mono.fromCallable(() -> dispatch(jsonValue.asJsonObject())))", ClassName.get(Flux.class), CodeBlock.join(monoList, ","));
         } else {
             codeBlock = CodeBlock.of("return $T.just(jsonValue)", ClassName.get(Mono.class));
         }

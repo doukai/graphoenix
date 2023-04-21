@@ -141,8 +141,8 @@ public class MutationHandlerBuilder {
                                 key
                         );
                     } else {
-                        builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
-                                .addStatement("field.getValue().asJsonArray().forEach(item -> item.asJsonObject().put($S, jsonValue.asJsonObject().get($S)))", to, from)
+                        builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
+                                .addStatement("field.getValue().asJsonArray().forEach(item -> item.asJsonObject().put($S, valueWithVariable.asJsonObject().get($S)))", to, from)
                                 .addStatement("loader.registerArray($S, $S, $S, $S, field.getValue())",
                                         packageName,
                                         protocol,
@@ -155,7 +155,7 @@ public class MutationHandlerBuilder {
                     if (anchor) {
                         builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S)", fieldParameterName.concat("List"), fieldDefinitionContext.name().getText());
                     } else {
-                        builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S, jsonValue.asJsonObject().get($S))", fieldParameterName.concat("List"), fieldDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());
+                        builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S, valueWithVariable.asJsonObject().get($S))", fieldParameterName.concat("List"), fieldDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());
                     }
                 }
             } else {
@@ -165,7 +165,7 @@ public class MutationHandlerBuilder {
                                 objectTypeDefinitionContext.name().getText()
                         );
                     } else {
-                        builder.addStatement("loader.registerCreate($S, jsonValue.asJsonObject().get($S))",
+                        builder.addStatement("loader.registerCreate($S, valueWithVariable.asJsonObject().get($S))",
                                 objectTypeDefinitionContext.name().getText(),
                                 fieldDefinitionContext.name().getText()
                         );
@@ -185,12 +185,12 @@ public class MutationHandlerBuilder {
                                 typeName,
                                 to,
                                 key,
-                                fieldDefinitionContext.name().getText(),
-                                from
+                                from,
+                                to
                         );
                     } else {
-                        builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
-                                .addStatement("field.getValue().asJsonObject().put($S, jsonValue.asJsonObject().get($S))", to, from)
+                        builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
+                                .addStatement("field.getValue().asJsonObject().put($S, valueWithVariable.asJsonObject().get($S))", to, from)
                                 .addStatement("loader.register($S, $S, $S, $S, field.getValue())",
                                         packageName,
                                         protocol,
@@ -203,7 +203,7 @@ public class MutationHandlerBuilder {
                     if (anchor) {
                         builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S)", fieldParameterName, fieldDefinitionContext.name().getText());
                     } else {
-                        builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S, jsonValue.asJsonObject().get($S))", fieldParameterName, fieldDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());
+                        builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S, valueWithVariable.asJsonObject().get($S))", fieldParameterName, fieldDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());
                     }
                 }
             }
