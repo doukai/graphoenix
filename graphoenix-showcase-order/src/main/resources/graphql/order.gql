@@ -28,5 +28,5 @@ type Merchant {
     name: String!
     organizationId: Int
     organization: Organization @fetch(from: "organizationId" to: "id" anchor: true protocol: GRPC)
-    customerServices: [User!] @fetch(from: "organizationId" to: "id" protocol: GRPC)
+    customerServices: [User!] @fetch(from: "organizationId" to: "organizationId" protocol: GRPC)
 }

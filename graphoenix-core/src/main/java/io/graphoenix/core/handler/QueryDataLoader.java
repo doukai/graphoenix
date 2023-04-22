@@ -12,6 +12,7 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonPatchBuilder;
 import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
+import jakarta.json.bind.Jsonb;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
 import reactor.core.publisher.Mono;
@@ -29,6 +30,7 @@ import static jakarta.json.JsonValue.NULL;
 public abstract class QueryDataLoader {
 
     private final JsonProvider jsonProvider;
+    private final Jsonb jsonb;
     private final Map<String, Map<String, Map<String, Map<String, Map<String, Map<JsonValue.ValueType, Set<Tuple2<String, GraphqlParser.SelectionSetContext>>>>>>>> conditionMap = new ConcurrentHashMap<>();
     private final Map<String, Map<String, Map<String, Map<String, Set<Field>>>>> fieldTree = new ConcurrentHashMap<>();
     private final Map<String, Map<String, Set<Tuple2<String, Field>>>> operationTypeFields = new ConcurrentHashMap<>();
@@ -37,6 +39,7 @@ public abstract class QueryDataLoader {
 
     public QueryDataLoader() {
         this.jsonProvider = BeanContext.get(JsonProvider.class);
+        this.jsonb = BeanContext.get(Jsonb.class);
     }
 
     public void register(String packageName, String protocol, String jsonPointer, GraphqlParser.SelectionContext selectionContext) {
@@ -87,7 +90,7 @@ public abstract class QueryDataLoader {
                                                                                                         .setAlias(getQueryFieldAlias(typeEntry.getKey(), fieldEntry.getKey()))
                                                                                                         .addArgument(
                                                                                                                 fieldEntry.getKey(),
-                                                                                                                new ObjectValueWithVariable().put("in", new ArrayValueWithVariable(fieldEntry.getValue().keySet()))
+                                                                                                                new ObjectValueWithVariable(Map.of("in", new ArrayValueWithVariable(fieldEntry.getValue().keySet())))
                                                                                                         )
                                                                                                         .setFields(fieldTree.get(packageName).get(protocol).get(typeEntry.getKey()).get(fieldEntry.getKey()))
                                                                                         )
@@ -116,7 +119,11 @@ public abstract class QueryDataLoader {
     }
 
     protected void addResult(String packageName, String protocol, String response) {
-        JsonObject jsonObject = jsonProvider.createReader(new StringReader(response)).readObject().get("data").asJsonObject();
+        JsonObject responseObject = jsonProvider.createReader(new StringReader(response)).readObject();
+        if (responseObject.containsKey("errors")) {
+            throw jsonb.fromJson(response, GraphQLErrors.class);
+        }
+        JsonObject jsonObject = responseObject.get("data").asJsonObject();
         resultMap.computeIfAbsent(packageName, k -> new ConcurrentHashMap<>());
         resultMap.get(packageName).put(protocol, jsonObject);
     }

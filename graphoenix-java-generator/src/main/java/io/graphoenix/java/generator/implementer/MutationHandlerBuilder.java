@@ -1,10 +1,6 @@
 package io.graphoenix.java.generator.implementer;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
@@ -16,6 +12,8 @@ import jakarta.inject.Inject;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
+import jakarta.json.stream.JsonCollectors;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
@@ -63,6 +61,14 @@ public class MutationHandlerBuilder {
         TypeSpec.Builder builder = TypeSpec.classBuilder(anchor ? "MutationBeforeHandler" : "MutationAfterHandler")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
+                .addField(
+                        FieldSpec.builder(
+                                ClassName.get(JsonProvider.class),
+                                "jsonProvider",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeMethods(anchor))
                 .addMethod(buildHandleMethod(anchor));
@@ -73,6 +79,8 @@ public class MutationHandlerBuilder {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
+                .addParameter(ClassName.get(JsonProvider.class), "jsonProvider")
+                .addStatement("this.jsonProvider = jsonProvider")
                 .build();
     }
 
@@ -133,21 +141,16 @@ public class MutationHandlerBuilder {
                     String to = manager.getTo(fieldDefinitionContext);
                     String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
 
-                    if (anchor) {
-                        builder.addStatement("loader.registerArray($S, $S, $S, $S, field.getValue())",
-                                packageName,
-                                protocol,
-                                typeName,
-                                key
-                        );
-                    } else {
+                    if (!anchor) {
                         builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
-                                .addStatement("field.getValue().asJsonArray().forEach(item -> item.asJsonObject().put($S, valueWithVariable.asJsonObject().get($S)))", to, from)
-                                .addStatement("loader.registerArray($S, $S, $S, $S, field.getValue())",
+                                .addStatement("loader.registerArray($S, $S, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder(item.asJsonObject()).add($S, valueWithVariable.asJsonObject().get($S)).build()).collect($T.toJsonArray()))",
                                         packageName,
                                         protocol,
                                         typeName,
-                                        key
+                                        key,
+                                        to,
+                                        from,
+                                        ClassName.get(JsonCollectors.class)
                                 )
                                 .endControlFlow();
                     }
@@ -190,12 +193,13 @@ public class MutationHandlerBuilder {
                         );
                     } else {
                         builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
-                                .addStatement("field.getValue().asJsonObject().put($S, valueWithVariable.asJsonObject().get($S))", to, from)
-                                .addStatement("loader.register($S, $S, $S, $S, field.getValue())",
+                                .addStatement("loader.register($S, $S, $S, $S, jsonProvider.createObjectBuilder(field.getValue().asJsonObject()).add($S, valueWithVariable.asJsonObject().get($S)).build())",
                                         packageName,
                                         protocol,
                                         typeName,
-                                        key
+                                        key,
+                                        to,
+                                        from
                                 )
                                 .endControlFlow();
                     }

@@ -45,48 +45,20 @@ public class ObjectValueWithVariable extends AbstractMap<String, JsonValue> impl
         this.objectValueWithVariable = objectValueWithVariableContext.objectFieldWithVariable().stream().collect(Collectors.toMap(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText(), objectFieldWithVariableContext -> new ValueWithVariable(objectFieldWithVariableContext.valueWithVariable())));
     }
 
-    public ValueWithVariable put(String key, BooleanValue value) {
-        return objectValueWithVariable.put(key, new ValueWithVariable(value));
-    }
-
-    public ValueWithVariable put(String key, IntValue value) {
-        return objectValueWithVariable.put(key, new ValueWithVariable(value));
-    }
-
-    public ValueWithVariable put(String key, FloatValue value) {
-        return objectValueWithVariable.put(key, new ValueWithVariable(value));
-    }
-
-    public ValueWithVariable put(String key, StringValue value) {
-        return objectValueWithVariable.put(key, new ValueWithVariable(value));
-    }
-
-    public ValueWithVariable put(String key, EnumValue value) {
-        return objectValueWithVariable.put(key, new ValueWithVariable(value));
-    }
-
-    public ValueWithVariable put(String key, NullValue value) {
-        return objectValueWithVariable.put(key, new ValueWithVariable(value));
-    }
-
-    public ValueWithVariable put(String key, ObjectValueWithVariable value) {
-        return objectValueWithVariable.put(key, new ValueWithVariable(value));
-    }
-
-    public ValueWithVariable put(String key, ArrayValueWithVariable value) {
-        return objectValueWithVariable.put(key, new ValueWithVariable(value));
-    }
-
-    public ValueWithVariable put(String key, Variable value) {
-        return objectValueWithVariable.put(key, new ValueWithVariable(value));
-    }
-
     public ValueWithVariable put(String key, Object value) {
         return objectValueWithVariable.put(key, new ValueWithVariable(value));
     }
 
-    public ValueWithVariable put(String key, JsonValue value) {
-        return objectValueWithVariable.put(key, new ValueWithVariable(value));
+    public ValueWithVariable putIfAbsent(String key, Object value) {
+        return objectValueWithVariable.putIfAbsent(key, new ValueWithVariable(value));
+    }
+
+    public ValueWithVariable compute(String key, Object value) {
+        return objectValueWithVariable.compute(key, (k, v) -> new ValueWithVariable(value));
+    }
+
+    public ValueWithVariable computeIfAbsent(String key, Object value) {
+        return objectValueWithVariable.computeIfAbsent(key, k -> new ValueWithVariable(value));
     }
 
     @NotNull

@@ -13,6 +13,7 @@ import io.graphoenix.spi.handler.OperationHandler;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.json.*;
+import jakarta.json.bind.Jsonb;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
 import reactor.core.publisher.Mono;
@@ -34,6 +35,7 @@ public abstract class MutationDataLoader {
     private final IGraphQLDocumentManager manager;
     private final GraphQLConfig graphQLConfig;
     private final JsonProvider jsonProvider;
+    private final Jsonb jsonb;
     private final OperationHandler operationHandler;
     private final Map<String, Map<String, Map<String, Map<String, JsonObject>>>> objectValueMap = new ConcurrentHashMap<>();
     private final Map<String, Map<String, Map<String, Set<String>>>> selectionMap = new ConcurrentHashMap<>();
@@ -47,6 +49,7 @@ public abstract class MutationDataLoader {
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
         this.graphQLConfig = BeanContext.get(GraphQLConfig.class);
         this.jsonProvider = BeanContext.get(JsonProvider.class);
+        this.jsonb = BeanContext.get(Jsonb.class);
         this.operationHandler = BeanContext.get(OperationHandler.class);
     }
 
@@ -275,7 +278,11 @@ public abstract class MutationDataLoader {
     }
 
     protected void addResult(String packageName, String protocol, String response) {
-        JsonObject jsonObject = jsonProvider.createReader(new StringReader(response)).readObject().get("data").asJsonObject();
+        JsonObject responseObject = jsonProvider.createReader(new StringReader(response)).readObject();
+        if (responseObject.containsKey("errors")) {
+            throw jsonb.fromJson(response, GraphQLErrors.class);
+        }
+        JsonObject jsonObject = responseObject.get("data").asJsonObject();
         resultMap.computeIfAbsent(packageName, k -> new ConcurrentHashMap<>());
         resultMap.get(packageName).put(protocol, jsonObject);
     }

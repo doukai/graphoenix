@@ -129,9 +129,7 @@ public class SelectionFilterBuilder {
                 .addStatement("String selectionName = $T.ofNullable(selectionContext.field().alias()).map(aliasContext -> aliasContext.name().getText()).orElse(selectionContext.field().name().getText())", ClassName.get(Optional.class));
 
         int index = 0;
-        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(manager::isNotFetchField)
-                .collect(Collectors.toList());
+        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition();
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {
             String fieldGetterMethodName = typeManager.getFieldGetterMethodName(fieldDefinitionContext);
             String fieldParameterName = typeManager.typeToLowerCamelName(fieldDefinitionContext.type());
