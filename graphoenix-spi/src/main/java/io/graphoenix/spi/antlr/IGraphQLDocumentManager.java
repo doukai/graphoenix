@@ -310,6 +310,14 @@ public interface IGraphQLDocumentManager {
 
     boolean getAnchor(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
+    boolean hasWith(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    String getWithType(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    String getWithFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    String getWithTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
     Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitionFromArgumentsDefinitionContext(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext,
                                                                                                               GraphqlParser.ArgumentContext argumentContext);
 

@@ -1277,6 +1277,64 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public boolean hasWith(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("with"))
+                .anyMatch(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable() != null);
+    }
+
+    @Override
+    public String getWithType(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("with"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable() != null)
+                .flatMap(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
+                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("type"))
+                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().StringValue() != null)
+                .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
+                .findFirst()
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("type")));
+    }
+
+    @Override
+    public String getWithFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("with"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable() != null)
+                .flatMap(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
+                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("from"))
+                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().StringValue() != null)
+                .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
+                .findFirst()
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("from")));
+    }
+
+    @Override
+    public String getWithTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("with"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable() != null)
+                .flatMap(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
+                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("to"))
+                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().StringValue() != null)
+                .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
     public Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitionFromArgumentsDefinitionContext(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
         return argumentsDefinitionContext.inputValueDefinition().stream().filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(argumentContext.name().getText())).findFirst();
     }
