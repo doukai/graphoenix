@@ -255,6 +255,11 @@ public class BaseTask extends DefaultTask {
                                                                                             )
                                                                                             .addArgument("returnClassName", methodDeclaration.getTypeAsString())
                                                                             )
+                                                                            .addDirective(
+                                                                                    new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                                                                            .addArgument("packageName", graphQLConfig.getPackageName())
+                                                                                            .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
+                                                                            )
                                                             );
                                                     manager.mergeDocument(objectType.toString());
                                                 }

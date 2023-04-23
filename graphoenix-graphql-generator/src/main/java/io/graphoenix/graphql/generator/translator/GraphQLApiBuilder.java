@@ -104,6 +104,11 @@ public class GraphQLApiBuilder {
                                         )
                                         .addArgument("returnClassName", executableElement.getReturnType().toString())
                         )
+                        .addDirective(
+                                new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                        .addArgument("packageName", graphQLConfig.getPackageName())
+                                        .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
+                        )
         );
     }
 }
