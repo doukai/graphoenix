@@ -5,6 +5,7 @@ import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.operation.Field;
+import io.graphoenix.core.operation.ObjectValueWithVariable;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.constant.Hammurabi;
@@ -156,7 +157,7 @@ public abstract class MutationDataLoader {
                                                                 .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
                                                                 .addArgument(
                                                                         manager.getObjectTypeIDFieldName(typeEntry.getKey()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST)),
-                                                                        Map.of("in", typeEntry.getValue())
+                                                                        new ObjectValueWithVariable(Map.of("in", typeEntry.getValue()))
                                                                 )
                                                                 .setFields(
                                                                         manager.getFields(typeEntry.getKey())
@@ -171,12 +172,13 @@ public abstract class MutationDataLoader {
                 );
     }
 
-    public Mono<Void> compensating() {
+    public Mono<Void> compensating(Throwable throwable) {
         return Mono.justOrEmpty(graphQLConfig.getCompensating())
                 .filter(compensating -> compensating)
                 .flatMap(v -> buildCompensatingMutation())
                 .flatMap(operation -> operationHandler.mutation(DOCUMENT_UTIL.graphqlToOperation(operation.toString())))
-                .then();
+                .then()
+                .switchIfEmpty(Mono.error(throwable));
     }
 
     private Mono<Operation> buildCompensatingMutation() {

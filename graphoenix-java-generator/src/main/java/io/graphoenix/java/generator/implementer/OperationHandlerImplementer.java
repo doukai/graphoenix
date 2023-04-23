@@ -366,7 +366,9 @@ public class OperationHandlerImplementer {
                                                     .unindent()
                                                     .add(")")
                                                     .build(),
-                                            CodeBlock.of(".onErrorResume(throwable -> mutationLoader.compensating().then($T.error(throwable)))", ClassName.get(Mono.class)),
+                                            graphQLConfig.getCompensating() ?
+                                                    CodeBlock.of(".onErrorResume(throwable -> mutationLoader.compensating(throwable).then($T.error(throwable)))", ClassName.get(Mono.class)) :
+                                                    CodeBlock.of(".onErrorResume(throwable -> $T.error(throwable))", ClassName.get(Mono.class)),
                                             CodeBlock.of(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationDefinitionContext, queryLoader))"),
                                             CodeBlock.of(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName)),
                                             CodeBlock.of(".flatMap(jsonValue -> invoke(jsonValue, operationDefinitionContext))")
