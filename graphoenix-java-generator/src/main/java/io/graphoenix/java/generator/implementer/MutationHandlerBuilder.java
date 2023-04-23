@@ -299,7 +299,11 @@ public class MutationHandlerBuilder {
                 .endControlFlow();
 
         if (anchor) {
-            builder.addStatement("return loader.backup().then(loader.load(operationArguments)).map(jsonValue -> loader.dispatchOperationArguments(jsonValue, operation))");
+            if (graphQLConfig.getBackup()) {
+                builder.addStatement("return loader.backup().then(loader.load(operationArguments)).switchIfEmpty(loader.load(operationArguments)).map(jsonValue -> loader.dispatchOperationArguments(jsonValue, operation))");
+            } else {
+                builder.addStatement("return loader.load(operationArguments).map(jsonValue -> loader.dispatchOperationArguments(jsonValue, operation))");
+            }
         } else {
             builder.addStatement("return loader.load().thenReturn(jsonValue.asJsonObject())");
         }
