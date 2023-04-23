@@ -316,7 +316,11 @@ public interface IGraphQLDocumentManager {
 
     String getWithFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
+    GraphqlParser.FieldDefinitionContext getWithFromObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
     String getWithTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    GraphqlParser.FieldDefinitionContext getWithToObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
     Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitionFromArgumentsDefinitionContext(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext,
                                                                                                               GraphqlParser.ArgumentContext argumentContext);

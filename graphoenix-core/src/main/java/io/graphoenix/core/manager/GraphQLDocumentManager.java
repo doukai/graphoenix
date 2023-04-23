@@ -1247,7 +1247,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
                 .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
                 .findFirst()
-                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("from")));
+                .orElse(null);
     }
 
     @Override
@@ -1299,7 +1299,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().StringValue() != null)
                 .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
                 .findFirst()
-                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("type")));
+                .orElse(null);
     }
 
     @Override
@@ -1315,7 +1315,17 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().StringValue() != null)
                 .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
                 .findFirst()
-                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("from")));
+                .orElse(null);
+    }
+
+    @Override
+    public GraphqlParser.FieldDefinitionContext getWithFromObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return getObject(getWithType(fieldDefinitionContext)).stream()
+                .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(witTypeFieldDefinitionContext -> getFrom(witTypeFieldDefinitionContext) != null)
+                .filter(witTypeFieldDefinitionContext -> getFrom(witTypeFieldDefinitionContext).equals(getWithFrom(fieldDefinitionContext)))
+                .findFirst()
+                .orElseThrow(() -> new GraphQLErrors(FETCH_FROM_OBJECT_FIELD_NOT_EXIST.bind(getWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
     }
 
     @Override
@@ -1332,6 +1342,16 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Override
+    public GraphqlParser.FieldDefinitionContext getWithToObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return getObject(getWithType(fieldDefinitionContext)).stream()
+                .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(witTypeFieldDefinitionContext -> getFrom(witTypeFieldDefinitionContext) != null)
+                .filter(witTypeFieldDefinitionContext -> getFrom(witTypeFieldDefinitionContext).equals(getWithTo(fieldDefinitionContext)))
+                .findFirst()
+                .orElseThrow(() -> new GraphQLErrors(FETCH_TO_OBJECT_FIELD_NOT_EXIST.bind(getWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
     }
 
     @Override

@@ -146,12 +146,21 @@ public class MutationHandlerBuilder {
                         String to = manager.getTo(fieldDefinitionContext);
                         String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
                         if (manager.hasWith(fieldDefinitionContext)) {
+                            String withTypeName = manager.getWithType(fieldDefinitionContext);
+                            String withFrom = manager.getWithFrom(fieldDefinitionContext);
+                            GraphqlParser.FieldDefinitionContext withToObjectField = manager.getWithToObjectField(fieldDefinitionContext);
+                            String withKey = manager.getObjectTypeIDFieldName(withTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(withTypeName)));
+
                             builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
-                                    .addStatement("loader.registerArray($S, $S, $S, $S, field.getValue().asJsonArray())",
+                                    .addStatement("loader.registerArray($S, $S, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).add($S, item.asJsonObject()).build()).collect($T.toJsonArray()))",
                                             packageName,
-                                            protocol,
-                                            typeName,
-                                            key
+                                            packageManager.isLocalPackage(packageName) ? "local" : protocol,
+                                            withTypeName,
+                                            withKey,
+                                            withFrom,
+                                            from,
+                                            withToObjectField.name().getText(),
+                                            ClassName.get(JsonCollectors.class)
                                     )
                                     .endControlFlow();
                         } else {
