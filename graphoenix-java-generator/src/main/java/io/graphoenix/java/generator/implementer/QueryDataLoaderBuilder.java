@@ -57,7 +57,7 @@ public class QueryDataLoaderBuilder {
                                         manager.getProtocol(fieldDefinitionContext),
                                         new AbstractMap.SimpleEntry<>(
                                                 manager.getFieldTypeName(fieldDefinitionContext.type()),
-                                                manager.getTo(fieldDefinitionContext)
+                                                manager.getFetchTo(fieldDefinitionContext)
                                         )
                                 )
                         )

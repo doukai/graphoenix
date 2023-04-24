@@ -31,10 +31,12 @@ import java.util.stream.Stream;
 import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.utils.FilerUtil.FILER_UTIL;
+import static io.graphoenix.core.utils.NameUtil.NAME_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DELETE_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.FETCH_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.MAP_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MERGE_TO_LIST_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.DELETE;
@@ -1238,7 +1240,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public String getFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    public String getFetchFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
                 .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
@@ -1251,7 +1253,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public String getTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    public String getFetchTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
                 .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
@@ -1264,7 +1266,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public boolean getAnchor(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    public boolean getFetchAnchor(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
                 .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
@@ -1277,7 +1279,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public boolean hasWith(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    public boolean hasFetchWith(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
                 .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
@@ -1287,7 +1289,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public String getWithType(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    public String getFetchWithType(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
                 .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
@@ -1303,7 +1305,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public String getWithFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    public String getFetchWithFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
                 .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
@@ -1319,17 +1321,17 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public GraphqlParser.FieldDefinitionContext getWithFromObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return getObject(getWithType(fieldDefinitionContext)).stream()
+    public GraphqlParser.FieldDefinitionContext getFetchWithFromObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return getObject(getFetchWithType(fieldDefinitionContext)).stream()
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
-                .filter(witTypeFieldDefinitionContext -> getFrom(witTypeFieldDefinitionContext) != null)
-                .filter(witTypeFieldDefinitionContext -> getFrom(witTypeFieldDefinitionContext).equals(getWithFrom(fieldDefinitionContext)))
+                .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext) != null)
+                .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext).equals(getFetchWithFrom(fieldDefinitionContext)))
                 .findFirst()
-                .orElseThrow(() -> new GraphQLErrors(FETCH_FROM_OBJECT_FIELD_NOT_EXIST.bind(getWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
+                .orElseThrow(() -> new GraphQLErrors(FETCH_FROM_OBJECT_FIELD_NOT_EXIST.bind(getFetchWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
     }
 
     @Override
-    public String getWithTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    public String getFetchWithTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
                 .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
@@ -1345,13 +1347,138 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public GraphqlParser.FieldDefinitionContext getWithToObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return getObject(getWithType(fieldDefinitionContext)).stream()
+    public GraphqlParser.FieldDefinitionContext getFetchWithToObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return getObject(getFetchWithType(fieldDefinitionContext)).stream()
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
-                .filter(witTypeFieldDefinitionContext -> getFrom(witTypeFieldDefinitionContext) != null)
-                .filter(witTypeFieldDefinitionContext -> getFrom(witTypeFieldDefinitionContext).equals(getWithTo(fieldDefinitionContext)))
+                .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext) != null)
+                .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext).equals(getFetchWithTo(fieldDefinitionContext)))
                 .findFirst()
-                .orElseThrow(() -> new GraphQLErrors(FETCH_TO_OBJECT_FIELD_NOT_EXIST.bind(getWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
+                .orElseThrow(() -> new GraphQLErrors(FETCH_TO_OBJECT_FIELD_NOT_EXIST.bind(getFetchWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
+    }
+
+    @Override
+    public GraphqlParser.FieldDefinitionContext getFetchWithObjectField(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                .filter(otherFieldDefinitionContext -> otherFieldDefinitionContext.name().getText().equals(NAME_UTIL.getSchemaFieldName(getFetchWithType(fieldDefinitionContext))))
+                .findFirst()
+                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(objectTypeDefinitionContext.name().getText(), NAME_UTIL.getSchemaFieldName(getFetchWithType(fieldDefinitionContext)))));
+    }
+
+    @Override
+    public String getMapFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(MAP_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("from"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public String getMapTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(MAP_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("to"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public boolean getMapAnchor(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(MAP_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("anchor"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().BooleanValue() != null)
+                .map(argumentContext -> Boolean.parseBoolean(argumentContext.valueWithVariable().BooleanValue().getText()))
+                .findFirst()
+                .orElse(false);
+    }
+
+    @Override
+    public boolean hasMapWith(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(MAP_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("with"))
+                .anyMatch(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable() != null);
+    }
+
+    @Override
+    public String getMapWithType(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(MAP_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("with"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable() != null)
+                .flatMap(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
+                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("type"))
+                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().StringValue() != null)
+                .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public String getMapWithFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(MAP_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("with"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable() != null)
+                .flatMap(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
+                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("from"))
+                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().StringValue() != null)
+                .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public GraphqlParser.FieldDefinitionContext getMapWithFromObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return getObject(getMapWithType(fieldDefinitionContext)).stream()
+                .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(witTypeFieldDefinitionContext -> getMapFrom(witTypeFieldDefinitionContext) != null)
+                .filter(witTypeFieldDefinitionContext -> getMapFrom(witTypeFieldDefinitionContext).equals(getMapWithFrom(fieldDefinitionContext)))
+                .findFirst()
+                .orElseThrow(() -> new GraphQLErrors(MAP_FROM_OBJECT_FIELD_NOT_EXIST.bind(getMapWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
+    }
+
+    @Override
+    public String getMapWithTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(MAP_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("with"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable() != null)
+                .flatMap(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
+                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("to"))
+                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().StringValue() != null)
+                .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public GraphqlParser.FieldDefinitionContext getMapWithToObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return getObject(getMapWithType(fieldDefinitionContext)).stream()
+                .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(witTypeFieldDefinitionContext -> getMapFrom(witTypeFieldDefinitionContext) != null)
+                .filter(witTypeFieldDefinitionContext -> getMapFrom(witTypeFieldDefinitionContext).equals(getMapWithTo(fieldDefinitionContext)))
+                .findFirst()
+                .orElseThrow(() -> new GraphQLErrors(MAP_TO_OBJECT_FIELD_NOT_EXIST.bind(getMapWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
     }
 
     @Override

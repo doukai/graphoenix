@@ -57,7 +57,7 @@ public class GrpcFetchHandlerBuilder {
                                 manager.getPackageName(manager.getFieldTypeName(fieldDefinitionContext.type())),
                                 new AbstractMap.SimpleEntry<>(
                                         manager.getFieldTypeName(fieldDefinitionContext.type()),
-                                        manager.getTo(fieldDefinitionContext)
+                                        manager.getFetchTo(fieldDefinitionContext)
                                 )
                         )
                 )

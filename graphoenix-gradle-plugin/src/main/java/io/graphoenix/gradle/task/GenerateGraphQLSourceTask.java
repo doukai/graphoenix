@@ -6,6 +6,7 @@ import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.java.generator.builder.JavaFileBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskAction;
@@ -22,6 +23,7 @@ public class GenerateGraphQLSourceTask extends BaseTask {
     public void generateGraphQLSourceTask() {
         init();
         IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
+        IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
@@ -33,6 +35,8 @@ public class GenerateGraphQLSourceTask extends BaseTask {
             configRegister.registerPackage(createClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
+            } else {
+                mapper.registerFieldMaps();
             }
             javaFileBuilder.writeToPath(new File(javaPath));
         } catch (IOException | URISyntaxException e) {

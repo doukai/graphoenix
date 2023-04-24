@@ -6,6 +6,7 @@ import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
@@ -45,6 +46,7 @@ public class PackageProcessor extends BaseProcessor {
         }
         GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
         IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
+        IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
         registerElements(roundEnv);
         try {
@@ -52,6 +54,8 @@ public class PackageProcessor extends BaseProcessor {
             configRegister.registerPackage(PackageProcessor.class.getClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
+            } else {
+                mapper.registerFieldMaps();
             }
             registerOperations(roundEnv);
             FileObject packageGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/package.gql");

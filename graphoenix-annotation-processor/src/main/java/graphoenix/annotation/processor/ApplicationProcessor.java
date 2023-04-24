@@ -14,6 +14,7 @@ import io.graphoenix.java.generator.implementer.grpc.GrpcObjectHandlerBuilder;
 import io.graphoenix.java.generator.implementer.grpc.GrpcRequestHandlerBuilder;
 import io.graphoenix.java.generator.implementer.grpc.GrpcServiceImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
@@ -54,6 +55,7 @@ public class ApplicationProcessor extends BaseProcessor {
         }
         GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
         IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
+        IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
         JsonSchemaTranslator jsonSchemaTranslator = BeanContext.get(JsonSchemaTranslator.class);
         InvokeHandlerBuilder invokeHandlerBuilder = BeanContext.get(InvokeHandlerBuilder.class);
@@ -78,6 +80,8 @@ public class ApplicationProcessor extends BaseProcessor {
             configRegister.registerPackage(ApplicationProcessor.class.getClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
+            } else {
+                mapper.registerFieldMaps();
             }
             registerOperations(roundEnv);
             FileObject mainGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/main.gql");

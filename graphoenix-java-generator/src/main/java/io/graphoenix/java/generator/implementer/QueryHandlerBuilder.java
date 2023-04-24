@@ -140,8 +140,8 @@ public class QueryHandlerBuilder {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     String packageName = manager.getPackageName(typeName);
                     String protocol = manager.getProtocol(fieldDefinitionContext);
-                    String from = manager.getFrom(fieldDefinitionContext);
-                    String to = manager.getTo(fieldDefinitionContext);
+                    String from = manager.getFetchFrom(fieldDefinitionContext);
+                    String to = manager.getFetchTo(fieldDefinitionContext);
 
                     builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
                             .addStatement("loader.registerArray($S, $S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
@@ -162,8 +162,8 @@ public class QueryHandlerBuilder {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     String packageName = manager.getPackageName(typeName);
                     String protocol = manager.getProtocol(fieldDefinitionContext);
-                    String from = manager.getFrom(fieldDefinitionContext);
-                    String to = manager.getTo(fieldDefinitionContext);
+                    String from = manager.getFetchFrom(fieldDefinitionContext);
+                    String to = manager.getFetchTo(fieldDefinitionContext);
 
                     builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
                             .addStatement("loader.register($S, $S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",

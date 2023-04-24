@@ -15,6 +15,8 @@ public enum GraphQLErrorType {
     FIELD_NOT_EXIST(-21, "field definition not exist in type %s: %s"),
     TYPE_ID_FIELD_NOT_EXIST(-22, "type id field not exist: %s"),
     FRAGMENT_NOT_EXIST(-23, "fragment not exist: %s"),
+    MAP_FROM_OBJECT_FIELD_NOT_EXIST(-24, "map from object field definition not exist in type %s: %s"),
+    MAP_TO_OBJECT_FIELD_NOT_EXIST(-25, "map to object field definition not exist in type %s: %s"),
     FETCH_FROM_OBJECT_FIELD_NOT_EXIST(-24, "fetch from object field definition not exist in type %s: %s"),
     FETCH_TO_OBJECT_FIELD_NOT_EXIST(-25, "fetch to object field definition not exist in type %s: %s"),
 

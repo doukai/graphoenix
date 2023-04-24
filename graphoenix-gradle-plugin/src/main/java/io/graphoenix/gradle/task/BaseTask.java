@@ -109,11 +109,9 @@ public class BaseTask extends DefaultTask {
             manager = BeanContext.get(IGraphQLDocumentManager.class);
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
             documentBuilder = BeanContext.get(DocumentBuilder.class);
-            IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
 
             manager.clearAll();
             configRegister.registerConfig(resourcePath);
-            mapper.registerFieldMaps();
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);
             throw new TaskExecutionException(this, e);

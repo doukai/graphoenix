@@ -75,12 +75,10 @@ public abstract class BaseProcessor extends AbstractProcessor {
         javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
         javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
-        IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
 
         try {
             manager.clearAll();
             configRegister.registerConfig(filer);
-            mapper.registerFieldMaps();
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());

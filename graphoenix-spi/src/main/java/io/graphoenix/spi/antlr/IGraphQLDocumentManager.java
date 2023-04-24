@@ -304,23 +304,43 @@ public interface IGraphQLDocumentManager {
 
     String getProtocol(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
-    String getFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+    String getFetchFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
-    String getTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+    String getFetchTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
-    boolean getAnchor(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+    boolean getFetchAnchor(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
-    boolean hasWith(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+    boolean hasFetchWith(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
-    String getWithType(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+    String getFetchWithType(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
-    String getWithFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+    String getFetchWithFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
-    GraphqlParser.FieldDefinitionContext getWithFromObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+    GraphqlParser.FieldDefinitionContext getFetchWithFromObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
-    String getWithTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+    String getFetchWithTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
-    GraphqlParser.FieldDefinitionContext getWithToObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+    GraphqlParser.FieldDefinitionContext getFetchWithToObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    GraphqlParser.FieldDefinitionContext getFetchWithObjectField(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    String getMapFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    String getMapTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    boolean getMapAnchor(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    boolean hasMapWith(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    String getMapWithType(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    String getMapWithFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    GraphqlParser.FieldDefinitionContext getMapWithFromObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    String getMapWithTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    GraphqlParser.FieldDefinitionContext getMapWithToObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
     Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitionFromArgumentsDefinitionContext(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext,
                                                                                                               GraphqlParser.ArgumentContext argumentContext);

@@ -29,8 +29,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.PAGE_INFO_NAME;
 
 @ApplicationScoped
@@ -121,7 +121,7 @@ public class MutationHandlerBuilder {
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext ->
                         idFieldName.isPresent() && fieldDefinitionContext.name().getText().equals(idFieldName.get()) ||
-                                manager.isFetchField(fieldDefinitionContext) && manager.getAnchor(fieldDefinitionContext) == anchor ||
+                                manager.isFetchField(fieldDefinitionContext) && manager.getFetchAnchor(fieldDefinitionContext) == anchor ||
                                 !manager.isFetchField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
                 )
                 .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
@@ -138,23 +138,34 @@ public class MutationHandlerBuilder {
             }
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                 if (manager.isFetchField(fieldDefinitionContext)) {
-                    if (!anchor) {
-                        String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                        String packageName = manager.getPackageName(typeName);
-                        String protocol = manager.getProtocol(fieldDefinitionContext);
-                        String from = manager.getFrom(fieldDefinitionContext);
-                        String to = manager.getTo(fieldDefinitionContext);
-                        String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
-                        if (manager.hasWith(fieldDefinitionContext)) {
-                            String withTypeName = manager.getWithType(fieldDefinitionContext);
-                            String withFrom = manager.getWithFrom(fieldDefinitionContext);
-                            GraphqlParser.FieldDefinitionContext withToObjectField = manager.getWithToObjectField(fieldDefinitionContext);
+                    String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                    String packageName = manager.getPackageName(typeName);
+                    String protocol = manager.getProtocol(fieldDefinitionContext);
+                    String from = manager.getFetchFrom(fieldDefinitionContext);
+                    String to = manager.getFetchTo(fieldDefinitionContext);
+                    String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
+                    if (anchor) {
+                        if (manager.hasFetchWith(fieldDefinitionContext)) {
+                            String withTypeName = manager.getFetchWithType(fieldDefinitionContext);
                             String withKey = manager.getObjectTypeIDFieldName(withTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(withTypeName)));
+                            String withFrom = manager.getFetchWithFrom(fieldDefinitionContext);
+                            GraphqlParser.FieldDefinitionContext withToObjectField = manager.getFetchWithToObjectField(fieldDefinitionContext);
+                            GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
 
                             builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
+                                    .addStatement("loader.registerArray($S, $S, $S, $S, valueWithVariable.asJsonObject().get($S).asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder(item.asJsonObject()).add($S, $T.TRUE).build()).collect($T.toJsonArray()))",
+                                            packageName,
+                                            manager.getProtocol(withObjectField),
+                                            withTypeName,
+                                            withKey,
+                                            withObjectField.name().getText(),
+                                            DEPRECATED_FIELD_NAME,
+                                            ClassName.get(JsonValue.class),
+                                            ClassName.get(JsonCollectors.class)
+                                    )
                                     .addStatement("loader.registerArray($S, $S, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).add($S, item.asJsonObject()).build()).collect($T.toJsonArray()))",
                                             packageName,
-                                            packageManager.isLocalPackage(packageName) ? "local" : protocol,
+                                            manager.getProtocol(withObjectField),
                                             withTypeName,
                                             withKey,
                                             withFrom,
@@ -163,19 +174,19 @@ public class MutationHandlerBuilder {
                                             ClassName.get(JsonCollectors.class)
                                     )
                                     .endControlFlow();
-                        } else {
-                            builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
-                                    .addStatement("loader.registerArray($S, $S, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder(item.asJsonObject()).add($S, valueWithVariable.asJsonObject().get($S)).build()).collect($T.toJsonArray()))",
-                                            packageName,
-                                            protocol,
-                                            typeName,
-                                            key,
-                                            to,
-                                            from,
-                                            ClassName.get(JsonCollectors.class)
-                                    )
-                                    .endControlFlow();
                         }
+                    } else {
+                        builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
+                                .addStatement("loader.registerArray($S, $S, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder(item.asJsonObject()).add($S, valueWithVariable.asJsonObject().get($S)).build()).collect($T.toJsonArray()))",
+                                        packageName,
+                                        protocol,
+                                        typeName,
+                                        key,
+                                        to,
+                                        from,
+                                        ClassName.get(JsonCollectors.class)
+                                )
+                                .endControlFlow();
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (anchor) {
@@ -200,8 +211,8 @@ public class MutationHandlerBuilder {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     String packageName = manager.getPackageName(typeName);
                     String protocol = manager.getProtocol(fieldDefinitionContext);
-                    String from = manager.getFrom(fieldDefinitionContext);
-                    String to = manager.getTo(fieldDefinitionContext);
+                    String from = manager.getFetchFrom(fieldDefinitionContext);
+                    String to = manager.getFetchTo(fieldDefinitionContext);
                     String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
 
                     if (anchor) {

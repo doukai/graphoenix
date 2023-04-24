@@ -22,6 +22,7 @@ import io.graphoenix.core.operation.EnumValue;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
+import io.vavr.Tuple;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.tinylog.Logger;
@@ -107,8 +108,43 @@ public class DocumentBuilder {
             manager.registerGraphQL(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString());
         }
 
+        io.vavr.collection.Stream.ofAll(
+                        manager.getObjects()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isNotOperationType)
+                                .filter(manager::isNotContainerType)
+                                .flatMap(objectTypeDefinitionContext ->
+                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                                )
+                                .filter(tuple -> manager.hasFetchWith(tuple._2()))
+                )
+                .distinctBy(tuple -> manager.getFetchWithType(tuple._2()))
+                .toJavaStream()
+                .flatMap(tuple -> buildFetchWithObject(tuple._1(), tuple._2()).stream())
+                .collect(Collectors.toList())
+                .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
+
+        io.vavr.collection.Stream.ofAll(
+                        manager.getObjects()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isNotOperationType)
+                                .filter(manager::isNotContainerType)
+                                .flatMap(objectTypeDefinitionContext ->
+                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                                )
+                                .filter(tuple -> manager.hasMapWith(tuple._2()))
+                )
+                .distinctBy(tuple -> manager.getMapWithType(tuple._2()))
+                .toJavaStream()
+                .flatMap(tuple -> buildMapWithObject(tuple._1(), tuple._2()).stream())
+                .collect(Collectors.toList())
+                .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
+
         buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
         buildContainerTypeObjects().forEach(objectType -> manager.registerGraphQL(objectType.toString()));
+
         mapper.registerFieldMaps();
 
         Document document = getDocument();
@@ -245,9 +281,158 @@ public class DocumentBuilder {
                                             )
                                     )
                                     .collect(Collectors.toList())
+                    )
+                    .addFields(
+                            fieldDefinitionContextList.stream()
+                                    .filter(manager::hasFetchWith)
+                                    .map(fieldDefinitionContext ->
+                                            new Field(getSchemaFieldName(manager.getFetchWithType(fieldDefinitionContext)))
+                                                    .setTypeName(
+                                                            fieldDefinitionContext.type().getText().replace(manager.getFieldTypeName(fieldDefinitionContext.type()), manager.getFetchWithType(fieldDefinitionContext))
+                                                    )
+                                                    .addDirective(
+                                                            new Directive(FETCH_DIRECTIVE_NAME)
+                                                                    .addArgument("from", manager.getFetchFrom(fieldDefinitionContext))
+                                                                    .addArgument("to", manager.getFetchWithFrom(fieldDefinitionContext))
+                                                                    .addArgument("protocol", manager.getProtocol(fieldDefinitionContext))
+                                                    )
+                                    )
+                                    .collect(Collectors.toList())
+                    )
+                    .addFields(
+                            fieldDefinitionContextList.stream()
+                                    .filter(manager::hasMapWith)
+                                    .map(fieldDefinitionContext ->
+                                            new Field(getSchemaFieldName(manager.getMapWithType(fieldDefinitionContext)))
+                                                    .setTypeName(
+                                                            fieldDefinitionContext.type().getText().replace(manager.getFieldTypeName(fieldDefinitionContext.type()), manager.getMapWithType(fieldDefinitionContext))
+                                                    )
+                                                    .addDirective(
+                                                            new Directive(MAP_DIRECTIVE_NAME)
+                                                                    .addArgument("from", manager.getMapFrom(fieldDefinitionContext))
+                                                                    .addArgument("to", manager.getMapWithFrom(fieldDefinitionContext))
+                                                    )
+                                    )
+                                    .collect(Collectors.toList())
                     );
         }
         return objectType;
+    }
+
+    public Optional<ObjectType> buildFetchWithObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        String fetchWithTypeName = manager.getFetchWithType(fieldDefinitionContext);
+        if (manager.getObject(fetchWithTypeName).isPresent()) {
+            return Optional.empty();
+        }
+        String fetchFromTypeName = objectTypeDefinitionContext.name().getText();
+        String fetchToTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+        String fetchFromFieldName = manager.getFetchFrom(fieldDefinitionContext);
+        String fetchToFieldName = manager.getFetchTo(fieldDefinitionContext);
+        String fetchWithFromFieldName = manager.getFetchWithFrom(fieldDefinitionContext);
+        String fetchWithToFieldName = manager.getFetchWithTo(fieldDefinitionContext);
+
+        String fetchWithFromObjectFieldName = "from";
+        String fetchWithToObjectFieldName = "to";
+
+        ObjectType objectType = new ObjectType(fetchWithTypeName)
+                .addField(
+                        new Field("id")
+                                .setTypeName("ID")
+                                .addDirective(
+                                        new Directive("dataType")
+                                                .addArgument("type", "int")
+                                )
+                                .addDirective(
+                                        new Directive("column")
+                                                .addArgument("autoIncrement", true)
+                                )
+                )
+                .addField(new Field(fetchWithFromFieldName).setTypeName("String!"))
+                .addField(
+                        new Field(fetchWithFromObjectFieldName)
+                                .setTypeName(fetchFromTypeName)
+                                .addDirective(
+                                        new Directive(FETCH_DIRECTIVE_NAME)
+                                                .addArgument("from", fetchWithFromFieldName)
+                                                .addArgument("to", fetchFromFieldName)
+                                )
+                );
+
+        if (fetchToFieldName != null) {
+            objectType
+                    .addField(new Field(fetchWithToFieldName).setTypeName("String!"))
+                    .addField(
+                            new Field(fetchWithToObjectFieldName)
+                                    .setTypeName(fetchToTypeName)
+                                    .addDirective(
+                                            new Directive(FETCH_DIRECTIVE_NAME)
+                                                    .addArgument("from", fetchWithToFieldName)
+                                                    .addArgument("to", fetchToFieldName)
+                                    )
+                    );
+        } else {
+            objectType
+                    .addField(new Field(fetchWithToFieldName).setTypeName(fetchToTypeName));
+        }
+        return Optional.of(objectType);
+    }
+
+    public Optional<ObjectType> buildMapWithObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        String mapWithTypeName = manager.getMapWithType(fieldDefinitionContext);
+        if (manager.getObject(mapWithTypeName).isPresent()) {
+            return Optional.empty();
+        }
+        String mapFromTypeName = objectTypeDefinitionContext.name().getText();
+        String mapToTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+        String mapFromFieldName = manager.getMapFrom(fieldDefinitionContext);
+        String mapToFieldName = manager.getMapTo(fieldDefinitionContext);
+        String mapWithFromFieldName = manager.getMapWithFrom(fieldDefinitionContext);
+        String mapWithToFieldName = manager.getMapWithTo(fieldDefinitionContext);
+
+        String mapWithFromObjectFieldName = "from";
+        String mapWithToObjectFieldName = "to";
+
+        ObjectType objectType = new ObjectType(mapWithTypeName)
+                .addField(
+                        new Field("id")
+                                .setTypeName("ID")
+                                .addDirective(
+                                        new Directive("dataType")
+                                                .addArgument("type", "int")
+                                )
+                                .addDirective(
+                                        new Directive("column")
+                                                .addArgument("autoIncrement", true)
+                                )
+                )
+                .addField(new Field(mapWithFromFieldName).setTypeName("String!"))
+                .addField(
+                        new Field(mapWithFromObjectFieldName)
+                                .setTypeName(mapFromTypeName)
+                                .addDirective(
+                                        new Directive(MAP_DIRECTIVE_NAME)
+                                                .addArgument("from", mapWithFromFieldName)
+                                                .addArgument("to", mapFromFieldName)
+                                )
+                );
+
+        if (mapToFieldName != null) {
+            objectType
+                    .addField(new Field(mapWithToFieldName).setTypeName("String!"))
+                    .addField(
+                            new Field(mapWithToObjectFieldName)
+                                    .setTypeName(mapToTypeName)
+                                    .addDirective(
+                                            new Directive(MAP_DIRECTIVE_NAME)
+                                                    .addArgument("from", mapWithToFieldName)
+                                                    .addArgument("to", mapToFieldName)
+                                    )
+                    );
+        } else {
+            objectType
+                    .addField(new Field(mapWithToFieldName).setTypeName(mapToTypeName));
+        }
+        return Optional.of(objectType);
     }
 
     public InputObjectType buildInputObjectType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
@@ -567,10 +752,14 @@ public class DocumentBuilder {
     }
 
     private String getSchemaFieldName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        if (objectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX)) {
-            return INTROSPECTION_PREFIX.concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText().replace(INTROSPECTION_PREFIX, "")));
+        return getSchemaFieldName(objectTypeDefinitionContext.name().getText());
+    }
+
+    private String getSchemaFieldName(String name) {
+        if (name.startsWith(INTROSPECTION_PREFIX)) {
+            return INTROSPECTION_PREFIX.concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name.replace(INTROSPECTION_PREFIX, "")));
         } else {
-            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText());
+            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name);
         }
     }
 
