@@ -7,6 +7,7 @@ import jakarta.json.JsonValue;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -143,6 +144,14 @@ public class Field {
             this.fields = new LinkedHashSet<>();
         }
         this.fields.add(field);
+        return this;
+    }
+
+    public Field addFields(Collection<Field> fields) {
+        if (this.fields == null) {
+            this.fields = new LinkedHashSet<>();
+        }
+        this.fields.addAll(fields);
         return this;
     }
 

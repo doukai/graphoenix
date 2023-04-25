@@ -62,14 +62,9 @@ public abstract class QueryDataLoader {
 
     protected Mono<Operation> build(String packageName, String protocol) {
         return Mono.justOrEmpty(
-                Optional.of(conditionMap)
-                        .filter(map -> !map.isEmpty())
-                        .flatMap(map -> Optional.ofNullable(map.get(packageName)))
+                Optional.ofNullable(conditionMap.get(packageName))
                         .flatMap(protocolMap ->
-                                Optional.of(protocolMap)
-                                        .filter(map -> !map.isEmpty())
-                                        .flatMap(map -> Optional.ofNullable(map.get(protocol)))
-                                        .filter(map -> !map.isEmpty())
+                                Optional.ofNullable(protocolMap.get(protocol))
                                         .map(typeMap ->
                                                 new Operation()
                                                         .setOperationType("query")
@@ -77,7 +72,8 @@ public abstract class QueryDataLoader {
                                                                 Stream.ofNullable(operationTypeFields.get(packageName))
                                                                         .flatMap(packageMap -> Stream.ofNullable(packageMap.get(protocol)))
                                                                         .flatMap(Collection::stream)
-                                                                        .map(Tuple2::_2).collect(Collectors.toSet())
+                                                                        .map(Tuple2::_2)
+                                                                        .collect(Collectors.toSet())
                                                         )
                                                         .addFields(
                                                                 typeMap.entrySet().stream()
@@ -90,7 +86,7 @@ public abstract class QueryDataLoader {
                                                                                                         .setAlias(getQueryFieldAlias(typeEntry.getKey(), fieldEntry.getKey()))
                                                                                                         .addArgument(
                                                                                                                 fieldEntry.getKey(),
-                                                                                                                new ObjectValueWithVariable(Map.of("in", new ArrayValueWithVariable(fieldEntry.getValue().keySet())))
+                                                                                                                Map.of("in", fieldEntry.getValue().keySet())
                                                                                                         )
                                                                                                         .setFields(fieldTree.get(packageName).get(protocol).get(typeEntry.getKey()).get(fieldEntry.getKey()))
                                                                                         )
@@ -130,89 +126,85 @@ public abstract class QueryDataLoader {
 
     protected JsonValue dispatch(JsonObject jsonObject) {
         JsonPatchBuilder patchBuilder = jsonProvider.createPatchBuilder();
-        operationTypeFields.forEach((packageName, protocolMap) ->
-                protocolMap.forEach((protocolName, fieldSet) ->
-                        fieldSet.forEach(
-                                jsonPointer ->
-                                        patchBuilder.add(
-                                                jsonPointer._1(),
-                                                jsonObject.get(Optional.ofNullable(jsonPointer._2().getAlias()).orElse(jsonPointer._2().getName()))
-                                        )
-                        )
-                )
-        );
-        Optional.of(conditionMap)
-                .filter(map -> !map.isEmpty()).stream()
-                .flatMap(map -> map.entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-                .forEach((packageName, packageMap) -> {
-                    Optional.of(packageMap)
-                            .filter(map -> !map.isEmpty()).stream()
-                            .flatMap(map -> map.entrySet().stream())
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-                            .forEach((protocolName, protocolMap) -> {
-                                Optional.of(protocolMap)
-                                        .filter(map -> !map.isEmpty()).stream()
-                                        .flatMap(map -> map.entrySet().stream())
-                                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-                                        .forEach((typeName, typeMap) -> {
-                                            Optional.of(typeMap)
-                                                    .filter(map -> !map.isEmpty()).stream()
-                                                    .flatMap(map -> map.entrySet().stream())
-                                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-                                                    .forEach((fieldName, fieldMap) -> {
-                                                        Optional.of(fieldMap)
-                                                                .filter(map -> !map.isEmpty()).stream()
-                                                                .flatMap(map -> map.entrySet().stream())
-                                                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-                                                                .forEach((key, valueTypeMap) -> {
-                                                                    Optional.of(valueTypeMap)
-                                                                            .filter(map -> !map.isEmpty()).stream()
-                                                                            .flatMap(map -> map.entrySet().stream())
-                                                                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-                                                                            .forEach((valueType, jsonPointerList) -> {
-                                                                                if (resultMap.containsKey(packageName) && resultMap.get(packageName).containsKey(protocolName)) {
-                                                                                    JsonObject data = resultMap.get(packageName).get(protocolName).asJsonObject();
-                                                                                    JsonValue fieldValue = data.get(getQueryFieldAlias(typeName, fieldName));
-                                                                                    if (fieldValue != null && fieldValue.getValueType().equals(JsonValue.ValueType.ARRAY)) {
-                                                                                        if (valueType.equals(JsonValue.ValueType.ARRAY)) {
-                                                                                            Stream.ofNullable(jsonPointerList)
-                                                                                                    .flatMap(Collection::stream)
-                                                                                                    .forEach(jsonPointer ->
-                                                                                                            patchBuilder.add(
-                                                                                                                    jsonPointer._1(),
-                                                                                                                    jsonValueFilter(
-                                                                                                                            fieldValue.asJsonArray().stream()
-                                                                                                                                    .filter(item -> getKeyValue(item.asJsonObject().get(fieldName)).equals(key))
-                                                                                                                                    .collect(JsonCollectors.toJsonArray()),
-                                                                                                                            jsonPointer._2()
-                                                                                                                    )
-                                                                                                            )
-                                                                                                    );
-                                                                                        } else {
-                                                                                            Stream.ofNullable(jsonPointerList)
-                                                                                                    .flatMap(Collection::stream)
-                                                                                                    .forEach(jsonPointer ->
-                                                                                                            patchBuilder.add(
-                                                                                                                    jsonPointer._1(),
-                                                                                                                    jsonValueFilter(
-                                                                                                                            fieldValue.asJsonArray().stream()
-                                                                                                                                    .filter(item -> getKeyValue(item.asJsonObject().get(fieldName)).equals(key))
-                                                                                                                                    .findFirst()
-                                                                                                                                    .orElse(NULL),
-                                                                                                                            jsonPointer._2()
-                                                                                                                    )
-                                                                                                            )
-                                                                                                    );
+        if (!operationTypeFields.isEmpty()) {
+            operationTypeFields.forEach((packageName, protocolMap) ->
+                    protocolMap.forEach((protocolName, fieldSet) ->
+                            fieldSet.forEach(
+                                    jsonPointer ->
+                                            patchBuilder.add(
+                                                    jsonPointer._1(),
+                                                    jsonObject.get(Optional.ofNullable(jsonPointer._2().getAlias()).orElse(jsonPointer._2().getName()))
+                                            )
+                            )
+                    )
+            );
+        }
+        if (!conditionMap.isEmpty()) {
+            conditionMap.forEach((packageName, packageMap) -> {
+                        if (packageMap != null && !packageMap.isEmpty()) {
+                            packageMap.forEach((protocolName, protocolMap) -> {
+                                        if (protocolMap != null && !protocolMap.isEmpty()) {
+                                            protocolMap.forEach((typeName, typeMap) -> {
+                                                        if (typeMap != null && !typeMap.isEmpty()) {
+                                                            typeMap.forEach((fieldName, fieldMap) -> {
+                                                                        if (fieldMap != null && !fieldMap.isEmpty()) {
+                                                                            fieldMap.forEach((key, valueTypeMap) -> {
+                                                                                        if (valueTypeMap != null && !valueTypeMap.isEmpty()) {
+                                                                                            valueTypeMap.forEach((valueType, jsonPointerList) -> {
+                                                                                                        if (resultMap.containsKey(packageName) && resultMap.get(packageName).containsKey(protocolName)) {
+                                                                                                            JsonObject data = resultMap.get(packageName).get(protocolName).asJsonObject();
+                                                                                                            JsonValue fieldValue = data.get(getQueryFieldAlias(typeName, fieldName));
+                                                                                                            if (fieldValue != null && fieldValue.getValueType().equals(JsonValue.ValueType.ARRAY)) {
+                                                                                                                if (valueType.equals(JsonValue.ValueType.ARRAY)) {
+                                                                                                                    Stream.ofNullable(jsonPointerList)
+                                                                                                                            .flatMap(Collection::stream)
+                                                                                                                            .forEach(jsonPointer ->
+                                                                                                                                    patchBuilder.add(
+                                                                                                                                            jsonPointer._1(),
+                                                                                                                                            jsonValueFilter(
+                                                                                                                                                    fieldValue.asJsonArray().stream()
+                                                                                                                                                            .filter(item -> getKeyValue(item.asJsonObject().get(fieldName)).equals(key))
+                                                                                                                                                            .collect(JsonCollectors.toJsonArray()),
+                                                                                                                                                    jsonPointer._2()
+                                                                                                                                            )
+                                                                                                                                    )
+                                                                                                                            );
+                                                                                                                } else {
+                                                                                                                    Stream.ofNullable(jsonPointerList)
+                                                                                                                            .flatMap(Collection::stream)
+                                                                                                                            .forEach(jsonPointer ->
+                                                                                                                                    patchBuilder.add(
+                                                                                                                                            jsonPointer._1(),
+                                                                                                                                            jsonValueFilter(
+                                                                                                                                                    fieldValue.asJsonArray().stream()
+                                                                                                                                                            .filter(item -> getKeyValue(item.asJsonObject().get(fieldName)).equals(key))
+                                                                                                                                                            .findFirst()
+                                                                                                                                                            .orElse(NULL),
+                                                                                                                                                    jsonPointer._2()
+                                                                                                                                            )
+                                                                                                                                    )
+                                                                                                                            );
+                                                                                                                }
+                                                                                                            }
+                                                                                                        }
+                                                                                                    }
+                                                                                            );
                                                                                         }
                                                                                     }
-                                                                                }
-                                                                            });
-                                                                });
-                                                    });
-                                        });
-                            });
-                });
+                                                                            );
+                                                                        }
+                                                                    }
+                                                            );
+                                                        }
+                                                    }
+                                            );
+                                        }
+                                    }
+                            );
+                        }
+                    }
+            );
+        }
         return patchBuilder.build().apply(jsonObject);
     }
 

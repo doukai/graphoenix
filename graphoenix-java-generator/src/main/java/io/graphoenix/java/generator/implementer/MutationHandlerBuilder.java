@@ -146,34 +146,44 @@ public class MutationHandlerBuilder {
                     String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
                     if (anchor) {
                         if (manager.hasFetchWith(fieldDefinitionContext)) {
-                            String withTypeName = manager.getFetchWithType(fieldDefinitionContext);
-                            String withKey = manager.getObjectTypeIDFieldName(withTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(withTypeName)));
-                            String withFrom = manager.getFetchWithFrom(fieldDefinitionContext);
-                            GraphqlParser.FieldDefinitionContext withToObjectField = manager.getFetchWithToObjectField(fieldDefinitionContext);
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
+                            String withObjectFiledFrom = manager.getFetchFrom(withObjectField);
+                            String withObjectFiledTo = manager.getFetchTo(withObjectField);
 
-                            builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
-                                    .addStatement("loader.registerArray($S, $S, $S, $S, valueWithVariable.asJsonObject().get($S).asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder(item.asJsonObject()).add($S, $T.TRUE).build()).collect($T.toJsonArray()))",
-                                            packageName,
-                                            manager.getProtocol(withObjectField),
-                                            withTypeName,
-                                            withKey,
-                                            withObjectField.name().getText(),
-                                            DEPRECATED_FIELD_NAME,
-                                            ClassName.get(JsonValue.class),
-                                            ClassName.get(JsonCollectors.class)
-                                    )
-                                    .addStatement("loader.registerArray($S, $S, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).add($S, item.asJsonObject()).build()).collect($T.toJsonArray()))",
-                                            packageName,
-                                            manager.getProtocol(withObjectField),
-                                            withTypeName,
-                                            withKey,
-                                            withFrom,
-                                            from,
-                                            withToObjectField.name().getText(),
-                                            ClassName.get(JsonCollectors.class)
-                                    )
-                                    .endControlFlow();
+                            if (packageManager.isLocalPackage(withObjectField)) {
+                                String withTo = manager.getFetchWithTo(fieldDefinitionContext);
+                                builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
+                                        .addStatement("loader.registerWithTypeFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).build()).collect($T.toJsonArray()))",
+                                                fieldDefinitionContext.name().getText(),
+                                                withObjectField.name().getText(),
+                                                withObjectFiledTo,
+                                                withObjectFiledFrom,
+                                                ClassName.get(JsonCollectors.class)
+                                        )
+                                        .addStatement("loader.registerArray($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, $S, null, field.getValue().asJsonArray())",
+                                                packageName,
+                                                protocol,
+                                                typeName,
+                                                to,
+                                                key,
+                                                withObjectField.name().getText(),
+                                                withTo,
+                                                from
+                                        )
+                                        .endControlFlow();
+                            } else {
+                                String withToObjectFileName = manager.getFetchWithToObjectField(fieldDefinitionContext).name().getText();
+                                builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
+                                        .addStatement("loader.registerWithTypeFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).add($S, item).build()).collect($T.toJsonArray()))",
+                                                fieldDefinitionContext.name().getText(),
+                                                withObjectField.name().getText(),
+                                                withObjectFiledTo,
+                                                withObjectFiledFrom,
+                                                withToObjectFileName,
+                                                ClassName.get(JsonCollectors.class)
+                                        )
+                                        .endControlFlow();
+                            }
                         }
                     } else {
                         builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
@@ -216,12 +226,13 @@ public class MutationHandlerBuilder {
                     String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
 
                     if (anchor) {
-                        builder.addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue())",
+                        builder.addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, $S, field.getValue())",
                                 packageName,
                                 protocol,
                                 typeName,
                                 to,
                                 key,
+                                from,
                                 from,
                                 to
                         );
