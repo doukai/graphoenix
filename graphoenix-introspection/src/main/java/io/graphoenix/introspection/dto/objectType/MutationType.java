@@ -25,14 +25,6 @@ public class MutationType implements Meta {
 
   private Collection<__Type> __typeList;
 
-  private __TypeInterfaces __typeInterfaces;
-
-  private Collection<__TypeInterfaces> __typeInterfacesList;
-
-  private __TypePossibleTypes __typePossibleTypes;
-
-  private Collection<__TypePossibleTypes> __typePossibleTypesList;
-
   private __Field __field;
 
   private Collection<__Field> __fieldList;
@@ -48,6 +40,14 @@ public class MutationType implements Meta {
   private __Directive __directive;
 
   private Collection<__Directive> __directiveList;
+
+  private __TypeInterfaces __typeInterfaces;
+
+  private Collection<__TypeInterfaces> __typeInterfacesList;
+
+  private __TypePossibleTypes __typePossibleTypes;
+
+  private Collection<__TypePossibleTypes> __typePossibleTypesList;
 
   private __DirectiveLocations __directiveLocations;
 
@@ -99,38 +99,6 @@ public class MutationType implements Meta {
 
   public void set__typeList(Collection<__Type> __typeList) {
     this.__typeList = __typeList;
-  }
-
-  public __TypeInterfaces get__typeInterfaces() {
-    return this.__typeInterfaces;
-  }
-
-  public void set__typeInterfaces(__TypeInterfaces __typeInterfaces) {
-    this.__typeInterfaces = __typeInterfaces;
-  }
-
-  public Collection<__TypeInterfaces> get__typeInterfacesList() {
-    return this.__typeInterfacesList;
-  }
-
-  public void set__typeInterfacesList(Collection<__TypeInterfaces> __typeInterfacesList) {
-    this.__typeInterfacesList = __typeInterfacesList;
-  }
-
-  public __TypePossibleTypes get__typePossibleTypes() {
-    return this.__typePossibleTypes;
-  }
-
-  public void set__typePossibleTypes(__TypePossibleTypes __typePossibleTypes) {
-    this.__typePossibleTypes = __typePossibleTypes;
-  }
-
-  public Collection<__TypePossibleTypes> get__typePossibleTypesList() {
-    return this.__typePossibleTypesList;
-  }
-
-  public void set__typePossibleTypesList(Collection<__TypePossibleTypes> __typePossibleTypesList) {
-    this.__typePossibleTypesList = __typePossibleTypesList;
   }
 
   public __Field get__field() {
@@ -195,6 +163,38 @@ public class MutationType implements Meta {
 
   public void set__directiveList(Collection<__Directive> __directiveList) {
     this.__directiveList = __directiveList;
+  }
+
+  public __TypeInterfaces get__typeInterfaces() {
+    return this.__typeInterfaces;
+  }
+
+  public void set__typeInterfaces(__TypeInterfaces __typeInterfaces) {
+    this.__typeInterfaces = __typeInterfaces;
+  }
+
+  public Collection<__TypeInterfaces> get__typeInterfacesList() {
+    return this.__typeInterfacesList;
+  }
+
+  public void set__typeInterfacesList(Collection<__TypeInterfaces> __typeInterfacesList) {
+    this.__typeInterfacesList = __typeInterfacesList;
+  }
+
+  public __TypePossibleTypes get__typePossibleTypes() {
+    return this.__typePossibleTypes;
+  }
+
+  public void set__typePossibleTypes(__TypePossibleTypes __typePossibleTypes) {
+    this.__typePossibleTypes = __typePossibleTypes;
+  }
+
+  public Collection<__TypePossibleTypes> get__typePossibleTypesList() {
+    return this.__typePossibleTypesList;
+  }
+
+  public void set__typePossibleTypesList(Collection<__TypePossibleTypes> __typePossibleTypesList) {
+    this.__typePossibleTypesList = __typePossibleTypesList;
   }
 
   public __DirectiveLocations get__directiveLocations() {

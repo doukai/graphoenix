@@ -19,7 +19,11 @@ public class __TypeInterfacesInput {
 
   private String typeName;
 
+  private __TypeInput from;
+
   private String interfaceName;
+
+  private __TypeInput to;
 
   private Boolean isDeprecated;
 
@@ -56,12 +60,28 @@ public class __TypeInterfacesInput {
     this.typeName = typeName;
   }
 
+  public __TypeInput getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(__TypeInput from) {
+    this.from = from;
+  }
+
   public String getInterfaceName() {
     return this.interfaceName;
   }
 
   public void setInterfaceName(String interfaceName) {
     this.interfaceName = interfaceName;
+  }
+
+  public __TypeInput getTo() {
+    return this.to;
+  }
+
+  public void setTo(__TypeInput to) {
+    this.to = to;
   }
 
   public Boolean getIsDeprecated() {

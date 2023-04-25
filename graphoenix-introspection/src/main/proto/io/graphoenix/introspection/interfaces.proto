@@ -6,5 +6,4 @@ option java_package = "io.graphoenix.introspection.dto.objectType.grpc";
 package io.graphoenix.introspection.grpc;
 
 import "io/graphoenix/introspection/enums.proto";
-import "google/protobuf/timestamp.proto";
 

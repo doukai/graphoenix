@@ -58,6 +58,10 @@ public class __TypeInput {
   @DefaultValue("\"__Type\"")
   private String __typename;
 
+  private Collection<__TypeInterfacesInput> __typeInterfaces;
+
+  private Collection<__TypePossibleTypesInput> __typePossibleTypes;
+
   public String getName() {
     return this.name;
   }
@@ -216,5 +220,21 @@ public class __TypeInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Collection<__TypeInterfacesInput> get__typeInterfaces() {
+    return this.__typeInterfaces;
+  }
+
+  public void set__typeInterfaces(Collection<__TypeInterfacesInput> __typeInterfaces) {
+    this.__typeInterfaces = __typeInterfaces;
+  }
+
+  public Collection<__TypePossibleTypesInput> get__typePossibleTypes() {
+    return this.__typePossibleTypes;
+  }
+
+  public void set__typePossibleTypes(Collection<__TypePossibleTypesInput> __typePossibleTypes) {
+    this.__typePossibleTypes = __typePossibleTypes;
   }
 }

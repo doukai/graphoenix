@@ -97,4 +97,8 @@ public @interface __TypeInput0 {
   String $inputFieldsAggregate() default "";
 
   String $inputFieldsConnection() default "";
+
+  String $__typeInterfaces() default "";
+
+  String $__typePossibleTypes() default "";
 }

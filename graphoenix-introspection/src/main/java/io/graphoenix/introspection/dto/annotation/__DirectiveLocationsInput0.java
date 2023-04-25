@@ -38,6 +38,8 @@ public @interface __DirectiveLocationsInput0 {
 
   String $directiveName() default "";
 
+  String $from() default "";
+
   String $directiveLocation() default "";
 
   String $isDeprecated() default "";

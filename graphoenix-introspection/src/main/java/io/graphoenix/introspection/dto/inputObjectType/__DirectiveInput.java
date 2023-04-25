@@ -48,6 +48,8 @@ public class __DirectiveInput {
   @DefaultValue("\"__Directive\"")
   private String __typename;
 
+  private Collection<__DirectiveLocationsInput> __directiveLocations;
+
   public String getName() {
     return this.name;
   }
@@ -166,5 +168,13 @@ public class __DirectiveInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Collection<__DirectiveLocationsInput> get__directiveLocations() {
+    return this.__directiveLocations;
+  }
+
+  public void set__directiveLocations(Collection<__DirectiveLocationsInput> __directiveLocations) {
+    this.__directiveLocations = __directiveLocations;
   }
 }

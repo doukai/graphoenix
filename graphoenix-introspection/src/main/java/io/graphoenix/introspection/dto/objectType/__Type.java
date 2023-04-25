@@ -113,6 +113,10 @@ public class __Type implements Meta {
 
   private __InputValueConnection inputFieldsConnection;
 
+  private Collection<__TypeInterfaces> __typeInterfaces;
+
+  private Collection<__TypePossibleTypes> __typePossibleTypes;
+
   public String getName() {
     return this.name;
   }
@@ -479,5 +483,21 @@ public class __Type implements Meta {
 
   public void setInputFieldsConnection(__InputValueConnection inputFieldsConnection) {
     this.inputFieldsConnection = inputFieldsConnection;
+  }
+
+  public Collection<__TypeInterfaces> get__typeInterfaces() {
+    return this.__typeInterfaces;
+  }
+
+  public void set__typeInterfaces(Collection<__TypeInterfaces> __typeInterfaces) {
+    this.__typeInterfaces = __typeInterfaces;
+  }
+
+  public Collection<__TypePossibleTypes> get__typePossibleTypes() {
+    return this.__typePossibleTypes;
+  }
+
+  public void set__typePossibleTypes(Collection<__TypePossibleTypes> __typePossibleTypes) {
+    this.__typePossibleTypes = __typePossibleTypes;
   }
 }

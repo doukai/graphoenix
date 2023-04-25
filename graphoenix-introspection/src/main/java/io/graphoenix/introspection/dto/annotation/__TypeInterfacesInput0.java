@@ -37,7 +37,11 @@ public @interface __TypeInterfacesInput0 {
 
   String $typeName() default "";
 
+  String $from() default "";
+
   String $interfaceName() default "";
+
+  String $to() default "";
 
   String $isDeprecated() default "";
 

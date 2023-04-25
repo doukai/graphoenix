@@ -20,6 +20,8 @@ public class __DirectiveLocationsInput {
 
   private String directiveName;
 
+  private __DirectiveInput from;
+
   private __DirectiveLocation directiveLocation;
 
   private Boolean isDeprecated;
@@ -55,6 +57,14 @@ public class __DirectiveLocationsInput {
 
   public void setDirectiveName(String directiveName) {
     this.directiveName = directiveName;
+  }
+
+  public __DirectiveInput getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(__DirectiveInput from) {
+    this.from = from;
   }
 
   public __DirectiveLocation getDirectiveLocation() {

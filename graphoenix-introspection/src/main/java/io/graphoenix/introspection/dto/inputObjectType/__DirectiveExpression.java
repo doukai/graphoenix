@@ -49,6 +49,8 @@ public class __DirectiveExpression {
 
   private StringExpression __typename;
 
+  private __DirectiveLocationsExpression __directiveLocations;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -172,6 +174,14 @@ public class __DirectiveExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public __DirectiveLocationsExpression get__directiveLocations() {
+    return this.__directiveLocations;
+  }
+
+  public void set__directiveLocations(__DirectiveLocationsExpression __directiveLocations) {
+    this.__directiveLocations = __directiveLocations;
   }
 
   public Conditional getCond() {

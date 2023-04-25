@@ -56,13 +56,13 @@ public class MutationHandlerBuilder {
         Logger.info("MutationAfterHandler build success");
     }
 
-    private JavaFile buildClass(boolean anchor) {
-        TypeSpec typeSpec = buildMutationHandler(anchor);
+    private JavaFile buildClass(boolean before) {
+        TypeSpec typeSpec = buildMutationHandler(before);
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    private TypeSpec buildMutationHandler(boolean anchor) {
-        TypeSpec.Builder builder = TypeSpec.classBuilder(anchor ? "MutationBeforeHandler" : "MutationAfterHandler")
+    private TypeSpec buildMutationHandler(boolean before) {
+        TypeSpec.Builder builder = TypeSpec.classBuilder(before ? "MutationBeforeHandler" : "MutationAfterHandler")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
                 .addField(
@@ -74,8 +74,8 @@ public class MutationHandlerBuilder {
                         ).build()
                 )
                 .addMethod(buildConstructor())
-                .addMethods(buildTypeMethods(anchor))
-                .addMethod(buildHandleMethod(anchor));
+                .addMethods(buildTypeMethods(before))
+                .addMethod(buildHandleMethod(before));
         return builder.build();
     }
 
@@ -88,19 +88,19 @@ public class MutationHandlerBuilder {
                 .build();
     }
 
-    private List<MethodSpec> buildTypeMethods(boolean anchor) {
+    private List<MethodSpec> buildTypeMethods(boolean before) {
         return manager.getObjects()
                 .filter(manager::isNotOperationType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
-                                buildTypeMethod(objectTypeDefinitionContext, anchor),
-                                buildListTypeMethod(objectTypeDefinitionContext, anchor)
+                                buildTypeMethod(objectTypeDefinitionContext, before),
+                                buildListTypeMethod(objectTypeDefinitionContext, before)
                         )
                 )
                 .collect(Collectors.toList());
     }
 
-    private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean anchor) {
+    private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean before) {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
                 .addModifiers(Modifier.PUBLIC)
@@ -108,7 +108,7 @@ public class MutationHandlerBuilder {
                 .addParameter(ClassName.get(MutationDataLoader.class), "loader")
                 .addParameter(ClassName.get(String.class), "jsonPointer");
 
-        if (anchor) {
+        if (before) {
             builder.beginControlFlow("if (valueWithVariable != null && valueWithVariable.getValueType().equals($T.ValueType.OBJECT) && valueWithVariable.asJsonObject().size() > 0)", ClassName.get(JsonValue.class));
         } else {
             builder.addParameter(ClassName.get(JsonValue.class), "jsonValue")
@@ -121,7 +121,7 @@ public class MutationHandlerBuilder {
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext ->
                         idFieldName.isPresent() && fieldDefinitionContext.name().getText().equals(idFieldName.get()) ||
-                                manager.isFetchField(fieldDefinitionContext) && manager.getFetchAnchor(fieldDefinitionContext) == anchor ||
+                                manager.isFetchField(fieldDefinitionContext) && manager.getFetchAnchor(fieldDefinitionContext) == before ||
                                 !manager.isFetchField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
                 )
                 .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
@@ -144,46 +144,22 @@ public class MutationHandlerBuilder {
                     String from = manager.getFetchFrom(fieldDefinitionContext);
                     String to = manager.getFetchTo(fieldDefinitionContext);
                     String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
-                    if (anchor) {
+                    if (before) {
                         if (manager.hasFetchWith(fieldDefinitionContext)) {
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
                             String withObjectFiledFrom = manager.getFetchFrom(withObjectField);
                             String withObjectFiledTo = manager.getFetchTo(withObjectField);
-
-                            if (packageManager.isLocalPackage(withObjectField)) {
-                                String withTo = manager.getFetchWithTo(fieldDefinitionContext);
-                                builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
-                                        .addStatement("loader.registerWithTypeFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).build()).collect($T.toJsonArray()))",
-                                                fieldDefinitionContext.name().getText(),
-                                                withObjectField.name().getText(),
-                                                withObjectFiledTo,
-                                                withObjectFiledFrom,
-                                                ClassName.get(JsonCollectors.class)
-                                        )
-                                        .addStatement("loader.registerArray($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, $S, null, field.getValue().asJsonArray())",
-                                                packageName,
-                                                protocol,
-                                                typeName,
-                                                to,
-                                                key,
-                                                withObjectField.name().getText(),
-                                                withTo,
-                                                from
-                                        )
-                                        .endControlFlow();
-                            } else {
-                                String withToObjectFileName = manager.getFetchWithToObjectField(fieldDefinitionContext).name().getText();
-                                builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
-                                        .addStatement("loader.registerWithTypeFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).add($S, item).build()).collect($T.toJsonArray()))",
-                                                fieldDefinitionContext.name().getText(),
-                                                withObjectField.name().getText(),
-                                                withObjectFiledTo,
-                                                withObjectFiledFrom,
-                                                withToObjectFileName,
-                                                ClassName.get(JsonCollectors.class)
-                                        )
-                                        .endControlFlow();
-                            }
+                            String withToObjectFileName = manager.getFetchWithToObjectField(fieldDefinitionContext).name().getText();
+                            builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
+                                    .addStatement("loader.registerWithTypeFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).add($S, item).build()).collect($T.toJsonArray()))",
+                                            fieldDefinitionContext.name().getText(),
+                                            withObjectField.name().getText(),
+                                            withObjectFiledTo,
+                                            withObjectFiledFrom,
+                                            withToObjectFileName,
+                                            ClassName.get(JsonCollectors.class)
+                                    )
+                                    .endControlFlow();
                         }
                     } else {
                         builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
@@ -199,7 +175,7 @@ public class MutationHandlerBuilder {
                                 .endControlFlow();
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    if (anchor) {
+                    if (before) {
                         builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S)", fieldParameterName.concat("List"), fieldDefinitionContext.name().getText());
                     } else {
                         builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S, valueWithVariable.asJsonObject().get($S))", fieldParameterName.concat("List"), fieldDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());
@@ -207,7 +183,7 @@ public class MutationHandlerBuilder {
                 }
             } else {
                 if (idFieldName.isPresent() && fieldDefinitionContext.name().getText().equals(idFieldName.get())) {
-                    if (anchor) {
+                    if (before) {
                         builder.addStatement("loader.registerUpdate($S, field.getValue())",
                                 objectTypeDefinitionContext.name().getText()
                         );
@@ -225,7 +201,7 @@ public class MutationHandlerBuilder {
                     String to = manager.getFetchTo(fieldDefinitionContext);
                     String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
 
-                    if (anchor) {
+                    if (before) {
                         builder.addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, $S, field.getValue())",
                                 packageName,
                                 protocol,
@@ -249,7 +225,7 @@ public class MutationHandlerBuilder {
                                 .endControlFlow();
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    if (anchor) {
+                    if (before) {
                         builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S)", fieldParameterName, fieldDefinitionContext.name().getText());
                     } else {
                         builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S, valueWithVariable.asJsonObject().get($S))", fieldParameterName, fieldDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());

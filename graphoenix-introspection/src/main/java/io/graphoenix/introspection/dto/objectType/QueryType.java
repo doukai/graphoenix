@@ -29,18 +29,6 @@ public class QueryType implements Meta {
 
   private __TypeConnection __typeConnection;
 
-  private __TypeInterfaces __typeInterfaces;
-
-  private Collection<__TypeInterfaces> __typeInterfacesList;
-
-  private __TypeInterfacesConnection __typeInterfacesConnection;
-
-  private __TypePossibleTypes __typePossibleTypes;
-
-  private Collection<__TypePossibleTypes> __typePossibleTypesList;
-
-  private __TypePossibleTypesConnection __typePossibleTypesConnection;
-
   private __Field __field;
 
   private Collection<__Field> __fieldList;
@@ -64,6 +52,18 @@ public class QueryType implements Meta {
   private Collection<__Directive> __directiveList;
 
   private __DirectiveConnection __directiveConnection;
+
+  private __TypeInterfaces __typeInterfaces;
+
+  private Collection<__TypeInterfaces> __typeInterfacesList;
+
+  private __TypeInterfacesConnection __typeInterfacesConnection;
+
+  private __TypePossibleTypes __typePossibleTypes;
+
+  private Collection<__TypePossibleTypes> __typePossibleTypesList;
+
+  private __TypePossibleTypesConnection __typePossibleTypesConnection;
 
   private __DirectiveLocations __directiveLocations;
 
@@ -133,55 +133,6 @@ public class QueryType implements Meta {
 
   public void set__typeConnection(__TypeConnection __typeConnection) {
     this.__typeConnection = __typeConnection;
-  }
-
-  public __TypeInterfaces get__typeInterfaces() {
-    return this.__typeInterfaces;
-  }
-
-  public void set__typeInterfaces(__TypeInterfaces __typeInterfaces) {
-    this.__typeInterfaces = __typeInterfaces;
-  }
-
-  public Collection<__TypeInterfaces> get__typeInterfacesList() {
-    return this.__typeInterfacesList;
-  }
-
-  public void set__typeInterfacesList(Collection<__TypeInterfaces> __typeInterfacesList) {
-    this.__typeInterfacesList = __typeInterfacesList;
-  }
-
-  public __TypeInterfacesConnection get__typeInterfacesConnection() {
-    return this.__typeInterfacesConnection;
-  }
-
-  public void set__typeInterfacesConnection(__TypeInterfacesConnection __typeInterfacesConnection) {
-    this.__typeInterfacesConnection = __typeInterfacesConnection;
-  }
-
-  public __TypePossibleTypes get__typePossibleTypes() {
-    return this.__typePossibleTypes;
-  }
-
-  public void set__typePossibleTypes(__TypePossibleTypes __typePossibleTypes) {
-    this.__typePossibleTypes = __typePossibleTypes;
-  }
-
-  public Collection<__TypePossibleTypes> get__typePossibleTypesList() {
-    return this.__typePossibleTypesList;
-  }
-
-  public void set__typePossibleTypesList(Collection<__TypePossibleTypes> __typePossibleTypesList) {
-    this.__typePossibleTypesList = __typePossibleTypesList;
-  }
-
-  public __TypePossibleTypesConnection get__typePossibleTypesConnection() {
-    return this.__typePossibleTypesConnection;
-  }
-
-  public void set__typePossibleTypesConnection(
-      __TypePossibleTypesConnection __typePossibleTypesConnection) {
-    this.__typePossibleTypesConnection = __typePossibleTypesConnection;
   }
 
   public __Field get__field() {
@@ -278,6 +229,55 @@ public class QueryType implements Meta {
 
   public void set__directiveConnection(__DirectiveConnection __directiveConnection) {
     this.__directiveConnection = __directiveConnection;
+  }
+
+  public __TypeInterfaces get__typeInterfaces() {
+    return this.__typeInterfaces;
+  }
+
+  public void set__typeInterfaces(__TypeInterfaces __typeInterfaces) {
+    this.__typeInterfaces = __typeInterfaces;
+  }
+
+  public Collection<__TypeInterfaces> get__typeInterfacesList() {
+    return this.__typeInterfacesList;
+  }
+
+  public void set__typeInterfacesList(Collection<__TypeInterfaces> __typeInterfacesList) {
+    this.__typeInterfacesList = __typeInterfacesList;
+  }
+
+  public __TypeInterfacesConnection get__typeInterfacesConnection() {
+    return this.__typeInterfacesConnection;
+  }
+
+  public void set__typeInterfacesConnection(__TypeInterfacesConnection __typeInterfacesConnection) {
+    this.__typeInterfacesConnection = __typeInterfacesConnection;
+  }
+
+  public __TypePossibleTypes get__typePossibleTypes() {
+    return this.__typePossibleTypes;
+  }
+
+  public void set__typePossibleTypes(__TypePossibleTypes __typePossibleTypes) {
+    this.__typePossibleTypes = __typePossibleTypes;
+  }
+
+  public Collection<__TypePossibleTypes> get__typePossibleTypesList() {
+    return this.__typePossibleTypesList;
+  }
+
+  public void set__typePossibleTypesList(Collection<__TypePossibleTypes> __typePossibleTypesList) {
+    this.__typePossibleTypesList = __typePossibleTypesList;
+  }
+
+  public __TypePossibleTypesConnection get__typePossibleTypesConnection() {
+    return this.__typePossibleTypesConnection;
+  }
+
+  public void set__typePossibleTypesConnection(
+      __TypePossibleTypesConnection __typePossibleTypesConnection) {
+    this.__typePossibleTypesConnection = __typePossibleTypesConnection;
   }
 
   public __DirectiveLocations get__directiveLocations() {

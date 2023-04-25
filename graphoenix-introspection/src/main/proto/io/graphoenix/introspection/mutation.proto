@@ -17,10 +17,6 @@ service MutationTypeService {
     rpc IntroSchemaList (MutationIntroSchemaListRequest) returns (MutationIntroSchemaListResponse);
     rpc IntroType (MutationIntroTypeRequest) returns (MutationIntroTypeResponse);
     rpc IntroTypeList (MutationIntroTypeListRequest) returns (MutationIntroTypeListResponse);
-    rpc IntroTypeInterfaces (MutationIntroTypeInterfacesRequest) returns (MutationIntroTypeInterfacesResponse);
-    rpc IntroTypeInterfacesList (MutationIntroTypeInterfacesListRequest) returns (MutationIntroTypeInterfacesListResponse);
-    rpc IntroTypePossibleTypes (MutationIntroTypePossibleTypesRequest) returns (MutationIntroTypePossibleTypesResponse);
-    rpc IntroTypePossibleTypesList (MutationIntroTypePossibleTypesListRequest) returns (MutationIntroTypePossibleTypesListResponse);
     rpc IntroField (MutationIntroFieldRequest) returns (MutationIntroFieldResponse);
     rpc IntroFieldList (MutationIntroFieldListRequest) returns (MutationIntroFieldListResponse);
     rpc IntroInputValue (MutationIntroInputValueRequest) returns (MutationIntroInputValueResponse);
@@ -29,6 +25,10 @@ service MutationTypeService {
     rpc IntroEnumValueList (MutationIntroEnumValueListRequest) returns (MutationIntroEnumValueListResponse);
     rpc IntroDirective (MutationIntroDirectiveRequest) returns (MutationIntroDirectiveResponse);
     rpc IntroDirectiveList (MutationIntroDirectiveListRequest) returns (MutationIntroDirectiveListResponse);
+    rpc IntroTypeInterfaces (MutationIntroTypeInterfacesRequest) returns (MutationIntroTypeInterfacesResponse);
+    rpc IntroTypeInterfacesList (MutationIntroTypeInterfacesListRequest) returns (MutationIntroTypeInterfacesListResponse);
+    rpc IntroTypePossibleTypes (MutationIntroTypePossibleTypesRequest) returns (MutationIntroTypePossibleTypesResponse);
+    rpc IntroTypePossibleTypesList (MutationIntroTypePossibleTypesListRequest) returns (MutationIntroTypePossibleTypesListResponse);
     rpc IntroDirectiveLocations (MutationIntroDirectiveLocationsRequest) returns (MutationIntroDirectiveLocationsResponse);
     rpc IntroDirectiveLocationsList (MutationIntroDirectiveLocationsListRequest) returns (MutationIntroDirectiveLocationsListResponse);
     rpc IsDeprecated (MutationIsDeprecatedRequest) returns (MutationIsDeprecatedResponse);

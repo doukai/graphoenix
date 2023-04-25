@@ -25,7 +25,8 @@ public class __DirectiveLocations implements Meta {
   @NonNull
   private String directiveName;
 
-  @NonNull
+  private __Directive from;
+
   private __DirectiveLocation directiveLocation;
 
   private Boolean isDeprecated;
@@ -74,6 +75,14 @@ public class __DirectiveLocations implements Meta {
 
   public void setDirectiveName(String directiveName) {
     this.directiveName = directiveName;
+  }
+
+  public __Directive getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(__Directive from) {
+    this.from = from;
   }
 
   public __DirectiveLocation getDirectiveLocation() {

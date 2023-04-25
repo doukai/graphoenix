@@ -91,52 +91,8 @@ message IntroType {
     optional IntroEnumValueConnection enum_values_connection = 42;
     optional IntroInputValue input_fields_aggregate = 43;
     optional IntroInputValueConnection input_fields_connection = 44;
-}
-message IntroTypeInterfaces {
-    optional string id = 1;
-    string type_name = 2;
-    string interface_name = 3;
-    optional bool is_deprecated = 4;
-    optional int32 version = 5;
-    optional string realm_id = 6;
-    optional string create_user_id = 7;
-    optional google.protobuf.Timestamp create_time = 8;
-    optional string update_user_id = 9;
-    optional google.protobuf.Timestamp update_time = 10;
-    optional string create_group_id = 11;
-    optional string intro_typename = 12;
-    optional int32 id_count = 13;
-    optional string id_max = 14;
-    optional string id_min = 15;
-    optional int32 type_name_count = 16;
-    optional string type_name_max = 17;
-    optional string type_name_min = 18;
-    optional int32 interface_name_count = 19;
-    optional string interface_name_max = 20;
-    optional string interface_name_min = 21;
-}
-message IntroTypePossibleTypes {
-    optional string id = 1;
-    string type_name = 2;
-    string possible_type_name = 3;
-    optional bool is_deprecated = 4;
-    optional int32 version = 5;
-    optional string realm_id = 6;
-    optional string create_user_id = 7;
-    optional google.protobuf.Timestamp create_time = 8;
-    optional string update_user_id = 9;
-    optional google.protobuf.Timestamp update_time = 10;
-    optional string create_group_id = 11;
-    optional string intro_typename = 12;
-    optional int32 id_count = 13;
-    optional string id_max = 14;
-    optional string id_min = 15;
-    optional int32 type_name_count = 16;
-    optional string type_name_max = 17;
-    optional string type_name_min = 18;
-    optional int32 possible_type_name_count = 19;
-    optional string possible_type_name_max = 20;
-    optional string possible_type_name_min = 21;
+    repeated IntroTypeInterfaces intro_type_interfaces = 45;
+    repeated IntroTypePossibleTypes intro_type_possible_types = 46;
 }
 message IntroField {
     optional string id = 1;
@@ -286,26 +242,78 @@ message IntroDirective {
     optional int32 schema_id_min = 26;
     optional IntroInputValue args_aggregate = 27;
     optional IntroInputValueConnection args_connection = 28;
+    repeated IntroDirectiveLocations intro_directive_locations = 29;
+}
+message IntroTypeInterfaces {
+    optional string id = 1;
+    string type_name = 2;
+    optional IntroType from = 3;
+    string interface_name = 4;
+    optional IntroType to = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional google.protobuf.Timestamp create_time = 10;
+    optional string update_user_id = 11;
+    optional google.protobuf.Timestamp update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional int32 id_count = 15;
+    optional string id_max = 16;
+    optional string id_min = 17;
+    optional int32 type_name_count = 18;
+    optional string type_name_max = 19;
+    optional string type_name_min = 20;
+    optional int32 interface_name_count = 21;
+    optional string interface_name_max = 22;
+    optional string interface_name_min = 23;
+}
+message IntroTypePossibleTypes {
+    optional string id = 1;
+    string type_name = 2;
+    optional IntroType from = 3;
+    string possible_type_name = 4;
+    optional IntroType to = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional google.protobuf.Timestamp create_time = 10;
+    optional string update_user_id = 11;
+    optional google.protobuf.Timestamp update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional int32 id_count = 15;
+    optional string id_max = 16;
+    optional string id_min = 17;
+    optional int32 type_name_count = 18;
+    optional string type_name_max = 19;
+    optional string type_name_min = 20;
+    optional int32 possible_type_name_count = 21;
+    optional string possible_type_name_max = 22;
+    optional string possible_type_name_min = 23;
 }
 message IntroDirectiveLocations {
     optional string id = 1;
     string directive_name = 2;
-    io.graphoenix.core.grpc.IntroDirectiveLocation directive_location = 3;
-    optional bool is_deprecated = 4;
-    optional int32 version = 5;
-    optional string realm_id = 6;
-    optional string create_user_id = 7;
-    optional google.protobuf.Timestamp create_time = 8;
-    optional string update_user_id = 9;
-    optional google.protobuf.Timestamp update_time = 10;
-    optional string create_group_id = 11;
-    optional string intro_typename = 12;
-    optional int32 id_count = 13;
-    optional string id_max = 14;
-    optional string id_min = 15;
-    optional int32 directive_name_count = 16;
-    optional string directive_name_max = 17;
-    optional string directive_name_min = 18;
+    optional IntroDirective from = 3;
+    optional io.graphoenix.core.grpc.IntroDirectiveLocation directive_location = 4;
+    optional bool is_deprecated = 5;
+    optional int32 version = 6;
+    optional string realm_id = 7;
+    optional string create_user_id = 8;
+    optional google.protobuf.Timestamp create_time = 9;
+    optional string update_user_id = 10;
+    optional google.protobuf.Timestamp update_time = 11;
+    optional string create_group_id = 12;
+    optional string intro_typename = 13;
+    optional int32 id_count = 14;
+    optional string id_max = 15;
+    optional string id_min = 16;
+    optional int32 directive_name_count = 17;
+    optional string directive_name_max = 18;
+    optional string directive_name_min = 19;
 }
 message QueryType {
     optional IntroSchema intro_schema = 1;
@@ -314,24 +322,24 @@ message QueryType {
     optional IntroType intro_type = 4;
     repeated IntroType intro_type_list = 5;
     optional IntroTypeConnection intro_type_connection = 6;
-    optional IntroTypeInterfaces intro_type_interfaces = 7;
-    repeated IntroTypeInterfaces intro_type_interfaces_list = 8;
-    optional IntroTypeInterfacesConnection intro_type_interfaces_connection = 9;
-    optional IntroTypePossibleTypes intro_type_possible_types = 10;
-    repeated IntroTypePossibleTypes intro_type_possible_types_list = 11;
-    optional IntroTypePossibleTypesConnection intro_type_possible_types_connection = 12;
-    optional IntroField intro_field = 13;
-    repeated IntroField intro_field_list = 14;
-    optional IntroFieldConnection intro_field_connection = 15;
-    optional IntroInputValue intro_input_value = 16;
-    repeated IntroInputValue intro_input_value_list = 17;
-    optional IntroInputValueConnection intro_input_value_connection = 18;
-    optional IntroEnumValue intro_enum_value = 19;
-    repeated IntroEnumValue intro_enum_value_list = 20;
-    optional IntroEnumValueConnection intro_enum_value_connection = 21;
-    optional IntroDirective intro_directive = 22;
-    repeated IntroDirective intro_directive_list = 23;
-    optional IntroDirectiveConnection intro_directive_connection = 24;
+    optional IntroField intro_field = 7;
+    repeated IntroField intro_field_list = 8;
+    optional IntroFieldConnection intro_field_connection = 9;
+    optional IntroInputValue intro_input_value = 10;
+    repeated IntroInputValue intro_input_value_list = 11;
+    optional IntroInputValueConnection intro_input_value_connection = 12;
+    optional IntroEnumValue intro_enum_value = 13;
+    repeated IntroEnumValue intro_enum_value_list = 14;
+    optional IntroEnumValueConnection intro_enum_value_connection = 15;
+    optional IntroDirective intro_directive = 16;
+    repeated IntroDirective intro_directive_list = 17;
+    optional IntroDirectiveConnection intro_directive_connection = 18;
+    optional IntroTypeInterfaces intro_type_interfaces = 19;
+    repeated IntroTypeInterfaces intro_type_interfaces_list = 20;
+    optional IntroTypeInterfacesConnection intro_type_interfaces_connection = 21;
+    optional IntroTypePossibleTypes intro_type_possible_types = 22;
+    repeated IntroTypePossibleTypes intro_type_possible_types_list = 23;
+    optional IntroTypePossibleTypesConnection intro_type_possible_types_connection = 24;
     optional IntroDirectiveLocations intro_directive_locations = 25;
     repeated IntroDirectiveLocations intro_directive_locations_list = 26;
     optional IntroDirectiveLocationsConnection intro_directive_locations_connection = 27;
@@ -349,18 +357,18 @@ message MutationType {
     repeated IntroSchema intro_schema_list = 2;
     optional IntroType intro_type = 3;
     repeated IntroType intro_type_list = 4;
-    optional IntroTypeInterfaces intro_type_interfaces = 5;
-    repeated IntroTypeInterfaces intro_type_interfaces_list = 6;
-    optional IntroTypePossibleTypes intro_type_possible_types = 7;
-    repeated IntroTypePossibleTypes intro_type_possible_types_list = 8;
-    optional IntroField intro_field = 9;
-    repeated IntroField intro_field_list = 10;
-    optional IntroInputValue intro_input_value = 11;
-    repeated IntroInputValue intro_input_value_list = 12;
-    optional IntroEnumValue intro_enum_value = 13;
-    repeated IntroEnumValue intro_enum_value_list = 14;
-    optional IntroDirective intro_directive = 15;
-    repeated IntroDirective intro_directive_list = 16;
+    optional IntroField intro_field = 5;
+    repeated IntroField intro_field_list = 6;
+    optional IntroInputValue intro_input_value = 7;
+    repeated IntroInputValue intro_input_value_list = 8;
+    optional IntroEnumValue intro_enum_value = 9;
+    repeated IntroEnumValue intro_enum_value_list = 10;
+    optional IntroDirective intro_directive = 11;
+    repeated IntroDirective intro_directive_list = 12;
+    optional IntroTypeInterfaces intro_type_interfaces = 13;
+    repeated IntroTypeInterfaces intro_type_interfaces_list = 14;
+    optional IntroTypePossibleTypes intro_type_possible_types = 15;
+    repeated IntroTypePossibleTypes intro_type_possible_types_list = 16;
     optional IntroDirectiveLocations intro_directive_locations = 17;
     repeated IntroDirectiveLocations intro_directive_locations_list = 18;
     optional bool is_deprecated = 19;
@@ -388,24 +396,6 @@ message IntroTypeConnection {
 }
 message IntroTypeEdge {
     optional IntroType node = 1;
-    optional string cursor = 2;
-}
-message IntroTypeInterfacesConnection {
-    optional int32 total_count = 1;
-    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
-    repeated IntroTypeInterfacesEdge edges = 3;
-}
-message IntroTypeInterfacesEdge {
-    optional IntroTypeInterfaces node = 1;
-    optional string cursor = 2;
-}
-message IntroTypePossibleTypesConnection {
-    optional int32 total_count = 1;
-    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
-    repeated IntroTypePossibleTypesEdge edges = 3;
-}
-message IntroTypePossibleTypesEdge {
-    optional IntroTypePossibleTypes node = 1;
     optional string cursor = 2;
 }
 message IntroFieldConnection {
@@ -442,6 +432,24 @@ message IntroDirectiveConnection {
 }
 message IntroDirectiveEdge {
     optional IntroDirective node = 1;
+    optional string cursor = 2;
+}
+message IntroTypeInterfacesConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated IntroTypeInterfacesEdge edges = 3;
+}
+message IntroTypeInterfacesEdge {
+    optional IntroTypeInterfaces node = 1;
+    optional string cursor = 2;
+}
+message IntroTypePossibleTypesConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated IntroTypePossibleTypesEdge edges = 3;
+}
+message IntroTypePossibleTypesEdge {
+    optional IntroTypePossibleTypes node = 1;
     optional string cursor = 2;
 }
 message IntroDirectiveLocationsConnection {

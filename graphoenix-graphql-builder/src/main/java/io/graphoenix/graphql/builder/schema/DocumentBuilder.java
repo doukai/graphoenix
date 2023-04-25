@@ -81,6 +81,42 @@ public class DocumentBuilder {
     }
 
     public Document buildDocument() {
+        io.vavr.collection.Stream.ofAll(
+                manager.getObjects()
+                        .filter(packageManager::isOwnPackage)
+                        .filter(manager::isNotOperationType)
+                        .filter(manager::isNotContainerType)
+                        .flatMap(objectTypeDefinitionContext ->
+                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                        )
+                        .filter(tuple -> manager.getFetchAnchor(tuple._2()))
+                        .filter(tuple -> manager.hasFetchWith(tuple._2()))
+        )
+                .distinctBy(tuple -> manager.getFetchWithType(tuple._2()))
+                .toJavaStream()
+                .flatMap(tuple -> buildFetchWithObject(tuple._1(), tuple._2()).stream())
+                .collect(Collectors.toList())
+                .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
+
+        io.vavr.collection.Stream.ofAll(
+                manager.getObjects()
+                        .filter(packageManager::isOwnPackage)
+                        .filter(manager::isNotOperationType)
+                        .filter(manager::isNotContainerType)
+                        .flatMap(objectTypeDefinitionContext ->
+                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                        )
+                        .filter(tuple -> manager.getMapAnchor(tuple._2()))
+                        .filter(tuple -> manager.hasMapWith(tuple._2()))
+        )
+                .distinctBy(tuple -> manager.getMapWithType(tuple._2()))
+                .toJavaStream()
+                .flatMap(tuple -> buildMapWithObject(tuple._1(), tuple._2()).stream())
+                .collect(Collectors.toList())
+                .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
+
         manager.getObjects()
                 .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
@@ -107,42 +143,6 @@ public class DocumentBuilder {
             manager.registerGraphQL(mutationType.toString());
             manager.registerGraphQL(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString());
         }
-
-        io.vavr.collection.Stream.ofAll(
-                        manager.getObjects()
-                                .filter(packageManager::isOwnPackage)
-                                .filter(manager::isNotOperationType)
-                                .filter(manager::isNotContainerType)
-                                .flatMap(objectTypeDefinitionContext ->
-                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                                )
-                                .filter(tuple -> manager.getFetchAnchor(tuple._2()))
-                                .filter(tuple -> manager.hasFetchWith(tuple._2()))
-                )
-                .distinctBy(tuple -> manager.getFetchWithType(tuple._2()))
-                .toJavaStream()
-                .flatMap(tuple -> buildFetchWithObject(tuple._1(), tuple._2()).stream())
-                .collect(Collectors.toList())
-                .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
-
-        io.vavr.collection.Stream.ofAll(
-                        manager.getObjects()
-                                .filter(packageManager::isOwnPackage)
-                                .filter(manager::isNotOperationType)
-                                .filter(manager::isNotContainerType)
-                                .flatMap(objectTypeDefinitionContext ->
-                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                                )
-                                .filter(tuple -> manager.getMapAnchor(tuple._2()))
-                                .filter(tuple -> manager.hasMapWith(tuple._2()))
-                )
-                .distinctBy(tuple -> manager.getMapWithType(tuple._2()))
-                .toJavaStream()
-                .flatMap(tuple -> buildMapWithObject(tuple._1(), tuple._2()).stream())
-                .collect(Collectors.toList())
-                .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
         buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
         buildContainerTypeObjects().forEach(objectType -> manager.registerGraphQL(objectType.toString()));
@@ -296,7 +296,7 @@ public class DocumentBuilder {
                                                             new Directive(FETCH_DIRECTIVE_NAME)
                                                                     .addArgument("from", manager.getFetchFrom(fieldDefinitionContext))
                                                                     .addArgument("to", manager.getFetchWithFrom(fieldDefinitionContext))
-                                                                    .addArgument("protocol", manager.getProtocol(fieldDefinitionContext))
+                                                                    .addArgument("protocol", manager.getFetchAnchor(fieldDefinitionContext) ? "local" : manager.getProtocol(fieldDefinitionContext))
                                                     )
                                     )
                                     .collect(Collectors.toList())
@@ -357,6 +357,8 @@ public class DocumentBuilder {
                                         new Directive(FETCH_DIRECTIVE_NAME)
                                                 .addArgument("from", fetchWithFromFieldName)
                                                 .addArgument("to", fetchFromFieldName)
+                                                .addArgument("anchor", true)
+                                                .addArgument("protocol", "local")
                                 )
                 );
 
@@ -370,6 +372,8 @@ public class DocumentBuilder {
                                             new Directive(FETCH_DIRECTIVE_NAME)
                                                     .addArgument("from", fetchWithToFieldName)
                                                     .addArgument("to", fetchToFieldName)
+                                                    .addArgument("anchor", true)
+                                                    .addArgument("protocol", manager.getProtocol(fieldDefinitionContext))
                                     )
                     );
         } else {
@@ -415,6 +419,7 @@ public class DocumentBuilder {
                                         new Directive(MAP_DIRECTIVE_NAME)
                                                 .addArgument("from", mapWithFromFieldName)
                                                 .addArgument("to", mapFromFieldName)
+                                                .addArgument("anchor", true)
                                 )
                 );
 
@@ -428,6 +433,7 @@ public class DocumentBuilder {
                                             new Directive(MAP_DIRECTIVE_NAME)
                                                     .addArgument("from", mapWithToFieldName)
                                                     .addArgument("to", mapToFieldName)
+                                                    .addArgument("anchor", true)
                                     )
                     );
         } else {

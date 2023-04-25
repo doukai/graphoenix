@@ -19,7 +19,11 @@ public class __TypePossibleTypesInput {
 
   private String typeName;
 
+  private __TypeInput from;
+
   private String possibleTypeName;
+
+  private __TypeInput to;
 
   private Boolean isDeprecated;
 
@@ -56,12 +60,28 @@ public class __TypePossibleTypesInput {
     this.typeName = typeName;
   }
 
+  public __TypeInput getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(__TypeInput from) {
+    this.from = from;
+  }
+
   public String getPossibleTypeName() {
     return this.possibleTypeName;
   }
 
   public void setPossibleTypeName(String possibleTypeName) {
     this.possibleTypeName = possibleTypeName;
+  }
+
+  public __TypeInput getTo() {
+    return this.to;
+  }
+
+  public void setTo(__TypeInput to) {
+    this.to = to;
   }
 
   public Boolean getIsDeprecated() {

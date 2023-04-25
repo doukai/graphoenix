@@ -14,7 +14,7 @@ public class Arguments extends AbstractMap<String, JsonValue> implements JsonObj
     private final Map<String, ValueWithVariable> arguments;
 
     public Arguments() {
-        this.arguments = new HashMap<>();
+        this.arguments = new LinkedHashMap<>();
     }
 
     public Arguments(GraphqlParser.ArgumentsContext argumentsContext) {

@@ -37,7 +37,11 @@ public @interface __TypePossibleTypesInput0 {
 
   String $typeName() default "";
 
+  String $from() default "";
+
   String $possibleTypeName() default "";
+
+  String $to() default "";
 
   String $isDeprecated() default "";
 

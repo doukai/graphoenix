@@ -20,7 +20,11 @@ public class __TypeInterfacesExpression {
 
   private StringExpression typeName;
 
+  private __TypeExpression from;
+
   private StringExpression interfaceName;
+
+  private __TypeExpression to;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -62,12 +66,28 @@ public class __TypeInterfacesExpression {
     this.typeName = typeName;
   }
 
+  public __TypeExpression getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(__TypeExpression from) {
+    this.from = from;
+  }
+
   public StringExpression getInterfaceName() {
     return this.interfaceName;
   }
 
   public void setInterfaceName(StringExpression interfaceName) {
     this.interfaceName = interfaceName;
+  }
+
+  public __TypeExpression getTo() {
+    return this.to;
+  }
+
+  public void setTo(__TypeExpression to) {
+    this.to = to;
   }
 
   public Boolean getIncludeDeprecated() {

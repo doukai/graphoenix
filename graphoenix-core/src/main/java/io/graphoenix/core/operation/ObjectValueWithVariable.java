@@ -17,7 +17,7 @@ public class ObjectValueWithVariable extends AbstractMap<String, JsonValue> impl
     private final Map<String, ValueWithVariable> objectValueWithVariable;
 
     public ObjectValueWithVariable() {
-        this.objectValueWithVariable = new HashMap<>();
+        this.objectValueWithVariable = new LinkedHashMap<>();
     }
 
     public ObjectValueWithVariable(Map<?, ?> objectValueWithVariable) {

@@ -82,7 +82,9 @@ message MutationIntroTypeRequest {
     optional google.protobuf.Timestamp update_time = 20;
     optional string create_group_id = 21;
     optional string intro_typename = 22;
-    optional IntroTypeExpression where = 23;
+    repeated IntroTypeInterfacesInput intro_type_interfaces = 23;
+    repeated IntroTypePossibleTypesInput intro_type_possible_types = 24;
+    optional IntroTypeExpression where = 25;
 }
 message MutationIntroTypeListRequest {
     optional string selection_set = 1;
@@ -107,78 +109,10 @@ message MutationIntroTypeListRequest {
     optional google.protobuf.Timestamp update_time = 20;
     optional string create_group_id = 21;
     optional string intro_typename = 22;
-    repeated IntroTypeInput list = 23;
-    optional IntroTypeExpression where = 24;
-}
-message MutationIntroTypeInterfacesRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string type_name = 4;
-    optional string interface_name = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional google.protobuf.Timestamp create_time = 10;
-    optional string update_user_id = 11;
-    optional google.protobuf.Timestamp update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
-    optional IntroTypeInterfacesExpression where = 15;
-}
-message MutationIntroTypeInterfacesListRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string type_name = 4;
-    optional string interface_name = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional google.protobuf.Timestamp create_time = 10;
-    optional string update_user_id = 11;
-    optional google.protobuf.Timestamp update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
-    repeated IntroTypeInterfacesInput list = 15;
-    optional IntroTypeInterfacesExpression where = 16;
-}
-message MutationIntroTypePossibleTypesRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string type_name = 4;
-    optional string possible_type_name = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional google.protobuf.Timestamp create_time = 10;
-    optional string update_user_id = 11;
-    optional google.protobuf.Timestamp update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
-    optional IntroTypePossibleTypesExpression where = 15;
-}
-message MutationIntroTypePossibleTypesListRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string type_name = 4;
-    optional string possible_type_name = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional google.protobuf.Timestamp create_time = 10;
-    optional string update_user_id = 11;
-    optional google.protobuf.Timestamp update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
-    repeated IntroTypePossibleTypesInput list = 15;
-    optional IntroTypePossibleTypesExpression where = 16;
+    repeated IntroTypeInterfacesInput intro_type_interfaces = 23;
+    repeated IntroTypePossibleTypesInput intro_type_possible_types = 24;
+    repeated IntroTypeInput list = 25;
+    optional IntroTypeExpression where = 26;
 }
 message MutationIntroFieldRequest {
     optional string selection_set = 1;
@@ -335,7 +269,8 @@ message MutationIntroDirectiveRequest {
     optional google.protobuf.Timestamp update_time = 15;
     optional string create_group_id = 16;
     optional string intro_typename = 17;
-    optional IntroDirectiveExpression where = 18;
+    repeated IntroDirectiveLocationsInput intro_directive_locations = 18;
+    optional IntroDirectiveExpression where = 19;
 }
 message MutationIntroDirectiveListRequest {
     optional string selection_set = 1;
@@ -355,43 +290,124 @@ message MutationIntroDirectiveListRequest {
     optional google.protobuf.Timestamp update_time = 15;
     optional string create_group_id = 16;
     optional string intro_typename = 17;
-    repeated IntroDirectiveInput list = 18;
-    optional IntroDirectiveExpression where = 19;
+    repeated IntroDirectiveLocationsInput intro_directive_locations = 18;
+    repeated IntroDirectiveInput list = 19;
+    optional IntroDirectiveExpression where = 20;
+}
+message MutationIntroTypeInterfacesRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string type_name = 4;
+    optional IntroTypeInput from = 5;
+    optional string interface_name = 6;
+    optional IntroTypeInput to = 7;
+    optional bool is_deprecated = 8;
+    optional int32 version = 9;
+    optional string realm_id = 10;
+    optional string create_user_id = 11;
+    optional google.protobuf.Timestamp create_time = 12;
+    optional string update_user_id = 13;
+    optional google.protobuf.Timestamp update_time = 14;
+    optional string create_group_id = 15;
+    optional string intro_typename = 16;
+    optional IntroTypeInterfacesExpression where = 17;
+}
+message MutationIntroTypeInterfacesListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string type_name = 4;
+    optional IntroTypeInput from = 5;
+    optional string interface_name = 6;
+    optional IntroTypeInput to = 7;
+    optional bool is_deprecated = 8;
+    optional int32 version = 9;
+    optional string realm_id = 10;
+    optional string create_user_id = 11;
+    optional google.protobuf.Timestamp create_time = 12;
+    optional string update_user_id = 13;
+    optional google.protobuf.Timestamp update_time = 14;
+    optional string create_group_id = 15;
+    optional string intro_typename = 16;
+    repeated IntroTypeInterfacesInput list = 17;
+    optional IntroTypeInterfacesExpression where = 18;
+}
+message MutationIntroTypePossibleTypesRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string type_name = 4;
+    optional IntroTypeInput from = 5;
+    optional string possible_type_name = 6;
+    optional IntroTypeInput to = 7;
+    optional bool is_deprecated = 8;
+    optional int32 version = 9;
+    optional string realm_id = 10;
+    optional string create_user_id = 11;
+    optional google.protobuf.Timestamp create_time = 12;
+    optional string update_user_id = 13;
+    optional google.protobuf.Timestamp update_time = 14;
+    optional string create_group_id = 15;
+    optional string intro_typename = 16;
+    optional IntroTypePossibleTypesExpression where = 17;
+}
+message MutationIntroTypePossibleTypesListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string type_name = 4;
+    optional IntroTypeInput from = 5;
+    optional string possible_type_name = 6;
+    optional IntroTypeInput to = 7;
+    optional bool is_deprecated = 8;
+    optional int32 version = 9;
+    optional string realm_id = 10;
+    optional string create_user_id = 11;
+    optional google.protobuf.Timestamp create_time = 12;
+    optional string update_user_id = 13;
+    optional google.protobuf.Timestamp update_time = 14;
+    optional string create_group_id = 15;
+    optional string intro_typename = 16;
+    repeated IntroTypePossibleTypesInput list = 17;
+    optional IntroTypePossibleTypesExpression where = 18;
 }
 message MutationIntroDirectiveLocationsRequest {
     optional string selection_set = 1;
     optional string arguments = 2;
     optional string id = 3;
     optional string directive_name = 4;
-    optional io.graphoenix.core.grpc.IntroDirectiveLocation directive_location = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional google.protobuf.Timestamp create_time = 10;
-    optional string update_user_id = 11;
-    optional google.protobuf.Timestamp update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
-    optional IntroDirectiveLocationsExpression where = 15;
+    optional IntroDirectiveInput from = 5;
+    optional io.graphoenix.core.grpc.IntroDirectiveLocation directive_location = 6;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional google.protobuf.Timestamp create_time = 11;
+    optional string update_user_id = 12;
+    optional google.protobuf.Timestamp update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+    optional IntroDirectiveLocationsExpression where = 16;
 }
 message MutationIntroDirectiveLocationsListRequest {
     optional string selection_set = 1;
     optional string arguments = 2;
     optional string id = 3;
     optional string directive_name = 4;
-    optional io.graphoenix.core.grpc.IntroDirectiveLocation directive_location = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional google.protobuf.Timestamp create_time = 10;
-    optional string update_user_id = 11;
-    optional google.protobuf.Timestamp update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
-    repeated IntroDirectiveLocationsInput list = 15;
-    optional IntroDirectiveLocationsExpression where = 16;
+    optional IntroDirectiveInput from = 5;
+    optional io.graphoenix.core.grpc.IntroDirectiveLocation directive_location = 6;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional google.protobuf.Timestamp create_time = 11;
+    optional string update_user_id = 12;
+    optional google.protobuf.Timestamp update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+    repeated IntroDirectiveLocationsInput list = 16;
+    optional IntroDirectiveLocationsExpression where = 17;
 }
 message MutationIsDeprecatedRequest {
     optional string selection_set = 1;

@@ -82,6 +82,9 @@ public class __Directive implements Meta {
 
   private __InputValueConnection argsConnection;
 
+  @NonNull
+  private Collection<__DirectiveLocations> __directiveLocations;
+
   public String getName() {
     return this.name;
   }
@@ -320,5 +323,13 @@ public class __Directive implements Meta {
 
   public void setArgsConnection(__InputValueConnection argsConnection) {
     this.argsConnection = argsConnection;
+  }
+
+  public Collection<__DirectiveLocations> get__directiveLocations() {
+    return this.__directiveLocations;
+  }
+
+  public void set__directiveLocations(Collection<__DirectiveLocations> __directiveLocations) {
+    this.__directiveLocations = __directiveLocations;
   }
 }

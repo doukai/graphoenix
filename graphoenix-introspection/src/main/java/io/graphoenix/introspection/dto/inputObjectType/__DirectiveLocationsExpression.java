@@ -21,6 +21,8 @@ public class __DirectiveLocationsExpression {
 
   private StringExpression directiveName;
 
+  private __DirectiveExpression from;
+
   private __DirectiveLocationExpression directiveLocation;
 
   @DefaultValue("false")
@@ -61,6 +63,14 @@ public class __DirectiveLocationsExpression {
 
   public void setDirectiveName(StringExpression directiveName) {
     this.directiveName = directiveName;
+  }
+
+  public __DirectiveExpression getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(__DirectiveExpression from) {
+    this.from = from;
   }
 
   public __DirectiveLocationExpression getDirectiveLocation() {

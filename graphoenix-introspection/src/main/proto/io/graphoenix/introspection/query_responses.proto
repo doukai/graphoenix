@@ -31,24 +31,6 @@ message QueryIntroTypeListResponse {
 message QueryIntroTypeConnectionResponse {
     optional IntroTypeConnection intro_type_connection = 1;
 }
-message QueryIntroTypeInterfacesResponse {
-    optional IntroTypeInterfaces intro_type_interfaces = 1;
-}
-message QueryIntroTypeInterfacesListResponse {
-    repeated IntroTypeInterfaces intro_type_interfaces_list = 1;
-}
-message QueryIntroTypeInterfacesConnectionResponse {
-    optional IntroTypeInterfacesConnection intro_type_interfaces_connection = 1;
-}
-message QueryIntroTypePossibleTypesResponse {
-    optional IntroTypePossibleTypes intro_type_possible_types = 1;
-}
-message QueryIntroTypePossibleTypesListResponse {
-    repeated IntroTypePossibleTypes intro_type_possible_types_list = 1;
-}
-message QueryIntroTypePossibleTypesConnectionResponse {
-    optional IntroTypePossibleTypesConnection intro_type_possible_types_connection = 1;
-}
 message QueryIntroFieldResponse {
     optional IntroField intro_field = 1;
 }
@@ -84,6 +66,24 @@ message QueryIntroDirectiveListResponse {
 }
 message QueryIntroDirectiveConnectionResponse {
     optional IntroDirectiveConnection intro_directive_connection = 1;
+}
+message QueryIntroTypeInterfacesResponse {
+    optional IntroTypeInterfaces intro_type_interfaces = 1;
+}
+message QueryIntroTypeInterfacesListResponse {
+    repeated IntroTypeInterfaces intro_type_interfaces_list = 1;
+}
+message QueryIntroTypeInterfacesConnectionResponse {
+    optional IntroTypeInterfacesConnection intro_type_interfaces_connection = 1;
+}
+message QueryIntroTypePossibleTypesResponse {
+    optional IntroTypePossibleTypes intro_type_possible_types = 1;
+}
+message QueryIntroTypePossibleTypesListResponse {
+    repeated IntroTypePossibleTypes intro_type_possible_types_list = 1;
+}
+message QueryIntroTypePossibleTypesConnectionResponse {
+    optional IntroTypePossibleTypesConnection intro_type_possible_types_connection = 1;
 }
 message QueryIntroDirectiveLocationsResponse {
     optional IntroDirectiveLocations intro_directive_locations = 1;

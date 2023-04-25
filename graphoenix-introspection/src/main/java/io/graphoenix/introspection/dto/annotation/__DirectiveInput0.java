@@ -71,4 +71,6 @@ public @interface __DirectiveInput0 {
   String $argsAggregate() default "";
 
   String $argsConnection() default "";
+
+  String $__directiveLocations() default "";
 }
