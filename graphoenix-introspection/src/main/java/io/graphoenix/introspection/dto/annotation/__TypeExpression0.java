@@ -15,13 +15,9 @@ public @interface __TypeExpression0 {
 
   IDExpression name() default @IDExpression;
 
-  IntExpression schemaId() default @IntExpression;
-
   __TypeKindExpression kind() default @__TypeKindExpression;
 
   StringExpression description() default @StringExpression;
-
-  StringExpression ofTypeName() default @StringExpression;
 
   BooleanExpression isDeprecated() default @BooleanExpression;
 
@@ -40,6 +36,10 @@ public @interface __TypeExpression0 {
   StringExpression createGroupId() default @StringExpression;
 
   StringExpression __typename() default @StringExpression;
+
+  IntExpression schemaId() default @IntExpression;
+
+  StringExpression ofTypeName() default @StringExpression;
 
   String[] groupBy() default {};
 

@@ -1,8 +1,5 @@
 type __Schema {
-    id: ID @dataType(type: "int") @column(autoIncrement: true)
-    queryTypeName: String
-    mutationTypeName: String
-    subscriptionTypeName: String
+    id: ID @dataType(type: "Int" autoIncrement: true)
     types: [__Type!]! @map(from: "id" to: "schemaId")
     queryType: __Type! @map(from: "queryTypeName" to: "name" anchor: true)
     mutationType: __Type @map(from: "mutationTypeName" to: "name" anchor: true)
@@ -11,8 +8,8 @@ type __Schema {
 }
 
 type __Type {
-    name: ID! @dataType(type: "varchar")
-    schemaId: Int
+    name: ID!
+    ofSchema: __Schema @map(from: "schemaId" to: "id" anchor: true)
     kind: __TypeKind!
     description: String
 
@@ -20,10 +17,10 @@ type __Type {
     fields: [__Field!] @map(from: "name" to: "ofTypeName")
 
     # OBJECT only
-    interfaces: [__Type!] @map(from: "name" with: {type: "__TypeInterfaces", from: "typeName", to: "interfaceName"} to: "name" anchor: true)
+    interfaces: [__Type!] @map(from: "name" with: {type: "__TypeInterfaces", from: "typeName", to: "interfaceName"} to: "name")
 
     # INTERFACE and UNION only
-    possibleTypes: [__Type!] @map(from: "name" with: {type: "__TypePossibleTypes", from: "typeName", to: "possibleTypeName"} to: "name" anchor: true)
+    possibleTypes: [__Type!] @map(from: "name" with: {type: "__TypePossibleTypes", from: "typeName", to: "possibleTypeName"} to: "name")
 
     # ENUM only
     enumValues: [__EnumValue!] @map(from: "name" to: "ofTypeName")
@@ -32,27 +29,12 @@ type __Type {
     inputFields: [__InputValue!] @map(from: "name" to: "ofTypeName")
 
     # NON_NULL and LIST only
-    ofTypeName: String
     ofType: __Type @map(from: "ofTypeName" to: "name" anchor: true)
 }
 
-#type __TypeInterfaces {
-#    id: ID @dataType(type: "int") @column(autoIncrement: true)
-#    typeName: String!
-#    interfaceName: String!
-#}
-#
-#type __TypePossibleTypes {
-#    id: ID @dataType(type: "int") @column(autoIncrement: true)
-#    typeName: String!
-#    possibleTypeName: String!
-#}
-
 type __Field {
-    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "Int" autoIncrement: true)
     name: String
-    typeName: String
-    ofTypeName: String
     ofType: __Type @map(from: "ofTypeName" to: "name" anchor: true)
     description: String
     args: [__InputValue!]! @map(from: "id" to: "fieldId")
@@ -61,10 +43,8 @@ type __Field {
 }
 
 type __InputValue {
-    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "Int" autoIncrement: true)
     name: String
-    typeName: String
-    ofTypeName: String
     ofType: __Type @map(from: "ofTypeName" to: "name" anchor: true)
     fieldId: Int
     directiveName: String
@@ -74,25 +54,18 @@ type __InputValue {
 }
 
 type __EnumValue {
-    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "Int" autoIncrement: true)
     name: String
-    ofTypeName: String
     ofType: __Type @map(from: "ofTypeName" to: "name" anchor: true)
     description: String
     deprecationReason: String
 }
 
 type __Directive {
-    name: ID @dataType(type: "varchar")
-    schemaId: Int
+    name: ID!
+    ofSchema: __Schema @map(from: "schemaId" to: "id" anchor: true)
     description: String
-    locations: [__DirectiveLocation!]! @map(from: "name" with: {type: "__DirectiveLocations", from: "directiveName", to: "directiveLocation"} anchor: true)
+    locations: [__DirectiveLocation!]! @map(from: "name" with: {type: "__DirectiveLocations", from: "directiveName", to: "directiveLocation"})
     args: [__InputValue!]! @map(from: "name" to: "directiveName")
     isRepeatable: Boolean!
 }
-
-#type __DirectiveLocations {
-#    id: ID @dataType(type: "int") @column(autoIncrement: true)
-#    directiveName: String!
-#    directiveLocation: __DirectiveLocation!
-#}

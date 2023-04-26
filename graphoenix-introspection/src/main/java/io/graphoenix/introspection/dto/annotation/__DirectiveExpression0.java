@@ -15,8 +15,6 @@ public @interface __DirectiveExpression0 {
 
   IDExpression name() default @IDExpression;
 
-  IntExpression schemaId() default @IntExpression;
-
   StringExpression description() default @StringExpression;
 
   __DirectiveLocationExpression locations() default @__DirectiveLocationExpression;
@@ -40,6 +38,8 @@ public @interface __DirectiveExpression0 {
   StringExpression createGroupId() default @StringExpression;
 
   StringExpression __typename() default @StringExpression;
+
+  IntExpression schemaId() default @IntExpression;
 
   String[] groupBy() default {};
 

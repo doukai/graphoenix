@@ -24,8 +24,6 @@ public @interface UserInput0 {
 
   Sex sex() default Sex.MAN;
 
-  int organizationId() default 0;
-
   String[] mobileNumbers() default {};
 
   boolean isDeprecated() default false;
@@ -46,6 +44,8 @@ public @interface UserInput0 {
 
   String __typename() default "";
 
+  int organizationId() default 0;
+
   String $id() default "";
 
   String $login() default "";
@@ -61,8 +61,6 @@ public @interface UserInput0 {
   String $sex() default "";
 
   String $userProfile() default "";
-
-  String $organizationId() default "";
 
   String $organization() default "";
 
@@ -91,4 +89,18 @@ public @interface UserInput0 {
   String $rolesAggregate() default "";
 
   String $rolesConnection() default "";
+
+  String $organizationId() default "";
+
+  String $userRole() default "";
+
+  String $userRoleAggregate() default "";
+
+  String $userRoleConnection() default "";
+
+  String $userMobileNumbers() default "";
+
+  String $userMobileNumbersAggregate() default "";
+
+  String $userMobileNumbersConnection() default "";
 }

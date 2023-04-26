@@ -22,12 +22,6 @@ public class __Schema implements Meta {
   @Id
   private String id;
 
-  private String queryTypeName;
-
-  private String mutationTypeName;
-
-  private String subscriptionTypeName;
-
   @NonNull
   private Collection<__Type> types;
 
@@ -67,6 +61,20 @@ public class __Schema implements Meta {
   @Id
   private String idMin;
 
+  private __Type typesAggregate;
+
+  private __TypeConnection typesConnection;
+
+  private __Directive directivesAggregate;
+
+  private __DirectiveConnection directivesConnection;
+
+  private String queryTypeName;
+
+  private String mutationTypeName;
+
+  private String subscriptionTypeName;
+
   private Integer queryTypeNameCount;
 
   private String queryTypeNameMax;
@@ -85,44 +93,12 @@ public class __Schema implements Meta {
 
   private String subscriptionTypeNameMin;
 
-  private __Type typesAggregate;
-
-  private __TypeConnection typesConnection;
-
-  private __Directive directivesAggregate;
-
-  private __DirectiveConnection directivesConnection;
-
   public String getId() {
     return this.id;
   }
 
   public void setId(String id) {
     this.id = id;
-  }
-
-  public String getQueryTypeName() {
-    return this.queryTypeName;
-  }
-
-  public void setQueryTypeName(String queryTypeName) {
-    this.queryTypeName = queryTypeName;
-  }
-
-  public String getMutationTypeName() {
-    return this.mutationTypeName;
-  }
-
-  public void setMutationTypeName(String mutationTypeName) {
-    this.mutationTypeName = mutationTypeName;
-  }
-
-  public String getSubscriptionTypeName() {
-    return this.subscriptionTypeName;
-  }
-
-  public void setSubscriptionTypeName(String subscriptionTypeName) {
-    this.subscriptionTypeName = subscriptionTypeName;
   }
 
   public Collection<__Type> getTypes() {
@@ -277,6 +253,62 @@ public class __Schema implements Meta {
     this.idMin = idMin;
   }
 
+  public __Type getTypesAggregate() {
+    return this.typesAggregate;
+  }
+
+  public void setTypesAggregate(__Type typesAggregate) {
+    this.typesAggregate = typesAggregate;
+  }
+
+  public __TypeConnection getTypesConnection() {
+    return this.typesConnection;
+  }
+
+  public void setTypesConnection(__TypeConnection typesConnection) {
+    this.typesConnection = typesConnection;
+  }
+
+  public __Directive getDirectivesAggregate() {
+    return this.directivesAggregate;
+  }
+
+  public void setDirectivesAggregate(__Directive directivesAggregate) {
+    this.directivesAggregate = directivesAggregate;
+  }
+
+  public __DirectiveConnection getDirectivesConnection() {
+    return this.directivesConnection;
+  }
+
+  public void setDirectivesConnection(__DirectiveConnection directivesConnection) {
+    this.directivesConnection = directivesConnection;
+  }
+
+  public String getQueryTypeName() {
+    return this.queryTypeName;
+  }
+
+  public void setQueryTypeName(String queryTypeName) {
+    this.queryTypeName = queryTypeName;
+  }
+
+  public String getMutationTypeName() {
+    return this.mutationTypeName;
+  }
+
+  public void setMutationTypeName(String mutationTypeName) {
+    this.mutationTypeName = mutationTypeName;
+  }
+
+  public String getSubscriptionTypeName() {
+    return this.subscriptionTypeName;
+  }
+
+  public void setSubscriptionTypeName(String subscriptionTypeName) {
+    this.subscriptionTypeName = subscriptionTypeName;
+  }
+
   public Integer getQueryTypeNameCount() {
     return this.queryTypeNameCount;
   }
@@ -347,37 +379,5 @@ public class __Schema implements Meta {
 
   public void setSubscriptionTypeNameMin(String subscriptionTypeNameMin) {
     this.subscriptionTypeNameMin = subscriptionTypeNameMin;
-  }
-
-  public __Type getTypesAggregate() {
-    return this.typesAggregate;
-  }
-
-  public void setTypesAggregate(__Type typesAggregate) {
-    this.typesAggregate = typesAggregate;
-  }
-
-  public __TypeConnection getTypesConnection() {
-    return this.typesConnection;
-  }
-
-  public void setTypesConnection(__TypeConnection typesConnection) {
-    this.typesConnection = typesConnection;
-  }
-
-  public __Directive getDirectivesAggregate() {
-    return this.directivesAggregate;
-  }
-
-  public void setDirectivesAggregate(__Directive directivesAggregate) {
-    this.directivesAggregate = directivesAggregate;
-  }
-
-  public __DirectiveConnection getDirectivesConnection() {
-    return this.directivesConnection;
-  }
-
-  public void setDirectivesConnection(__DirectiveConnection directivesConnection) {
-    this.directivesConnection = directivesConnection;
   }
 }

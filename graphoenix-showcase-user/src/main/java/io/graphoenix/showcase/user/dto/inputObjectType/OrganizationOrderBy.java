@@ -15,8 +15,6 @@ public class OrganizationOrderBy {
 
   private Sort name;
 
-  private Sort aboveId;
-
   private Sort isDeprecated;
 
   private Sort version;
@@ -35,6 +33,8 @@ public class OrganizationOrderBy {
 
   private Sort __typename;
 
+  private Sort aboveId;
+
   public Sort getId() {
     return this.id;
   }
@@ -49,14 +49,6 @@ public class OrganizationOrderBy {
 
   public void setName(Sort name) {
     this.name = name;
-  }
-
-  public Sort getAboveId() {
-    return this.aboveId;
-  }
-
-  public void setAboveId(Sort aboveId) {
-    this.aboveId = aboveId;
   }
 
   public Sort getIsDeprecated() {
@@ -129,5 +121,13 @@ public class OrganizationOrderBy {
 
   public void set__typename(Sort __typename) {
     this.__typename = __typename;
+  }
+
+  public Sort getAboveId() {
+    return this.aboveId;
+  }
+
+  public void setAboveId(Sort aboveId) {
+    this.aboveId = aboveId;
   }
 }

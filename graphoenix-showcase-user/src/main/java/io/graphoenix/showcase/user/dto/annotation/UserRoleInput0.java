@@ -37,7 +37,11 @@ public @interface UserRoleInput0 {
 
   String $userId() default "";
 
+  String $from() default "";
+
   String $roleId() default "";
+
+  String $to() default "";
 
   String $isDeprecated() default "";
 

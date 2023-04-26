@@ -18,10 +18,12 @@ import org.eclipse.microprofile.graphql.Name;
 public @interface DataType {
   String type();
 
+  @Name("default")
+  String _default();
+
   int length();
 
   int decimals();
 
-  @Name("default")
-  String _default();
+  boolean autoIncrement();
 }

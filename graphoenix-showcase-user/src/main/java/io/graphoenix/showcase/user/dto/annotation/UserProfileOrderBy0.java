@@ -11,8 +11,6 @@ import java.lang.annotation.Target;
 public @interface UserProfileOrderBy0 {
   Sort id() default Sort.ASC;
 
-  Sort userId() default Sort.ASC;
-
   Sort email() default Sort.ASC;
 
   Sort address() default Sort.ASC;
@@ -34,4 +32,6 @@ public @interface UserProfileOrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
+
+  Sort userId() default Sort.ASC;
 }

@@ -13,10 +13,6 @@ public @interface __InputValueInput0 {
 
   String name() default "";
 
-  String typeName() default "";
-
-  String ofTypeName() default "";
-
   int fieldId() default 0;
 
   String directiveName() default "";
@@ -43,13 +39,13 @@ public @interface __InputValueInput0 {
 
   String __typename() default "";
 
+  String ofTypeName() default "";
+
+  String typeName() default "";
+
   String $id() default "";
 
   String $name() default "";
-
-  String $typeName() default "";
-
-  String $ofTypeName() default "";
 
   String $ofType() default "";
 
@@ -80,4 +76,8 @@ public @interface __InputValueInput0 {
   String $createGroupId() default "";
 
   String $__typename() default "";
+
+  String $ofTypeName() default "";
+
+  String $typeName() default "";
 }

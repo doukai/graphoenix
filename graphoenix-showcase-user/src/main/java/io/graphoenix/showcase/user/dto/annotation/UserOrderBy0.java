@@ -23,8 +23,6 @@ public @interface UserOrderBy0 {
 
   Sort sex() default Sort.ASC;
 
-  Sort organizationId() default Sort.ASC;
-
   Sort mobileNumbers() default Sort.ASC;
 
   Sort isDeprecated() default Sort.ASC;
@@ -44,4 +42,6 @@ public @interface UserOrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
+
+  Sort organizationId() default Sort.ASC;
 }

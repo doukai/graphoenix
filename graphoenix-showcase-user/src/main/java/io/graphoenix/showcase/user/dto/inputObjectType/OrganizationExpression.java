@@ -20,8 +20,6 @@ public class OrganizationExpression {
 
   private StringExpression name;
 
-  private IntExpression aboveId;
-
   private OrganizationExpression above;
 
   private UserExpression users;
@@ -45,6 +43,8 @@ public class OrganizationExpression {
 
   private StringExpression __typename;
 
+  private IntExpression aboveId;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -64,14 +64,6 @@ public class OrganizationExpression {
 
   public void setName(StringExpression name) {
     this.name = name;
-  }
-
-  public IntExpression getAboveId() {
-    return this.aboveId;
-  }
-
-  public void setAboveId(IntExpression aboveId) {
-    this.aboveId = aboveId;
   }
 
   public OrganizationExpression getAbove() {
@@ -160,6 +152,14 @@ public class OrganizationExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public IntExpression getAboveId() {
+    return this.aboveId;
+  }
+
+  public void setAboveId(IntExpression aboveId) {
+    this.aboveId = aboveId;
   }
 
   public Conditional getCond() {

@@ -43,6 +43,10 @@ public class RoleExpression {
 
   private StringExpression __typename;
 
+  private RoleRoleTypeExpression roleRoleType;
+
+  private UserRoleExpression userRole;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -150,6 +154,22 @@ public class RoleExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public RoleRoleTypeExpression getRoleRoleType() {
+    return this.roleRoleType;
+  }
+
+  public void setRoleRoleType(RoleRoleTypeExpression roleRoleType) {
+    this.roleRoleType = roleRoleType;
+  }
+
+  public UserRoleExpression getUserRole() {
+    return this.userRole;
+  }
+
+  public void setUserRole(UserRoleExpression userRole) {
+    this.userRole = userRole;
   }
 
   public Conditional getCond() {

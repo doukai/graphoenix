@@ -20,6 +20,8 @@ public class UserMobileNumbersExpression {
 
   private IntExpression userId;
 
+  private UserExpression from;
+
   private StringExpression mobileNumber;
 
   @DefaultValue("false")
@@ -60,6 +62,14 @@ public class UserMobileNumbersExpression {
 
   public void setUserId(IntExpression userId) {
     this.userId = userId;
+  }
+
+  public UserExpression getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(UserExpression from) {
+    this.from = from;
   }
 
   public StringExpression getMobileNumber() {

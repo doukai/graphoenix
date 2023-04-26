@@ -10,7 +10,6 @@ import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.core.operation.EnumValue;
 import io.graphoenix.core.operation.Field;
 import io.graphoenix.core.operation.Operation;
@@ -40,14 +39,12 @@ import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 public class GrpcRequestHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
-    private final PackageManager packageManager;
     private final GrpcNameUtil grpcNameUtil;
     private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public GrpcRequestHandlerBuilder(IGraphQLDocumentManager manager, PackageManager packageManager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
+    public GrpcRequestHandlerBuilder(IGraphQLDocumentManager manager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
         this.manager = manager;
-        this.packageManager = packageManager;
         this.grpcNameUtil = grpcNameUtil;
         this.graphQLConfig = graphQLConfig;
     }

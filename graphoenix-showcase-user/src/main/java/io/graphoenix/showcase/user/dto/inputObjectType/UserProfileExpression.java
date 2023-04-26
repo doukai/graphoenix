@@ -18,8 +18,6 @@ import org.eclipse.microprofile.graphql.Input;
 public class UserProfileExpression {
   private StringExpression id;
 
-  private StringExpression userId;
-
   private UserExpression user;
 
   private StringExpression email;
@@ -45,6 +43,8 @@ public class UserProfileExpression {
 
   private StringExpression __typename;
 
+  private IntExpression userId;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -56,14 +56,6 @@ public class UserProfileExpression {
 
   public void setId(StringExpression id) {
     this.id = id;
-  }
-
-  public StringExpression getUserId() {
-    return this.userId;
-  }
-
-  public void setUserId(StringExpression userId) {
-    this.userId = userId;
   }
 
   public UserExpression getUser() {
@@ -160,6 +152,14 @@ public class UserProfileExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public IntExpression getUserId() {
+    return this.userId;
+  }
+
+  public void setUserId(IntExpression userId) {
+    this.userId = userId;
   }
 
   public Conditional getCond() {

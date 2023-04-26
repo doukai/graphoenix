@@ -86,6 +86,11 @@ public class Field {
         return directives;
     }
 
+    public Field setStringDirectives(Set<String> directives) {
+        this.directives = directives;
+        return this;
+    }
+
     public Field setDirectives(Set<Directive> directives) {
         if (directives != null) {
             this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));

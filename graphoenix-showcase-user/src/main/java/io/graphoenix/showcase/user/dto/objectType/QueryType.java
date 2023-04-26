@@ -31,11 +31,17 @@ public class QueryType implements Meta {
 
   private UserProfileConnection userProfileConnection;
 
-  private UserMobileNumbers userMobileNumbers;
+  private Role role;
 
-  private Collection<UserMobileNumbers> userMobileNumbersList;
+  private Collection<Role> roleList;
 
-  private UserMobileNumbersConnection userMobileNumbersConnection;
+  private RoleConnection roleConnection;
+
+  private Organization organization;
+
+  private Collection<Organization> organizationList;
+
+  private OrganizationConnection organizationConnection;
 
   private UserRole userRole;
 
@@ -43,23 +49,17 @@ public class QueryType implements Meta {
 
   private UserRoleConnection userRoleConnection;
 
-  private Role role;
+  private UserMobileNumbers userMobileNumbers;
 
-  private Collection<Role> roleList;
+  private Collection<UserMobileNumbers> userMobileNumbersList;
 
-  private RoleConnection roleConnection;
+  private UserMobileNumbersConnection userMobileNumbersConnection;
 
   private RoleRoleType roleRoleType;
 
   private Collection<RoleRoleType> roleRoleTypeList;
 
   private RoleRoleTypeConnection roleRoleTypeConnection;
-
-  private Organization organization;
-
-  private Collection<Organization> organizationList;
-
-  private OrganizationConnection organizationConnection;
 
   private Boolean isDeprecated;
 
@@ -133,29 +133,52 @@ public class QueryType implements Meta {
     this.userProfileConnection = userProfileConnection;
   }
 
-  public UserMobileNumbers getUserMobileNumbers() {
-    return this.userMobileNumbers;
+  public Role getRole() {
+    return this.role;
   }
 
-  public void setUserMobileNumbers(UserMobileNumbers userMobileNumbers) {
-    this.userMobileNumbers = userMobileNumbers;
+  public void setRole(Role role) {
+    this.role = role;
   }
 
-  public Collection<UserMobileNumbers> getUserMobileNumbersList() {
-    return this.userMobileNumbersList;
+  public Collection<Role> getRoleList() {
+    return this.roleList;
   }
 
-  public void setUserMobileNumbersList(Collection<UserMobileNumbers> userMobileNumbersList) {
-    this.userMobileNumbersList = userMobileNumbersList;
+  public void setRoleList(Collection<Role> roleList) {
+    this.roleList = roleList;
   }
 
-  public UserMobileNumbersConnection getUserMobileNumbersConnection() {
-    return this.userMobileNumbersConnection;
+  public RoleConnection getRoleConnection() {
+    return this.roleConnection;
   }
 
-  public void setUserMobileNumbersConnection(
-      UserMobileNumbersConnection userMobileNumbersConnection) {
-    this.userMobileNumbersConnection = userMobileNumbersConnection;
+  public void setRoleConnection(RoleConnection roleConnection) {
+    this.roleConnection = roleConnection;
+  }
+
+  public Organization getOrganization() {
+    return this.organization;
+  }
+
+  public void setOrganization(Organization organization) {
+    this.organization = organization;
+  }
+
+  public Collection<Organization> getOrganizationList() {
+    return this.organizationList;
+  }
+
+  public void setOrganizationList(Collection<Organization> organizationList) {
+    this.organizationList = organizationList;
+  }
+
+  public OrganizationConnection getOrganizationConnection() {
+    return this.organizationConnection;
+  }
+
+  public void setOrganizationConnection(OrganizationConnection organizationConnection) {
+    this.organizationConnection = organizationConnection;
   }
 
   public UserRole getUserRole() {
@@ -182,28 +205,29 @@ public class QueryType implements Meta {
     this.userRoleConnection = userRoleConnection;
   }
 
-  public Role getRole() {
-    return this.role;
+  public UserMobileNumbers getUserMobileNumbers() {
+    return this.userMobileNumbers;
   }
 
-  public void setRole(Role role) {
-    this.role = role;
+  public void setUserMobileNumbers(UserMobileNumbers userMobileNumbers) {
+    this.userMobileNumbers = userMobileNumbers;
   }
 
-  public Collection<Role> getRoleList() {
-    return this.roleList;
+  public Collection<UserMobileNumbers> getUserMobileNumbersList() {
+    return this.userMobileNumbersList;
   }
 
-  public void setRoleList(Collection<Role> roleList) {
-    this.roleList = roleList;
+  public void setUserMobileNumbersList(Collection<UserMobileNumbers> userMobileNumbersList) {
+    this.userMobileNumbersList = userMobileNumbersList;
   }
 
-  public RoleConnection getRoleConnection() {
-    return this.roleConnection;
+  public UserMobileNumbersConnection getUserMobileNumbersConnection() {
+    return this.userMobileNumbersConnection;
   }
 
-  public void setRoleConnection(RoleConnection roleConnection) {
-    this.roleConnection = roleConnection;
+  public void setUserMobileNumbersConnection(
+      UserMobileNumbersConnection userMobileNumbersConnection) {
+    this.userMobileNumbersConnection = userMobileNumbersConnection;
   }
 
   public RoleRoleType getRoleRoleType() {
@@ -228,30 +252,6 @@ public class QueryType implements Meta {
 
   public void setRoleRoleTypeConnection(RoleRoleTypeConnection roleRoleTypeConnection) {
     this.roleRoleTypeConnection = roleRoleTypeConnection;
-  }
-
-  public Organization getOrganization() {
-    return this.organization;
-  }
-
-  public void setOrganization(Organization organization) {
-    this.organization = organization;
-  }
-
-  public Collection<Organization> getOrganizationList() {
-    return this.organizationList;
-  }
-
-  public void setOrganizationList(Collection<Organization> organizationList) {
-    this.organizationList = organizationList;
-  }
-
-  public OrganizationConnection getOrganizationConnection() {
-    return this.organizationConnection;
-  }
-
-  public void setOrganizationConnection(OrganizationConnection organizationConnection) {
-    this.organizationConnection = organizationConnection;
   }
 
   @Override

@@ -16,7 +16,6 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.alter.Alter;
 import net.sf.jsqlparser.statement.alter.AlterExpression;
 import net.sf.jsqlparser.statement.alter.AlterOperation;
-import net.sf.jsqlparser.statement.create.schema.CreateSchema;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
@@ -26,6 +25,7 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.truncate.Truncate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -270,7 +270,7 @@ public class GraphQLTypeToTable {
         }
         ColumnDefinition columnDefinition = new ColumnDefinition();
         columnDefinition.setColumnName(dbNameUtil.graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
-        columnDefinition.setColDataType(createColDataType(typeNameContext, fieldDefinitionContext.directives()));
+        columnDefinition.setColDataType(createColDataType(fieldDefinitionContext));
         List<String> columnSpecs = new ArrayList<>();
         if (typeNameContext.name().getText().equals("ID")) {
             columnSpecs.add("PRIMARY KEY");
@@ -300,7 +300,13 @@ public class GraphQLTypeToTable {
             }
         }
 
-        columnDirectiveToColumnSpecs(fieldDefinitionContext.directives()).ifPresent(columnSpecs::addAll);
+        Optional<GraphqlParser.DirectiveContext> dataTypeDirective = getDataTypeDirective(fieldDefinitionContext.directives());
+        Optional<GraphqlParser.ArgumentContext> autoIncrement = dataTypeDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("autoIncrement")).findFirst());
+
+        if (autoIncrement.isPresent()) {
+            columnSpecs.add("AUTO_INCREMENT");
+        }
+
         if (fieldDefinitionContext.description() != null) {
             columnSpecs.add("COMMENT " + dbNameUtil.graphqlDescriptionToDBComment(fieldDefinitionContext.description().getText()));
         }
@@ -308,73 +314,74 @@ public class GraphQLTypeToTable {
         return Optional.of(columnDefinition);
     }
 
-    protected ColDataType createColDataType(GraphqlParser.TypeNameContext typeNameContext, GraphqlParser.DirectivesContext directivesContext) {
-        if (manager.isEnum(typeNameContext.name().getText())) {
-            return createEnumColDataType(typeNameContext);
-        } else if (manager.isScalar(typeNameContext.name().getText())) {
-            return createScalarColDataType(typeNameContext, directivesContext);
+    protected ColDataType createColDataType(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+        if (manager.isEnum(fieldTypeName)) {
+            return createEnumColDataType(fieldDefinitionContext);
+        } else if (manager.isScalar(fieldTypeName)) {
+            return createScalarColDataType(fieldDefinitionContext);
         }
-        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeNameContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
     }
 
-    protected ColDataType createEnumColDataType(GraphqlParser.TypeNameContext typeNameContext) {
+    protected ColDataType createEnumColDataType(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         ColDataType colDataType = new ColDataType();
         colDataType.setDataType("ENUM");
 
-        colDataType.setArgumentsStringList(manager.getEnum(typeNameContext.name().getText()).map(enumTypeDefinitionContext -> enumTypeDefinitionContext.enumValueDefinitions()
+        colDataType.setArgumentsStringList(manager.getEnum(manager.getFieldTypeName(fieldDefinitionContext.type())).map(enumTypeDefinitionContext -> enumTypeDefinitionContext.enumValueDefinitions()
                 .enumValueDefinition().stream()
                 .map(value -> dbNameUtil.stringValueToDBVarchar(value.getText())).collect(Collectors.toList())).orElse(Collections.emptyList()));
 
         return colDataType;
     }
 
-    protected ColDataType createScalarColDataType(GraphqlParser.TypeNameContext typeNameContext, GraphqlParser.DirectivesContext directivesContext) {
-        Optional<GraphqlParser.DirectiveContext> dataTypeDirective = getDataTypeDirective(directivesContext);
-        Optional<GraphqlParser.ArgumentContext> dataType = dataTypeDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("type")).findFirst());
+    protected ColDataType createScalarColDataType(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        Optional<GraphqlParser.DirectiveContext> dataTypeDirective = getDataTypeDirective(fieldDefinitionContext.directives());
         Optional<GraphqlParser.ArgumentContext> length = dataTypeDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("length")).findFirst());
         Optional<GraphqlParser.ArgumentContext> decimals = dataTypeDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("decimals")).findFirst());
 
         List<String> argumentsStringList = new ArrayList<>();
         ColDataType colDataType = new ColDataType();
-        switch (typeNameContext.name().getText()) {
+        String fieldTypeName = manager.getDataTypeName(fieldDefinitionContext).orElse(manager.getFieldTypeName(fieldDefinitionContext.type()));
+        switch (fieldTypeName) {
             case "ID":
             case "String":
-                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("VARCHAR"));
+                colDataType.setDataType("VARCHAR");
                 argumentsStringList.add(length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("255"));
                 break;
             case "Boolean":
-                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("BOOL"));
+                colDataType.setDataType("BOOL");
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
             case "Int":
-                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("INT"));
+                colDataType.setDataType("INT");
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
             case "Float":
-                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("FLOAT"));
+                colDataType.setDataType("FLOAT");
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 decimals.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
             case "BigInteger":
-                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("BIGINT"));
+                colDataType.setDataType("BIGINT");
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
             case "BigDecimal":
-                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("DECIMAL"));
+                colDataType.setDataType("DECIMAL");
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 decimals.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
             case "Date":
-                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("DATE"));
+                colDataType.setDataType("DATE");
                 break;
             case "Time":
-                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("TIME"));
+                colDataType.setDataType("TIME");
                 break;
             case "DateTime":
-                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("DATETIME"));
+                colDataType.setDataType("DATETIME");
                 break;
             case "Timestamp":
-                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("TIMESTAMP"));
+                colDataType.setDataType("TIMESTAMP");
                 break;
         }
 
@@ -408,37 +415,11 @@ public class GraphQLTypeToTable {
         }
     }
 
-    protected Optional<List<String>> columnDirectiveToColumnSpecs(GraphqlParser.DirectivesContext directivesContext) {
-        Optional<GraphqlParser.DirectiveContext> columnDirective = getColumnDirective(directivesContext);
-        return columnDirective.map(directiveContext -> directiveContext.arguments().argument().stream().map(this::argumentToColumnSpecs).collect(Collectors.toList()));
-    }
-
-    protected String argumentToColumnSpecs(GraphqlParser.ArgumentContext argumentContext) {
-        if (argumentContext.valueWithVariable().BooleanValue() != null) {
-            return dbNameUtil.booleanDirectiveTocColumnDefinition(argumentContext.name().getText());
-        } else {
-            return dbNameUtil.directiveToColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().getText());
-        }
-    }
-
     protected Optional<GraphqlParser.DirectiveContext> getTableDirective(GraphqlParser.DirectivesContext directivesContext) {
-        if (directivesContext == null) {
-            return Optional.empty();
-        }
-        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("table")).findFirst();
-    }
-
-    protected Optional<GraphqlParser.DirectiveContext> getColumnDirective(GraphqlParser.DirectivesContext directivesContext) {
-        if (directivesContext == null) {
-            return Optional.empty();
-        }
-        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("column")).findFirst();
+        return Stream.ofNullable(directivesContext).map(GraphqlParser.DirectivesContext::directive).flatMap(Collection::stream).filter(directiveContext -> directiveContext.name().getText().equals("table")).findFirst();
     }
 
     protected Optional<GraphqlParser.DirectiveContext> getDataTypeDirective(GraphqlParser.DirectivesContext directivesContext) {
-        if (directivesContext == null) {
-            return Optional.empty();
-        }
-        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("dataType")).findFirst();
+        return Stream.ofNullable(directivesContext).map(GraphqlParser.DirectivesContext::directive).flatMap(Collection::stream).filter(directiveContext -> directiveContext.name().getText().equals("dataType")).findFirst();
     }
 }

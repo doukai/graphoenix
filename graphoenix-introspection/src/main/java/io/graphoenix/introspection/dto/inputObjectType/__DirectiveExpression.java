@@ -20,7 +20,7 @@ import org.eclipse.microprofile.graphql.Input;
 public class __DirectiveExpression {
   private StringExpression name;
 
-  private IntExpression schemaId;
+  private __SchemaExpression ofSchema;
 
   private StringExpression description;
 
@@ -49,6 +49,8 @@ public class __DirectiveExpression {
 
   private StringExpression __typename;
 
+  private IntExpression schemaId;
+
   private __DirectiveLocationsExpression __directiveLocations;
 
   @DefaultValue("AND")
@@ -64,12 +66,12 @@ public class __DirectiveExpression {
     this.name = name;
   }
 
-  public IntExpression getSchemaId() {
-    return this.schemaId;
+  public __SchemaExpression getOfSchema() {
+    return this.ofSchema;
   }
 
-  public void setSchemaId(IntExpression schemaId) {
-    this.schemaId = schemaId;
+  public void setOfSchema(__SchemaExpression ofSchema) {
+    this.ofSchema = ofSchema;
   }
 
   public StringExpression getDescription() {
@@ -174,6 +176,14 @@ public class __DirectiveExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public IntExpression getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(IntExpression schemaId) {
+    this.schemaId = schemaId;
   }
 
   public __DirectiveLocationsExpression get__directiveLocations() {

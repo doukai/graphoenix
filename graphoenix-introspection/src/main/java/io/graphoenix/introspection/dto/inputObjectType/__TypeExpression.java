@@ -19,7 +19,7 @@ import org.eclipse.microprofile.graphql.Input;
 public class __TypeExpression {
   private StringExpression name;
 
-  private IntExpression schemaId;
+  private __SchemaExpression ofSchema;
 
   private __TypeKindExpression kind;
 
@@ -34,8 +34,6 @@ public class __TypeExpression {
   private __EnumValueExpression enumValues;
 
   private __InputValueExpression inputFields;
-
-  private StringExpression ofTypeName;
 
   private __TypeExpression ofType;
 
@@ -58,6 +56,10 @@ public class __TypeExpression {
 
   private StringExpression __typename;
 
+  private IntExpression schemaId;
+
+  private StringExpression ofTypeName;
+
   private __TypeInterfacesExpression __typeInterfaces;
 
   private __TypePossibleTypesExpression __typePossibleTypes;
@@ -75,12 +77,12 @@ public class __TypeExpression {
     this.name = name;
   }
 
-  public IntExpression getSchemaId() {
-    return this.schemaId;
+  public __SchemaExpression getOfSchema() {
+    return this.ofSchema;
   }
 
-  public void setSchemaId(IntExpression schemaId) {
-    this.schemaId = schemaId;
+  public void setOfSchema(__SchemaExpression ofSchema) {
+    this.ofSchema = ofSchema;
   }
 
   public __TypeKindExpression getKind() {
@@ -137,14 +139,6 @@ public class __TypeExpression {
 
   public void setInputFields(__InputValueExpression inputFields) {
     this.inputFields = inputFields;
-  }
-
-  public StringExpression getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(StringExpression ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public __TypeExpression getOfType() {
@@ -225,6 +219,22 @@ public class __TypeExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public IntExpression getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(IntExpression schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public StringExpression getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(StringExpression ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 
   public __TypeInterfacesExpression get__typeInterfaces() {

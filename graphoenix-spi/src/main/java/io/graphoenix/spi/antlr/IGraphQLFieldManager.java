@@ -42,6 +42,10 @@ public interface IGraphQLFieldManager {
 
     boolean isNotFetchField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
+    boolean isMapField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    boolean isNotMapField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
     boolean isFunctionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
     boolean isNotFunctionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);

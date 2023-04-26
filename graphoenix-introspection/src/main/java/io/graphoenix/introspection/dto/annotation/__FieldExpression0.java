@@ -16,10 +16,6 @@ public @interface __FieldExpression0 {
 
   StringExpression name() default @StringExpression;
 
-  StringExpression typeName() default @StringExpression;
-
-  StringExpression ofTypeName() default @StringExpression;
-
   StringExpression description() default @StringExpression;
 
   StringExpression deprecationReason() default @StringExpression;
@@ -41,6 +37,10 @@ public @interface __FieldExpression0 {
   StringExpression createGroupId() default @StringExpression;
 
   StringExpression __typename() default @StringExpression;
+
+  StringExpression ofTypeName() default @StringExpression;
+
+  StringExpression typeName() default @StringExpression;
 
   String[] groupBy() default {};
 

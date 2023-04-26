@@ -69,23 +69,23 @@ public abstract class MutationDataLoader {
         return this;
     }
 
-    public void register(String packageName, String protocol, String typeName, String selectionName, String keyName, String jsonPointer, String from, String to, JsonValue jsonValue) {
+    public void register(String packageName, String protocol, String typeName, String selectionName, String keyName, String jsonPointer, String element, String from, String to, JsonValue jsonValue) {
         addSelection(packageName, protocol, typeName, keyName);
         if (selectionName != null) {
             addSelection(packageName, protocol, typeName, selectionName);
         }
-        addObjectValue(packageName, protocol, typeName, keyName, jsonPointer, from, to, jsonValue.asJsonObject());
+        addObjectValue(packageName, protocol, typeName, keyName, jsonPointer + "/" + element, from, to, jsonValue.asJsonObject());
     }
 
-    public void registerArray(String packageName, String protocol, String typeName, String selectionName, String keyName, String jsonPointer, String itemPointer, String from, String to, JsonValue jsonValue) {
+    public void registerArray(String packageName, String protocol, String typeName, String selectionName, String keyName, String jsonPointer, String element, String from, String to, JsonValue jsonValue) {
         if (jsonValue != null && jsonValue.getValueType().equals(JsonValue.ValueType.ARRAY)) {
             JsonArray jsonArray = jsonValue.asJsonArray();
-            IntStream.range(0, jsonArray.size()).forEach(index -> register(packageName, protocol, typeName, selectionName, keyName, jsonPointer + "/" + index + "/" + itemPointer, from, to, jsonArray.get(index)));
+            IntStream.range(0, jsonArray.size()).forEach(index -> register(packageName, protocol, typeName, selectionName, keyName, jsonPointer + "/" + index, element, from, to, jsonArray.get(index)));
         }
     }
 
     public void register(String packageName, String protocol, String typeName, String keyName, JsonValue jsonValue) {
-        register(packageName, protocol, typeName, null, keyName, null, null, null, jsonValue);
+        register(packageName, protocol, typeName, null, keyName, null, null, null, null, jsonValue);
     }
 
     public void registerArray(String packageName, String protocol, String typeName, String keyName, JsonValue jsonValue) {

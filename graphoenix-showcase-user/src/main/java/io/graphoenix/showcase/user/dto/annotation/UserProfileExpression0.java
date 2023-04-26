@@ -14,8 +14,6 @@ public @interface UserProfileExpression0 {
 
   IDExpression id() default @IDExpression;
 
-  StringExpression userId() default @StringExpression;
-
   StringExpression email() default @StringExpression;
 
   StringExpression address() default @StringExpression;
@@ -37,6 +35,8 @@ public @interface UserProfileExpression0 {
   StringExpression createGroupId() default @StringExpression;
 
   StringExpression __typename() default @StringExpression;
+
+  IntExpression userId() default @IntExpression;
 
   String[] groupBy() default {};
 

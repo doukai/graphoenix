@@ -133,6 +133,18 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     }
 
     @Override
+    public boolean isMapField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals(MAP_DIRECTIVE_NAME));
+    }
+
+    @Override
+    public boolean isNotMapField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return !isMapField(fieldDefinitionContext);
+    }
+
+    @Override
     public boolean isFunctionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())

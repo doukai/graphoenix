@@ -18,12 +18,6 @@ import org.eclipse.microprofile.graphql.Input;
 public class __SchemaExpression {
   private StringExpression id;
 
-  private StringExpression queryTypeName;
-
-  private StringExpression mutationTypeName;
-
-  private StringExpression subscriptionTypeName;
-
   private __TypeExpression types;
 
   private __TypeExpression queryType;
@@ -53,6 +47,12 @@ public class __SchemaExpression {
 
   private StringExpression __typename;
 
+  private StringExpression queryTypeName;
+
+  private StringExpression mutationTypeName;
+
+  private StringExpression subscriptionTypeName;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -64,30 +64,6 @@ public class __SchemaExpression {
 
   public void setId(StringExpression id) {
     this.id = id;
-  }
-
-  public StringExpression getQueryTypeName() {
-    return this.queryTypeName;
-  }
-
-  public void setQueryTypeName(StringExpression queryTypeName) {
-    this.queryTypeName = queryTypeName;
-  }
-
-  public StringExpression getMutationTypeName() {
-    return this.mutationTypeName;
-  }
-
-  public void setMutationTypeName(StringExpression mutationTypeName) {
-    this.mutationTypeName = mutationTypeName;
-  }
-
-  public StringExpression getSubscriptionTypeName() {
-    return this.subscriptionTypeName;
-  }
-
-  public void setSubscriptionTypeName(StringExpression subscriptionTypeName) {
-    this.subscriptionTypeName = subscriptionTypeName;
   }
 
   public __TypeExpression getTypes() {
@@ -200,6 +176,30 @@ public class __SchemaExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public StringExpression getQueryTypeName() {
+    return this.queryTypeName;
+  }
+
+  public void setQueryTypeName(StringExpression queryTypeName) {
+    this.queryTypeName = queryTypeName;
+  }
+
+  public StringExpression getMutationTypeName() {
+    return this.mutationTypeName;
+  }
+
+  public void setMutationTypeName(StringExpression mutationTypeName) {
+    this.mutationTypeName = mutationTypeName;
+  }
+
+  public StringExpression getSubscriptionTypeName() {
+    return this.subscriptionTypeName;
+  }
+
+  public void setSubscriptionTypeName(StringExpression subscriptionTypeName) {
+    this.subscriptionTypeName = subscriptionTypeName;
   }
 
   public Conditional getCond() {

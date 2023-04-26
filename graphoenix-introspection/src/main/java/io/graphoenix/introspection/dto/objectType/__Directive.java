@@ -21,9 +21,10 @@ import org.eclipse.microprofile.graphql.Type;
 @Ignore
 public class __Directive implements Meta {
   @Id
+  @NonNull
   private String name;
 
-  private Integer schemaId;
+  private __Schema ofSchema;
 
   private String description;
 
@@ -68,6 +69,19 @@ public class __Directive implements Meta {
 
   private String descriptionMin;
 
+  private __InputValue argsAggregate;
+
+  private __InputValueConnection argsConnection;
+
+  private Integer schemaId;
+
+  @NonNull
+  private Collection<__DirectiveLocations> __directiveLocations;
+
+  private __DirectiveLocations __directiveLocationsAggregate;
+
+  private __DirectiveLocationsConnection __directiveLocationsConnection;
+
   private Integer schemaIdCount;
 
   private Integer schemaIdSum;
@@ -78,13 +92,6 @@ public class __Directive implements Meta {
 
   private Integer schemaIdMin;
 
-  private __InputValue argsAggregate;
-
-  private __InputValueConnection argsConnection;
-
-  @NonNull
-  private Collection<__DirectiveLocations> __directiveLocations;
-
   public String getName() {
     return this.name;
   }
@@ -93,12 +100,12 @@ public class __Directive implements Meta {
     this.name = name;
   }
 
-  public Integer getSchemaId() {
-    return this.schemaId;
+  public __Schema getOfSchema() {
+    return this.ofSchema;
   }
 
-  public void setSchemaId(Integer schemaId) {
-    this.schemaId = schemaId;
+  public void setOfSchema(__Schema ofSchema) {
+    this.ofSchema = ofSchema;
   }
 
   public String getDescription() {
@@ -269,6 +276,55 @@ public class __Directive implements Meta {
     this.descriptionMin = descriptionMin;
   }
 
+  public __InputValue getArgsAggregate() {
+    return this.argsAggregate;
+  }
+
+  public void setArgsAggregate(__InputValue argsAggregate) {
+    this.argsAggregate = argsAggregate;
+  }
+
+  public __InputValueConnection getArgsConnection() {
+    return this.argsConnection;
+  }
+
+  public void setArgsConnection(__InputValueConnection argsConnection) {
+    this.argsConnection = argsConnection;
+  }
+
+  public Integer getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Integer schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public Collection<__DirectiveLocations> get__directiveLocations() {
+    return this.__directiveLocations;
+  }
+
+  public void set__directiveLocations(Collection<__DirectiveLocations> __directiveLocations) {
+    this.__directiveLocations = __directiveLocations;
+  }
+
+  public __DirectiveLocations get__directiveLocationsAggregate() {
+    return this.__directiveLocationsAggregate;
+  }
+
+  public void set__directiveLocationsAggregate(__DirectiveLocations __directiveLocationsAggregate) {
+    this.__directiveLocationsAggregate = __directiveLocationsAggregate;
+  }
+
+  public __DirectiveLocationsConnection get__directiveLocationsConnection() {
+    return this.__directiveLocationsConnection;
+  }
+
+  public void set__directiveLocationsConnection(
+      __DirectiveLocationsConnection __directiveLocationsConnection) {
+    this.__directiveLocationsConnection = __directiveLocationsConnection;
+  }
+
   public Integer getSchemaIdCount() {
     return this.schemaIdCount;
   }
@@ -307,29 +363,5 @@ public class __Directive implements Meta {
 
   public void setSchemaIdMin(Integer schemaIdMin) {
     this.schemaIdMin = schemaIdMin;
-  }
-
-  public __InputValue getArgsAggregate() {
-    return this.argsAggregate;
-  }
-
-  public void setArgsAggregate(__InputValue argsAggregate) {
-    this.argsAggregate = argsAggregate;
-  }
-
-  public __InputValueConnection getArgsConnection() {
-    return this.argsConnection;
-  }
-
-  public void setArgsConnection(__InputValueConnection argsConnection) {
-    this.argsConnection = argsConnection;
-  }
-
-  public Collection<__DirectiveLocations> get__directiveLocations() {
-    return this.__directiveLocations;
-  }
-
-  public void set__directiveLocations(Collection<__DirectiveLocations> __directiveLocations) {
-    this.__directiveLocations = __directiveLocations;
   }
 }

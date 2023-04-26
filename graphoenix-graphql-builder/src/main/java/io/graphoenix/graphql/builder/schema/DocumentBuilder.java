@@ -82,17 +82,16 @@ public class DocumentBuilder {
 
     public Document buildDocument() {
         io.vavr.collection.Stream.ofAll(
-                manager.getObjects()
-                        .filter(packageManager::isOwnPackage)
-                        .filter(manager::isNotOperationType)
-                        .filter(manager::isNotContainerType)
-                        .flatMap(objectTypeDefinitionContext ->
-                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                        )
-                        .filter(tuple -> manager.getFetchAnchor(tuple._2()))
-                        .filter(tuple -> manager.hasFetchWith(tuple._2()))
-        )
+                        manager.getObjects()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isNotOperationType)
+                                .filter(manager::isNotContainerType)
+                                .flatMap(objectTypeDefinitionContext ->
+                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                                )
+                                .filter(tuple -> manager.hasFetchWith(tuple._2()))
+                )
                 .distinctBy(tuple -> manager.getFetchWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildFetchWithObject(tuple._1(), tuple._2()).stream())
@@ -100,17 +99,16 @@ public class DocumentBuilder {
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
         io.vavr.collection.Stream.ofAll(
-                manager.getObjects()
-                        .filter(packageManager::isOwnPackage)
-                        .filter(manager::isNotOperationType)
-                        .filter(manager::isNotContainerType)
-                        .flatMap(objectTypeDefinitionContext ->
-                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                        )
-                        .filter(tuple -> manager.getMapAnchor(tuple._2()))
-                        .filter(tuple -> manager.hasMapWith(tuple._2()))
-        )
+                        manager.getObjects()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isNotOperationType)
+                                .filter(manager::isNotContainerType)
+                                .flatMap(objectTypeDefinitionContext ->
+                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                                )
+                                .filter(tuple -> manager.hasMapWith(tuple._2()))
+                )
                 .distinctBy(tuple -> manager.getMapWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildMapWithObject(tuple._1(), tuple._2()).stream())
@@ -286,34 +284,73 @@ public class DocumentBuilder {
                     )
                     .addFields(
                             fieldDefinitionContextList.stream()
+                                    .filter(manager::isFetchField)
+                                    .filter(manager::getFetchAnchor)
+                                    .filter(fieldDefinitionContext -> !manager.hasFetchWith(fieldDefinitionContext))
+                                    .map(fieldDefinitionContext -> new Field(manager.getFetchFrom(fieldDefinitionContext)).setTypeName(getMapFieldType(manager.getFieldTypeName(fieldDefinitionContext.type()), manager.getFetchTo(fieldDefinitionContext))))
+                                    .filter(field -> fieldDefinitionContextList.stream().noneMatch(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(field.getName())))
+                                    .collect(Collectors.toList())
+                    )
+                    .addFields(
+                            fieldDefinitionContextList.stream()
                                     .filter(manager::hasFetchWith)
-                                    .map(fieldDefinitionContext ->
-                                            new Field(getSchemaFieldName(manager.getFetchWithType(fieldDefinitionContext)))
-                                                    .setTypeName(
-                                                            fieldDefinitionContext.type().getText().replace(manager.getFieldTypeName(fieldDefinitionContext.type()), manager.getFetchWithType(fieldDefinitionContext))
-                                                    )
-                                                    .addDirective(
-                                                            new Directive(FETCH_DIRECTIVE_NAME)
-                                                                    .addArgument("from", manager.getFetchFrom(fieldDefinitionContext))
-                                                                    .addArgument("to", manager.getFetchWithFrom(fieldDefinitionContext))
-                                                                    .addArgument("protocol", manager.getFetchAnchor(fieldDefinitionContext) ? "local" : manager.getProtocol(fieldDefinitionContext))
-                                                    )
+                                    .flatMap(fieldDefinitionContext -> {
+                                                String withType = manager.getFetchWithType(fieldDefinitionContext);
+                                                Field field = new Field(getSchemaFieldName(withType))
+                                                        .setTypeName(
+                                                                fieldDefinitionContext.type().getText().replace(manager.getFieldTypeName(fieldDefinitionContext.type()), withType)
+                                                        )
+                                                        .addDirective(
+                                                                new Directive(MAP_DIRECTIVE_NAME)
+                                                                        .addArgument("from", manager.getFetchFrom(fieldDefinitionContext))
+                                                                        .addArgument("to", manager.getFetchWithFrom(fieldDefinitionContext))
+                                                        );
+                                                if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                                                    return Stream.of(
+                                                            field,
+                                                            buildListObjectAggregateField(field, withType),
+                                                            buildListObjectConnectionField(field, withType)
+                                                    );
+                                                } else {
+                                                    return Stream.of(field);
+                                                }
+                                            }
                                     )
                                     .collect(Collectors.toList())
                     )
                     .addFields(
                             fieldDefinitionContextList.stream()
+                                    .filter(manager::isMapField)
+                                    .filter(manager::getMapAnchor)
+                                    .filter(fieldDefinitionContext -> !manager.hasMapWith(fieldDefinitionContext))
+                                    .map(fieldDefinitionContext -> new Field(manager.getMapFrom(fieldDefinitionContext)).setTypeName(getMapFieldType(manager.getFieldTypeName(fieldDefinitionContext.type()), manager.getMapTo(fieldDefinitionContext))))
+                                    .filter(field -> fieldDefinitionContextList.stream().noneMatch(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(field.getName())))
+                                    .collect(Collectors.toList())
+                    )
+                    .addFields(
+                            fieldDefinitionContextList.stream()
                                     .filter(manager::hasMapWith)
-                                    .map(fieldDefinitionContext ->
-                                            new Field(getSchemaFieldName(manager.getMapWithType(fieldDefinitionContext)))
-                                                    .setTypeName(
-                                                            fieldDefinitionContext.type().getText().replace(manager.getFieldTypeName(fieldDefinitionContext.type()), manager.getMapWithType(fieldDefinitionContext))
-                                                    )
-                                                    .addDirective(
-                                                            new Directive(MAP_DIRECTIVE_NAME)
-                                                                    .addArgument("from", manager.getMapFrom(fieldDefinitionContext))
-                                                                    .addArgument("to", manager.getMapWithFrom(fieldDefinitionContext))
-                                                    )
+                                    .flatMap(fieldDefinitionContext -> {
+                                                String withType = manager.getMapWithType(fieldDefinitionContext);
+                                                Field field = new Field(getSchemaFieldName(withType))
+                                                        .setTypeName(
+                                                                fieldDefinitionContext.type().getText().replace(manager.getFieldTypeName(fieldDefinitionContext.type()), withType)
+                                                        )
+                                                        .addDirective(
+                                                                new Directive(MAP_DIRECTIVE_NAME)
+                                                                        .addArgument("from", manager.getMapFrom(fieldDefinitionContext))
+                                                                        .addArgument("to", manager.getMapWithFrom(fieldDefinitionContext))
+                                                        );
+                                                if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                                                    return Stream.of(
+                                                            field,
+                                                            buildListObjectAggregateField(field, withType),
+                                                            buildListObjectConnectionField(field, withType)
+                                                    );
+                                                } else {
+                                                    return Stream.of(field);
+                                                }
+                                            }
                                     )
                                     .collect(Collectors.toList())
                     );
@@ -342,29 +379,25 @@ public class DocumentBuilder {
                                 .setTypeName("ID")
                                 .addDirective(
                                         new Directive("dataType")
-                                                .addArgument("type", "int")
-                                )
-                                .addDirective(
-                                        new Directive("column")
+                                                .addArgument("type", "Int")
                                                 .addArgument("autoIncrement", true)
                                 )
                 )
-                .addField(new Field(fetchWithFromFieldName).setTypeName("String!"))
+                .addField(new Field(fetchWithFromFieldName).setTypeName(getMapFieldType(fetchFromTypeName, manager.getFetchFrom(fieldDefinitionContext))))
                 .addField(
                         new Field(fetchWithFromObjectFieldName)
                                 .setTypeName(fetchFromTypeName)
                                 .addDirective(
-                                        new Directive(FETCH_DIRECTIVE_NAME)
+                                        new Directive(MAP_DIRECTIVE_NAME)
                                                 .addArgument("from", fetchWithFromFieldName)
                                                 .addArgument("to", fetchFromFieldName)
                                                 .addArgument("anchor", true)
-                                                .addArgument("protocol", "local")
                                 )
                 );
 
         if (fetchToFieldName != null) {
             objectType
-                    .addField(new Field(fetchWithToFieldName).setTypeName("String!"))
+                    .addField(new Field(fetchWithToFieldName).setTypeName(getMapFieldType(fetchToTypeName, manager.getFetchTo(fieldDefinitionContext))))
                     .addField(
                             new Field(fetchWithToObjectFieldName)
                                     .setTypeName(fetchToTypeName)
@@ -404,14 +437,11 @@ public class DocumentBuilder {
                                 .setTypeName("ID")
                                 .addDirective(
                                         new Directive("dataType")
-                                                .addArgument("type", "int")
-                                )
-                                .addDirective(
-                                        new Directive("column")
+                                                .addArgument("type", "Int")
                                                 .addArgument("autoIncrement", true)
                                 )
                 )
-                .addField(new Field(mapWithFromFieldName).setTypeName("String!"))
+                .addField(new Field(mapWithFromFieldName).setTypeName(getMapFieldType(mapFromTypeName, manager.getMapFrom(fieldDefinitionContext))))
                 .addField(
                         new Field(mapWithFromObjectFieldName)
                                 .setTypeName(mapFromTypeName)
@@ -425,7 +455,7 @@ public class DocumentBuilder {
 
         if (mapToFieldName != null) {
             objectType
-                    .addField(new Field(mapWithToFieldName).setTypeName("String!"))
+                    .addField(new Field(mapWithToFieldName).setTypeName(getMapFieldType(mapToTypeName, manager.getMapTo(fieldDefinitionContext))))
                     .addField(
                             new Field(mapWithToObjectFieldName)
                                     .setTypeName(mapToTypeName)
@@ -598,6 +628,21 @@ public class DocumentBuilder {
         return field;
     }
 
+    public Field buildListObjectAggregateField(Field original, String withTypeName) {
+        Field field = new Field().setName(original.getName().concat(AGGREGATE_SUFFIX))
+                .setTypeName(withTypeName)
+                .setStringDirectives(original.getDirectives())
+                .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int"))
+                .addArgument(new InputValue().setName(LAST_INPUT_NAME).setTypeName("Int"))
+                .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setTypeName("Int"))
+                .addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setTypeName(withTypeName.concat(InputType.ORDER_BY.toString())))
+                .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setTypeName("[String!]"));
+
+        Optional<GraphqlParser.ObjectTypeDefinitionContext> fieldObjectTypeDefinitionContext = manager.getObject(withTypeName);
+        fieldObjectTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> field.addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.EXPRESSION)));
+        return field;
+    }
+
     public Field buildListObjectConnectionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         Field field = new Field().setName(fieldDefinitionContext.name().getText().concat(CONNECTION_SUFFIX))
                 .setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(CONNECTION_SUFFIX))
@@ -613,6 +658,25 @@ public class DocumentBuilder {
                 .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setTypeName("[String!]"));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> fieldObjectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(fieldDefinitionContext.type()));
+        fieldObjectTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> field.addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.EXPRESSION)));
+        return field;
+    }
+
+    public Field buildListObjectConnectionField(Field original, String withTypeName) {
+        Field field = new Field().setName(original.getName().concat(CONNECTION_SUFFIX))
+                .setTypeName(withTypeName.concat(CONNECTION_SUFFIX))
+                .addDirective(new Directive()
+                        .setName(CONNECTION_DIRECTIVE_NAME)
+                        .addArgument("field", original.getName())
+                        .addArgument("agg", original.getName().concat(AGGREGATE_SUFFIX))
+                )
+                .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int"))
+                .addArgument(new InputValue().setName(LAST_INPUT_NAME).setTypeName("Int"))
+                .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setTypeName("Int"))
+                .addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setTypeName(withTypeName.concat(InputType.ORDER_BY.toString())))
+                .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setTypeName("[String!]"));
+
+        Optional<GraphqlParser.ObjectTypeDefinitionContext> fieldObjectTypeDefinitionContext = manager.getObject(withTypeName);
         fieldObjectTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> field.addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.EXPRESSION)));
         return field;
     }
@@ -923,6 +987,19 @@ public class DocumentBuilder {
 
     public Directive buildDirective(GraphqlParser.DirectiveContext directiveContext) {
         return new Directive(directiveContext);
+    }
+
+    public String getMapFieldType(String typeName, String filedName) {
+        return manager.getField(typeName, filedName)
+                .map(fieldDefinitionContext -> {
+                            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                            if ("ID".equals(fieldTypeName)) {
+                                return manager.getDataTypeName(fieldDefinitionContext).orElse("String");
+                            }
+                            return fieldTypeName;
+                        }
+                )
+                .orElse("String");
     }
 
     public List<Field> buildFunctionFieldList(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {

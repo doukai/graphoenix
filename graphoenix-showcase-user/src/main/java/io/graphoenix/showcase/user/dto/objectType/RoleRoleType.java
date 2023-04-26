@@ -23,6 +23,8 @@ public class RoleRoleType implements Meta {
 
   private Integer roleId;
 
+  private Role from;
+
   private RoleType type;
 
   private Boolean isDeprecated;
@@ -75,6 +77,14 @@ public class RoleRoleType implements Meta {
 
   public void setRoleId(Integer roleId) {
     this.roleId = roleId;
+  }
+
+  public Role getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(Role from) {
+    this.from = from;
   }
 
   public RoleType getType() {

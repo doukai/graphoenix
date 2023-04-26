@@ -37,6 +37,8 @@ public @interface UserMobileNumbersInput0 {
 
   String $userId() default "";
 
+  String $from() default "";
+
   String $mobileNumber() default "";
 
   String $isDeprecated() default "";

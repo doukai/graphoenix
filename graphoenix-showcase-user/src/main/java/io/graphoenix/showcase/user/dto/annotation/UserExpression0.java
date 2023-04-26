@@ -26,8 +26,6 @@ public @interface UserExpression0 {
 
   SexExpression sex() default @SexExpression;
 
-  IntExpression organizationId() default @IntExpression;
-
   StringExpression mobileNumbers() default @StringExpression;
 
   BooleanExpression isDeprecated() default @BooleanExpression;
@@ -47,6 +45,8 @@ public @interface UserExpression0 {
   StringExpression createGroupId() default @StringExpression;
 
   StringExpression __typename() default @StringExpression;
+
+  IntExpression organizationId() default @IntExpression;
 
   String[] groupBy() default {};
 

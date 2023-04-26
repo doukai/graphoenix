@@ -15,10 +15,6 @@ public class __FieldOrderBy {
 
   private Sort name;
 
-  private Sort typeName;
-
-  private Sort ofTypeName;
-
   private Sort description;
 
   private Sort deprecationReason;
@@ -41,6 +37,10 @@ public class __FieldOrderBy {
 
   private Sort __typename;
 
+  private Sort ofTypeName;
+
+  private Sort typeName;
+
   public Sort getId() {
     return this.id;
   }
@@ -55,22 +55,6 @@ public class __FieldOrderBy {
 
   public void setName(Sort name) {
     this.name = name;
-  }
-
-  public Sort getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(Sort typeName) {
-    this.typeName = typeName;
-  }
-
-  public Sort getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(Sort ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public Sort getDescription() {
@@ -159,5 +143,21 @@ public class __FieldOrderBy {
 
   public void set__typename(Sort __typename) {
     this.__typename = __typename;
+  }
+
+  public Sort getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(Sort ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public Sort getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(Sort typeName) {
+    this.typeName = typeName;
   }
 }

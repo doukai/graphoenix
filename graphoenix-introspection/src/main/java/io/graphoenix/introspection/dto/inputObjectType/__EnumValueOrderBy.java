@@ -15,8 +15,6 @@ public class __EnumValueOrderBy {
 
   private Sort name;
 
-  private Sort ofTypeName;
-
   private Sort description;
 
   private Sort deprecationReason;
@@ -39,6 +37,8 @@ public class __EnumValueOrderBy {
 
   private Sort __typename;
 
+  private Sort ofTypeName;
+
   public Sort getId() {
     return this.id;
   }
@@ -53,14 +53,6 @@ public class __EnumValueOrderBy {
 
   public void setName(Sort name) {
     this.name = name;
-  }
-
-  public Sort getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(Sort ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public Sort getDescription() {
@@ -149,5 +141,13 @@ public class __EnumValueOrderBy {
 
   public void set__typename(Sort __typename) {
     this.__typename = __typename;
+  }
+
+  public Sort getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(Sort ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 }

@@ -13,10 +13,6 @@ public @interface __InputValueOrderBy0 {
 
   Sort name() default Sort.ASC;
 
-  Sort typeName() default Sort.ASC;
-
-  Sort ofTypeName() default Sort.ASC;
-
   Sort fieldId() default Sort.ASC;
 
   Sort directiveName() default Sort.ASC;
@@ -42,4 +38,8 @@ public @interface __InputValueOrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
+
+  Sort ofTypeName() default Sort.ASC;
+
+  Sort typeName() default Sort.ASC;
 }

@@ -12,13 +12,9 @@ import java.lang.annotation.Target;
 public @interface __TypeInput0 {
   String name() default "";
 
-  int schemaId() default 0;
-
   __TypeKind kind() default __TypeKind.SCALAR;
 
   String description() default "";
-
-  String ofTypeName() default "";
 
   boolean isDeprecated() default false;
 
@@ -38,9 +34,13 @@ public @interface __TypeInput0 {
 
   String __typename() default "";
 
+  int schemaId() default 0;
+
+  String ofTypeName() default "";
+
   String $name() default "";
 
-  String $schemaId() default "";
+  String $ofSchema() default "";
 
   String $kind() default "";
 
@@ -55,8 +55,6 @@ public @interface __TypeInput0 {
   String $enumValues() default "";
 
   String $inputFields() default "";
-
-  String $ofTypeName() default "";
 
   String $ofType() default "";
 
@@ -98,7 +96,19 @@ public @interface __TypeInput0 {
 
   String $inputFieldsConnection() default "";
 
+  String $schemaId() default "";
+
+  String $ofTypeName() default "";
+
   String $__typeInterfaces() default "";
 
+  String $__typeInterfacesAggregate() default "";
+
+  String $__typeInterfacesConnection() default "";
+
   String $__typePossibleTypes() default "";
+
+  String $__typePossibleTypesAggregate() default "";
+
+  String $__typePossibleTypesConnection() default "";
 }

@@ -1,5 +1,5 @@
 type Order {
-    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "Int" autoIncrement: true)
     number: String!
     buyerId: String!
     buyer: User! @fetch(from: "buyerId" to:"id" anchor: true protocol: GRPC)
@@ -7,7 +7,7 @@ type Order {
 }
 
 type Good {
-    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "Int" autoIncrement: true)
     quantity: Int!
     orderId: Int!
     order: Order! @map(from: "orderId" to: "id" anchor: true)
@@ -18,15 +18,16 @@ type Good {
 }
 
 type Product {
-    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "Int" autoIncrement: true)
     name: String!
     price: Float!
 }
 
 type Merchant {
-    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "Int" autoIncrement: true)
     name: String!
     organizationId: Int
     organization: Organization @fetch(from: "organizationId" to: "id" anchor: true protocol: GRPC)
     customerServices: [User!] @fetch(from: "organizationId" to: "organizationId" protocol: GRPC)
+    partners: [Organization!] @fetch(from: "id" with: {type: "MerchantPartners" from: "merchantId" to: "organizationId"} to: "id" protocol: GRPC)
 }

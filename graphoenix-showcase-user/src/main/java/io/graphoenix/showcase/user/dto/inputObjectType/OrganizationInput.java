@@ -20,8 +20,6 @@ public class OrganizationInput {
 
   private String name;
 
-  private Integer aboveId;
-
   private OrganizationInput above;
 
   private Collection<UserInput> users;
@@ -45,6 +43,8 @@ public class OrganizationInput {
   @DefaultValue("\"Organization\"")
   private String __typename;
 
+  private Integer aboveId;
+
   public String getId() {
     return this.id;
   }
@@ -59,14 +59,6 @@ public class OrganizationInput {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public Integer getAboveId() {
-    return this.aboveId;
-  }
-
-  public void setAboveId(Integer aboveId) {
-    this.aboveId = aboveId;
   }
 
   public OrganizationInput getAbove() {
@@ -155,5 +147,13 @@ public class OrganizationInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getAboveId() {
+    return this.aboveId;
+  }
+
+  public void setAboveId(Integer aboveId) {
+    this.aboveId = aboveId;
   }
 }

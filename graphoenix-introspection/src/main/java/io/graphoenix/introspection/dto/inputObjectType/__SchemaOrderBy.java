@@ -13,12 +13,6 @@ import org.eclipse.microprofile.graphql.Input;
 public class __SchemaOrderBy {
   private Sort id;
 
-  private Sort queryTypeName;
-
-  private Sort mutationTypeName;
-
-  private Sort subscriptionTypeName;
-
   private Sort isDeprecated;
 
   private Sort version;
@@ -37,36 +31,18 @@ public class __SchemaOrderBy {
 
   private Sort __typename;
 
+  private Sort queryTypeName;
+
+  private Sort mutationTypeName;
+
+  private Sort subscriptionTypeName;
+
   public Sort getId() {
     return this.id;
   }
 
   public void setId(Sort id) {
     this.id = id;
-  }
-
-  public Sort getQueryTypeName() {
-    return this.queryTypeName;
-  }
-
-  public void setQueryTypeName(Sort queryTypeName) {
-    this.queryTypeName = queryTypeName;
-  }
-
-  public Sort getMutationTypeName() {
-    return this.mutationTypeName;
-  }
-
-  public void setMutationTypeName(Sort mutationTypeName) {
-    this.mutationTypeName = mutationTypeName;
-  }
-
-  public Sort getSubscriptionTypeName() {
-    return this.subscriptionTypeName;
-  }
-
-  public void setSubscriptionTypeName(Sort subscriptionTypeName) {
-    this.subscriptionTypeName = subscriptionTypeName;
   }
 
   public Sort getIsDeprecated() {
@@ -139,5 +115,29 @@ public class __SchemaOrderBy {
 
   public void set__typename(Sort __typename) {
     this.__typename = __typename;
+  }
+
+  public Sort getQueryTypeName() {
+    return this.queryTypeName;
+  }
+
+  public void setQueryTypeName(Sort queryTypeName) {
+    this.queryTypeName = queryTypeName;
+  }
+
+  public Sort getMutationTypeName() {
+    return this.mutationTypeName;
+  }
+
+  public void setMutationTypeName(Sort mutationTypeName) {
+    this.mutationTypeName = mutationTypeName;
+  }
+
+  public Sort getSubscriptionTypeName() {
+    return this.subscriptionTypeName;
+  }
+
+  public void setSubscriptionTypeName(Sort subscriptionTypeName) {
+    this.subscriptionTypeName = subscriptionTypeName;
   }
 }

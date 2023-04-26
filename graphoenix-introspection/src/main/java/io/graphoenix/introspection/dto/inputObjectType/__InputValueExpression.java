@@ -20,10 +20,6 @@ public class __InputValueExpression {
 
   private StringExpression name;
 
-  private StringExpression typeName;
-
-  private StringExpression ofTypeName;
-
   private __TypeExpression ofType;
 
   private IntExpression fieldId;
@@ -55,6 +51,10 @@ public class __InputValueExpression {
 
   private StringExpression __typename;
 
+  private StringExpression ofTypeName;
+
+  private StringExpression typeName;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -74,22 +74,6 @@ public class __InputValueExpression {
 
   public void setName(StringExpression name) {
     this.name = name;
-  }
-
-  public StringExpression getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(StringExpression typeName) {
-    this.typeName = typeName;
-  }
-
-  public StringExpression getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(StringExpression ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public __TypeExpression getOfType() {
@@ -210,6 +194,22 @@ public class __InputValueExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public StringExpression getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(StringExpression ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public StringExpression getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(StringExpression typeName) {
+    this.typeName = typeName;
   }
 
   public Conditional getCond() {

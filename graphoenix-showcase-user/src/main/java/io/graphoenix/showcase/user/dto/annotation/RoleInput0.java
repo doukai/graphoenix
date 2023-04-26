@@ -63,4 +63,16 @@ public @interface RoleInput0 {
   String $usersAggregate() default "";
 
   String $usersConnection() default "";
+
+  String $roleRoleType() default "";
+
+  String $roleRoleTypeAggregate() default "";
+
+  String $roleRoleTypeConnection() default "";
+
+  String $userRole() default "";
+
+  String $userRoleAggregate() default "";
+
+  String $userRoleConnection() default "";
 }

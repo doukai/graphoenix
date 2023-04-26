@@ -20,8 +20,6 @@ public class __EnumValueExpression {
 
   private StringExpression name;
 
-  private StringExpression ofTypeName;
-
   private __TypeExpression ofType;
 
   private StringExpression description;
@@ -47,6 +45,8 @@ public class __EnumValueExpression {
 
   private StringExpression __typename;
 
+  private StringExpression ofTypeName;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -66,14 +66,6 @@ public class __EnumValueExpression {
 
   public void setName(StringExpression name) {
     this.name = name;
-  }
-
-  public StringExpression getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(StringExpression ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public __TypeExpression getOfType() {
@@ -170,6 +162,14 @@ public class __EnumValueExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public StringExpression getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(StringExpression ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 
   public Conditional getCond() {

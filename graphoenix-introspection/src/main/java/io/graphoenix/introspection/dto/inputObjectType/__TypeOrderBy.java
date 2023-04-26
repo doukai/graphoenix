@@ -13,13 +13,9 @@ import org.eclipse.microprofile.graphql.Input;
 public class __TypeOrderBy {
   private Sort name;
 
-  private Sort schemaId;
-
   private Sort kind;
 
   private Sort description;
-
-  private Sort ofTypeName;
 
   private Sort isDeprecated;
 
@@ -39,20 +35,16 @@ public class __TypeOrderBy {
 
   private Sort __typename;
 
+  private Sort schemaId;
+
+  private Sort ofTypeName;
+
   public Sort getName() {
     return this.name;
   }
 
   public void setName(Sort name) {
     this.name = name;
-  }
-
-  public Sort getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(Sort schemaId) {
-    this.schemaId = schemaId;
   }
 
   public Sort getKind() {
@@ -69,14 +61,6 @@ public class __TypeOrderBy {
 
   public void setDescription(Sort description) {
     this.description = description;
-  }
-
-  public Sort getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(Sort ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public Sort getIsDeprecated() {
@@ -149,5 +133,21 @@ public class __TypeOrderBy {
 
   public void set__typename(Sort __typename) {
     this.__typename = __typename;
+  }
+
+  public Sort getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Sort schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public Sort getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(Sort ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 }

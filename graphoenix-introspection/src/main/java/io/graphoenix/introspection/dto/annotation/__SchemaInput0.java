@@ -11,12 +11,6 @@ import java.lang.annotation.Target;
 public @interface __SchemaInput0 {
   String id() default "";
 
-  String queryTypeName() default "";
-
-  String mutationTypeName() default "";
-
-  String subscriptionTypeName() default "";
-
   boolean isDeprecated() default false;
 
   int version() default 0;
@@ -35,13 +29,13 @@ public @interface __SchemaInput0 {
 
   String __typename() default "";
 
+  String queryTypeName() default "";
+
+  String mutationTypeName() default "";
+
+  String subscriptionTypeName() default "";
+
   String $id() default "";
-
-  String $queryTypeName() default "";
-
-  String $mutationTypeName() default "";
-
-  String $subscriptionTypeName() default "";
 
   String $types() default "";
 
@@ -78,4 +72,10 @@ public @interface __SchemaInput0 {
   String $directivesAggregate() default "";
 
   String $directivesConnection() default "";
+
+  String $queryTypeName() default "";
+
+  String $mutationTypeName() default "";
+
+  String $subscriptionTypeName() default "";
 }

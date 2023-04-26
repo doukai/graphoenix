@@ -19,6 +19,8 @@ public class UserMobileNumbersInput {
 
   private Integer userId;
 
+  private UserInput from;
+
   private String mobileNumber;
 
   private Boolean isDeprecated;
@@ -54,6 +56,14 @@ public class UserMobileNumbersInput {
 
   public void setUserId(Integer userId) {
     this.userId = userId;
+  }
+
+  public UserInput getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(UserInput from) {
+    this.from = from;
   }
 
   public String getMobileNumber() {

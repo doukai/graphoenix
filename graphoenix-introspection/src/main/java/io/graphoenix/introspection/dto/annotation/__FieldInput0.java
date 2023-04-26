@@ -13,10 +13,6 @@ public @interface __FieldInput0 {
 
   String name() default "";
 
-  String typeName() default "";
-
-  String ofTypeName() default "";
-
   String description() default "";
 
   String deprecationReason() default "";
@@ -39,13 +35,13 @@ public @interface __FieldInput0 {
 
   String __typename() default "";
 
+  String ofTypeName() default "";
+
+  String typeName() default "";
+
   String $id() default "";
 
   String $name() default "";
-
-  String $typeName() default "";
-
-  String $ofTypeName() default "";
 
   String $ofType() default "";
 
@@ -78,4 +74,8 @@ public @interface __FieldInput0 {
   String $argsAggregate() default "";
 
   String $argsConnection() default "";
+
+  String $ofTypeName() default "";
+
+  String $typeName() default "";
 }

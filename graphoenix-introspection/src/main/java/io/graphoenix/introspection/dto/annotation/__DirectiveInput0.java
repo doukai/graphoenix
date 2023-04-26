@@ -12,8 +12,6 @@ import java.lang.annotation.Target;
 public @interface __DirectiveInput0 {
   String name() default "";
 
-  int schemaId() default 0;
-
   String description() default "";
 
   __DirectiveLocation[] locations() default {};
@@ -38,9 +36,11 @@ public @interface __DirectiveInput0 {
 
   String __typename() default "";
 
+  int schemaId() default 0;
+
   String $name() default "";
 
-  String $schemaId() default "";
+  String $ofSchema() default "";
 
   String $description() default "";
 
@@ -72,5 +72,11 @@ public @interface __DirectiveInput0 {
 
   String $argsConnection() default "";
 
+  String $schemaId() default "";
+
   String $__directiveLocations() default "";
+
+  String $__directiveLocationsAggregate() default "";
+
+  String $__directiveLocationsConnection() default "";
 }

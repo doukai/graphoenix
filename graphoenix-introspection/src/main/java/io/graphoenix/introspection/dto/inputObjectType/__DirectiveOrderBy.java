@@ -13,8 +13,6 @@ import org.eclipse.microprofile.graphql.Input;
 public class __DirectiveOrderBy {
   private Sort name;
 
-  private Sort schemaId;
-
   private Sort description;
 
   private Sort isRepeatable;
@@ -37,20 +35,14 @@ public class __DirectiveOrderBy {
 
   private Sort __typename;
 
+  private Sort schemaId;
+
   public Sort getName() {
     return this.name;
   }
 
   public void setName(Sort name) {
     this.name = name;
-  }
-
-  public Sort getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(Sort schemaId) {
-    this.schemaId = schemaId;
   }
 
   public Sort getDescription() {
@@ -139,5 +131,13 @@ public class __DirectiveOrderBy {
 
   public void set__typename(Sort __typename) {
     this.__typename = __typename;
+  }
+
+  public Sort getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Sort schemaId) {
+    this.schemaId = schemaId;
   }
 }

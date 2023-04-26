@@ -19,7 +19,11 @@ public class UserRoleInput {
 
   private Integer userId;
 
+  private UserInput from;
+
   private Integer roleId;
+
+  private RoleInput to;
 
   private Boolean isDeprecated;
 
@@ -56,12 +60,28 @@ public class UserRoleInput {
     this.userId = userId;
   }
 
+  public UserInput getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(UserInput from) {
+    this.from = from;
+  }
+
   public Integer getRoleId() {
     return this.roleId;
   }
 
   public void setRoleId(Integer roleId) {
     this.roleId = roleId;
+  }
+
+  public RoleInput getTo() {
+    return this.to;
+  }
+
+  public void setTo(RoleInput to) {
+    this.to = to;
   }
 
   public Boolean getIsDeprecated() {

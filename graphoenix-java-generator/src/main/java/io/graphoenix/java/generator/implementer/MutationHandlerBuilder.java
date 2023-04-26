@@ -5,7 +5,6 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.MutationDataLoader;
-import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -30,21 +29,18 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
-import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.PAGE_INFO_NAME;
 
 @ApplicationScoped
 public class MutationHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
-    private final PackageManager packageManager;
     private final TypeManager typeManager;
     private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public MutationHandlerBuilder(IGraphQLDocumentManager manager, PackageManager packageManager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
+    public MutationHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
-        this.packageManager = packageManager;
         this.typeManager = typeManager;
         this.graphQLConfig = graphQLConfig;
     }
@@ -149,15 +145,22 @@ public class MutationHandlerBuilder {
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
                             String withObjectFiledFrom = manager.getFetchFrom(withObjectField);
                             String withObjectFiledTo = manager.getFetchTo(withObjectField);
-                            String withToObjectFileName = manager.getFetchWithToObjectField(fieldDefinitionContext).name().getText();
                             builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
-                                    .addStatement("loader.registerWithTypeFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).add($S, item).build()).collect($T.toJsonArray()))",
+                                    .addStatement("loader.registerWithTypeFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).build()).collect($T.toJsonArray()))",
                                             fieldDefinitionContext.name().getText(),
                                             withObjectField.name().getText(),
                                             withObjectFiledTo,
                                             withObjectFiledFrom,
-                                            withToObjectFileName,
                                             ClassName.get(JsonCollectors.class)
+                                    )
+                                    .addStatement("loader.registerArray($S, $S, $S, $S, $S, jsonPointer, $S, $S, null, field.getValue())",
+                                            packageName,
+                                            protocol,
+                                            typeName,
+                                            to,
+                                            key,
+                                            withObjectField.name().getText(),
+                                            from
                                     )
                                     .endControlFlow();
                         }
@@ -202,16 +205,39 @@ public class MutationHandlerBuilder {
                     String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
 
                     if (before) {
-                        builder.addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, $S, field.getValue())",
-                                packageName,
-                                protocol,
-                                typeName,
-                                to,
-                                key,
-                                from,
-                                from,
-                                to
-                        );
+                        if (manager.hasFetchWith(fieldDefinitionContext)) {
+                            GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
+                            String withObjectFiledFrom = manager.getFetchFrom(withObjectField);
+                            String withObjectFiledTo = manager.getFetchTo(withObjectField);
+                            builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
+                                    .addStatement("loader.registerWithTypeFiled(jsonPointer, $S, $S, jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).build()",
+                                            fieldDefinitionContext.name().getText(),
+                                            withObjectField.name().getText(),
+                                            withObjectFiledTo,
+                                            withObjectFiledFrom
+                                    )
+                                    .addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer, $S, $S, null, field.getValue())",
+                                            packageName,
+                                            protocol,
+                                            typeName,
+                                            to,
+                                            key,
+                                            withObjectField.name().getText(),
+                                            from
+                                    )
+                                    .endControlFlow();
+                        } else {
+                            builder.addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer, $S, $S, $S, field.getValue())",
+                                    packageName,
+                                    protocol,
+                                    typeName,
+                                    to,
+                                    key,
+                                    from,
+                                    from,
+                                    to
+                            );
+                        }
                     } else {
                         builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
                                 .addStatement("loader.register($S, $S, $S, $S, jsonProvider.createObjectBuilder(field.getValue().asJsonObject()).add($S, valueWithVariable.asJsonObject().get($S)).build())",
@@ -237,8 +263,7 @@ public class MutationHandlerBuilder {
             }
             index++;
         }
-        builder.endControlFlow()
-                .endControlFlow();
+        builder.endControlFlow().endControlFlow();
         return builder.build();
     }
 
@@ -316,8 +341,7 @@ public class MutationHandlerBuilder {
             }
             index++;
         }
-        builder.endControlFlow()
-                .endControlFlow();
+        builder.endControlFlow().endControlFlow();
 
         if (anchor) {
             if (graphQLConfig.getBackup()) {

@@ -22,8 +22,6 @@ public class __EnumValue implements Meta {
 
   private String name;
 
-  private String ofTypeName;
-
   private __Type ofType;
 
   private String description;
@@ -62,12 +60,6 @@ public class __EnumValue implements Meta {
 
   private String nameMin;
 
-  private Integer ofTypeNameCount;
-
-  private String ofTypeNameMax;
-
-  private String ofTypeNameMin;
-
   private Integer descriptionCount;
 
   private String descriptionMax;
@@ -79,6 +71,14 @@ public class __EnumValue implements Meta {
   private String deprecationReasonMax;
 
   private String deprecationReasonMin;
+
+  private String ofTypeName;
+
+  private Integer ofTypeNameCount;
+
+  private String ofTypeNameMax;
+
+  private String ofTypeNameMin;
 
   public String getId() {
     return this.id;
@@ -94,14 +94,6 @@ public class __EnumValue implements Meta {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public __Type getOfType() {
@@ -264,30 +256,6 @@ public class __EnumValue implements Meta {
     this.nameMin = nameMin;
   }
 
-  public Integer getOfTypeNameCount() {
-    return this.ofTypeNameCount;
-  }
-
-  public void setOfTypeNameCount(Integer ofTypeNameCount) {
-    this.ofTypeNameCount = ofTypeNameCount;
-  }
-
-  public String getOfTypeNameMax() {
-    return this.ofTypeNameMax;
-  }
-
-  public void setOfTypeNameMax(String ofTypeNameMax) {
-    this.ofTypeNameMax = ofTypeNameMax;
-  }
-
-  public String getOfTypeNameMin() {
-    return this.ofTypeNameMin;
-  }
-
-  public void setOfTypeNameMin(String ofTypeNameMin) {
-    this.ofTypeNameMin = ofTypeNameMin;
-  }
-
   public Integer getDescriptionCount() {
     return this.descriptionCount;
   }
@@ -334,5 +302,37 @@ public class __EnumValue implements Meta {
 
   public void setDeprecationReasonMin(String deprecationReasonMin) {
     this.deprecationReasonMin = deprecationReasonMin;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public Integer getOfTypeNameCount() {
+    return this.ofTypeNameCount;
+  }
+
+  public void setOfTypeNameCount(Integer ofTypeNameCount) {
+    this.ofTypeNameCount = ofTypeNameCount;
+  }
+
+  public String getOfTypeNameMax() {
+    return this.ofTypeNameMax;
+  }
+
+  public void setOfTypeNameMax(String ofTypeNameMax) {
+    this.ofTypeNameMax = ofTypeNameMax;
+  }
+
+  public String getOfTypeNameMin() {
+    return this.ofTypeNameMin;
+  }
+
+  public void setOfTypeNameMin(String ofTypeNameMin) {
+    this.ofTypeNameMin = ofTypeNameMin;
   }
 }

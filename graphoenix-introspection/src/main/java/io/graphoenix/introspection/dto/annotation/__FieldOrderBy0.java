@@ -13,10 +13,6 @@ public @interface __FieldOrderBy0 {
 
   Sort name() default Sort.ASC;
 
-  Sort typeName() default Sort.ASC;
-
-  Sort ofTypeName() default Sort.ASC;
-
   Sort description() default Sort.ASC;
 
   Sort deprecationReason() default Sort.ASC;
@@ -38,4 +34,8 @@ public @interface __FieldOrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
+
+  Sort ofTypeName() default Sort.ASC;
+
+  Sort typeName() default Sort.ASC;
 }

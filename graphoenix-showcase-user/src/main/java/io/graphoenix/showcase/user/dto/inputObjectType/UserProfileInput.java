@@ -17,8 +17,6 @@ import org.eclipse.microprofile.graphql.Input;
 public class UserProfileInput {
   private String id;
 
-  private String userId;
-
   private UserInput user;
 
   private String email;
@@ -44,20 +42,14 @@ public class UserProfileInput {
   @DefaultValue("\"UserProfile\"")
   private String __typename;
 
+  private Integer userId;
+
   public String getId() {
     return this.id;
   }
 
   public void setId(String id) {
     this.id = id;
-  }
-
-  public String getUserId() {
-    return this.userId;
-  }
-
-  public void setUserId(String userId) {
-    this.userId = userId;
   }
 
   public UserInput getUser() {
@@ -154,5 +146,13 @@ public class UserProfileInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getUserId() {
+    return this.userId;
+  }
+
+  public void setUserId(Integer userId) {
+    this.userId = userId;
   }
 }

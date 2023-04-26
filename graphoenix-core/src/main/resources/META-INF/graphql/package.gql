@@ -10,260 +10,260 @@ scalar Time
 scalar DateTime
 scalar Timestamp
 enum Operator @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(grpcClassName: "io.graphoenix.core.dto.enumType.grpc.Operator", className: "io.graphoenix.core.dto.enumType.Operator") {
-  EQ
+    EQ
 
-  NEQ
+    NEQ
 
-  LK
+    LK
 
-  NLK
+    NLK
 
-  GT
+    GT
 
-  NLTE
+    NLTE
 
-  GTE
+    GTE
 
-  NLT
+    NLT
 
-  LT
+    LT
 
-  NGTE
+    NGTE
 
-  LTE
+    LTE
 
-  NGT
+    NGT
 
-  NIL
+    NIL
 
-  NNIL
+    NNIL
 
-  IN
+    IN
 
-  NIN
+    NIN
 
-  BT
+    BT
 
-  NBT
+    NBT
 }
 enum Conditional @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(grpcClassName: "io.graphoenix.core.dto.enumType.grpc.Conditional", className: "io.graphoenix.core.dto.enumType.Conditional") {
-  AND
+    AND
 
-  OR
+    OR
 }
 enum Sort @packageInfo(packageName: "io.graphoenix.core", grpcPackageName: "io.graphoenix.core.grpc") @classInfo(className: "io.graphoenix.core.dto.enumType.Sort", grpcClassName: "io.graphoenix.core.dto.enumType.grpc.Sort") {
-  ASC
+    ASC
 
-  DESC
+    DESC
 }
 enum Function @packageInfo(packageName: "io.graphoenix.core", grpcPackageName: "io.graphoenix.core.grpc") @classInfo(grpcClassName: "io.graphoenix.core.dto.enumType.grpc.Function", className: "io.graphoenix.core.dto.enumType.Function") {
-  COUNT
+    COUNT
 
-  MAX
+    MAX
 
-  MIN
+    MIN
 
-  SUM
+    SUM
 
-  AVG
+    AVG
 }
 enum Protocol @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Protocol", grpcClassName: "io.graphoenix.core.dto.enumType.grpc.Protocol") {
-  LOCAL
+    LOCAL
 
-  GRPC
+    GRPC
 
-  HTTP
+    HTTP
 
-  RSOCKET
+    RSOCKET
 }
 enum __TypeKind @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(grpcClassName: "io.graphoenix.core.dto.enumType.grpc.IntroTypeKind", className: "io.graphoenix.core.dto.enumType.__TypeKind") {
-  SCALAR
+    SCALAR
 
-  OBJECT
+    OBJECT
 
-  INTERFACE
+    INTERFACE
 
-  UNION
+    UNION
 
-  ENUM
+    ENUM
 
-  INPUT_OBJECT
+    INPUT_OBJECT
 
-  LIST
+    LIST
 
-  NON_NULL
+    NON_NULL
 }
 enum __DirectiveLocation @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(grpcClassName: "io.graphoenix.core.dto.enumType.grpc.IntroDirectiveLocation", className: "io.graphoenix.core.dto.enumType.__DirectiveLocation") {
-  QUERY
+    QUERY
 
-  MUTATION
+    MUTATION
 
-  SUBSCRIPTION
+    SUBSCRIPTION
 
-  FIELD
+    FIELD
 
-  FRAGMENT_DEFINITION
+    FRAGMENT_DEFINITION
 
-  FRAGMENT_SPREAD
+    FRAGMENT_SPREAD
 
-  INLINE_FRAGMENT
+    INLINE_FRAGMENT
 
-  SCHEMA
+    SCHEMA
 
-  SCALAR
+    SCALAR
 
-  OBJECT
+    OBJECT
 
-  FIELD_DEFINITION
+    FIELD_DEFINITION
 
-  ARGUMENT_DEFINITION
+    ARGUMENT_DEFINITION
 
-  INTERFACE
+    INTERFACE
 
-  UNION
+    UNION
 
-  ENUM
+    ENUM
 
-  ENUM_VALUE
+    ENUM_VALUE
 
-  INPUT_OBJECT
+    INPUT_OBJECT
 
-  INPUT_FIELD_DEFINITION
+    INPUT_FIELD_DEFINITION
 }
 interface Meta @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.interfaceType.Meta", grpcClassName: "io.graphoenix.core.dto.interfaceType.grpc.Meta") {
-  isDeprecated: Boolean
+    isDeprecated: Boolean
 
-  version: Int
+    version: Int
 
-  realmId: String
+    realmId: String
 
-  createUserId: String
+    createUserId: String
 
-  createTime: Timestamp
+    createTime: Timestamp
 
-  updateUserId: String
+    updateUserId: String
 
-  updateTime: Timestamp
+    updateTime: Timestamp
 
-  createGroupId: String
+    createGroupId: String
 }
 type PageInfo @containerType @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(grpcClassName: "io.graphoenix.core.dto.objectType.grpc.PageInfo", className: "io.graphoenix.core.dto.objectType.PageInfo") {
-  hasNextPage: Boolean!
+    hasNextPage: Boolean!
 
-  hasPreviousPage: Boolean!
+    hasPreviousPage: Boolean!
 
-  startCursor: String!
+    startCursor: String!
 
-  endCursor: String!
+    endCursor: String!
 }
 input IDExpression @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(annotationName: "io.graphoenix.core.dto.annotation.IDExpression", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.IDExpression", className: "io.graphoenix.core.dto.inputObjectType.IDExpression") {
-  opr: Operator = EQ
-  val: ID
-  in: [ID]
-  skipNull: Boolean = false
+    opr: Operator = EQ
+    val: ID
+    in: [ID]
+    skipNull: Boolean = false
 }
 input StringExpression @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.StringExpression", annotationName: "io.graphoenix.core.dto.annotation.StringExpression", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.StringExpression") {
-  opr: Operator = EQ
-  val: String
-  in: [String]
-  skipNull: Boolean = false
+    opr: Operator = EQ
+    val: String
+    in: [String]
+    skipNull: Boolean = false
 }
 input BooleanExpression @packageInfo(packageName: "io.graphoenix.core", grpcPackageName: "io.graphoenix.core.grpc") @classInfo(grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.BooleanExpression", className: "io.graphoenix.core.dto.inputObjectType.BooleanExpression", annotationName: "io.graphoenix.core.dto.annotation.BooleanExpression") {
-  opr: Operator = EQ
-  val: Boolean
-  in: [Boolean]
-  skipNull: Boolean = false
+    opr: Operator = EQ
+    val: Boolean
+    in: [Boolean]
+    skipNull: Boolean = false
 }
 input IntExpression @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.IntExpression", className: "io.graphoenix.core.dto.inputObjectType.IntExpression", annotationName: "io.graphoenix.core.dto.annotation.IntExpression") {
-  opr: Operator = EQ
-  val: Int
-  in: [Int]
-  skipNull: Boolean = false
+    opr: Operator = EQ
+    val: Int
+    in: [Int]
+    skipNull: Boolean = false
 }
 input FloatExpression @packageInfo(packageName: "io.graphoenix.core", grpcPackageName: "io.graphoenix.core.grpc") @classInfo(grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.FloatExpression", annotationName: "io.graphoenix.core.dto.annotation.FloatExpression", className: "io.graphoenix.core.dto.inputObjectType.FloatExpression") {
-  opr: Operator = EQ
-  val: Float
-  in: [Float]
-  skipNull: Boolean = false
+    opr: Operator = EQ
+    val: Float
+    in: [Float]
+    skipNull: Boolean = false
 }
 input MapWith @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.MapWith", annotationName: "io.graphoenix.core.dto.annotation.MapWith", className: "io.graphoenix.core.dto.inputObjectType.MapWith") {
-  type: String
-  from: String
-  to: String
+    type: String
+    from: String
+    to: String
 }
 input InvokeParameter @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.InvokeParameter", annotationName: "io.graphoenix.core.dto.annotation.InvokeParameter", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.InvokeParameter") {
-  name: String
-  className: String
+    name: String
+    className: String
 }
 input ValidationInput @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(annotationName: "io.graphoenix.core.dto.annotation.ValidationInput", className: "io.graphoenix.core.dto.inputObjectType.ValidationInput", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.ValidationInput") {
-  minLength: Int
-  maxLength: Int
-  pattern: String
-  format: String
-  contentMediaType: String
-  contentEncoding: String
-  minimum: Float
-  exclusiveMinimum: Float
-  maximum: Float
-  exclusiveMaximum: Float
-  multipleOf: Float
-  const: String
-  enum: [String]
-  items: ValidationInput
-  minItems: Int
-  maxItems: Int
-  uniqueItems: Boolean
-  allOf: [ValidationInput]
-  anyOf: [ValidationInput]
-  oneOf: [ValidationInput]
-  not: ValidationInput
-  properties: [Property]
-  if: ValidationInput
-  then: ValidationInput
-  else: ValidationInput
-  dependentRequired: [Property]
+    minLength: Int
+    maxLength: Int
+    pattern: String
+    format: String
+    contentMediaType: String
+    contentEncoding: String
+    minimum: Float
+    exclusiveMinimum: Float
+    maximum: Float
+    exclusiveMaximum: Float
+    multipleOf: Float
+    const: String
+    enum: [String]
+    items: ValidationInput
+    minItems: Int
+    maxItems: Int
+    uniqueItems: Boolean
+    allOf: [ValidationInput]
+    anyOf: [ValidationInput]
+    oneOf: [ValidationInput]
+    not: ValidationInput
+    properties: [Property]
+    if: ValidationInput
+    then: ValidationInput
+    else: ValidationInput
+    dependentRequired: [Property]
 }
 input Property @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.Property", annotationName: "io.graphoenix.core.dto.annotation.Property", className: "io.graphoenix.core.dto.inputObjectType.Property") {
-  name: String!
-  validation: ValidationInput
-  required: [String]
+    name: String!
+    validation: ValidationInput
+    required: [String]
 }
 input OperatorExpression @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.OperatorExpression", annotationName: "io.graphoenix.core.dto.annotation.OperatorExpression", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.OperatorExpression") {
-  opr: Operator = EQ
-  val: Operator
-  in: [Operator]
+    opr: Operator = EQ
+    val: Operator
+    in: [Operator]
 }
 input ConditionalExpression @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.ConditionalExpression", annotationName: "io.graphoenix.core.dto.annotation.ConditionalExpression", className: "io.graphoenix.core.dto.inputObjectType.ConditionalExpression") {
-  opr: Operator = EQ
-  val: Conditional
-  in: [Conditional]
+    opr: Operator = EQ
+    val: Conditional
+    in: [Conditional]
 }
 input SortExpression @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.SortExpression", annotationName: "io.graphoenix.core.dto.annotation.SortExpression", className: "io.graphoenix.core.dto.inputObjectType.SortExpression") {
-  opr: Operator = EQ
-  val: Sort
-  in: [Sort]
+    opr: Operator = EQ
+    val: Sort
+    in: [Sort]
 }
 input FunctionExpression @packageInfo(packageName: "io.graphoenix.core", grpcPackageName: "io.graphoenix.core.grpc") @classInfo(annotationName: "io.graphoenix.core.dto.annotation.FunctionExpression", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.FunctionExpression", className: "io.graphoenix.core.dto.inputObjectType.FunctionExpression") {
-  opr: Operator = EQ
-  val: Function
-  in: [Function]
+    opr: Operator = EQ
+    val: Function
+    in: [Function]
 }
 input ProtocolExpression @packageInfo(packageName: "io.graphoenix.core", grpcPackageName: "io.graphoenix.core.grpc") @classInfo(annotationName: "io.graphoenix.core.dto.annotation.ProtocolExpression", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.ProtocolExpression", className: "io.graphoenix.core.dto.inputObjectType.ProtocolExpression") {
-  opr: Operator = EQ
-  val: Protocol
-  in: [Protocol]
+    opr: Operator = EQ
+    val: Protocol
+    in: [Protocol]
 }
 input __TypeKindExpression @packageInfo(packageName: "io.graphoenix.core", grpcPackageName: "io.graphoenix.core.grpc") @classInfo(grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.IntroTypeKindExpression", annotationName: "io.graphoenix.core.dto.annotation.__TypeKindExpression", className: "io.graphoenix.core.dto.inputObjectType.__TypeKindExpression") {
-  opr: Operator = EQ
-  val: __TypeKind
-  in: [__TypeKind]
+    opr: Operator = EQ
+    val: __TypeKind
+    in: [__TypeKind]
 }
 input __DirectiveLocationExpression @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.IntroDirectiveLocationExpression", annotationName: "io.graphoenix.core.dto.annotation.__DirectiveLocationExpression", className: "io.graphoenix.core.dto.inputObjectType.__DirectiveLocationExpression") {
-  opr: Operator = EQ
-  val: __DirectiveLocation
-  in: [__DirectiveLocation]
+    opr: Operator = EQ
+    val: __DirectiveLocation
+    in: [__DirectiveLocation]
 }
-directive @dataType(type: String length: Int decimals: Int default: String) on FIELD_DEFINITION
+directive @dataType(type: String default: String length: Int decimals: Int autoIncrement: Boolean) on FIELD_DEFINITION
 directive @map(from: String! with: MapWith to: String anchor: Boolean) on FIELD_DEFINITION
 directive @fetch(protocol: Protocol from: String! with: MapWith to: String anchor: Boolean) on FIELD_DEFINITION
 directive @invoke(className: String methodName: String parameters: [InvokeParameter] returnClassName: String) on FIELD_DEFINITION | QUERY | MUTATION | SUBSCRIPTION

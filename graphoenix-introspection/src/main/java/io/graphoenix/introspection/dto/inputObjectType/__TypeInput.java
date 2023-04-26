@@ -19,7 +19,7 @@ import org.eclipse.microprofile.graphql.Input;
 public class __TypeInput {
   private String name;
 
-  private Integer schemaId;
+  private __SchemaInput ofSchema;
 
   private __TypeKind kind;
 
@@ -34,8 +34,6 @@ public class __TypeInput {
   private Collection<__EnumValueInput> enumValues;
 
   private Collection<__InputValueInput> inputFields;
-
-  private String ofTypeName;
 
   private __TypeInput ofType;
 
@@ -58,6 +56,10 @@ public class __TypeInput {
   @DefaultValue("\"__Type\"")
   private String __typename;
 
+  private Integer schemaId;
+
+  private String ofTypeName;
+
   private Collection<__TypeInterfacesInput> __typeInterfaces;
 
   private Collection<__TypePossibleTypesInput> __typePossibleTypes;
@@ -70,12 +72,12 @@ public class __TypeInput {
     this.name = name;
   }
 
-  public Integer getSchemaId() {
-    return this.schemaId;
+  public __SchemaInput getOfSchema() {
+    return this.ofSchema;
   }
 
-  public void setSchemaId(Integer schemaId) {
-    this.schemaId = schemaId;
+  public void setOfSchema(__SchemaInput ofSchema) {
+    this.ofSchema = ofSchema;
   }
 
   public __TypeKind getKind() {
@@ -132,14 +134,6 @@ public class __TypeInput {
 
   public void setInputFields(Collection<__InputValueInput> inputFields) {
     this.inputFields = inputFields;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public __TypeInput getOfType() {
@@ -220,6 +214,22 @@ public class __TypeInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Integer schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 
   public Collection<__TypeInterfacesInput> get__typeInterfaces() {

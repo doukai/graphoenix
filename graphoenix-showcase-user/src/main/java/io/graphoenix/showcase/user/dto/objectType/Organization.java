@@ -25,8 +25,6 @@ public class Organization implements Meta {
   @NonNull
   private String name;
 
-  private Integer aboveId;
-
   private Organization above;
 
   private Collection<User> users;
@@ -63,6 +61,12 @@ public class Organization implements Meta {
 
   private String nameMin;
 
+  private User usersAggregate;
+
+  private UserConnection usersConnection;
+
+  private Integer aboveId;
+
   private Integer aboveIdCount;
 
   private Integer aboveIdSum;
@@ -72,10 +76,6 @@ public class Organization implements Meta {
   private Integer aboveIdMax;
 
   private Integer aboveIdMin;
-
-  private User usersAggregate;
-
-  private UserConnection usersConnection;
 
   public String getId() {
     return this.id;
@@ -91,14 +91,6 @@ public class Organization implements Meta {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public Integer getAboveId() {
-    return this.aboveId;
-  }
-
-  public void setAboveId(Integer aboveId) {
-    this.aboveId = aboveId;
   }
 
   public Organization getAbove() {
@@ -253,6 +245,30 @@ public class Organization implements Meta {
     this.nameMin = nameMin;
   }
 
+  public User getUsersAggregate() {
+    return this.usersAggregate;
+  }
+
+  public void setUsersAggregate(User usersAggregate) {
+    this.usersAggregate = usersAggregate;
+  }
+
+  public UserConnection getUsersConnection() {
+    return this.usersConnection;
+  }
+
+  public void setUsersConnection(UserConnection usersConnection) {
+    this.usersConnection = usersConnection;
+  }
+
+  public Integer getAboveId() {
+    return this.aboveId;
+  }
+
+  public void setAboveId(Integer aboveId) {
+    this.aboveId = aboveId;
+  }
+
   public Integer getAboveIdCount() {
     return this.aboveIdCount;
   }
@@ -291,21 +307,5 @@ public class Organization implements Meta {
 
   public void setAboveIdMin(Integer aboveIdMin) {
     this.aboveIdMin = aboveIdMin;
-  }
-
-  public User getUsersAggregate() {
-    return this.usersAggregate;
-  }
-
-  public void setUsersAggregate(User usersAggregate) {
-    this.usersAggregate = usersAggregate;
-  }
-
-  public UserConnection getUsersConnection() {
-    return this.usersConnection;
-  }
-
-  public void setUsersConnection(UserConnection usersConnection) {
-    this.usersConnection = usersConnection;
   }
 }

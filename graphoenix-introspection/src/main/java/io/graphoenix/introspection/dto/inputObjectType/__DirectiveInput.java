@@ -19,7 +19,7 @@ import org.eclipse.microprofile.graphql.Input;
 public class __DirectiveInput {
   private String name;
 
-  private Integer schemaId;
+  private __SchemaInput ofSchema;
 
   private String description;
 
@@ -48,6 +48,8 @@ public class __DirectiveInput {
   @DefaultValue("\"__Directive\"")
   private String __typename;
 
+  private Integer schemaId;
+
   private Collection<__DirectiveLocationsInput> __directiveLocations;
 
   public String getName() {
@@ -58,12 +60,12 @@ public class __DirectiveInput {
     this.name = name;
   }
 
-  public Integer getSchemaId() {
-    return this.schemaId;
+  public __SchemaInput getOfSchema() {
+    return this.ofSchema;
   }
 
-  public void setSchemaId(Integer schemaId) {
-    this.schemaId = schemaId;
+  public void setOfSchema(__SchemaInput ofSchema) {
+    this.ofSchema = ofSchema;
   }
 
   public String getDescription() {
@@ -168,6 +170,14 @@ public class __DirectiveInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Integer schemaId) {
+    this.schemaId = schemaId;
   }
 
   public Collection<__DirectiveLocationsInput> get__directiveLocations() {

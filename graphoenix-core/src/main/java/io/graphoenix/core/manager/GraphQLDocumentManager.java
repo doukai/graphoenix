@@ -33,6 +33,7 @@ import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.utils.FilerUtil.FILER_UTIL;
 import static io.graphoenix.core.utils.NameUtil.NAME_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.DATA_TYPE_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DELETE_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.FETCH_DIRECTIVE_NAME;
@@ -531,6 +532,16 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     @Override
     public boolean isNotFetchField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return graphQLFieldManager.isNotFetchField(fieldDefinitionContext);
+    }
+
+    @Override
+    public boolean isMapField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return graphQLFieldManager.isMapField(fieldDefinitionContext);
+    }
+
+    @Override
+    public boolean isNotMapField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return graphQLFieldManager.isNotMapField(fieldDefinitionContext);
     }
 
     @Override
@@ -1479,6 +1490,18 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .filter(witTypeFieldDefinitionContext -> getMapFrom(witTypeFieldDefinitionContext).equals(getMapWithTo(fieldDefinitionContext)))
                 .findFirst()
                 .orElseThrow(() -> new GraphQLErrors(MAP_TO_OBJECT_FIELD_NOT_EXIST.bind(getMapWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
+    }
+
+    @Override
+    public Optional<String> getDataTypeName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(DATA_TYPE_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("type"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
+                .findFirst();
     }
 
     @Override

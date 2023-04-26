@@ -20,7 +20,11 @@ public class UserRoleExpression {
 
   private IntExpression userId;
 
+  private UserExpression from;
+
   private IntExpression roleId;
+
+  private RoleExpression to;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -62,12 +66,28 @@ public class UserRoleExpression {
     this.userId = userId;
   }
 
+  public UserExpression getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(UserExpression from) {
+    this.from = from;
+  }
+
   public IntExpression getRoleId() {
     return this.roleId;
   }
 
   public void setRoleId(IntExpression roleId) {
     this.roleId = roleId;
+  }
+
+  public RoleExpression getTo() {
+    return this.to;
+  }
+
+  public void setTo(RoleExpression to) {
+    this.to = to;
   }
 
   public Boolean getIncludeDeprecated() {

@@ -24,6 +24,8 @@ public class Hammurabi {
     public static final String INVOKE_DIRECTIVE_NAME = "invoke";
     public static final String CONNECTION_DIRECTIVE_NAME = "connection";
     public static final String MAP_DIRECTIVE_NAME = "map";
+    public static final String DATA_TYPE_DIRECTIVE_NAME = "dataType";
+    public static final String VALIDATION_DIRECTIVE_NAME = "validation";
     public static final String FETCH_DIRECTIVE_NAME = "fetch";
     public static final String UPDATE_DIRECTIVE_NAME = "update";
     public static final String DELETE_DIRECTIVE_NAME = "delete";

@@ -33,8 +33,6 @@ public class UserInput {
 
   private UserProfileInput userProfile;
 
-  private Integer organizationId;
-
   private OrganizationInput organization;
 
   private Collection<RoleInput> roles;
@@ -59,6 +57,12 @@ public class UserInput {
 
   @DefaultValue("\"User\"")
   private String __typename;
+
+  private Integer organizationId;
+
+  private Collection<UserRoleInput> userRole;
+
+  private Collection<UserMobileNumbersInput> userMobileNumbers;
 
   public String getId() {
     return this.id;
@@ -122,14 +126,6 @@ public class UserInput {
 
   public void setUserProfile(UserProfileInput userProfile) {
     this.userProfile = userProfile;
-  }
-
-  public Integer getOrganizationId() {
-    return this.organizationId;
-  }
-
-  public void setOrganizationId(Integer organizationId) {
-    this.organizationId = organizationId;
   }
 
   public OrganizationInput getOrganization() {
@@ -226,5 +222,29 @@ public class UserInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getOrganizationId() {
+    return this.organizationId;
+  }
+
+  public void setOrganizationId(Integer organizationId) {
+    this.organizationId = organizationId;
+  }
+
+  public Collection<UserRoleInput> getUserRole() {
+    return this.userRole;
+  }
+
+  public void setUserRole(Collection<UserRoleInput> userRole) {
+    this.userRole = userRole;
+  }
+
+  public Collection<UserMobileNumbersInput> getUserMobileNumbers() {
+    return this.userMobileNumbers;
+  }
+
+  public void setUserMobileNumbers(Collection<UserMobileNumbersInput> userMobileNumbers) {
+    this.userMobileNumbers = userMobileNumbers;
   }
 }

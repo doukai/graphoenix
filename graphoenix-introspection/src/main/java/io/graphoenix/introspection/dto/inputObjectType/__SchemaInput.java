@@ -18,12 +18,6 @@ import org.eclipse.microprofile.graphql.Input;
 public class __SchemaInput {
   private String id;
 
-  private String queryTypeName;
-
-  private String mutationTypeName;
-
-  private String subscriptionTypeName;
-
   private Collection<__TypeInput> types;
 
   private __TypeInput queryType;
@@ -53,36 +47,18 @@ public class __SchemaInput {
   @DefaultValue("\"__Schema\"")
   private String __typename;
 
+  private String queryTypeName;
+
+  private String mutationTypeName;
+
+  private String subscriptionTypeName;
+
   public String getId() {
     return this.id;
   }
 
   public void setId(String id) {
     this.id = id;
-  }
-
-  public String getQueryTypeName() {
-    return this.queryTypeName;
-  }
-
-  public void setQueryTypeName(String queryTypeName) {
-    this.queryTypeName = queryTypeName;
-  }
-
-  public String getMutationTypeName() {
-    return this.mutationTypeName;
-  }
-
-  public void setMutationTypeName(String mutationTypeName) {
-    this.mutationTypeName = mutationTypeName;
-  }
-
-  public String getSubscriptionTypeName() {
-    return this.subscriptionTypeName;
-  }
-
-  public void setSubscriptionTypeName(String subscriptionTypeName) {
-    this.subscriptionTypeName = subscriptionTypeName;
   }
 
   public Collection<__TypeInput> getTypes() {
@@ -195,5 +171,29 @@ public class __SchemaInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public String getQueryTypeName() {
+    return this.queryTypeName;
+  }
+
+  public void setQueryTypeName(String queryTypeName) {
+    this.queryTypeName = queryTypeName;
+  }
+
+  public String getMutationTypeName() {
+    return this.mutationTypeName;
+  }
+
+  public void setMutationTypeName(String mutationTypeName) {
+    this.mutationTypeName = mutationTypeName;
+  }
+
+  public String getSubscriptionTypeName() {
+    return this.subscriptionTypeName;
+  }
+
+  public void setSubscriptionTypeName(String subscriptionTypeName) {
+    this.subscriptionTypeName = subscriptionTypeName;
   }
 }

@@ -33,8 +33,6 @@ public class UserExpression {
 
   private UserProfileExpression userProfile;
 
-  private IntExpression organizationId;
-
   private OrganizationExpression organization;
 
   private RoleExpression roles;
@@ -59,6 +57,12 @@ public class UserExpression {
   private StringExpression createGroupId;
 
   private StringExpression __typename;
+
+  private IntExpression organizationId;
+
+  private UserRoleExpression userRole;
+
+  private UserMobileNumbersExpression userMobileNumbers;
 
   @DefaultValue("AND")
   private Conditional cond;
@@ -127,14 +131,6 @@ public class UserExpression {
 
   public void setUserProfile(UserProfileExpression userProfile) {
     this.userProfile = userProfile;
-  }
-
-  public IntExpression getOrganizationId() {
-    return this.organizationId;
-  }
-
-  public void setOrganizationId(IntExpression organizationId) {
-    this.organizationId = organizationId;
   }
 
   public OrganizationExpression getOrganization() {
@@ -231,6 +227,30 @@ public class UserExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public IntExpression getOrganizationId() {
+    return this.organizationId;
+  }
+
+  public void setOrganizationId(IntExpression organizationId) {
+    this.organizationId = organizationId;
+  }
+
+  public UserRoleExpression getUserRole() {
+    return this.userRole;
+  }
+
+  public void setUserRole(UserRoleExpression userRole) {
+    this.userRole = userRole;
+  }
+
+  public UserMobileNumbersExpression getUserMobileNumbers() {
+    return this.userMobileNumbers;
+  }
+
+  public void setUserMobileNumbers(UserMobileNumbersExpression userMobileNumbers) {
+    this.userMobileNumbers = userMobileNumbers;
   }
 
   public Conditional getCond() {

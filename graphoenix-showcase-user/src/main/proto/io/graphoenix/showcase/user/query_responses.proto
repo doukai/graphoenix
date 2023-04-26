@@ -34,14 +34,23 @@ message QueryUserProfileListResponse {
 message QueryUserProfileConnectionResponse {
     optional UserProfileConnection user_profile_connection = 1;
 }
-message QueryUserMobileNumbersResponse {
-    optional UserMobileNumbers user_mobile_numbers = 1;
+message QueryRoleResponse {
+    optional Role role = 1;
 }
-message QueryUserMobileNumbersListResponse {
-    repeated UserMobileNumbers user_mobile_numbers_list = 1;
+message QueryRoleListResponse {
+    repeated Role role_list = 1;
 }
-message QueryUserMobileNumbersConnectionResponse {
-    optional UserMobileNumbersConnection user_mobile_numbers_connection = 1;
+message QueryRoleConnectionResponse {
+    optional RoleConnection role_connection = 1;
+}
+message QueryOrganizationResponse {
+    optional Organization organization = 1;
+}
+message QueryOrganizationListResponse {
+    repeated Organization organization_list = 1;
+}
+message QueryOrganizationConnectionResponse {
+    optional OrganizationConnection organization_connection = 1;
 }
 message QueryUserRoleResponse {
     optional UserRole user_role = 1;
@@ -52,14 +61,14 @@ message QueryUserRoleListResponse {
 message QueryUserRoleConnectionResponse {
     optional UserRoleConnection user_role_connection = 1;
 }
-message QueryRoleResponse {
-    optional Role role = 1;
+message QueryUserMobileNumbersResponse {
+    optional UserMobileNumbers user_mobile_numbers = 1;
 }
-message QueryRoleListResponse {
-    repeated Role role_list = 1;
+message QueryUserMobileNumbersListResponse {
+    repeated UserMobileNumbers user_mobile_numbers_list = 1;
 }
-message QueryRoleConnectionResponse {
-    optional RoleConnection role_connection = 1;
+message QueryUserMobileNumbersConnectionResponse {
+    optional UserMobileNumbersConnection user_mobile_numbers_connection = 1;
 }
 message QueryRoleRoleTypeResponse {
     optional RoleRoleType role_role_type = 1;
@@ -69,15 +78,6 @@ message QueryRoleRoleTypeListResponse {
 }
 message QueryRoleRoleTypeConnectionResponse {
     optional RoleRoleTypeConnection role_role_type_connection = 1;
-}
-message QueryOrganizationResponse {
-    optional Organization organization = 1;
-}
-message QueryOrganizationListResponse {
-    repeated Organization organization_list = 1;
-}
-message QueryOrganizationConnectionResponse {
-    optional OrganizationConnection organization_connection = 1;
 }
 message QueryIsDeprecatedResponse {
     optional bool is_deprecated = 1;

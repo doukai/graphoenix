@@ -25,25 +25,25 @@ public class MutationType implements Meta {
 
   private Collection<UserProfile> userProfileList;
 
-  private UserMobileNumbers userMobileNumbers;
+  private Role role;
 
-  private Collection<UserMobileNumbers> userMobileNumbersList;
+  private Collection<Role> roleList;
+
+  private Organization organization;
+
+  private Collection<Organization> organizationList;
 
   private UserRole userRole;
 
   private Collection<UserRole> userRoleList;
 
-  private Role role;
+  private UserMobileNumbers userMobileNumbers;
 
-  private Collection<Role> roleList;
+  private Collection<UserMobileNumbers> userMobileNumbersList;
 
   private RoleRoleType roleRoleType;
 
   private Collection<RoleRoleType> roleRoleTypeList;
-
-  private Organization organization;
-
-  private Collection<Organization> organizationList;
 
   private Boolean isDeprecated;
 
@@ -93,20 +93,36 @@ public class MutationType implements Meta {
     this.userProfileList = userProfileList;
   }
 
-  public UserMobileNumbers getUserMobileNumbers() {
-    return this.userMobileNumbers;
+  public Role getRole() {
+    return this.role;
   }
 
-  public void setUserMobileNumbers(UserMobileNumbers userMobileNumbers) {
-    this.userMobileNumbers = userMobileNumbers;
+  public void setRole(Role role) {
+    this.role = role;
   }
 
-  public Collection<UserMobileNumbers> getUserMobileNumbersList() {
-    return this.userMobileNumbersList;
+  public Collection<Role> getRoleList() {
+    return this.roleList;
   }
 
-  public void setUserMobileNumbersList(Collection<UserMobileNumbers> userMobileNumbersList) {
-    this.userMobileNumbersList = userMobileNumbersList;
+  public void setRoleList(Collection<Role> roleList) {
+    this.roleList = roleList;
+  }
+
+  public Organization getOrganization() {
+    return this.organization;
+  }
+
+  public void setOrganization(Organization organization) {
+    this.organization = organization;
+  }
+
+  public Collection<Organization> getOrganizationList() {
+    return this.organizationList;
+  }
+
+  public void setOrganizationList(Collection<Organization> organizationList) {
+    this.organizationList = organizationList;
   }
 
   public UserRole getUserRole() {
@@ -125,20 +141,20 @@ public class MutationType implements Meta {
     this.userRoleList = userRoleList;
   }
 
-  public Role getRole() {
-    return this.role;
+  public UserMobileNumbers getUserMobileNumbers() {
+    return this.userMobileNumbers;
   }
 
-  public void setRole(Role role) {
-    this.role = role;
+  public void setUserMobileNumbers(UserMobileNumbers userMobileNumbers) {
+    this.userMobileNumbers = userMobileNumbers;
   }
 
-  public Collection<Role> getRoleList() {
-    return this.roleList;
+  public Collection<UserMobileNumbers> getUserMobileNumbersList() {
+    return this.userMobileNumbersList;
   }
 
-  public void setRoleList(Collection<Role> roleList) {
-    this.roleList = roleList;
+  public void setUserMobileNumbersList(Collection<UserMobileNumbers> userMobileNumbersList) {
+    this.userMobileNumbersList = userMobileNumbersList;
   }
 
   public RoleRoleType getRoleRoleType() {
@@ -155,22 +171,6 @@ public class MutationType implements Meta {
 
   public void setRoleRoleTypeList(Collection<RoleRoleType> roleRoleTypeList) {
     this.roleRoleTypeList = roleRoleTypeList;
-  }
-
-  public Organization getOrganization() {
-    return this.organization;
-  }
-
-  public void setOrganization(Organization organization) {
-    this.organization = organization;
-  }
-
-  public Collection<Organization> getOrganizationList() {
-    return this.organizationList;
-  }
-
-  public void setOrganizationList(Collection<Organization> organizationList) {
-    this.organizationList = organizationList;
   }
 
   @Override

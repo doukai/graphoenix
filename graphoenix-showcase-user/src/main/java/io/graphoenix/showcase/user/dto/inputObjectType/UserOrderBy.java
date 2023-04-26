@@ -25,8 +25,6 @@ public class UserOrderBy {
 
   private Sort sex;
 
-  private Sort organizationId;
-
   private Sort isDeprecated;
 
   private Sort version;
@@ -44,6 +42,8 @@ public class UserOrderBy {
   private Sort createGroupId;
 
   private Sort __typename;
+
+  private Sort organizationId;
 
   public Sort getId() {
     return this.id;
@@ -99,14 +99,6 @@ public class UserOrderBy {
 
   public void setSex(Sort sex) {
     this.sex = sex;
-  }
-
-  public Sort getOrganizationId() {
-    return this.organizationId;
-  }
-
-  public void setOrganizationId(Sort organizationId) {
-    this.organizationId = organizationId;
   }
 
   public Sort getIsDeprecated() {
@@ -179,5 +171,13 @@ public class UserOrderBy {
 
   public void set__typename(Sort __typename) {
     this.__typename = __typename;
+  }
+
+  public Sort getOrganizationId() {
+    return this.organizationId;
+  }
+
+  public void setOrganizationId(Sort organizationId) {
+    this.organizationId = organizationId;
   }
 }

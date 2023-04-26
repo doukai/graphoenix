@@ -11,13 +11,9 @@ import java.lang.annotation.Target;
 public @interface __TypeOrderBy0 {
   Sort name() default Sort.ASC;
 
-  Sort schemaId() default Sort.ASC;
-
   Sort kind() default Sort.ASC;
 
   Sort description() default Sort.ASC;
-
-  Sort ofTypeName() default Sort.ASC;
 
   Sort isDeprecated() default Sort.ASC;
 
@@ -36,4 +32,8 @@ public @interface __TypeOrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
+
+  Sort schemaId() default Sort.ASC;
+
+  Sort ofTypeName() default Sort.ASC;
 }

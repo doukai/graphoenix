@@ -96,6 +96,10 @@ public interface IGraphQLDocumentManager {
 
     boolean isNotFetchField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
+    boolean isMapField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    boolean isNotMapField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
     boolean isFunctionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
     boolean isNotFunctionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
@@ -341,6 +345,8 @@ public interface IGraphQLDocumentManager {
     String getMapWithTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
     GraphqlParser.FieldDefinitionContext getMapWithToObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    Optional<String> getDataTypeName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
     Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitionFromArgumentsDefinitionContext(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext,
                                                                                                               GraphqlParser.ArgumentContext argumentContext);

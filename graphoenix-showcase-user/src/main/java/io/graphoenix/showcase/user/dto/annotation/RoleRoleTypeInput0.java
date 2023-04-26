@@ -38,6 +38,8 @@ public @interface RoleRoleTypeInput0 {
 
   String $roleId() default "";
 
+  String $from() default "";
+
   String $type() default "";
 
   String $isDeprecated() default "";

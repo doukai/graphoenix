@@ -19,8 +19,6 @@ public class __EnumValueInput {
 
   private String name;
 
-  private String ofTypeName;
-
   private __TypeInput ofType;
 
   private String description;
@@ -46,6 +44,8 @@ public class __EnumValueInput {
   @DefaultValue("\"__EnumValue\"")
   private String __typename;
 
+  private String ofTypeName;
+
   public String getId() {
     return this.id;
   }
@@ -60,14 +60,6 @@ public class __EnumValueInput {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public __TypeInput getOfType() {
@@ -164,5 +156,13 @@ public class __EnumValueInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 }

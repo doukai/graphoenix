@@ -11,7 +11,6 @@ import java.lang.Override;
 import java.lang.String;
 import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.Id;
-import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type
@@ -22,7 +21,6 @@ public class __DirectiveLocations implements Meta {
   @Id
   private String id;
 
-  @NonNull
   private String directiveName;
 
   private __Directive from;

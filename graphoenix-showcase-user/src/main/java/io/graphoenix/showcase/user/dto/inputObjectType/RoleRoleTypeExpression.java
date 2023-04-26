@@ -20,6 +20,8 @@ public class RoleRoleTypeExpression {
 
   private IntExpression roleId;
 
+  private RoleExpression from;
+
   private RoleTypeExpression type;
 
   @DefaultValue("false")
@@ -60,6 +62,14 @@ public class RoleRoleTypeExpression {
 
   public void setRoleId(IntExpression roleId) {
     this.roleId = roleId;
+  }
+
+  public RoleExpression getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(RoleExpression from) {
+    this.from = from;
   }
 
   public RoleTypeExpression getType() {

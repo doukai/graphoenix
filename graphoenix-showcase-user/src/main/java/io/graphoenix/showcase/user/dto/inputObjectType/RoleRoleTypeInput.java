@@ -20,6 +20,8 @@ public class RoleRoleTypeInput {
 
   private Integer roleId;
 
+  private RoleInput from;
+
   private RoleType type;
 
   private Boolean isDeprecated;
@@ -55,6 +57,14 @@ public class RoleRoleTypeInput {
 
   public void setRoleId(Integer roleId) {
     this.roleId = roleId;
+  }
+
+  public RoleInput getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(RoleInput from) {
+    this.from = from;
   }
 
   public RoleType getType() {

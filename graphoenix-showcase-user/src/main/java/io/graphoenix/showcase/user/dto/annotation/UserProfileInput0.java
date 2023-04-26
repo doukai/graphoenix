@@ -11,8 +11,6 @@ import java.lang.annotation.Target;
 public @interface UserProfileInput0 {
   String id() default "";
 
-  String userId() default "";
-
   String email() default "";
 
   String address() default "";
@@ -35,9 +33,9 @@ public @interface UserProfileInput0 {
 
   String __typename() default "";
 
-  String $id() default "";
+  int userId() default 0;
 
-  String $userId() default "";
+  String $id() default "";
 
   String $user() default "";
 
@@ -62,4 +60,6 @@ public @interface UserProfileInput0 {
   String $createGroupId() default "";
 
   String $__typename() default "";
+
+  String $userId() default "";
 }

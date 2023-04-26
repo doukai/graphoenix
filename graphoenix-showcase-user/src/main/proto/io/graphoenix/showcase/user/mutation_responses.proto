@@ -23,11 +23,17 @@ message MutationUserProfileResponse {
 message MutationUserProfileListResponse {
     repeated UserProfile user_profile_list = 1;
 }
-message MutationUserMobileNumbersResponse {
-    optional UserMobileNumbers user_mobile_numbers = 1;
+message MutationRoleResponse {
+    optional Role role = 1;
 }
-message MutationUserMobileNumbersListResponse {
-    repeated UserMobileNumbers user_mobile_numbers_list = 1;
+message MutationRoleListResponse {
+    repeated Role role_list = 1;
+}
+message MutationOrganizationResponse {
+    optional Organization organization = 1;
+}
+message MutationOrganizationListResponse {
+    repeated Organization organization_list = 1;
 }
 message MutationUserRoleResponse {
     optional UserRole user_role = 1;
@@ -35,23 +41,17 @@ message MutationUserRoleResponse {
 message MutationUserRoleListResponse {
     repeated UserRole user_role_list = 1;
 }
-message MutationRoleResponse {
-    optional Role role = 1;
+message MutationUserMobileNumbersResponse {
+    optional UserMobileNumbers user_mobile_numbers = 1;
 }
-message MutationRoleListResponse {
-    repeated Role role_list = 1;
+message MutationUserMobileNumbersListResponse {
+    repeated UserMobileNumbers user_mobile_numbers_list = 1;
 }
 message MutationRoleRoleTypeResponse {
     optional RoleRoleType role_role_type = 1;
 }
 message MutationRoleRoleTypeListResponse {
     repeated RoleRoleType role_role_type_list = 1;
-}
-message MutationOrganizationResponse {
-    optional Organization organization = 1;
-}
-message MutationOrganizationListResponse {
-    repeated Organization organization_list = 1;
 }
 message MutationIsDeprecatedResponse {
     optional bool is_deprecated = 1;

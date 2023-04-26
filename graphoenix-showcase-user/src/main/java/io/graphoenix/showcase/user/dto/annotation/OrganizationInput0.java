@@ -13,8 +13,6 @@ public @interface OrganizationInput0 {
 
   String name() default "";
 
-  int aboveId() default 0;
-
   boolean isDeprecated() default false;
 
   int version() default 0;
@@ -33,11 +31,11 @@ public @interface OrganizationInput0 {
 
   String __typename() default "";
 
+  int aboveId() default 0;
+
   String $id() default "";
 
   String $name() default "";
-
-  String $aboveId() default "";
 
   String $above() default "";
 
@@ -64,4 +62,6 @@ public @interface OrganizationInput0 {
   String $usersAggregate() default "";
 
   String $usersConnection() default "";
+
+  String $aboveId() default "";
 }

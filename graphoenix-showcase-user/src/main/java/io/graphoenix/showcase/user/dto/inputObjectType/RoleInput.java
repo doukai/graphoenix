@@ -44,6 +44,10 @@ public class RoleInput {
   @DefaultValue("\"Role\"")
   private String __typename;
 
+  private Collection<RoleRoleTypeInput> roleRoleType;
+
+  private Collection<UserRoleInput> userRole;
+
   public String getId() {
     return this.id;
   }
@@ -146,5 +150,21 @@ public class RoleInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Collection<RoleRoleTypeInput> getRoleRoleType() {
+    return this.roleRoleType;
+  }
+
+  public void setRoleRoleType(Collection<RoleRoleTypeInput> roleRoleType) {
+    this.roleRoleType = roleRoleType;
+  }
+
+  public Collection<UserRoleInput> getUserRole() {
+    return this.userRole;
+  }
+
+  public void setUserRole(Collection<UserRoleInput> userRole) {
+    this.userRole = userRole;
   }
 }

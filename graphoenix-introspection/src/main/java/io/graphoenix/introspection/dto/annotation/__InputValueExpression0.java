@@ -16,10 +16,6 @@ public @interface __InputValueExpression0 {
 
   StringExpression name() default @StringExpression;
 
-  StringExpression typeName() default @StringExpression;
-
-  StringExpression ofTypeName() default @StringExpression;
-
   IntExpression fieldId() default @IntExpression;
 
   StringExpression directiveName() default @StringExpression;
@@ -45,6 +41,10 @@ public @interface __InputValueExpression0 {
   StringExpression createGroupId() default @StringExpression;
 
   StringExpression __typename() default @StringExpression;
+
+  StringExpression ofTypeName() default @StringExpression;
+
+  StringExpression typeName() default @StringExpression;
 
   String[] groupBy() default {};
 

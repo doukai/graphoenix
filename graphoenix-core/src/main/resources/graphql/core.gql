@@ -154,9 +154,10 @@ input InvokeParameter {
 
 directive @dataType(
     type: String
+    default: String
     length: Int
     decimals: Int
-    default: String
+    autoIncrement: Boolean
 ) on FIELD_DEFINITION
 
 directive @map(

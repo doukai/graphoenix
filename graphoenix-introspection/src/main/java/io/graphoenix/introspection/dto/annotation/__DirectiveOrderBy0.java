@@ -11,8 +11,6 @@ import java.lang.annotation.Target;
 public @interface __DirectiveOrderBy0 {
   Sort name() default Sort.ASC;
 
-  Sort schemaId() default Sort.ASC;
-
   Sort description() default Sort.ASC;
 
   Sort locations() default Sort.ASC;
@@ -36,4 +34,6 @@ public @interface __DirectiveOrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
+
+  Sort schemaId() default Sort.ASC;
 }

@@ -67,6 +67,19 @@ public class Role implements Meta {
 
   private UserConnection usersConnection;
 
+  @NonNull
+  private Collection<RoleRoleType> roleRoleType;
+
+  private RoleRoleType roleRoleTypeAggregate;
+
+  private RoleRoleTypeConnection roleRoleTypeConnection;
+
+  private Collection<UserRole> userRole;
+
+  private UserRole userRoleAggregate;
+
+  private UserRoleConnection userRoleConnection;
+
   public String getId() {
     return this.id;
   }
@@ -249,5 +262,53 @@ public class Role implements Meta {
 
   public void setUsersConnection(UserConnection usersConnection) {
     this.usersConnection = usersConnection;
+  }
+
+  public Collection<RoleRoleType> getRoleRoleType() {
+    return this.roleRoleType;
+  }
+
+  public void setRoleRoleType(Collection<RoleRoleType> roleRoleType) {
+    this.roleRoleType = roleRoleType;
+  }
+
+  public RoleRoleType getRoleRoleTypeAggregate() {
+    return this.roleRoleTypeAggregate;
+  }
+
+  public void setRoleRoleTypeAggregate(RoleRoleType roleRoleTypeAggregate) {
+    this.roleRoleTypeAggregate = roleRoleTypeAggregate;
+  }
+
+  public RoleRoleTypeConnection getRoleRoleTypeConnection() {
+    return this.roleRoleTypeConnection;
+  }
+
+  public void setRoleRoleTypeConnection(RoleRoleTypeConnection roleRoleTypeConnection) {
+    this.roleRoleTypeConnection = roleRoleTypeConnection;
+  }
+
+  public Collection<UserRole> getUserRole() {
+    return this.userRole;
+  }
+
+  public void setUserRole(Collection<UserRole> userRole) {
+    this.userRole = userRole;
+  }
+
+  public UserRole getUserRoleAggregate() {
+    return this.userRoleAggregate;
+  }
+
+  public void setUserRoleAggregate(UserRole userRoleAggregate) {
+    this.userRoleAggregate = userRoleAggregate;
+  }
+
+  public UserRoleConnection getUserRoleConnection() {
+    return this.userRoleConnection;
+  }
+
+  public void setUserRoleConnection(UserRoleConnection userRoleConnection) {
+    this.userRoleConnection = userRoleConnection;
   }
 }

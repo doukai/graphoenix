@@ -40,8 +40,6 @@ public class User implements Meta {
 
   private UserProfile userProfile;
 
-  private Integer organizationId;
-
   private Organization organization;
 
   private Collection<Role> roles;
@@ -102,6 +100,24 @@ public class User implements Meta {
 
   private Integer ageMin;
 
+  private Role rolesAggregate;
+
+  private RoleConnection rolesConnection;
+
+  private Integer organizationId;
+
+  private Collection<UserRole> userRole;
+
+  private UserRole userRoleAggregate;
+
+  private UserRoleConnection userRoleConnection;
+
+  private Collection<UserMobileNumbers> userMobileNumbers;
+
+  private UserMobileNumbers userMobileNumbersAggregate;
+
+  private UserMobileNumbersConnection userMobileNumbersConnection;
+
   private Integer organizationIdCount;
 
   private Integer organizationIdSum;
@@ -111,10 +127,6 @@ public class User implements Meta {
   private Integer organizationIdMax;
 
   private Integer organizationIdMin;
-
-  private Role rolesAggregate;
-
-  private RoleConnection rolesConnection;
 
   public String getId() {
     return this.id;
@@ -178,14 +190,6 @@ public class User implements Meta {
 
   public void setUserProfile(UserProfile userProfile) {
     this.userProfile = userProfile;
-  }
-
-  public Integer getOrganizationId() {
-    return this.organizationId;
-  }
-
-  public void setOrganizationId(Integer organizationId) {
-    this.organizationId = organizationId;
   }
 
   public Organization getOrganization() {
@@ -436,6 +440,79 @@ public class User implements Meta {
     this.ageMin = ageMin;
   }
 
+  public Role getRolesAggregate() {
+    return this.rolesAggregate;
+  }
+
+  public void setRolesAggregate(Role rolesAggregate) {
+    this.rolesAggregate = rolesAggregate;
+  }
+
+  public RoleConnection getRolesConnection() {
+    return this.rolesConnection;
+  }
+
+  public void setRolesConnection(RoleConnection rolesConnection) {
+    this.rolesConnection = rolesConnection;
+  }
+
+  public Integer getOrganizationId() {
+    return this.organizationId;
+  }
+
+  public void setOrganizationId(Integer organizationId) {
+    this.organizationId = organizationId;
+  }
+
+  public Collection<UserRole> getUserRole() {
+    return this.userRole;
+  }
+
+  public void setUserRole(Collection<UserRole> userRole) {
+    this.userRole = userRole;
+  }
+
+  public UserRole getUserRoleAggregate() {
+    return this.userRoleAggregate;
+  }
+
+  public void setUserRoleAggregate(UserRole userRoleAggregate) {
+    this.userRoleAggregate = userRoleAggregate;
+  }
+
+  public UserRoleConnection getUserRoleConnection() {
+    return this.userRoleConnection;
+  }
+
+  public void setUserRoleConnection(UserRoleConnection userRoleConnection) {
+    this.userRoleConnection = userRoleConnection;
+  }
+
+  public Collection<UserMobileNumbers> getUserMobileNumbers() {
+    return this.userMobileNumbers;
+  }
+
+  public void setUserMobileNumbers(Collection<UserMobileNumbers> userMobileNumbers) {
+    this.userMobileNumbers = userMobileNumbers;
+  }
+
+  public UserMobileNumbers getUserMobileNumbersAggregate() {
+    return this.userMobileNumbersAggregate;
+  }
+
+  public void setUserMobileNumbersAggregate(UserMobileNumbers userMobileNumbersAggregate) {
+    this.userMobileNumbersAggregate = userMobileNumbersAggregate;
+  }
+
+  public UserMobileNumbersConnection getUserMobileNumbersConnection() {
+    return this.userMobileNumbersConnection;
+  }
+
+  public void setUserMobileNumbersConnection(
+      UserMobileNumbersConnection userMobileNumbersConnection) {
+    this.userMobileNumbersConnection = userMobileNumbersConnection;
+  }
+
   public Integer getOrganizationIdCount() {
     return this.organizationIdCount;
   }
@@ -474,21 +551,5 @@ public class User implements Meta {
 
   public void setOrganizationIdMin(Integer organizationIdMin) {
     this.organizationIdMin = organizationIdMin;
-  }
-
-  public Role getRolesAggregate() {
-    return this.rolesAggregate;
-  }
-
-  public void setRolesAggregate(Role rolesAggregate) {
-    this.rolesAggregate = rolesAggregate;
-  }
-
-  public RoleConnection getRolesConnection() {
-    return this.rolesConnection;
-  }
-
-  public void setRolesConnection(RoleConnection rolesConnection) {
-    this.rolesConnection = rolesConnection;
   }
 }

@@ -22,6 +22,8 @@ public class UserMobileNumbers implements Meta {
 
   private Integer userId;
 
+  private User from;
+
   private String mobileNumber;
 
   private Boolean isDeprecated;
@@ -80,6 +82,14 @@ public class UserMobileNumbers implements Meta {
 
   public void setUserId(Integer userId) {
     this.userId = userId;
+  }
+
+  public User getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(User from) {
+    this.from = from;
   }
 
   public String getMobileNumber() {

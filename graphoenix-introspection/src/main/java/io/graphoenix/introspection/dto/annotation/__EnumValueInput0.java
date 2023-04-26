@@ -13,8 +13,6 @@ public @interface __EnumValueInput0 {
 
   String name() default "";
 
-  String ofTypeName() default "";
-
   String description() default "";
 
   String deprecationReason() default "";
@@ -37,11 +35,11 @@ public @interface __EnumValueInput0 {
 
   String __typename() default "";
 
+  String ofTypeName() default "";
+
   String $id() default "";
 
   String $name() default "";
-
-  String $ofTypeName() default "";
 
   String $ofType() default "";
 
@@ -66,4 +64,6 @@ public @interface __EnumValueInput0 {
   String $createGroupId() default "";
 
   String $__typename() default "";
+
+  String $ofTypeName() default "";
 }

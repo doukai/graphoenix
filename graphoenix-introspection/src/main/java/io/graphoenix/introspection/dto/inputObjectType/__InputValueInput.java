@@ -19,10 +19,6 @@ public class __InputValueInput {
 
   private String name;
 
-  private String typeName;
-
-  private String ofTypeName;
-
   private __TypeInput ofType;
 
   private Integer fieldId;
@@ -54,6 +50,10 @@ public class __InputValueInput {
   @DefaultValue("\"__InputValue\"")
   private String __typename;
 
+  private String ofTypeName;
+
+  private String typeName;
+
   public String getId() {
     return this.id;
   }
@@ -68,22 +68,6 @@ public class __InputValueInput {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public __TypeInput getOfType() {
@@ -204,5 +188,21 @@ public class __InputValueInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
   }
 }

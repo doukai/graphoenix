@@ -23,10 +23,6 @@ public class __InputValue implements Meta {
 
   private String name;
 
-  private String typeName;
-
-  private String ofTypeName;
-
   private __Type ofType;
 
   private Integer fieldId;
@@ -72,18 +68,6 @@ public class __InputValue implements Meta {
 
   private String nameMin;
 
-  private Integer typeNameCount;
-
-  private String typeNameMax;
-
-  private String typeNameMin;
-
-  private Integer ofTypeNameCount;
-
-  private String ofTypeNameMax;
-
-  private String ofTypeNameMin;
-
   private Integer directiveNameCount;
 
   private String directiveNameMax;
@@ -112,6 +96,22 @@ public class __InputValue implements Meta {
 
   private Integer fieldIdMin;
 
+  private String ofTypeName;
+
+  private String typeName;
+
+  private Integer ofTypeNameCount;
+
+  private String ofTypeNameMax;
+
+  private String ofTypeNameMin;
+
+  private Integer typeNameCount;
+
+  private String typeNameMax;
+
+  private String typeNameMin;
+
   public String getId() {
     return this.id;
   }
@@ -126,22 +126,6 @@ public class __InputValue implements Meta {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public __Type getOfType() {
@@ -328,54 +312,6 @@ public class __InputValue implements Meta {
     this.nameMin = nameMin;
   }
 
-  public Integer getTypeNameCount() {
-    return this.typeNameCount;
-  }
-
-  public void setTypeNameCount(Integer typeNameCount) {
-    this.typeNameCount = typeNameCount;
-  }
-
-  public String getTypeNameMax() {
-    return this.typeNameMax;
-  }
-
-  public void setTypeNameMax(String typeNameMax) {
-    this.typeNameMax = typeNameMax;
-  }
-
-  public String getTypeNameMin() {
-    return this.typeNameMin;
-  }
-
-  public void setTypeNameMin(String typeNameMin) {
-    this.typeNameMin = typeNameMin;
-  }
-
-  public Integer getOfTypeNameCount() {
-    return this.ofTypeNameCount;
-  }
-
-  public void setOfTypeNameCount(Integer ofTypeNameCount) {
-    this.ofTypeNameCount = ofTypeNameCount;
-  }
-
-  public String getOfTypeNameMax() {
-    return this.ofTypeNameMax;
-  }
-
-  public void setOfTypeNameMax(String ofTypeNameMax) {
-    this.ofTypeNameMax = ofTypeNameMax;
-  }
-
-  public String getOfTypeNameMin() {
-    return this.ofTypeNameMin;
-  }
-
-  public void setOfTypeNameMin(String ofTypeNameMin) {
-    this.ofTypeNameMin = ofTypeNameMin;
-  }
-
   public Integer getDirectiveNameCount() {
     return this.directiveNameCount;
   }
@@ -486,5 +422,69 @@ public class __InputValue implements Meta {
 
   public void setFieldIdMin(Integer fieldIdMin) {
     this.fieldIdMin = fieldIdMin;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
+
+  public Integer getOfTypeNameCount() {
+    return this.ofTypeNameCount;
+  }
+
+  public void setOfTypeNameCount(Integer ofTypeNameCount) {
+    this.ofTypeNameCount = ofTypeNameCount;
+  }
+
+  public String getOfTypeNameMax() {
+    return this.ofTypeNameMax;
+  }
+
+  public void setOfTypeNameMax(String ofTypeNameMax) {
+    this.ofTypeNameMax = ofTypeNameMax;
+  }
+
+  public String getOfTypeNameMin() {
+    return this.ofTypeNameMin;
+  }
+
+  public void setOfTypeNameMin(String ofTypeNameMin) {
+    this.ofTypeNameMin = ofTypeNameMin;
+  }
+
+  public Integer getTypeNameCount() {
+    return this.typeNameCount;
+  }
+
+  public void setTypeNameCount(Integer typeNameCount) {
+    this.typeNameCount = typeNameCount;
+  }
+
+  public String getTypeNameMax() {
+    return this.typeNameMax;
+  }
+
+  public void setTypeNameMax(String typeNameMax) {
+    this.typeNameMax = typeNameMax;
+  }
+
+  public String getTypeNameMin() {
+    return this.typeNameMin;
+  }
+
+  public void setTypeNameMin(String typeNameMin) {
+    this.typeNameMin = typeNameMin;
   }
 }

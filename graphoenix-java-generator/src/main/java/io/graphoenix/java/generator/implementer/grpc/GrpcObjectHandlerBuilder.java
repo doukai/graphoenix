@@ -91,7 +91,7 @@ public class GrpcObjectHandlerBuilder {
                 .filter(manager::isNotFetchField)
                 .collect(Collectors.toList());
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContexts) {
-            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+            String fieldTypeName = manager.getDataTypeName(fieldDefinitionContext).orElseGet(() -> manager.getFieldTypeName(fieldDefinitionContext.type()));
             String fieldGetterName = grpcNameUtil.getGetMethodName(fieldDefinitionContext);
             String objectFieldMethodName = grpcNameUtil.getLowerCamelName(fieldDefinitionContext.type());
             CodeBlock codeBlock;
