@@ -117,7 +117,8 @@ public class MutationHandlerBuilder {
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext ->
                         idFieldName.isPresent() && fieldDefinitionContext.name().getText().equals(idFieldName.get()) ||
-                                manager.isFetchField(fieldDefinitionContext) && manager.getFetchAnchor(fieldDefinitionContext) == before ||
+                                manager.isFetchField(fieldDefinitionContext) && manager.hasFetchWith(fieldDefinitionContext) ||
+                                manager.isFetchField(fieldDefinitionContext) && !manager.hasFetchWith(fieldDefinitionContext) && manager.getFetchAnchor(fieldDefinitionContext) == before ||
                                 !manager.isFetchField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
                 )
                 .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
@@ -143,7 +144,7 @@ public class MutationHandlerBuilder {
                     if (before) {
                         if (manager.hasFetchWith(fieldDefinitionContext)) {
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
-                            String withObjectFiledFrom = manager.getFetchFrom(withObjectField);
+                            String withObjectFiledFrom = manager.getMapWithFrom(withObjectField);
                             String withObjectFiledTo = manager.getFetchTo(withObjectField);
                             builder.beginControlFlow("if(valueWithVariable.asJsonObject().containsKey($S) && !valueWithVariable.asJsonObject().isNull($S))", from, from)
                                     .addStatement("loader.registerWithTypeFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).build()).collect($T.toJsonArray()))",

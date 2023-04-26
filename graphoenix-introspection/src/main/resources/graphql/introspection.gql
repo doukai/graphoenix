@@ -17,10 +17,10 @@ type __Type {
     fields: [__Field!] @map(from: "name" to: "ofTypeName")
 
     # OBJECT only
-    interfaces: [__Type!] @map(from: "name" with: {type: "__TypeInterfaces", from: "typeName", to: "interfaceName"} to: "name")
+    interfaces: [__Type!] @map(from: "name" with: {type: "__TypeInterfaces" from: "typeName" to: "interfaceName"} to: "name")
 
     # INTERFACE and UNION only
-    possibleTypes: [__Type!] @map(from: "name" with: {type: "__TypePossibleTypes", from: "typeName", to: "possibleTypeName"} to: "name")
+    possibleTypes: [__Type!] @map(from: "name" with: {type: "__TypePossibleTypes" from: "typeName" to: "possibleTypeName"} to: "name")
 
     # ENUM only
     enumValues: [__EnumValue!] @map(from: "name" to: "ofTypeName")
@@ -65,7 +65,7 @@ type __Directive {
     name: ID!
     ofSchema: __Schema @map(from: "schemaId" to: "id" anchor: true)
     description: String
-    locations: [__DirectiveLocation!]! @map(from: "name" with: {type: "__DirectiveLocations", from: "directiveName", to: "directiveLocation"})
+    locations: [__DirectiveLocation!]! @map(from: "name" with: {type: "__DirectiveLocations" from: "directiveName" to: "directiveLocation"})
     args: [__InputValue!]! @map(from: "name" to: "directiveName")
     isRepeatable: Boolean!
 }

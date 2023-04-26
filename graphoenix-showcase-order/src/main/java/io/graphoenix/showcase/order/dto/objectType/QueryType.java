@@ -57,6 +57,12 @@ public class QueryType implements Meta {
 
   private MerchantConnection merchantConnection;
 
+  private MerchantPartners merchantPartners;
+
+  private Collection<MerchantPartners> merchantPartnersList;
+
+  private MerchantPartnersConnection merchantPartnersConnection;
+
   @Override
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
@@ -231,5 +237,29 @@ public class QueryType implements Meta {
 
   public void setMerchantConnection(MerchantConnection merchantConnection) {
     this.merchantConnection = merchantConnection;
+  }
+
+  public MerchantPartners getMerchantPartners() {
+    return this.merchantPartners;
+  }
+
+  public void setMerchantPartners(MerchantPartners merchantPartners) {
+    this.merchantPartners = merchantPartners;
+  }
+
+  public Collection<MerchantPartners> getMerchantPartnersList() {
+    return this.merchantPartnersList;
+  }
+
+  public void setMerchantPartnersList(Collection<MerchantPartners> merchantPartnersList) {
+    this.merchantPartnersList = merchantPartnersList;
+  }
+
+  public MerchantPartnersConnection getMerchantPartnersConnection() {
+    return this.merchantPartnersConnection;
+  }
+
+  public void setMerchantPartnersConnection(MerchantPartnersConnection merchantPartnersConnection) {
+    this.merchantPartnersConnection = merchantPartnersConnection;
   }
 }

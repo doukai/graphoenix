@@ -8,10 +8,10 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
-public @interface MerchantInput0 {
+public @interface MerchantPartnersInput0 {
   String id() default "";
 
-  String name() default "";
+  int merchantId() default 0;
 
   int organizationId() default 0;
 
@@ -35,15 +35,13 @@ public @interface MerchantInput0 {
 
   String $id() default "";
 
-  String $name() default "";
+  String $merchantId() default "";
+
+  String $from() default "";
 
   String $organizationId() default "";
 
-  String $organization() default "";
-
-  String $customerServices() default "";
-
-  String $partners() default "";
+  String $to() default "";
 
   String $isDeprecated() default "";
 
@@ -62,10 +60,4 @@ public @interface MerchantInput0 {
   String $createGroupId() default "";
 
   String $__typename() default "";
-
-  String $merchantPartners() default "";
-
-  String $merchantPartnersAggregate() default "";
-
-  String $merchantPartnersConnection() default "";
 }

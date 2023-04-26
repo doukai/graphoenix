@@ -74,3 +74,12 @@ message QueryMerchantListResponse {
 message QueryMerchantConnectionResponse {
     optional MerchantConnection merchant_connection = 1;
 }
+message QueryMerchantPartnersResponse {
+    optional MerchantPartners merchant_partners = 1;
+}
+message QueryMerchantPartnersListResponse {
+    repeated MerchantPartners merchant_partners_list = 1;
+}
+message QueryMerchantPartnersConnectionResponse {
+    optional MerchantPartnersConnection merchant_partners_connection = 1;
+}

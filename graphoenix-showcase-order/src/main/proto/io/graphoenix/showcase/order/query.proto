@@ -33,4 +33,7 @@ service QueryTypeService {
     rpc Merchant (QueryMerchantRequest) returns (QueryMerchantResponse);
     rpc MerchantList (QueryMerchantListRequest) returns (QueryMerchantListResponse);
     rpc MerchantConnection (QueryMerchantConnectionRequest) returns (QueryMerchantConnectionResponse);
+    rpc MerchantPartners (QueryMerchantPartnersRequest) returns (QueryMerchantPartnersResponse);
+    rpc MerchantPartnersList (QueryMerchantPartnersListRequest) returns (QueryMerchantPartnersListResponse);
+    rpc MerchantPartnersConnection (QueryMerchantPartnersConnectionRequest) returns (QueryMerchantPartnersConnectionResponse);
 }

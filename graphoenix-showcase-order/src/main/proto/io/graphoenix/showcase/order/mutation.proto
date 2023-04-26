@@ -29,4 +29,6 @@ service MutationTypeService {
     rpc ProductList (MutationProductListRequest) returns (MutationProductListResponse);
     rpc Merchant (MutationMerchantRequest) returns (MutationMerchantResponse);
     rpc MerchantList (MutationMerchantListRequest) returns (MutationMerchantListResponse);
+    rpc MerchantPartners (MutationMerchantPartnersRequest) returns (MutationMerchantPartnersResponse);
+    rpc MerchantPartnersList (MutationMerchantPartnersListRequest) returns (MutationMerchantPartnersListResponse);
 }

@@ -3,7 +3,6 @@ package io.graphoenix.showcase.order.dto.objectType;
 import com.dslplatform.json.CompiledJson;
 import io.graphoenix.core.dto.interfaceType.Meta;
 import io.graphoenix.showcase.user.dto.objectType.Organization;
-import io.graphoenix.showcase.user.dto.objectType.User;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -11,29 +10,24 @@ import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import org.eclipse.microprofile.graphql.Id;
-import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class Merchant implements Meta {
+public class MerchantPartners implements Meta {
   @Id
   private String id;
 
-  @NonNull
-  private String name;
+  private Integer merchantId;
+
+  private Merchant from;
 
   private Integer organizationId;
 
-  private Organization organization;
-
-  private Collection<User> customerServices;
-
-  private Collection<Organization> partners;
+  private Organization to;
 
   private Boolean isDeprecated;
 
@@ -61,11 +55,15 @@ public class Merchant implements Meta {
   @Id
   private String idMin;
 
-  private Integer nameCount;
+  private Integer merchantIdCount;
 
-  private String nameMax;
+  private Integer merchantIdSum;
 
-  private String nameMin;
+  private Integer merchantIdAvg;
+
+  private Integer merchantIdMax;
+
+  private Integer merchantIdMin;
 
   private Integer organizationIdCount;
 
@@ -77,12 +75,6 @@ public class Merchant implements Meta {
 
   private Integer organizationIdMin;
 
-  private Collection<MerchantPartners> merchantPartners;
-
-  private MerchantPartners merchantPartnersAggregate;
-
-  private MerchantPartnersConnection merchantPartnersConnection;
-
   public String getId() {
     return this.id;
   }
@@ -91,12 +83,20 @@ public class Merchant implements Meta {
     this.id = id;
   }
 
-  public String getName() {
-    return this.name;
+  public Integer getMerchantId() {
+    return this.merchantId;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setMerchantId(Integer merchantId) {
+    this.merchantId = merchantId;
+  }
+
+  public Merchant getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(Merchant from) {
+    this.from = from;
   }
 
   public Integer getOrganizationId() {
@@ -107,28 +107,12 @@ public class Merchant implements Meta {
     this.organizationId = organizationId;
   }
 
-  public Organization getOrganization() {
-    return this.organization;
+  public Organization getTo() {
+    return this.to;
   }
 
-  public void setOrganization(Organization organization) {
-    this.organization = organization;
-  }
-
-  public Collection<User> getCustomerServices() {
-    return this.customerServices;
-  }
-
-  public void setCustomerServices(Collection<User> customerServices) {
-    this.customerServices = customerServices;
-  }
-
-  public Collection<Organization> getPartners() {
-    return this.partners;
-  }
-
-  public void setPartners(Collection<Organization> partners) {
-    this.partners = partners;
+  public void setTo(Organization to) {
+    this.to = to;
   }
 
   @Override
@@ -243,28 +227,44 @@ public class Merchant implements Meta {
     this.idMin = idMin;
   }
 
-  public Integer getNameCount() {
-    return this.nameCount;
+  public Integer getMerchantIdCount() {
+    return this.merchantIdCount;
   }
 
-  public void setNameCount(Integer nameCount) {
-    this.nameCount = nameCount;
+  public void setMerchantIdCount(Integer merchantIdCount) {
+    this.merchantIdCount = merchantIdCount;
   }
 
-  public String getNameMax() {
-    return this.nameMax;
+  public Integer getMerchantIdSum() {
+    return this.merchantIdSum;
   }
 
-  public void setNameMax(String nameMax) {
-    this.nameMax = nameMax;
+  public void setMerchantIdSum(Integer merchantIdSum) {
+    this.merchantIdSum = merchantIdSum;
   }
 
-  public String getNameMin() {
-    return this.nameMin;
+  public Integer getMerchantIdAvg() {
+    return this.merchantIdAvg;
   }
 
-  public void setNameMin(String nameMin) {
-    this.nameMin = nameMin;
+  public void setMerchantIdAvg(Integer merchantIdAvg) {
+    this.merchantIdAvg = merchantIdAvg;
+  }
+
+  public Integer getMerchantIdMax() {
+    return this.merchantIdMax;
+  }
+
+  public void setMerchantIdMax(Integer merchantIdMax) {
+    this.merchantIdMax = merchantIdMax;
+  }
+
+  public Integer getMerchantIdMin() {
+    return this.merchantIdMin;
+  }
+
+  public void setMerchantIdMin(Integer merchantIdMin) {
+    this.merchantIdMin = merchantIdMin;
   }
 
   public Integer getOrganizationIdCount() {
@@ -305,29 +305,5 @@ public class Merchant implements Meta {
 
   public void setOrganizationIdMin(Integer organizationIdMin) {
     this.organizationIdMin = organizationIdMin;
-  }
-
-  public Collection<MerchantPartners> getMerchantPartners() {
-    return this.merchantPartners;
-  }
-
-  public void setMerchantPartners(Collection<MerchantPartners> merchantPartners) {
-    this.merchantPartners = merchantPartners;
-  }
-
-  public MerchantPartners getMerchantPartnersAggregate() {
-    return this.merchantPartnersAggregate;
-  }
-
-  public void setMerchantPartnersAggregate(MerchantPartners merchantPartnersAggregate) {
-    this.merchantPartnersAggregate = merchantPartnersAggregate;
-  }
-
-  public MerchantPartnersConnection getMerchantPartnersConnection() {
-    return this.merchantPartnersConnection;
-  }
-
-  public void setMerchantPartnersConnection(MerchantPartnersConnection merchantPartnersConnection) {
-    this.merchantPartnersConnection = merchantPartnersConnection;
   }
 }

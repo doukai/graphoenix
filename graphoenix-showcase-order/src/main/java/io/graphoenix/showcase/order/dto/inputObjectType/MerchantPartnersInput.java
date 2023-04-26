@@ -2,14 +2,12 @@ package io.graphoenix.showcase.order.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
 import io.graphoenix.showcase.user.dto.inputObjectType.OrganizationInput;
-import io.graphoenix.showcase.user.dto.inputObjectType.UserInput;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
@@ -17,18 +15,16 @@ import org.eclipse.microprofile.graphql.Input;
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class MerchantInput {
+public class MerchantPartnersInput {
   private String id;
 
-  private String name;
+  private Integer merchantId;
+
+  private MerchantInput from;
 
   private Integer organizationId;
 
-  private OrganizationInput organization;
-
-  private Collection<UserInput> customerServices;
-
-  private Collection<OrganizationInput> partners;
+  private OrganizationInput to;
 
   private Boolean isDeprecated;
 
@@ -46,10 +42,8 @@ public class MerchantInput {
 
   private String createGroupId;
 
-  @DefaultValue("\"Merchant\"")
+  @DefaultValue("\"MerchantPartners\"")
   private String __typename;
-
-  private Collection<MerchantPartnersInput> merchantPartners;
 
   public String getId() {
     return this.id;
@@ -59,12 +53,20 @@ public class MerchantInput {
     this.id = id;
   }
 
-  public String getName() {
-    return this.name;
+  public Integer getMerchantId() {
+    return this.merchantId;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setMerchantId(Integer merchantId) {
+    this.merchantId = merchantId;
+  }
+
+  public MerchantInput getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(MerchantInput from) {
+    this.from = from;
   }
 
   public Integer getOrganizationId() {
@@ -75,28 +77,12 @@ public class MerchantInput {
     this.organizationId = organizationId;
   }
 
-  public OrganizationInput getOrganization() {
-    return this.organization;
+  public OrganizationInput getTo() {
+    return this.to;
   }
 
-  public void setOrganization(OrganizationInput organization) {
-    this.organization = organization;
-  }
-
-  public Collection<UserInput> getCustomerServices() {
-    return this.customerServices;
-  }
-
-  public void setCustomerServices(Collection<UserInput> customerServices) {
-    this.customerServices = customerServices;
-  }
-
-  public Collection<OrganizationInput> getPartners() {
-    return this.partners;
-  }
-
-  public void setPartners(Collection<OrganizationInput> partners) {
-    this.partners = partners;
+  public void setTo(OrganizationInput to) {
+    this.to = to;
   }
 
   public Boolean getIsDeprecated() {
@@ -169,13 +155,5 @@ public class MerchantInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
-  }
-
-  public Collection<MerchantPartnersInput> getMerchantPartners() {
-    return this.merchantPartners;
-  }
-
-  public void setMerchantPartners(Collection<MerchantPartnersInput> merchantPartners) {
-    this.merchantPartners = merchantPartners;
   }
 }
