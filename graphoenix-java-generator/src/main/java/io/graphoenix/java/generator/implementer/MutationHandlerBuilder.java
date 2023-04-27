@@ -147,21 +147,20 @@ public class MutationHandlerBuilder {
                             String withTo = manager.getFetchWithTo(fieldDefinitionContext);
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
                             builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).build()).collect($T.toJsonArray()))",
-                                            fieldDefinitionContext.name().getText(),
-                                            withObjectField.name().getText(),
-                                            withFrom,
-                                            from,
-                                            ClassName.get(JsonCollectors.class)
-                                    )
-                                    .addStatement("loader.registerArray($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, $S, null, field.getValue())",
+                                    fieldDefinitionContext.name().getText(),
+                                    withObjectField.name().getText(),
+                                    withFrom,
+                                    from,
+                                    ClassName.get(JsonCollectors.class)
+                            )
+                                    .addStatement("loader.registerArray($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue(), false)",
                                             packageName,
                                             protocol,
                                             typeName,
                                             to,
                                             key,
                                             withObjectField.name().getText(),
-                                            withTo,
-                                            from
+                                            withTo
                                     );
                         }
                     } else {
@@ -207,32 +206,32 @@ public class MutationHandlerBuilder {
                     if (before) {
                         if (manager.hasFetchWith(fieldDefinitionContext)) {
                             String withFrom = manager.getFetchWithFrom(fieldDefinitionContext);
+                            String withTo = manager.getFetchWithTo(fieldDefinitionContext);
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
                             builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).build())",
-                                            fieldDefinitionContext.name().getText(),
-                                            withObjectField.name().getText(),
-                                            withFrom,
-                                            from
-                                    )
-                                    .addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer, $S, $S, null, field.getValue())",
+                                    fieldDefinitionContext.name().getText(),
+                                    withObjectField.name().getText(),
+                                    withFrom,
+                                    from
+                            )
+                                    .addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue(), true)",
                                             packageName,
                                             protocol,
                                             typeName,
                                             to,
                                             key,
                                             withObjectField.name().getText(),
-                                            from
+                                            withTo
                                     );
                         } else {
-                            builder.addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer, $S, $S, $S, field.getValue())",
+                            builder.addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue(), true)",
                                     packageName,
                                     protocol,
                                     typeName,
                                     to,
                                     key,
-                                    from,
-                                    from,
-                                    to
+                                    fieldDefinitionContext.name().getText(),
+                                    from
                             );
                         }
                     } else {

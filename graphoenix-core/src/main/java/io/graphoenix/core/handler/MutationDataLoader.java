@@ -326,12 +326,12 @@ public abstract class MutationDataLoader {
         selectionMap.get(packageName).get(protocol).get(typeName).add(selectionName);
     }
 
-    public void addJsonPointer(String packageName, String protocol, String typeName, int index, String jsonPointer, String from) {
+    public void addJsonPointer(String packageName, String protocol, String typeName, int index, String jsonPointer, String selectionName) {
         indexMap.computeIfAbsent(packageName, k -> new ConcurrentHashMap<>());
         indexMap.get(packageName).computeIfAbsent(protocol, k -> new ConcurrentHashMap<>());
         indexMap.get(packageName).get(protocol).computeIfAbsent(typeName, k -> new ConcurrentHashMap<>());
         indexMap.get(packageName).get(protocol).get(typeName).computeIfAbsent(index, k -> new ArrayList<>());
-        indexMap.get(packageName).get(protocol).get(typeName).get(index).add(Tuple.of(jsonPointer, from));
+        indexMap.get(packageName).get(protocol).get(typeName).get(index).add(Tuple.of(jsonPointer, selectionName));
     }
 
     protected Mono<Void> fetch(String packageName, String protocol) {
