@@ -63,6 +63,12 @@ public class QueryType implements Meta {
 
   private MerchantPartnersConnection merchantPartnersConnection;
 
+  private MerchantDirector merchantDirector;
+
+  private Collection<MerchantDirector> merchantDirectorList;
+
+  private MerchantDirectorConnection merchantDirectorConnection;
+
   @Override
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
@@ -261,5 +267,29 @@ public class QueryType implements Meta {
 
   public void setMerchantPartnersConnection(MerchantPartnersConnection merchantPartnersConnection) {
     this.merchantPartnersConnection = merchantPartnersConnection;
+  }
+
+  public MerchantDirector getMerchantDirector() {
+    return this.merchantDirector;
+  }
+
+  public void setMerchantDirector(MerchantDirector merchantDirector) {
+    this.merchantDirector = merchantDirector;
+  }
+
+  public Collection<MerchantDirector> getMerchantDirectorList() {
+    return this.merchantDirectorList;
+  }
+
+  public void setMerchantDirectorList(Collection<MerchantDirector> merchantDirectorList) {
+    this.merchantDirectorList = merchantDirectorList;
+  }
+
+  public MerchantDirectorConnection getMerchantDirectorConnection() {
+    return this.merchantDirectorConnection;
+  }
+
+  public void setMerchantDirectorConnection(MerchantDirectorConnection merchantDirectorConnection) {
+    this.merchantDirectorConnection = merchantDirectorConnection;
   }
 }

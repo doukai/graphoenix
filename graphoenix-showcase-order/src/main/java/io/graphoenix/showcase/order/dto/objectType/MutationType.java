@@ -53,6 +53,10 @@ public class MutationType implements Meta {
 
   private Collection<MerchantPartners> merchantPartnersList;
 
+  private MerchantDirector merchantDirector;
+
+  private Collection<MerchantDirector> merchantDirectorList;
+
   @Override
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
@@ -211,5 +215,21 @@ public class MutationType implements Meta {
 
   public void setMerchantPartnersList(Collection<MerchantPartners> merchantPartnersList) {
     this.merchantPartnersList = merchantPartnersList;
+  }
+
+  public MerchantDirector getMerchantDirector() {
+    return this.merchantDirector;
+  }
+
+  public void setMerchantDirector(MerchantDirector merchantDirector) {
+    this.merchantDirector = merchantDirector;
+  }
+
+  public Collection<MerchantDirector> getMerchantDirectorList() {
+    return this.merchantDirectorList;
+  }
+
+  public void setMerchantDirectorList(Collection<MerchantDirector> merchantDirectorList) {
+    this.merchantDirectorList = merchantDirectorList;
   }
 }

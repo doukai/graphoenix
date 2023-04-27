@@ -43,7 +43,7 @@ public abstract class MutationDataLoader {
     private final Jsonb jsonb;
     private final OperationHandler operationHandler;
     private final Map<String, Map<String, Map<String, Map<String, JsonObject>>>> objectValueMap = new ConcurrentHashMap<>();
-    private final Map<String, Map<String, Map<String, Map<String, Set<String>>>>> removeConditionMap = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, Map<String, Map<String, Set<JsonValue>>>>> removeConditionMap = new ConcurrentHashMap<>();
     private final Map<String, Map<String, Map<String, Set<String>>>> selectionMap = new ConcurrentHashMap<>();
     private final Map<String, Map<String, Map<String, Map<Integer, List<Tuple2<String, String>>>>>> indexMap = new ConcurrentHashMap<>();
     private final Map<String, Map<String, JsonValue>> resultMap = new ConcurrentHashMap<>();
@@ -69,31 +69,31 @@ public abstract class MutationDataLoader {
         return this;
     }
 
-    public void register(String packageName, String protocol, String typeName, String selectionName, String keyName, String jsonPointer, String element, String from, String to, JsonValue jsonValue) {
+    public void register(String packageName, String protocol, String typeName, String selectionName, String keyName, String jsonPointer, String element, JsonValue jsonValue, boolean removeOther) {
         addSelection(packageName, protocol, typeName, keyName);
         if (selectionName != null) {
             addSelection(packageName, protocol, typeName, selectionName);
         }
-        addObjectValue(packageName, protocol, typeName, keyName, jsonPointer + "/" + element, from, to, jsonValue.asJsonObject());
+        addObjectValue(packageName, protocol, typeName, selectionName, keyName, jsonPointer, element, jsonValue.asJsonObject(), removeOther);
     }
 
-    public void registerArray(String packageName, String protocol, String typeName, String selectionName, String keyName, String jsonPointer, String element, String from, String to, JsonValue jsonValue) {
+    public void registerArray(String packageName, String protocol, String typeName, String selectionName, String keyName, String jsonPointer, String element, JsonValue jsonValue, boolean removeOther) {
         if (jsonValue != null && jsonValue.getValueType().equals(JsonValue.ValueType.ARRAY)) {
             JsonArray jsonArray = jsonValue.asJsonArray();
-            IntStream.range(0, jsonArray.size()).forEach(index -> register(packageName, protocol, typeName, selectionName, keyName, jsonPointer + "/" + index, element, from, to, jsonArray.get(index)));
+            IntStream.range(0, jsonArray.size()).forEach(index -> register(packageName, protocol, typeName, selectionName, keyName, jsonPointer + "/" + index, element, jsonArray.get(index), removeOther));
         }
     }
 
     public void register(String packageName, String protocol, String typeName, String keyName, JsonValue jsonValue) {
-        register(packageName, protocol, typeName, null, keyName, null, null, null, null, jsonValue);
+        register(packageName, protocol, typeName, null, keyName, null, null, jsonValue, false);
     }
 
     public void registerArray(String packageName, String protocol, String typeName, String keyName, JsonValue jsonValue) {
-        registerArray(packageName, protocol, typeName, null, keyName, null, null, null, null, jsonValue);
+        registerArray(packageName, protocol, typeName, null, keyName, null, null, jsonValue, false);
     }
 
-    public void registerWithTypeFiled(String jsonPointer, String filedName, String withTypeFieldName, JsonValue jsonValue) {
-        withTypeFiledMap.put(jsonPointer, Tuple.of(filedName, withTypeFieldName, jsonValue));
+    public void registerReplaceFiled(String jsonPointer, String removeFiled, String addField, JsonValue jsonValue) {
+        withTypeFiledMap.put(jsonPointer, Tuple.of(removeFiled, addField, jsonValue));
     }
 
     public void registerUpdate(String typeName, JsonValue jsonValue) {
@@ -132,10 +132,10 @@ public abstract class MutationDataLoader {
                                                                                                 typeEntry.getValue().values()
                                                                                         )
                                                                                         .setFields(selectionMap.get(packageName).get(protocol).get(typeEntry.getKey()).stream().map(Field::new).collect(Collectors.toSet()))
-                                                                                        .addFields(buildRemoveMutationFields(packageName, protocol))
                                                                         )
                                                                         .collect(Collectors.toSet())
                                                         )
+                                                        .addFields(buildRemoveMutationFields(packageName, protocol))
                                         )
                         )
         );
@@ -144,15 +144,15 @@ public abstract class MutationDataLoader {
     List<Field> buildRemoveMutationFields(String packageName, String protocol) {
         return Stream.ofNullable(removeConditionMap.get(packageName))
                 .flatMap(protocolMap ->
-                        Stream.ofNullable(removeConditionMap.get(protocol))
+                        Stream.ofNullable(protocolMap.get(protocol))
                                 .flatMap(typeMap ->
                                         typeMap.entrySet().stream()
                                                 .flatMap(typeEntry ->
                                                         typeEntry.getValue().entrySet().stream()
-                                                                .map(toEntry ->
+                                                                .map(selectionEntry ->
                                                                         new Field()
                                                                                 .setName(typeToLowerCamelName(typeEntry.getKey()))
-                                                                                .setAlias(typeToLowerCamelName(typeEntry.getKey()).concat("_").concat(toEntry.getKey()))
+                                                                                .setAlias(typeToLowerCamelName(typeEntry.getKey()).concat("_").concat(selectionEntry.getKey()))
                                                                                 .addArgument(
                                                                                         DEPRECATED_FIELD_NAME,
                                                                                         true
@@ -160,14 +160,14 @@ public abstract class MutationDataLoader {
                                                                                 .addArgument(
                                                                                         WHERE_INPUT_NAME,
                                                                                         Map.of(
-                                                                                                toEntry.getKey(),
-                                                                                                toEntry.getValue().isEmpty() ?
+                                                                                                selectionEntry.getKey(),
+                                                                                                selectionEntry.getValue().isEmpty() ?
                                                                                                         Map.of(
                                                                                                                 "opr", new EnumValue("NNIL")
                                                                                                         ) :
                                                                                                         Map.of(
                                                                                                                 "opr", new EnumValue("NIN"),
-                                                                                                                "in", toEntry.getValue()
+                                                                                                                "in", selectionEntry.getValue()
                                                                                                         )
                                                                                         )
                                                                                 )
@@ -178,7 +178,6 @@ public abstract class MutationDataLoader {
                 )
                 .collect(Collectors.toList());
     }
-
 
     public Mono<Void> backup() {
         return Mono.justOrEmpty(graphQLConfig.getBackup())
@@ -278,45 +277,45 @@ public abstract class MutationDataLoader {
                 );
     }
 
-    public void addObjectValue(String packageName, String protocol, String typeName, String keyName, String jsonPointer, String from, String to, JsonObject objectValueWithVariable) {
+    public void addObjectValue(String packageName, String protocol, String typeName, String selectionName, String keyName, String jsonPointer, String element, JsonObject objectValueWithVariable, boolean removeOther) {
         objectValueMap.computeIfAbsent(packageName, k -> new ConcurrentHashMap<>());
         objectValueMap.get(packageName).computeIfAbsent(protocol, k -> new LinkedHashMap<>());
         objectValueMap.get(packageName).get(protocol).computeIfAbsent(typeName, k -> new LinkedHashMap<>());
         JsonValue keyField = objectValueWithVariable.get(keyName);
         Map<String, JsonObject> typeValueMap = objectValueMap.get(packageName).get(protocol).get(typeName);
+        String mergePath = element != null ? jsonPointer + "/" + element : jsonPointer;
         if (keyField != null && keyField.getValueType().equals(JsonValue.ValueType.STRING)) {
             String key = ((JsonString) keyField).getString();
             if (typeValueMap.containsKey(key)) {
-                if (jsonPointer != null && from != null) {
-                    addJsonPointer(packageName, protocol, typeName, new ArrayList<>(typeValueMap.keySet()).indexOf(key), jsonPointer, from);
+                if (jsonPointer != null) {
+                    addJsonPointer(packageName, protocol, typeName, new ArrayList<>(typeValueMap.keySet()).indexOf(key), mergePath, selectionName);
                 }
             } else {
                 typeValueMap.put(key, objectValueWithVariable);
-                if (jsonPointer != null && from != null) {
-                    addJsonPointer(packageName, protocol, typeName, typeValueMap.size() - 1, jsonPointer, from);
+                if (jsonPointer != null) {
+                    addJsonPointer(packageName, protocol, typeName, typeValueMap.size() - 1, mergePath, selectionName);
                 }
-                if (to != null) {
-                    addRemoveCondition(packageName, protocol, typeName, from, to, objectValueWithVariable);
+                if (removeOther) {
+                    addRemoveCondition(packageName, protocol, typeName, element, selectionName, objectValueWithVariable);
                 }
             }
         } else {
             typeValueMap.put(UUID.randomUUID().toString(), objectValueWithVariable);
-            if (jsonPointer != null && from != null) {
-                addJsonPointer(packageName, protocol, typeName, typeValueMap.size() - 1, jsonPointer, from);
+            if (jsonPointer != null) {
+                addJsonPointer(packageName, protocol, typeName, typeValueMap.size() - 1, mergePath, selectionName);
             }
         }
     }
 
-    public void addRemoveCondition(String packageName, String protocol, String typeName, String from, String to, JsonObject objectValueWithVariable) {
+    public void addRemoveCondition(String packageName, String protocol, String typeName, String element, String selectionName, JsonObject objectValueWithVariable) {
         removeConditionMap.computeIfAbsent(packageName, k -> new ConcurrentHashMap<>());
         removeConditionMap.get(packageName).computeIfAbsent(protocol, k -> new LinkedHashMap<>());
         removeConditionMap.get(packageName).get(protocol).computeIfAbsent(typeName, k -> new LinkedHashMap<>());
-        removeConditionMap.get(packageName).get(protocol).get(typeName).computeIfAbsent(typeName, k -> new LinkedHashSet<>());
-        JsonValue fromField = objectValueWithVariable.get(from);
-        if (fromField != null && fromField.getValueType().equals(JsonValue.ValueType.STRING)) {
-            String fromValue = ((JsonString) fromField).getString();
-            Set<String> conditionSet = removeConditionMap.get(packageName).get(protocol).get(typeName).get(to);
-            conditionSet.add(fromValue);
+        removeConditionMap.get(packageName).get(protocol).get(typeName).computeIfAbsent(selectionName, k -> new LinkedHashSet<>());
+        JsonValue elementField = objectValueWithVariable.get(element);
+        if (elementField != null) {
+            Set<JsonValue> conditionSet = removeConditionMap.get(packageName).get(protocol).get(typeName).get(selectionName);
+            conditionSet.add(elementField);
         }
     }
 
@@ -394,14 +393,13 @@ public abstract class MutationDataLoader {
         return patchBuilder.build().apply(jsonObject);
     }
 
-    protected JsonValue replaceWithFiled(JsonObject jsonObject) {
+    public JsonValue replaceAll(JsonObject jsonObject) {
         if (!withTypeFiledMap.isEmpty()) {
             JsonPatchBuilder patchBuilder = jsonProvider.createPatchBuilder();
-            withTypeFiledMap.forEach((jsonPointer, tuple3) -> {
-                        patchBuilder.add(jsonPointer.concat("/").concat(tuple3._2()), tuple3._3()).remove(jsonPointer.concat("/").concat(tuple3._1()));
-                    }
-            );
-            return patchBuilder.build().apply(jsonObject);
+            withTypeFiledMap.forEach((jsonPointer, tuple3) -> patchBuilder.add(jsonPointer.concat("/").concat(tuple3._2()), tuple3._3()).remove(jsonPointer.concat("/").concat(tuple3._1())));
+            JsonObject replaced = patchBuilder.build().apply(jsonObject);
+            withTypeFiledMap.clear();
+            return replaced;
         }
         return jsonObject;
     }

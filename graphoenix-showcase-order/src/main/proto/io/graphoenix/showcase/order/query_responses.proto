@@ -83,3 +83,12 @@ message QueryMerchantPartnersListResponse {
 message QueryMerchantPartnersConnectionResponse {
     optional MerchantPartnersConnection merchant_partners_connection = 1;
 }
+message QueryMerchantDirectorResponse {
+    optional MerchantDirector merchant_director = 1;
+}
+message QueryMerchantDirectorListResponse {
+    repeated MerchantDirector merchant_director_list = 1;
+}
+message QueryMerchantDirectorConnectionResponse {
+    optional MerchantDirectorConnection merchant_director_connection = 1;
+}

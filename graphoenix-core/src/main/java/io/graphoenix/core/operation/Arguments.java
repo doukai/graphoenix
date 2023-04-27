@@ -20,13 +20,13 @@ public class Arguments extends AbstractMap<String, JsonValue> implements JsonObj
     public Arguments(GraphqlParser.ArgumentsContext argumentsContext) {
         this.arguments = argumentsContext.argument().stream()
                 .map(argumentContext -> new SimpleEntry<>(argumentContext.name().getText(), new ValueWithVariable(argumentContext.valueWithVariable())))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (x, y) -> y, LinkedHashMap::new));
     }
 
     public Arguments(JsonObject jsonObject) {
         this.arguments = jsonObject.entrySet().stream()
                 .map(entry -> new SimpleEntry<>(entry.getKey(), new ValueWithVariable(entry.getValue())))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (x, y) -> y, LinkedHashMap::new));
     }
 
     public ValueWithVariable put(String key, BooleanValue value) {

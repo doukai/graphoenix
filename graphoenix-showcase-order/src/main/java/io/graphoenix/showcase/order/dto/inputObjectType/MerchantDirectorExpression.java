@@ -4,7 +4,6 @@ import com.dslplatform.json.CompiledJson;
 import io.graphoenix.core.dto.enumType.Conditional;
 import io.graphoenix.core.dto.inputObjectType.IntExpression;
 import io.graphoenix.core.dto.inputObjectType.StringExpression;
-import io.graphoenix.showcase.user.dto.inputObjectType.OrganizationExpression;
 import io.graphoenix.showcase.user.dto.inputObjectType.UserExpression;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
@@ -17,20 +16,16 @@ import org.eclipse.microprofile.graphql.Input;
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class MerchantExpression {
+public class MerchantDirectorExpression {
   private StringExpression id;
 
-  private StringExpression name;
+  private IntExpression merchantId;
 
-  private IntExpression organizationId;
+  private MerchantExpression from;
 
-  private OrganizationExpression organization;
+  private IntExpression userId;
 
-  private UserExpression customerServices;
-
-  private OrganizationExpression partners;
-
-  private UserExpression director;
+  private UserExpression to;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -51,14 +46,10 @@ public class MerchantExpression {
 
   private StringExpression __typename;
 
-  private MerchantPartnersExpression merchantPartners;
-
-  private MerchantDirectorExpression merchantDirector;
-
   @DefaultValue("AND")
   private Conditional cond;
 
-  private Collection<MerchantExpression> exs;
+  private Collection<MerchantDirectorExpression> exs;
 
   public StringExpression getId() {
     return this.id;
@@ -68,52 +59,36 @@ public class MerchantExpression {
     this.id = id;
   }
 
-  public StringExpression getName() {
-    return this.name;
+  public IntExpression getMerchantId() {
+    return this.merchantId;
   }
 
-  public void setName(StringExpression name) {
-    this.name = name;
+  public void setMerchantId(IntExpression merchantId) {
+    this.merchantId = merchantId;
   }
 
-  public IntExpression getOrganizationId() {
-    return this.organizationId;
+  public MerchantExpression getFrom() {
+    return this.from;
   }
 
-  public void setOrganizationId(IntExpression organizationId) {
-    this.organizationId = organizationId;
+  public void setFrom(MerchantExpression from) {
+    this.from = from;
   }
 
-  public OrganizationExpression getOrganization() {
-    return this.organization;
+  public IntExpression getUserId() {
+    return this.userId;
   }
 
-  public void setOrganization(OrganizationExpression organization) {
-    this.organization = organization;
+  public void setUserId(IntExpression userId) {
+    this.userId = userId;
   }
 
-  public UserExpression getCustomerServices() {
-    return this.customerServices;
+  public UserExpression getTo() {
+    return this.to;
   }
 
-  public void setCustomerServices(UserExpression customerServices) {
-    this.customerServices = customerServices;
-  }
-
-  public OrganizationExpression getPartners() {
-    return this.partners;
-  }
-
-  public void setPartners(OrganizationExpression partners) {
-    this.partners = partners;
-  }
-
-  public UserExpression getDirector() {
-    return this.director;
-  }
-
-  public void setDirector(UserExpression director) {
-    this.director = director;
+  public void setTo(UserExpression to) {
+    this.to = to;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -188,22 +163,6 @@ public class MerchantExpression {
     this.__typename = __typename;
   }
 
-  public MerchantPartnersExpression getMerchantPartners() {
-    return this.merchantPartners;
-  }
-
-  public void setMerchantPartners(MerchantPartnersExpression merchantPartners) {
-    this.merchantPartners = merchantPartners;
-  }
-
-  public MerchantDirectorExpression getMerchantDirector() {
-    return this.merchantDirector;
-  }
-
-  public void setMerchantDirector(MerchantDirectorExpression merchantDirector) {
-    this.merchantDirector = merchantDirector;
-  }
-
   public Conditional getCond() {
     return this.cond;
   }
@@ -212,11 +171,11 @@ public class MerchantExpression {
     this.cond = cond;
   }
 
-  public Collection<MerchantExpression> getExs() {
+  public Collection<MerchantDirectorExpression> getExs() {
     return this.exs;
   }
 
-  public void setExs(Collection<MerchantExpression> exs) {
+  public void setExs(Collection<MerchantDirectorExpression> exs) {
     this.exs = exs;
   }
 }

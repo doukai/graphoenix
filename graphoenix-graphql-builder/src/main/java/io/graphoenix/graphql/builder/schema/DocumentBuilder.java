@@ -297,9 +297,7 @@ public class DocumentBuilder {
                                     .flatMap(fieldDefinitionContext -> {
                                                 String withType = manager.getFetchWithType(fieldDefinitionContext);
                                                 Field field = new Field(getSchemaFieldName(withType))
-                                                        .setTypeName(
-                                                                fieldDefinitionContext.type().getText().replace(manager.getFieldTypeName(fieldDefinitionContext.type()), withType)
-                                                        )
+                                                        .setTypeName(manager.fieldTypeIsList(fieldDefinitionContext.type()) ? "[" + withType + "]" : withType)
                                                         .addDirective(
                                                                 new Directive(MAP_DIRECTIVE_NAME)
                                                                         .addArgument("from", manager.getFetchFrom(fieldDefinitionContext))
@@ -333,9 +331,7 @@ public class DocumentBuilder {
                                     .flatMap(fieldDefinitionContext -> {
                                                 String withType = manager.getMapWithType(fieldDefinitionContext);
                                                 Field field = new Field(getSchemaFieldName(withType))
-                                                        .setTypeName(
-                                                                fieldDefinitionContext.type().getText().replace(manager.getFieldTypeName(fieldDefinitionContext.type()), withType)
-                                                        )
+                                                        .setTypeName(manager.fieldTypeIsList(fieldDefinitionContext.type()) ? "[" + withType + "]" : withType)
                                                         .addDirective(
                                                                 new Directive(MAP_DIRECTIVE_NAME)
                                                                         .addArgument("from", manager.getMapFrom(fieldDefinitionContext))

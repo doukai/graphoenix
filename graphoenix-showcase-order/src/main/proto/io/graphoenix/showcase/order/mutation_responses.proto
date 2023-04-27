@@ -67,3 +67,9 @@ message MutationMerchantPartnersResponse {
 message MutationMerchantPartnersListResponse {
     repeated MerchantPartners merchant_partners_list = 1;
 }
+message MutationMerchantDirectorResponse {
+    optional MerchantDirector merchant_director = 1;
+}
+message MutationMerchantDirectorListResponse {
+    repeated MerchantDirector merchant_director_list = 1;
+}

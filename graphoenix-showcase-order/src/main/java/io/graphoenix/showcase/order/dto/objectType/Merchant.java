@@ -35,6 +35,9 @@ public class Merchant implements Meta {
 
   private Collection<Organization> partners;
 
+  @NonNull
+  private User director;
+
   private Boolean isDeprecated;
 
   private Integer version;
@@ -83,6 +86,9 @@ public class Merchant implements Meta {
 
   private MerchantPartnersConnection merchantPartnersConnection;
 
+  @NonNull
+  private MerchantDirector merchantDirector;
+
   public String getId() {
     return this.id;
   }
@@ -129,6 +135,14 @@ public class Merchant implements Meta {
 
   public void setPartners(Collection<Organization> partners) {
     this.partners = partners;
+  }
+
+  public User getDirector() {
+    return this.director;
+  }
+
+  public void setDirector(User director) {
+    this.director = director;
   }
 
   @Override
@@ -329,5 +343,13 @@ public class Merchant implements Meta {
 
   public void setMerchantPartnersConnection(MerchantPartnersConnection merchantPartnersConnection) {
     this.merchantPartnersConnection = merchantPartnersConnection;
+  }
+
+  public MerchantDirector getMerchantDirector() {
+    return this.merchantDirector;
+  }
+
+  public void setMerchantDirector(MerchantDirector merchantDirector) {
+    this.merchantDirector = merchantDirector;
   }
 }

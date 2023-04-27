@@ -111,29 +111,31 @@ message Merchant {
     optional io.graphoenix.showcase.user.grpc.Organization organization = 4;
     repeated io.graphoenix.showcase.user.grpc.User customer_services = 5;
     repeated io.graphoenix.showcase.user.grpc.Organization partners = 6;
-    optional bool is_deprecated = 7;
-    optional int32 version = 8;
-    optional string realm_id = 9;
-    optional string create_user_id = 10;
-    optional google.protobuf.Timestamp create_time = 11;
-    optional string update_user_id = 12;
-    optional google.protobuf.Timestamp update_time = 13;
-    optional string create_group_id = 14;
-    optional string intro_typename = 15;
-    optional int32 id_count = 16;
-    optional string id_max = 17;
-    optional string id_min = 18;
-    optional int32 name_count = 19;
-    optional string name_max = 20;
-    optional string name_min = 21;
-    optional int32 organization_id_count = 22;
-    optional int32 organization_id_sum = 23;
-    optional int32 organization_id_avg = 24;
-    optional int32 organization_id_max = 25;
-    optional int32 organization_id_min = 26;
-    repeated MerchantPartners merchant_partners = 27;
-    optional MerchantPartners merchant_partners_aggregate = 28;
-    optional MerchantPartnersConnection merchant_partners_connection = 29;
+    io.graphoenix.showcase.user.grpc.User director = 7;
+    optional bool is_deprecated = 8;
+    optional int32 version = 9;
+    optional string realm_id = 10;
+    optional string create_user_id = 11;
+    optional google.protobuf.Timestamp create_time = 12;
+    optional string update_user_id = 13;
+    optional google.protobuf.Timestamp update_time = 14;
+    optional string create_group_id = 15;
+    optional string intro_typename = 16;
+    optional int32 id_count = 17;
+    optional string id_max = 18;
+    optional string id_min = 19;
+    optional int32 name_count = 20;
+    optional string name_max = 21;
+    optional string name_min = 22;
+    optional int32 organization_id_count = 23;
+    optional int32 organization_id_sum = 24;
+    optional int32 organization_id_avg = 25;
+    optional int32 organization_id_max = 26;
+    optional int32 organization_id_min = 27;
+    repeated MerchantPartners merchant_partners = 28;
+    optional MerchantPartners merchant_partners_aggregate = 29;
+    optional MerchantPartnersConnection merchant_partners_connection = 30;
+    MerchantDirector merchant_director = 31;
 }
 message MerchantPartners {
     optional string id = 1;
@@ -163,6 +165,35 @@ message MerchantPartners {
     optional int32 organization_id_avg = 25;
     optional int32 organization_id_max = 26;
     optional int32 organization_id_min = 27;
+}
+message MerchantDirector {
+    optional string id = 1;
+    optional int32 merchant_id = 2;
+    optional Merchant from = 3;
+    optional int32 user_id = 4;
+    optional io.graphoenix.showcase.user.grpc.User to = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional google.protobuf.Timestamp create_time = 10;
+    optional string update_user_id = 11;
+    optional google.protobuf.Timestamp update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional int32 id_count = 15;
+    optional string id_max = 16;
+    optional string id_min = 17;
+    optional int32 merchant_id_count = 18;
+    optional int32 merchant_id_sum = 19;
+    optional int32 merchant_id_avg = 20;
+    optional int32 merchant_id_max = 21;
+    optional int32 merchant_id_min = 22;
+    optional int32 user_id_count = 23;
+    optional int32 user_id_sum = 24;
+    optional int32 user_id_avg = 25;
+    optional int32 user_id_max = 26;
+    optional int32 user_id_min = 27;
 }
 message OrderConnection {
     optional int32 total_count = 1;
@@ -207,5 +238,14 @@ message MerchantPartnersConnection {
 }
 message MerchantPartnersEdge {
     optional MerchantPartners node = 1;
+    optional string cursor = 2;
+}
+message MerchantDirectorConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated MerchantDirectorEdge edges = 3;
+}
+message MerchantDirectorEdge {
+    optional MerchantDirector node = 1;
     optional string cursor = 2;
 }

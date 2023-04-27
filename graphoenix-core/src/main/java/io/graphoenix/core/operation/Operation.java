@@ -5,6 +5,7 @@ import io.graphoenix.core.document.Directive;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -104,7 +105,7 @@ public class Operation {
         return this;
     }
 
-    public Operation addFields(Set<Field> fields) {
+    public Operation addFields(Collection<Field> fields) {
         if (this.fields == null) {
             this.fields = new LinkedHashSet<>();
         }

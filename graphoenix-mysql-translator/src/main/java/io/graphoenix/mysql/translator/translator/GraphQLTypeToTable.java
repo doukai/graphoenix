@@ -220,6 +220,7 @@ public class GraphQLTypeToTable {
                                         .filter(manager::isNotFetchField)
                                         .filter(manager::isNotFunctionField)
                                         .filter(manager::isNotConnectionField)
+                                        .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals("ID"))
                                         .map(this::createColumn)
                                         .flatMap(Optional::stream)
                                         .map(columnDefinition ->

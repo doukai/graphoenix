@@ -8,12 +8,12 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
-public @interface MerchantInput0 {
+public @interface MerchantDirectorInput0 {
   String id() default "";
 
-  String name() default "";
+  int merchantId() default 0;
 
-  int organizationId() default 0;
+  int userId() default 0;
 
   boolean isDeprecated() default false;
 
@@ -35,17 +35,13 @@ public @interface MerchantInput0 {
 
   String $id() default "";
 
-  String $name() default "";
+  String $merchantId() default "";
 
-  String $organizationId() default "";
+  String $from() default "";
 
-  String $organization() default "";
+  String $userId() default "";
 
-  String $customerServices() default "";
-
-  String $partners() default "";
-
-  String $director() default "";
+  String $to() default "";
 
   String $isDeprecated() default "";
 
@@ -64,12 +60,4 @@ public @interface MerchantInput0 {
   String $createGroupId() default "";
 
   String $__typename() default "";
-
-  String $merchantPartners() default "";
-
-  String $merchantPartnersAggregate() default "";
-
-  String $merchantPartnersConnection() default "";
-
-  String $merchantDirector() default "";
 }
