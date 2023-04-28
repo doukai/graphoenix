@@ -22,7 +22,7 @@ public class ArgumentBuilder {
         return selectionContext.field().arguments().argument().stream()
                 .filter(argumentContext -> argumentContext.name().getText().equals(name))
                 .findFirst()
-                .map(argumentContext -> jsonb.fromJson(new ValueWithVariable(argumentContext.valueWithVariable()).toString(), beanClass))
+                .map(argumentContext -> jsonb.fromJson(ValueWithVariable.of(argumentContext.valueWithVariable()).toString(), beanClass))
                 .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SELECTION_ARGUMENT_NOT_EXIST.bind(name, selectionContext.field().name().getText())));
     }
 }

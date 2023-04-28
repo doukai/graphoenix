@@ -124,9 +124,9 @@ public class MethodToOperation {
                                     String fieldName = entry.getKey().getSimpleName().toString();
                                     Object value = entry.getValue().getValue();
                                     if (fieldName.startsWith("$")) {
-                                        return new AbstractMap.SimpleEntry<>(fieldName.substring(1), (JsonValue) new ValueWithVariable(rebuildVariable(executableElement, value)));
+                                        return new AbstractMap.SimpleEntry<>(fieldName.substring(1), (JsonValue) ValueWithVariable.of(rebuildVariable(executableElement, value)));
                                     } else {
-                                        return new AbstractMap.SimpleEntry<>(fieldName, (JsonValue) new ValueWithVariable(rebuildValue(executableElement, value)));
+                                        return new AbstractMap.SimpleEntry<>(fieldName, (JsonValue) ValueWithVariable.of(rebuildValue(executableElement, value)));
                                     }
                                 }
                         )

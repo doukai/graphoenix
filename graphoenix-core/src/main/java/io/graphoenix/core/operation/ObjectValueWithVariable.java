@@ -179,7 +179,7 @@ public class ObjectValueWithVariable extends AbstractMap<String, JsonValue> impl
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/ObjectValueWithVariable.stg");
         ST st = stGroupFile.getInstanceOf("objectValueWithVariableDefinition");
-        st.add("objectValueWithVariable", objectValueWithVariable.keySet().stream().collect(Collectors.toMap(key -> key, key -> objectValueWithVariable.get(key).toString())));
+        st.add("objectValueWithVariable", objectValueWithVariable.entrySet().stream().map(entry -> new SimpleEntry<>(entry.getKey(), entry.getValue().toString())).collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
         String render = st.render();
         stGroupFile.unload();
         return render;

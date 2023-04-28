@@ -29,47 +29,12 @@ public class Arguments extends AbstractMap<String, JsonValue> implements JsonObj
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (x, y) -> y, LinkedHashMap::new));
     }
 
-    public ValueWithVariable put(String key, BooleanValue value) {
-        return arguments.put(key, ValueWithVariable.of(value));
-    }
-
-    public ValueWithVariable put(String key, IntValue value) {
-        return arguments.put(key, ValueWithVariable.of(value));
-    }
-
-    public ValueWithVariable put(String key, FloatValue value) {
-        return arguments.put(key, ValueWithVariable.of(value));
-    }
-
-    public ValueWithVariable put(String key, StringValue value) {
-        return arguments.put(key, ValueWithVariable.of(value));
-    }
-
-    public ValueWithVariable put(String key, EnumValue value) {
-        return arguments.put(key, ValueWithVariable.of(value));
-    }
-
-    public ValueWithVariable put(String key, NullValue value) {
-        return arguments.put(key, ValueWithVariable.of(value));
-    }
-
-    public ValueWithVariable put(String key, Arguments value) {
-        return arguments.put(key, ValueWithVariable.of(value));
-    }
-
-    public ValueWithVariable put(String key, ArrayValueWithVariable value) {
-        return arguments.put(key, ValueWithVariable.of(value));
-    }
-
-    public ValueWithVariable put(String key, Variable value) {
-        return arguments.put(key, ValueWithVariable.of(value));
+    @Override
+    public JsonValue put(String key, JsonValue value) {
+        return put(key, (Object) value);
     }
 
     public ValueWithVariable put(String key, Object value) {
-        return arguments.put(key, ValueWithVariable.of(value));
-    }
-
-    public ValueWithVariable put(String key, JsonValue value) {
         return arguments.put(key, ValueWithVariable.of(value));
     }
 
@@ -191,7 +156,7 @@ public class Arguments extends AbstractMap<String, JsonValue> implements JsonObj
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/Arguments.stg");
         ST st = stGroupFile.getInstanceOf("argumentsDefinition");
-        st.add("arguments", arguments);
+        st.add("arguments", arguments.entrySet().stream().map(entry -> new SimpleEntry<>(entry.getKey(), entry.getValue().toString())).collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
         String render = st.render();
         stGroupFile.unload();
         return render;

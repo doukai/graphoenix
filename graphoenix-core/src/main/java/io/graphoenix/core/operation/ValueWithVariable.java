@@ -25,7 +25,9 @@ public interface ValueWithVariable extends JsonValue {
     }
 
     static <T extends JsonValue> ValueWithVariable of(T value) {
-        if (value.equals(JsonValue.NULL)) {
+        if (value instanceof ValueWithVariable) {
+            return (ValueWithVariable) value;
+        } else if (value.equals(JsonValue.NULL)) {
             return new NullValue();
         } else if (value.equals(JsonValue.TRUE)) {
             return new BooleanValue(true);
@@ -74,6 +76,12 @@ public interface ValueWithVariable extends JsonValue {
     static ValueWithVariable of(Object value) {
         if (value == null) {
             return new NullValue();
+        } else if (value instanceof ValueWithVariable) {
+            return (ValueWithVariable) value;
+        } else if (value instanceof JsonValue) {
+            return of((JsonValue) value);
+        } else if (value instanceof GraphqlParser.ValueWithVariableContext) {
+            return of((GraphqlParser.ValueWithVariableContext) value);
         } else if (value instanceof VariableElement) {
             return new Variable(((VariableElement) value).getSimpleName().toString());
         } else if (value instanceof Boolean) {
@@ -112,6 +120,4 @@ public interface ValueWithVariable extends JsonValue {
             return new ObjectValueWithVariable(value);
         }
     }
-
-    String toString();
 }
