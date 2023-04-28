@@ -97,17 +97,17 @@ public abstract class MutationDataLoader {
     }
 
     public void registerUpdate(String typeName, JsonValue jsonValue) {
-        updateWhereMap.computeIfAbsent(typeName, k -> new ConcurrentHashMap<>());
-        if (jsonValue != null && jsonValue.getValueType().equals(JsonValue.ValueType.OBJECT)) {
-            Map<String, JsonObject> stringJsonObjectMap = updateWhereMap.get(typeName);
-            updateWhereMap.get(typeName).put(typeName + (updateWhereMap.size() - 1), jsonValue.asJsonObject());
+        updateMap.computeIfAbsent(typeName, k -> new LinkedHashSet<>());
+        if (jsonValue != null && jsonValue.getValueType().equals(JsonValue.ValueType.STRING)) {
+            updateMap.get(typeName).add(((JsonString) jsonValue).getString());
         }
     }
 
     public void registerWhere(String typeName, JsonValue jsonValue) {
-        updateMap.computeIfAbsent(typeName, k -> new LinkedHashSet<>());
-        if (jsonValue != null && jsonValue.getValueType().equals(JsonValue.ValueType.STRING)) {
-            updateMap.get(typeName).add(((JsonString) jsonValue).getString());
+        updateWhereMap.computeIfAbsent(typeName, k -> new ConcurrentHashMap<>());
+        if (jsonValue != null && jsonValue.getValueType().equals(JsonValue.ValueType.OBJECT)) {
+            Map<String, JsonObject> typeMap = updateWhereMap.get(typeName);
+            updateWhereMap.get(typeName).put(typeName + (typeMap.size() - 1), jsonValue.asJsonObject());
         }
     }
 
