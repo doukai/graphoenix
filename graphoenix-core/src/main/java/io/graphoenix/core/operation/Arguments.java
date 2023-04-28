@@ -19,58 +19,58 @@ public class Arguments extends AbstractMap<String, JsonValue> implements JsonObj
 
     public Arguments(GraphqlParser.ArgumentsContext argumentsContext) {
         this.arguments = argumentsContext.argument().stream()
-                .map(argumentContext -> new SimpleEntry<>(argumentContext.name().getText(), new ValueWithVariable(argumentContext.valueWithVariable())))
+                .map(argumentContext -> new SimpleEntry<>(argumentContext.name().getText(), ValueWithVariable.of(argumentContext.valueWithVariable())))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (x, y) -> y, LinkedHashMap::new));
     }
 
     public Arguments(JsonObject jsonObject) {
         this.arguments = jsonObject.entrySet().stream()
-                .map(entry -> new SimpleEntry<>(entry.getKey(), new ValueWithVariable(entry.getValue())))
+                .map(entry -> new SimpleEntry<>(entry.getKey(), ValueWithVariable.of(entry.getValue())))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (x, y) -> y, LinkedHashMap::new));
     }
 
     public ValueWithVariable put(String key, BooleanValue value) {
-        return arguments.put(key, new ValueWithVariable(value));
+        return arguments.put(key, ValueWithVariable.of(value));
     }
 
     public ValueWithVariable put(String key, IntValue value) {
-        return arguments.put(key, new ValueWithVariable(value));
+        return arguments.put(key, ValueWithVariable.of(value));
     }
 
     public ValueWithVariable put(String key, FloatValue value) {
-        return arguments.put(key, new ValueWithVariable(value));
+        return arguments.put(key, ValueWithVariable.of(value));
     }
 
     public ValueWithVariable put(String key, StringValue value) {
-        return arguments.put(key, new ValueWithVariable(value));
+        return arguments.put(key, ValueWithVariable.of(value));
     }
 
     public ValueWithVariable put(String key, EnumValue value) {
-        return arguments.put(key, new ValueWithVariable(value));
+        return arguments.put(key, ValueWithVariable.of(value));
     }
 
     public ValueWithVariable put(String key, NullValue value) {
-        return arguments.put(key, new ValueWithVariable(value));
+        return arguments.put(key, ValueWithVariable.of(value));
     }
 
     public ValueWithVariable put(String key, Arguments value) {
-        return arguments.put(key, new ValueWithVariable(value));
+        return arguments.put(key, ValueWithVariable.of(value));
     }
 
     public ValueWithVariable put(String key, ArrayValueWithVariable value) {
-        return arguments.put(key, new ValueWithVariable(value));
+        return arguments.put(key, ValueWithVariable.of(value));
     }
 
     public ValueWithVariable put(String key, Variable value) {
-        return arguments.put(key, new ValueWithVariable(value));
+        return arguments.put(key, ValueWithVariable.of(value));
     }
 
     public ValueWithVariable put(String key, Object value) {
-        return arguments.put(key, new ValueWithVariable(value));
+        return arguments.put(key, ValueWithVariable.of(value));
     }
 
     public ValueWithVariable put(String key, JsonValue value) {
-        return arguments.put(key, new ValueWithVariable(value));
+        return arguments.put(key, ValueWithVariable.of(value));
     }
 
     @NotNull

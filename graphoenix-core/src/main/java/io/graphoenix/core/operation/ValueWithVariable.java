@@ -18,58 +18,37 @@ import java.util.Map;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_VALUE;
 
-public class ValueWithVariable implements JsonString, JsonNumber, JsonValue {
+public interface ValueWithVariable extends JsonValue {
 
-    private final JsonValue jsonValue;
+    static <T extends ValueWithVariable> ValueWithVariable of(T value) {
+        return value;
+    }
 
-    public ValueWithVariable(Object value) {
-        if (value instanceof ValueWithVariable) {
-            this.jsonValue = ((ValueWithVariable) value).getJsonValue();
-        } else if (value instanceof BooleanValue) {
-            this.jsonValue = (BooleanValue) value;
-        } else if (value instanceof IntValue) {
-            this.jsonValue = (IntValue) value;
-        } else if (value instanceof FloatValue) {
-            this.jsonValue = (FloatValue) value;
-        } else if (value instanceof StringValue) {
-            this.jsonValue = (StringValue) value;
-        } else if (value instanceof EnumValue) {
-            this.jsonValue = (EnumValue) value;
-        } else if (value instanceof NullValue) {
-            this.jsonValue = (NullValue) value;
-        } else if (value instanceof ObjectValueWithVariable) {
-            this.jsonValue = (ObjectValueWithVariable) value;
-        } else if (value instanceof ArrayValueWithVariable) {
-            this.jsonValue = (ArrayValueWithVariable) value;
-        } else if (value instanceof Variable) {
-            this.jsonValue = (Variable) value;
-        } else if (value.equals(JsonValue.NULL)) {
-            this.jsonValue = new NullValue();
+    static <T extends JsonValue> ValueWithVariable of(T value) {
+        if (value.equals(JsonValue.NULL)) {
+            return new NullValue();
         } else if (value.equals(JsonValue.TRUE)) {
-            this.jsonValue = new BooleanValue(true);
+            return new BooleanValue(true);
         } else if (value.equals(JsonValue.FALSE)) {
-            this.jsonValue = new BooleanValue(false);
+            return new BooleanValue(false);
         } else if (value instanceof JsonNumber) {
             JsonNumber jsonNumber = (JsonNumber) value;
             if (jsonNumber.isIntegral()) {
-                this.jsonValue = new IntValue(jsonNumber.intValue());
+                return new IntValue(jsonNumber.intValue());
             } else {
-                this.jsonValue = new FloatValue(jsonNumber.doubleValue());
+                return new FloatValue(jsonNumber.doubleValue());
             }
         } else if (value instanceof JsonString) {
-            this.jsonValue = new StringValue(((JsonString) value).getString());
+            return new StringValue(((JsonString) value).getString());
         } else if (value instanceof JsonArray) {
-            this.jsonValue = new ArrayValueWithVariable((JsonArray) value);
+            return new ArrayValueWithVariable((JsonArray) value);
         } else if (value instanceof JsonObject) {
-            this.jsonValue = new ObjectValueWithVariable((JsonObject) value);
-        } else if (value instanceof GraphqlParser.ValueWithVariableContext) {
-            this.jsonValue = toJsonValue((GraphqlParser.ValueWithVariableContext) value);
-        } else {
-            this.jsonValue = toJsonValue(value);
+            return new ObjectValueWithVariable((JsonObject) value);
         }
+        throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(value.toString()));
     }
 
-    private JsonValue toJsonValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+    static ValueWithVariable of(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
         if (valueWithVariableContext.NullValue() != null) {
             return new NullValue();
         } else if (valueWithVariableContext.variable() != null) {
@@ -92,7 +71,7 @@ public class ValueWithVariable implements JsonString, JsonNumber, JsonValue {
         throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(valueWithVariableContext.getText()));
     }
 
-    private JsonValue toJsonValue(Object value) {
+    static ValueWithVariable of(Object value) {
         if (value == null) {
             return new NullValue();
         } else if (value instanceof VariableElement) {
@@ -127,186 +106,12 @@ public class ValueWithVariable implements JsonString, JsonNumber, JsonValue {
             if (value.getClass().getSimpleName().equals("Enum")) {
                 return new EnumValue((AnnotationValue) value);
             } else {
-                return toJsonValue(((AnnotationValue) value).getValue());
+                return of(((AnnotationValue) value).getValue());
             }
         } else {
             return new ObjectValueWithVariable(value);
         }
     }
 
-    public JsonValue getJsonValue() {
-        return jsonValue;
-    }
-
-    public boolean isBoolean() {
-        return jsonValue instanceof BooleanValue;
-    }
-
-    public boolean isInteger() {
-        return jsonValue instanceof IntValue;
-    }
-
-    public boolean isFloat() {
-        return jsonValue instanceof FloatValue;
-    }
-
-    public boolean isString() {
-        return jsonValue instanceof StringValue;
-    }
-
-    public boolean isNull() {
-        return jsonValue instanceof NullValue;
-    }
-
-    public boolean isEnum() {
-        return jsonValue instanceof EnumValue;
-    }
-
-    public boolean isObject() {
-        return jsonValue instanceof ObjectValueWithVariable;
-    }
-
-    public boolean isArray() {
-        return jsonValue instanceof ArrayValueWithVariable;
-    }
-
-    public BooleanValue asBoolean() {
-        return (BooleanValue) jsonValue;
-    }
-
-    public IntValue asInteger() {
-        return (IntValue) jsonValue;
-    }
-
-    public FloatValue asFloat() {
-        return (FloatValue) jsonValue;
-    }
-
-    public StringValue asString() {
-        return (StringValue) jsonValue;
-    }
-
-    public NullValue asNull() {
-        return (NullValue) jsonValue;
-    }
-
-    public EnumValue asEnum() {
-        return (EnumValue) jsonValue;
-    }
-
-    public ObjectValueWithVariable asObject() {
-        return (ObjectValueWithVariable) jsonValue;
-    }
-
-    public ArrayValueWithVariable asArray() {
-        return (ArrayValueWithVariable) jsonValue;
-    }
-
-    public Boolean getBoolean() {
-        return asBoolean().getValue();
-    }
-
-    public Integer getInteger() {
-        return (Integer) asInteger().getValue();
-    }
-
-    public Float getFloat() {
-        return (Float) asFloat().getValue();
-    }
-
-    @Override
-    public String getString() {
-        return asString().getValue();
-    }
-
-    @Override
-    public CharSequence getChars() {
-        return asString().getChars();
-    }
-
-    public String getEnum() {
-        return asEnum().getValue();
-    }
-
-    @Override
-    public JsonObject asJsonObject() {
-        return asObject().asJsonObject();
-    }
-
-    @Override
-    public JsonArray asJsonArray() {
-        return asArray().asJsonArray();
-    }
-
-    @Override
-    public ValueType getValueType() {
-        if (isNull()) {
-            return ValueType.NULL;
-        } else if (isBoolean()) {
-            return asBoolean().getValue() ? ValueType.TRUE : ValueType.FALSE;
-        } else if (isString()) {
-            return ValueType.STRING;
-        } else if (isInteger()) {
-            return ValueType.NUMBER;
-        } else if (isFloat()) {
-            return ValueType.NUMBER;
-        } else if (isEnum()) {
-            return ValueType.STRING;
-        } else if (isObject()) {
-            return ValueType.OBJECT;
-        } else if (isArray()) {
-            return ValueType.ARRAY;
-        }
-        throw new JsonException("unknown json value type:" + this);
-    }
-
-    @Override
-    public boolean isIntegral() {
-        return isInteger();
-    }
-
-    @Override
-    public int intValue() {
-        return getInteger();
-    }
-
-    @Override
-    public int intValueExact() {
-        return getInteger();
-    }
-
-    @Override
-    public long longValue() {
-        return getInteger();
-    }
-
-    @Override
-    public long longValueExact() {
-        return getInteger();
-    }
-
-    @Override
-    public BigInteger bigIntegerValue() {
-        return BigInteger.valueOf(longValue());
-    }
-
-    @Override
-    public BigInteger bigIntegerValueExact() {
-        return BigInteger.valueOf(longValueExact());
-    }
-
-    @Override
-    public double doubleValue() {
-        return getFloat();
-    }
-
-    @Override
-    public BigDecimal bigDecimalValue() {
-        return BigDecimal.valueOf(doubleValue());
-    }
-
-    @Override
-    public String toString() {
-        return jsonValue.toString();
-    }
+    String toString();
 }

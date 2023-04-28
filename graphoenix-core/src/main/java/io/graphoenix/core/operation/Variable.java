@@ -5,7 +5,7 @@ import jakarta.json.JsonString;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-public class Variable implements JsonString {
+public class Variable implements ValueWithVariable, JsonString {
 
     private String name;
 

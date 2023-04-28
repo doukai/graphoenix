@@ -9,24 +9,24 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ArrayValueWithVariable extends AbstractList<JsonValue> implements JsonArray {
+public class ArrayValueWithVariable extends AbstractList<JsonValue> implements ValueWithVariable, JsonArray {
 
     private final List<ValueWithVariable> valueWithVariables;
 
     public ArrayValueWithVariable(Arrays valueWithVariables) {
-        this.valueWithVariables = Stream.of(valueWithVariables).map(ValueWithVariable::new).collect(Collectors.toList());
+        this.valueWithVariables = Stream.of(valueWithVariables).map(ValueWithVariable::of).collect(Collectors.toList());
     }
 
     public ArrayValueWithVariable(GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext) {
-        this.valueWithVariables = arrayValueWithVariableContext.valueWithVariable().stream().map(ValueWithVariable::new).collect(Collectors.toList());
+        this.valueWithVariables = arrayValueWithVariableContext.valueWithVariable().stream().map(ValueWithVariable::of).collect(Collectors.toList());
     }
 
     public ArrayValueWithVariable(Collection<?> valueWithVariables) {
-        this.valueWithVariables = valueWithVariables.stream().map(ValueWithVariable::new).collect(Collectors.toList());
+        this.valueWithVariables = valueWithVariables.stream().map(ValueWithVariable::of).collect(Collectors.toList());
     }
 
     public ArrayValueWithVariable(JsonArray valueWithVariables) {
-        this.valueWithVariables = valueWithVariables.stream().map(ValueWithVariable::new).collect(Collectors.toList());
+        this.valueWithVariables = valueWithVariables.stream().map(ValueWithVariable::of).collect(Collectors.toList());
     }
 
     @Override

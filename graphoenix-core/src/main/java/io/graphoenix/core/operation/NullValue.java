@@ -4,7 +4,7 @@ import jakarta.json.JsonValue;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-public class NullValue implements JsonValue {
+public class NullValue implements ValueWithVariable, JsonValue {
 
     @Override
     public ValueType getValueType() {

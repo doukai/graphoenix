@@ -7,7 +7,7 @@ import org.stringtemplate.v4.STGroupFile;
 
 import javax.lang.model.element.AnnotationValue;
 
-public class EnumValue implements JsonString {
+public class EnumValue implements ValueWithVariable, JsonString {
 
     private String value;
 

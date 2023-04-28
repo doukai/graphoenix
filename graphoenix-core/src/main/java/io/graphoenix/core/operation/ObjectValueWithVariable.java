@@ -12,7 +12,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ObjectValueWithVariable extends AbstractMap<String, JsonValue> implements JsonObject {
+public class ObjectValueWithVariable extends AbstractMap<String, JsonValue> implements ValueWithVariable, JsonObject {
 
     private final Map<String, ValueWithVariable> objectValueWithVariable;
 
@@ -21,15 +21,15 @@ public class ObjectValueWithVariable extends AbstractMap<String, JsonValue> impl
     }
 
     public ObjectValueWithVariable(Map<?, ?> objectValueWithVariable) {
-        this.objectValueWithVariable = objectValueWithVariable.entrySet().stream().collect(Collectors.toMap(entry -> (String) entry.getKey(), entry -> new ValueWithVariable(entry.getValue())));
+        this.objectValueWithVariable = objectValueWithVariable.entrySet().stream().collect(Collectors.toMap(entry -> (String) entry.getKey(), entry -> ValueWithVariable.of(entry.getValue())));
     }
 
     public ObjectValueWithVariable(JsonObject objectValueWithVariable) {
-        this.objectValueWithVariable = objectValueWithVariable.entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> new ValueWithVariable(entry.getValue())));
+        this.objectValueWithVariable = objectValueWithVariable.entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> ValueWithVariable.of(entry.getValue())));
     }
 
     public ObjectValueWithVariable(AnnotationMirror objectValueWithVariable) {
-        this.objectValueWithVariable = objectValueWithVariable.getElementValues().entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey().getSimpleName().toString(), entry -> new ValueWithVariable(entry.getValue())));
+        this.objectValueWithVariable = objectValueWithVariable.getElementValues().entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey().getSimpleName().toString(), entry -> ValueWithVariable.of(entry.getValue())));
     }
 
     public ObjectValueWithVariable(Object objectValueWithVariable) {
@@ -38,27 +38,27 @@ public class ObjectValueWithVariable extends AbstractMap<String, JsonValue> impl
             field.setAccessible(true);
             return field.get(object);
         };
-        this.objectValueWithVariable = Arrays.stream(clazz.getDeclaredFields()).collect(Collectors.toMap(Field::getName, field -> new ValueWithVariable(getField.unchecked().apply(field, objectValueWithVariable))));
+        this.objectValueWithVariable = Arrays.stream(clazz.getDeclaredFields()).collect(Collectors.toMap(Field::getName, field -> ValueWithVariable.of(getField.unchecked().apply(field, objectValueWithVariable))));
     }
 
     public ObjectValueWithVariable(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        this.objectValueWithVariable = objectValueWithVariableContext.objectFieldWithVariable().stream().collect(Collectors.toMap(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText(), objectFieldWithVariableContext -> new ValueWithVariable(objectFieldWithVariableContext.valueWithVariable())));
+        this.objectValueWithVariable = objectValueWithVariableContext.objectFieldWithVariable().stream().collect(Collectors.toMap(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText(), objectFieldWithVariableContext -> ValueWithVariable.of(objectFieldWithVariableContext.valueWithVariable())));
     }
 
     public ValueWithVariable put(String key, Object value) {
-        return objectValueWithVariable.put(key, new ValueWithVariable(value));
+        return objectValueWithVariable.put(key, ValueWithVariable.of(value));
     }
 
     public ValueWithVariable putIfAbsent(String key, Object value) {
-        return objectValueWithVariable.putIfAbsent(key, new ValueWithVariable(value));
+        return objectValueWithVariable.putIfAbsent(key, ValueWithVariable.of(value));
     }
 
     public ValueWithVariable compute(String key, Object value) {
-        return objectValueWithVariable.compute(key, (k, v) -> new ValueWithVariable(value));
+        return objectValueWithVariable.compute(key, (k, v) -> ValueWithVariable.of(value));
     }
 
     public ValueWithVariable computeIfAbsent(String key, Object value) {
-        return objectValueWithVariable.computeIfAbsent(key, k -> new ValueWithVariable(value));
+        return objectValueWithVariable.computeIfAbsent(key, k -> ValueWithVariable.of(value));
     }
 
     @NotNull

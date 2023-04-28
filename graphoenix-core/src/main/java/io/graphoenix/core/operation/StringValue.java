@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-public class StringValue implements JsonString {
+public class StringValue implements ValueWithVariable, JsonString {
 
     private String value;
 

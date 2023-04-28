@@ -9,7 +9,7 @@ import javax.lang.model.element.AnnotationValue;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public class IntValue implements JsonNumber {
+public class IntValue implements ValueWithVariable, JsonNumber {
 
     private Number value;
 

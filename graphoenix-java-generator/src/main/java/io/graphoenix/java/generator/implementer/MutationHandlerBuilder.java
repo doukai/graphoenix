@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.PAGE_INFO_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
 
 @ApplicationScoped
 public class MutationHandlerBuilder {
@@ -143,16 +144,13 @@ public class MutationHandlerBuilder {
                     String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
                     if (before) {
                         if (manager.hasFetchWith(fieldDefinitionContext)) {
-                            String withFrom = manager.getFetchWithFrom(fieldDefinitionContext);
                             String withTo = manager.getFetchWithTo(fieldDefinitionContext);
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
-                            builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).build()).collect($T.toJsonArray()))",
-                                    fieldDefinitionContext.name().getText(),
-                                    withObjectField.name().getText(),
-                                    withFrom,
-                                    from,
-                                    ClassName.get(JsonCollectors.class)
-                            )
+                            builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().build()).collect($T.toJsonArray()))",
+                                            fieldDefinitionContext.name().getText(),
+                                            withObjectField.name().getText(),
+                                            ClassName.get(JsonCollectors.class)
+                                    )
                                     .addStatement("loader.registerArray($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue(), false)",
                                             packageName,
                                             protocol,
@@ -205,15 +203,12 @@ public class MutationHandlerBuilder {
 
                     if (before) {
                         if (manager.hasFetchWith(fieldDefinitionContext)) {
-                            String withFrom = manager.getFetchWithFrom(fieldDefinitionContext);
                             String withTo = manager.getFetchWithTo(fieldDefinitionContext);
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
-                            builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, jsonProvider.createObjectBuilder().add($S, valueWithVariable.asJsonObject().get($S)).build())",
-                                    fieldDefinitionContext.name().getText(),
-                                    withObjectField.name().getText(),
-                                    withFrom,
-                                    from
-                            )
+                            builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, jsonProvider.createObjectBuilder().build())",
+                                            fieldDefinitionContext.name().getText(),
+                                            withObjectField.name().getText()
+                                    )
                                     .addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue(), true)",
                                             packageName,
                                             protocol,
@@ -255,6 +250,12 @@ public class MutationHandlerBuilder {
                 }
             }
             if (index == fieldDefinitionContextList.size() - 1) {
+                if (before) {
+                    builder.nextControlFlow("else if (field.getKey().equals($S))", WHERE_INPUT_NAME)
+                            .addStatement("loader.registerWhere($S, field.getValue())",
+                                    objectTypeDefinitionContext.name().getText()
+                            );
+                }
                 builder.endControlFlow();
             }
             index++;
@@ -343,7 +344,7 @@ public class MutationHandlerBuilder {
             if (graphQLConfig.getBackup()) {
                 builder.addStatement("return loader.backup().then(loader.load(loader.replaceAll(operationArguments))).switchIfEmpty(loader.load(loader.replaceAll(operationArguments))).map(jsonValue -> loader.dispatchOperationArguments(jsonValue, operation))");
             } else {
-                builder.addStatement("return loader.load(operationArguments).map(jsonValue -> loader.dispatchOperationArguments(jsonValue, operation))");
+                builder.addStatement("return loader.load(loader.replaceAll(operationArguments)).map(jsonValue -> loader.dispatchOperationArguments(jsonValue, operation))");
             }
         } else {
             builder.addStatement("return loader.load().thenReturn(jsonValue.asJsonObject())");

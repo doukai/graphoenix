@@ -7,7 +7,7 @@ import org.stringtemplate.v4.STGroupFile;
 
 import javax.lang.model.element.AnnotationValue;
 
-public class BooleanValue implements JsonValue {
+public class BooleanValue implements ValueWithVariable, JsonValue {
 
     private Boolean value;
 
