@@ -49,6 +49,7 @@ public abstract class MutationDataLoader {
     private final Map<String, Map<String, JsonValue>> resultMap = new ConcurrentHashMap<>();
     private final Map<String, Tuple3<String, String, JsonValue>> withTypeFiledMap = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> updateMap = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, JsonObject>> updateWhereMap = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> createMap = new ConcurrentHashMap<>();
     private String backUp;
 
@@ -62,7 +63,6 @@ public abstract class MutationDataLoader {
 
     public MutationDataLoader then() {
         this.objectValueMap.clear();
-        this.removeConditionMap.clear();
         this.selectionMap.clear();
         this.indexMap.clear();
         this.resultMap.clear();
@@ -97,6 +97,14 @@ public abstract class MutationDataLoader {
     }
 
     public void registerUpdate(String typeName, JsonValue jsonValue) {
+        updateWhereMap.computeIfAbsent(typeName, k -> new ConcurrentHashMap<>());
+        if (jsonValue != null && jsonValue.getValueType().equals(JsonValue.ValueType.OBJECT)) {
+            Map<String, JsonObject> stringJsonObjectMap = updateWhereMap.get(typeName);
+            updateWhereMap.get(typeName).put(typeName + (updateWhereMap.size() - 1), jsonValue.asJsonObject());
+        }
+    }
+
+    public void registerWhere(String typeName, JsonValue jsonValue) {
         updateMap.computeIfAbsent(typeName, k -> new LinkedHashSet<>());
         if (jsonValue != null && jsonValue.getValueType().equals(JsonValue.ValueType.STRING)) {
             updateMap.get(typeName).add(((JsonString) jsonValue).getString());
@@ -214,6 +222,29 @@ public abstract class MutationDataLoader {
                                                 )
                                                 .collect(Collectors.toSet())
                                 )
+                                .addFields(
+                                        updateWhereMap.entrySet().stream()
+                                                .flatMap(typeEntry ->
+                                                        typeEntry.getValue().entrySet().stream()
+                                                                .map(whereEntry ->
+                                                                        new Field()
+                                                                                .setAlias(whereEntry.getKey())
+                                                                                .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
+                                                                                .addArgument(
+                                                                                        WHERE_INPUT_NAME,
+                                                                                        whereEntry.getValue()
+                                                                                )
+                                                                                .setFields(
+                                                                                        manager.getFields(typeEntry.getKey())
+                                                                                                .filter(fieldDefinitionContext -> !manager.isObject(typeEntry.getKey()))
+                                                                                                .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText())
+                                                                                                .map(Field::new)
+                                                                                                .collect(Collectors.toSet())
+                                                                                )
+                                                                )
+                                                )
+                                                .collect(Collectors.toList())
+                                )
                 );
     }
 
@@ -256,13 +287,33 @@ public abstract class MutationDataLoader {
     }
 
     private Stream<JsonValue> getUpdateJsonArray(String typeName, JsonObject data) {
+        String idFieldName = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST));
         String selectionName = typeToLowerCamelName(typeName).concat("List");
-        return Stream.of(data)
-                .filter(jsonObject ->
+        return io.vavr.collection.Stream.ofAll(
+                        Stream.concat(
+                                Stream.of(data)
+                                        .filter(jsonObject ->
+                                                data.containsKey(selectionName) &&
+                                                        data.get(selectionName).getValueType().equals(JsonValue.ValueType.ARRAY) &&
+                                                        data.get(selectionName).asJsonArray().size() > 0)
+                                        .flatMap(jsonObject -> jsonObject.get(selectionName).asJsonArray().stream()),
+                                getUpdateWhereJsonArray(typeName, data)
+                        ).collect(Collectors.toList())
+                )
+                .distinctBy(jsonValue -> jsonValue.asJsonObject().get(idFieldName).toString())
+                .toJavaStream();
+    }
+
+
+    private Stream<JsonValue> getUpdateWhereJsonArray(String typeName, JsonObject data) {
+        return Stream.ofNullable(updateWhereMap.get(typeName))
+                .flatMap(typeMap -> typeMap.keySet().stream())
+                .filter(selectionName ->
                         data.containsKey(selectionName) &&
                                 data.get(selectionName).getValueType().equals(JsonValue.ValueType.ARRAY) &&
-                                data.get(selectionName).asJsonArray().size() > 0)
-                .flatMap(jsonObject -> jsonObject.get(selectionName).asJsonArray().stream());
+                                data.get(selectionName).asJsonArray().size() > 0
+                )
+                .flatMap(selectionName -> data.get(selectionName).asJsonArray().stream());
     }
 
     private Stream<JsonValue> getRemoveJsonArray(String typeName) {
