@@ -107,7 +107,7 @@ public abstract class MutationDataLoader {
         updateWhereMap.computeIfAbsent(typeName, k -> new ConcurrentHashMap<>());
         if (jsonValue != null && jsonValue.getValueType().equals(JsonValue.ValueType.OBJECT)) {
             Map<String, JsonObject> typeMap = updateWhereMap.get(typeName);
-            updateWhereMap.get(typeName).put(typeName + (typeMap.size() - 1), jsonValue.asJsonObject());
+            typeMap.put(typeName + (typeMap.size() - 1), jsonValue.asJsonObject());
         }
     }
 
