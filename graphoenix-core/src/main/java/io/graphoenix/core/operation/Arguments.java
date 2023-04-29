@@ -9,7 +9,7 @@ import org.stringtemplate.v4.STGroupFile;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Arguments extends AbstractMap<String, JsonValue> implements JsonObject {
+public class Arguments extends AbstractMap<String, JsonValue> implements ValueWithVariable, JsonObject {
 
     private final Map<String, ValueWithVariable> arguments;
 
@@ -154,9 +154,14 @@ public class Arguments extends AbstractMap<String, JsonValue> implements JsonObj
 
     @Override
     public String toString() {
+        return render();
+    }
+
+    @Override
+    public String render() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/Arguments.stg");
         ST st = stGroupFile.getInstanceOf("argumentsDefinition");
-        st.add("arguments", arguments.entrySet().stream().map(entry -> new SimpleEntry<>(entry.getKey(), entry.getValue().toString())).collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+        st.add("arguments", arguments.entrySet().stream().map(entry -> new SimpleEntry<>(entry.getKey(), entry.getValue().render())).collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
         String render = st.render();
         stGroupFile.unload();
         return render;

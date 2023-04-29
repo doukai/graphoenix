@@ -1,4 +1,3 @@
-import "stg/operation/Arguments.stg"
 directiveDefinition(directive) ::= <<
-@<directive.name><if(directive.arguments)><argumentsDefinition(directive.arguments)><endif>
+@<directive.name><if(directive.arguments)><directive.argumentsString><endif>
 >>

@@ -42,6 +42,11 @@ public class Variable implements ValueWithVariable, JsonString {
 
     @Override
     public String toString() {
+        return render();
+    }
+
+    @Override
+    public String render() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/Variable.stg");
         ST st = stGroupFile.getInstanceOf("variableDefinition");
         st.add("variable", this);

@@ -120,4 +120,42 @@ public interface ValueWithVariable extends JsonValue {
             return new ObjectValueWithVariable(value);
         }
     }
+
+    default boolean isBoolean() {
+        return false;
+    }
+
+    default boolean isInt() {
+        return false;
+    }
+
+    default boolean isFloat() {
+        return false;
+    }
+
+    default boolean isString() {
+        return false;
+    }
+
+    default boolean isNull() {
+        return false;
+    }
+
+    default boolean isEnum() {
+        return false;
+    }
+
+    default boolean isObject() {
+        return false;
+    }
+
+    default boolean isArray() {
+        return false;
+    }
+
+    default boolean isVariable() {
+        return false;
+    }
+
+    String render();
 }

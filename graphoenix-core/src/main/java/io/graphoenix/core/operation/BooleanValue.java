@@ -38,6 +38,11 @@ public class BooleanValue implements ValueWithVariable, JsonValue {
 
     @Override
     public String toString() {
+        return render();
+    }
+
+    @Override
+    public String render() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/BooleanValue.stg");
         ST st = stGroupFile.getInstanceOf("booleanValueDefinition");
         st.add("booleanValue", this);

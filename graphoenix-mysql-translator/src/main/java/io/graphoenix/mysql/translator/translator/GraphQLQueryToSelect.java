@@ -393,7 +393,7 @@ public class GraphQLQueryToSelect {
                                                             if ((argumentContext.name().getText().equals(FIRST_INPUT_NAME) || argumentContext.name().getText().equals(LAST_INPUT_NAME)) && argumentContext.valueWithVariable().IntValue() != null) {
                                                                 return new AbstractMap.SimpleEntry<>(argumentContext.name().getText(), (JsonValue) new IntValue(Integer.parseInt(argumentContext.valueWithVariable().IntValue().getText()) + 1));
                                                             } else {
-                                                                return new AbstractMap.SimpleEntry<>(argumentContext.name().getText(), (JsonValue) new ValueWithVariable(argumentContext.valueWithVariable()));
+                                                                return new AbstractMap.SimpleEntry<>(argumentContext.name().getText(), (JsonValue) ValueWithVariable.of(argumentContext.valueWithVariable()));
                                                             }
                                                         }
                                                 )
@@ -418,7 +418,7 @@ public class GraphQLQueryToSelect {
             Arguments arguments = new Arguments(
                     selectionContext.field().arguments().argument().stream()
                             .filter(argumentContext -> !argumentContext.name().getText().equals(FIRST_INPUT_NAME) && !argumentContext.name().getText().equals(LAST_INPUT_NAME))
-                            .map(argumentContext -> new AbstractMap.SimpleEntry<>(argumentContext.name().getText(), (JsonValue) new ValueWithVariable(argumentContext.valueWithVariable())))
+                            .map(argumentContext -> new AbstractMap.SimpleEntry<>(argumentContext.name().getText(), (JsonValue) ValueWithVariable.of(argumentContext.valueWithVariable())))
                             .collect(JsonCollectors.toJsonObject())
             );
             field.setArguments(arguments);

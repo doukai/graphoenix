@@ -45,7 +45,6 @@ public class Field {
         }
         if (fieldContext.directives() != null) {
             this.directives = fieldContext.directives().directive().stream().map(directiveContext -> new Directive(directiveContext).toString()).collect(Collectors.toCollection(LinkedHashSet::new));
-
         }
     }
 
@@ -69,6 +68,10 @@ public class Field {
 
     public Arguments getArguments() {
         return arguments;
+    }
+
+    public String getArgumentsString() {
+        return arguments.render();
     }
 
     public Field setArguments(Arguments arguments) {

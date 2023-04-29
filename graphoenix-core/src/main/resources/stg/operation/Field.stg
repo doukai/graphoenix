@@ -1,6 +1,5 @@
-import "Arguments.stg"
 fieldDefinition(filed) ::= <<
-<if(filed.alias)><filed.alias>: <endif><filed.name><if(filed.arguments)><argumentsDefinition(filed.arguments)><endif><if(filed.directives)> <filed.directives:{directive|<directive>};separator=" "><endif><if(filed.fields)> {
+<if(filed.alias)><filed.alias>: <endif><filed.name><if(filed.arguments)><filed.argumentsString><endif><if(filed.directives)> <filed.directives:{directive|<directive>};separator=" "><endif><if(filed.fields)> {
     <filed.fields:{field|<fieldDefinition(field)>};separator="\n">
 }<endif><if(filed.selections)><filed.selections><endif>
 >>
