@@ -9,7 +9,7 @@ import org.stringtemplate.v4.STGroupFile;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Arguments extends AbstractMap<String, JsonValue> implements ValueWithVariable, JsonObject {
+public class Arguments extends AbstractMap<String, JsonValue> implements ValueWithVariable, JsonObject, Iterable<JsonValue> {
 
     private final Map<String, ValueWithVariable> arguments;
 
@@ -27,6 +27,10 @@ public class Arguments extends AbstractMap<String, JsonValue> implements ValueWi
         this.arguments = jsonObject.entrySet().stream()
                 .map(entry -> new SimpleEntry<>(entry.getKey(), ValueWithVariable.of(entry.getValue())))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (x, y) -> y, LinkedHashMap::new));
+    }
+
+    public Map<String, ValueWithVariable> getArguments() {
+        return arguments;
     }
 
     @Override
@@ -152,6 +156,12 @@ public class Arguments extends AbstractMap<String, JsonValue> implements ValueWi
         return arguments.containsKey(key);
     }
 
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public Iterator<JsonValue> iterator() {
+        return null;
+    }
+
     @Override
     public String toString() {
         return render();
@@ -160,8 +170,9 @@ public class Arguments extends AbstractMap<String, JsonValue> implements ValueWi
     @Override
     public String render() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/Arguments.stg");
+        stGroupFile.registerRenderer(JsonValue.class, new ValueWithVariableRenderer());
         ST st = stGroupFile.getInstanceOf("argumentsDefinition");
-        st.add("arguments", arguments.entrySet().stream().map(entry -> new SimpleEntry<>(entry.getKey(), entry.getValue().render())).collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+        st.add("arguments", arguments);
         String render = st.render();
         stGroupFile.unload();
         return render;

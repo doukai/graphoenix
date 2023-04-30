@@ -12,7 +12,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ObjectValueWithVariable extends AbstractMap<String, JsonValue> implements ValueWithVariable, JsonObject {
+public class ObjectValueWithVariable extends AbstractMap<String, JsonValue> implements ValueWithVariable, JsonObject, Iterable<JsonValue> {
 
     private final Map<String, ValueWithVariable> objectValueWithVariable;
 
@@ -175,6 +175,12 @@ public class ObjectValueWithVariable extends AbstractMap<String, JsonValue> impl
         return objectValueWithVariable.containsKey(key);
     }
 
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public Iterator<JsonValue> iterator() {
+        return null;
+    }
+
     @Override
     public String toString() {
         return render();
@@ -183,8 +189,9 @@ public class ObjectValueWithVariable extends AbstractMap<String, JsonValue> impl
     @Override
     public String render() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/ObjectValueWithVariable.stg");
+        stGroupFile.registerRenderer(JsonValue.class, new ValueWithVariableRenderer());
         ST st = stGroupFile.getInstanceOf("objectValueWithVariableDefinition");
-        st.add("objectValueWithVariable", objectValueWithVariable.entrySet().stream().map(entry -> new SimpleEntry<>(entry.getKey(), entry.getValue().render())).collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+        st.add("objectValueWithVariable", objectValueWithVariable);
         String render = st.render();
         stGroupFile.unload();
         return render;

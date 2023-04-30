@@ -1,3 +1,3 @@
 directiveDefinition(directive) ::= <<
-@<directive.name><if(directive.arguments)><directive.argumentsString><endif>
+@<directive.name><if(directive.arguments)><directive.arguments><endif>
 >>

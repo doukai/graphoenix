@@ -124,6 +124,12 @@ public class ArrayValueWithVariable extends AbstractList<JsonValue> implements V
         return valueWithVariables.size();
     }
 
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public Iterator<JsonValue> iterator() {
+        return null;
+    }
+
     @Override
     public String toString() {
         return render();
@@ -132,8 +138,9 @@ public class ArrayValueWithVariable extends AbstractList<JsonValue> implements V
     @Override
     public String render() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/ArrayValueWithVariable.stg");
+        stGroupFile.registerRenderer(JsonValue.class, new ValueWithVariableRenderer());
         ST st = stGroupFile.getInstanceOf("arrayValueWithVariableDefinition");
-        st.add("valueWithVariables", valueWithVariables.stream().map(ValueWithVariable::render).collect(Collectors.toList()));
+        st.add("valueWithVariables", valueWithVariables);
         String render = st.render();
         stGroupFile.unload();
         return render;

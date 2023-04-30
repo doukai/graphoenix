@@ -70,10 +70,6 @@ public class Field {
         return arguments;
     }
 
-    public String getArgumentsString() {
-        return arguments.render();
-    }
-
     public Field setArguments(Arguments arguments) {
         this.arguments = arguments;
         return this;
@@ -170,6 +166,7 @@ public class Field {
     @Override
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/Field.stg");
+        stGroupFile.registerRenderer(JsonValue.class, new ValueWithVariableRenderer());
         ST st = stGroupFile.getInstanceOf("fieldDefinition");
         st.add("filed", this);
         String render = st.render();

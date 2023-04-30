@@ -3,6 +3,7 @@ package io.graphoenix.core.document;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.operation.Arguments;
 import io.graphoenix.core.operation.ValueWithVariable;
+import io.graphoenix.core.operation.ValueWithVariableRenderer;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import org.stringtemplate.v4.ST;
@@ -38,10 +39,6 @@ public class Directive {
 
     public Arguments getArguments() {
         return arguments;
-    }
-
-    public String getArgumentsString() {
-        return arguments.render();
     }
 
     public Directive setArguments(GraphqlParser.ArgumentsContext argumentsContext) {
@@ -102,6 +99,7 @@ public class Directive {
     @Override
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/document/Directive.stg");
+        stGroupFile.registerRenderer(JsonValue.class, new ValueWithVariableRenderer());
         ST st = stGroupFile.getInstanceOf("directiveDefinition");
         st.add("directive", this);
         String render = st.render();
