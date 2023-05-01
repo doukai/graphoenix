@@ -1,27 +1,27 @@
-package io.graphoenix.core.operation;
+package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.document.Directive;
+import io.graphoenix.core.operation.Directive;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-public class VariableDefinition {
+public class Variable {
 
-    private Variable variable;
+    private io.graphoenix.core.operation.Variable variable;
     private String typeName;
     private String defaultValue;
-    private Set<String> directives;
+    private Collection<Directive> directives;
 
-    public VariableDefinition() {
+    public Variable() {
     }
 
-    public VariableDefinition(GraphqlParser.VariableDefinitionContext variableDefinitionContext) {
+    public Variable(GraphqlParser.VariableDefinitionContext variableDefinitionContext) {
         if (variableDefinitionContext.variable() != null) {
-            this.variable = new Variable(variableDefinitionContext.variable());
+            this.variable = new io.graphoenix.core.operation.Variable(variableDefinitionContext.variable());
         }
         if (variableDefinitionContext.type() != null) {
             this.typeName = variableDefinitionContext.type().getText();
@@ -30,21 +30,21 @@ public class VariableDefinition {
             this.defaultValue = variableDefinitionContext.defaultValue().value().getText();
         }
         if (variableDefinitionContext.directives() != null) {
-            this.directives = variableDefinitionContext.directives().directive().stream().map(directiveContext -> new Directive(directiveContext).toString()).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = variableDefinitionContext.directives().directive().stream().map(Directive::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
     }
 
-    public Variable getVariable() {
+    public io.graphoenix.core.operation.Variable getVariable() {
         return variable;
     }
 
-    public VariableDefinition setVariable(Variable variable) {
+    public Variable setVariable(io.graphoenix.core.operation.Variable variable) {
         this.variable = variable;
         return this;
     }
 
-    public VariableDefinition setVariable(String variableName) {
-        this.variable = new Variable(variableName);
+    public Variable setVariable(String variableName) {
+        this.variable = new io.graphoenix.core.operation.Variable(variableName);
         return this;
     }
 
@@ -52,7 +52,7 @@ public class VariableDefinition {
         return typeName;
     }
 
-    public VariableDefinition setTypeName(String typeName) {
+    public Variable setTypeName(String typeName) {
         this.typeName = typeName;
         return this;
     }
@@ -61,25 +61,25 @@ public class VariableDefinition {
         return defaultValue;
     }
 
-    public VariableDefinition setDefaultValue(String defaultValue) {
+    public Variable setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
         return this;
     }
 
-    public Set<String> getDirectives() {
+    public Collection<Directive> getDirectives() {
         return directives;
     }
 
-    public VariableDefinition setDirectives(Set<String> directives) {
+    public Variable setDirectives(Collection<Directive> directives) {
         this.directives = directives;
         return this;
     }
 
     @Override
     public String toString() {
-        STGroupFile stGroupFile = new STGroupFile("stg/operation/VariableDefinition.stg");
-        ST st = stGroupFile.getInstanceOf("variableDefinitionDefinition");
-        st.add("variableDefinition", this);
+        STGroupFile stGroupFile = new STGroupFile("stg/document/Variable.stg");
+        ST st = stGroupFile.getInstanceOf("variableDefinition");
+        st.add("variable", this);
         String render = st.render();
         stGroupFile.unload();
         return render;

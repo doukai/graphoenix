@@ -85,11 +85,6 @@ public class IntValue implements ValueWithVariable, JsonNumber {
 
     @Override
     public String toString() {
-        return render();
-    }
-
-    @Override
-    public String render() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/IntValue.stg");
         ST st = stGroupFile.getInstanceOf("intValueDefinition");
         st.add("intValue", this);

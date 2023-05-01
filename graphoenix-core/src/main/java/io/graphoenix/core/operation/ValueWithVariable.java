@@ -156,6 +156,4 @@ public interface ValueWithVariable extends JsonValue {
     default boolean isVariable() {
         return false;
     }
-
-    String render();
 }

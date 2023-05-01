@@ -1,7 +1,6 @@
 package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.document.Directive;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import org.stringtemplate.v4.ST;
@@ -9,7 +8,6 @@ import org.stringtemplate.v4.STGroupFile;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Field {
@@ -17,8 +15,8 @@ public class Field {
     private String name;
     private String alias;
     private Arguments arguments;
-    private Set<String> directives;
-    private Set<Field> fields;
+    private Collection<Directive> directives;
+    private Collection<Field> fields;
     private String selections;
 
     public Field() {
@@ -44,7 +42,7 @@ public class Field {
             this.fields = fieldContext.selectionSet().selection().stream().map(Field::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (fieldContext.directives() != null) {
-            this.directives = fieldContext.directives().directive().stream().map(directiveContext -> new Directive(directiveContext).toString()).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = fieldContext.directives().directive().stream().map(Directive::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
     }
 
@@ -120,20 +118,20 @@ public class Field {
         return this;
     }
 
-    public Set<String> getDirectives() {
+    public Collection<Directive> getDirectives() {
         return directives;
     }
 
-    public Field setDirectives(Set<String> directives) {
+    public Field setDirectives(Collection<Directive> directives) {
         this.directives = directives;
         return this;
     }
 
-    public Set<Field> getFields() {
+    public Collection<Field> getFields() {
         return fields;
     }
 
-    public Field setFields(Set<Field> fields) {
+    public Field setFields(Collection<Field> fields) {
         this.fields = fields;
         return this;
     }
@@ -166,7 +164,6 @@ public class Field {
     @Override
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/Field.stg");
-        stGroupFile.registerRenderer(JsonValue.class, new ValueWithVariableRenderer());
         ST st = stGroupFile.getInstanceOf("fieldDefinition");
         st.add("filed", this);
         String render = st.render();

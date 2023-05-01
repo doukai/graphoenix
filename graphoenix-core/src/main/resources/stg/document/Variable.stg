@@ -1,0 +1,3 @@
+variableDefinition(variable) ::= <<
+<variable.variable>: <variable.typeName><if(variable.defaultValue)> = <variable.defaultValue><endif><if(variable.directives)> <variable.directives:{directive|<directive>};separator=" "><endif>
+>>

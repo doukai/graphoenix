@@ -1,12 +1,12 @@
 package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.operation.Directive;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,9 +15,9 @@ import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 public class InterfaceType {
 
     private String name;
-    private Set<String> interfaces;
-    private Set<String> directives;
-    private Set<Field> fields;
+    private Collection<String> interfaces;
+    private Collection<Directive> directives;
+    private Collection<Field> fields;
     private String description;
 
     public InterfaceType() {
@@ -32,7 +32,7 @@ public class InterfaceType {
             this.interfaces = getInterfaces(interfaceTypeDefinitionContext.implementsInterfaces()).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (interfaceTypeDefinitionContext.directives() != null) {
-            this.directives = interfaceTypeDefinitionContext.directives().directive().stream().map(Directive::new).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = interfaceTypeDefinitionContext.directives().directive().stream().map(Directive::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (interfaceTypeDefinitionContext.fieldsDefinition() != null) {
             this.fields = interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(Field::new).collect(Collectors.toCollection(LinkedHashSet::new));
@@ -58,7 +58,7 @@ public class InterfaceType {
         interfaceType.name = interfaceTypes[0].getName();
         interfaceType.description = interfaceTypes[0].getDescription();
         interfaceType.interfaces = Stream.of(interfaceTypes).flatMap(item -> Stream.ofNullable(item.getInterfaces()).flatMap(Collection::stream).distinct()).collect(Collectors.toCollection(LinkedHashSet::new));
-        interfaceType.directives = Stream.of(interfaceTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream).distinct()).collect(Collectors.toCollection(LinkedHashSet::new));
+        interfaceType.directives = Stream.of(interfaceTypes).flatMap(item -> io.vavr.collection.Stream.ofAll(Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream)).distinctBy(Directive::getName).toJavaStream()).collect(Collectors.toCollection(LinkedHashSet::new));
         interfaceType.fields = interfaceTypes[0].getFields();
         for (InterfaceType item : interfaceTypes) {
             for (Field itemField : item.getFields()) {
@@ -79,22 +79,22 @@ public class InterfaceType {
         return this;
     }
 
-    public Set<String> getInterfaces() {
+    public Collection<String> getInterfaces() {
         return interfaces;
     }
 
-    public InterfaceType setInterfaces(Set<String> interfaces) {
+    public InterfaceType setInterfaces(Collection<String> interfaces) {
         this.interfaces = interfaces;
         return this;
     }
 
-    public Set<String> getDirectives() {
+    public Collection<Directive> getDirectives() {
         return directives;
     }
 
-    public InterfaceType setDirectives(Set<Directive> directives) {
+    public InterfaceType setDirectives(Collection<Directive> directives) {
         if (directives != null) {
-            this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = new LinkedHashSet<>(directives);
         }
         return this;
     }
@@ -103,20 +103,20 @@ public class InterfaceType {
         if (this.directives == null) {
             this.directives = new LinkedHashSet<>();
         }
-        this.directives.add(directive.toString());
+        this.directives.add(directive);
         return this;
     }
 
-    public Set<Field> getFields() {
+    public Collection<Field> getFields() {
         return fields;
     }
 
-    public InterfaceType setFields(Set<Field> fields) {
+    public InterfaceType setFields(Collection<Field> fields) {
         this.fields = fields;
         return this;
     }
 
-    public InterfaceType addFields(Set<Field> fields) {
+    public InterfaceType addFields(Collection<Field> fields) {
         if (this.fields == null) {
             this.fields = new LinkedHashSet<>();
         }

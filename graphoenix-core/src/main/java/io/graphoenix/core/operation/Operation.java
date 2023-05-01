@@ -1,13 +1,12 @@
 package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.document.Directive;
+import io.graphoenix.core.document.Variable;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,9 +14,9 @@ public class Operation {
 
     private String operationType;
     private String name;
-    private Set<VariableDefinition> variableDefinitions;
-    private Set<String> directives;
-    private Set<Field> fields;
+    private Collection<Variable> variables;
+    private Collection<Directive> directives;
+    private Collection<Field> fields;
 
     public Operation() {
     }
@@ -28,10 +27,10 @@ public class Operation {
             this.name = operationDefinitionContext.name().getText();
         }
         if (operationDefinitionContext.variableDefinitions() != null) {
-            this.variableDefinitions = operationDefinitionContext.variableDefinitions().variableDefinition().stream().map(VariableDefinition::new).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.variables = operationDefinitionContext.variableDefinitions().variableDefinition().stream().map(Variable::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (operationDefinitionContext.directives() != null) {
-            this.directives = operationDefinitionContext.directives().directive().stream().map(directiveContext -> new Directive(directiveContext).toString()).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = operationDefinitionContext.directives().directive().stream().map(Directive::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         this.fields = operationDefinitionContext.selectionSet().selection().stream().map(Field::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }
@@ -54,36 +53,36 @@ public class Operation {
         return this;
     }
 
-    public Set<VariableDefinition> getVariableDefinitions() {
-        return variableDefinitions;
+    public Collection<Variable> getVariableDefinitions() {
+        return variables;
     }
 
-    public Operation setVariableDefinitions(Set<VariableDefinition> variableDefinitions) {
-        this.variableDefinitions = variableDefinitions;
+    public Operation setVariableDefinitions(Collection<Variable> variables) {
+        this.variables = variables;
         return this;
     }
 
-    public Operation addVariableDefinition(VariableDefinition variableDefinition) {
-        if (this.variableDefinitions == null) {
-            this.variableDefinitions = new LinkedHashSet<>();
+    public Operation addVariableDefinition(Variable variable) {
+        if (this.variables == null) {
+            this.variables = new LinkedHashSet<>();
         }
-        this.variableDefinitions.add(variableDefinition);
+        this.variables.add(variable);
         return this;
     }
 
-    public Operation addVariableDefinitions(Stream<VariableDefinition> variableDefinitionStream) {
-        if (this.variableDefinitions == null) {
-            this.variableDefinitions = new LinkedHashSet<>();
+    public Operation addVariableDefinitions(Stream<Variable> variableDefinitionStream) {
+        if (this.variables == null) {
+            this.variables = new LinkedHashSet<>();
         }
-        this.variableDefinitions.addAll(variableDefinitionStream.collect(Collectors.toList()));
+        this.variables.addAll(variableDefinitionStream.collect(Collectors.toList()));
         return this;
     }
 
-    public Set<String> getDirectives() {
+    public Collection<Directive> getDirectives() {
         return directives;
     }
 
-    public Operation setDirectives(Set<String> directives) {
+    public Operation setDirectives(Collection<Directive> directives) {
         this.directives = directives;
         return this;
     }
@@ -92,15 +91,15 @@ public class Operation {
         if (this.directives == null) {
             this.directives = new LinkedHashSet<>();
         }
-        this.directives.add(directive.toString());
+        this.directives.add(directive);
         return this;
     }
 
-    public Set<Field> getFields() {
+    public Collection<Field> getFields() {
         return fields;
     }
 
-    public Operation setFields(Set<Field> fields) {
+    public Operation setFields(Collection<Field> fields) {
         this.fields = fields;
         return this;
     }

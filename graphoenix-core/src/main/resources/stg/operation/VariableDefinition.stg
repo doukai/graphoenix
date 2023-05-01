@@ -1,4 +1,0 @@
-import "Variable.stg"
-variableDefinitionDefinition(variableDefinition) ::= <<
-<variableDefinition(variableDefinition.variable)>: <variableDefinition.typeName><if(variableDefinition.defaultValue)> = <variableDefinition.defaultValue><endif><if(variableDefinition.directives)> <variableDefinition.directives:{directive|<directive>};separator=" "><endif>
->>

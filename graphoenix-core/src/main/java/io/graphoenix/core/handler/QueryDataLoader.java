@@ -232,7 +232,7 @@ public abstract class QueryDataLoader {
         mergeSelection(fieldTree.get(packageName).get(protocol).get(typeName).get(fieldName), fieldSet);
     }
 
-    private void mergeSelection(Set<Field> originalSet, Set<Field> fieldSet) {
+    private void mergeSelection(Collection<Field> originalSet, Collection<Field> fieldSet) {
         fieldSet.forEach(
                 field -> {
                     if (originalSet.stream().map(Field::getName).noneMatch(name -> name.equals(field.getName()))) {

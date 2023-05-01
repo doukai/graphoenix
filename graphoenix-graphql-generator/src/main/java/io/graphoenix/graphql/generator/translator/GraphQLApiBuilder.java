@@ -1,7 +1,7 @@
 package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.document.Directive;
+import io.graphoenix.core.operation.Directive;
 import io.graphoenix.core.document.Field;
 import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.operation.ArrayValueWithVariable;

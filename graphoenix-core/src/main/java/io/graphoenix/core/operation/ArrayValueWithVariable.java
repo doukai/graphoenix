@@ -132,13 +132,7 @@ public class ArrayValueWithVariable extends AbstractList<JsonValue> implements V
 
     @Override
     public String toString() {
-        return render();
-    }
-
-    @Override
-    public String render() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/ArrayValueWithVariable.stg");
-        stGroupFile.registerRenderer(JsonValue.class, new ValueWithVariableRenderer());
         ST st = stGroupFile.getInstanceOf("arrayValueWithVariableDefinition");
         st.add("valueWithVariables", valueWithVariables);
         String render = st.render();

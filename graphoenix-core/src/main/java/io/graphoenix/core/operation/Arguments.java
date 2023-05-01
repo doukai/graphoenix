@@ -164,13 +164,7 @@ public class Arguments extends AbstractMap<String, JsonValue> implements ValueWi
 
     @Override
     public String toString() {
-        return render();
-    }
-
-    @Override
-    public String render() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/Arguments.stg");
-        stGroupFile.registerRenderer(JsonValue.class, new ValueWithVariableRenderer());
         ST st = stGroupFile.getInstanceOf("argumentsDefinition");
         st.add("arguments", arguments);
         String render = st.render();

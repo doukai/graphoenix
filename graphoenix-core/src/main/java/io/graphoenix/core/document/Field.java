@@ -1,11 +1,12 @@
 package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.operation.Directive;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
@@ -13,9 +14,9 @@ import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 public class Field {
 
     private String name;
-    private Set<InputValue> arguments;
+    private Collection<InputValue> arguments;
     private String typeName;
-    private Set<String> directives;
+    private Collection<Directive> directives;
     private String description;
 
     public Field() {
@@ -35,7 +36,7 @@ public class Field {
             this.arguments = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream().map(InputValue::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (fieldDefinitionContext.directives() != null) {
-            this.directives = fieldDefinitionContext.directives().directive().stream().map(Directive::new).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = fieldDefinitionContext.directives().directive().stream().map(Directive::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
     }
 
@@ -48,16 +49,16 @@ public class Field {
         return this;
     }
 
-    public Set<InputValue> getArguments() {
+    public Collection<InputValue> getArguments() {
         return arguments;
     }
 
-    public Field setArguments(Set<InputValue> arguments) {
+    public Field setArguments(Collection<InputValue> arguments) {
         this.arguments = arguments;
         return this;
     }
 
-    public Field addArguments(Set<InputValue> arguments) {
+    public Field addArguments(Collection<InputValue> arguments) {
         if (this.arguments == null) {
             this.arguments = new LinkedHashSet<>();
         }
@@ -82,18 +83,18 @@ public class Field {
         return this;
     }
 
-    public Set<String> getDirectives() {
+    public Collection<Directive> getDirectives() {
         return directives;
     }
 
-    public Field setStringDirectives(Set<String> directives) {
+    public Field setStringDirectives(Collection<Directive> directives) {
         this.directives = directives;
         return this;
     }
 
-    public Field setDirectives(Set<Directive> directives) {
+    public Field setDirectives(Collection<Directive> directives) {
         if (directives != null) {
-            this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = new LinkedHashSet<>(directives);
         }
         return this;
     }
@@ -102,7 +103,7 @@ public class Field {
         if (this.directives == null) {
             this.directives = new LinkedHashSet<>();
         }
-        this.directives.add(directive.toString());
+        this.directives.add(directive);
         return this;
     }
 

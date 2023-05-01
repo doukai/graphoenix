@@ -1,7 +1,7 @@
 package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.document.Directive;
+import io.graphoenix.core.operation.Directive;
 import io.graphoenix.core.document.EnumType;
 import io.graphoenix.core.document.EnumValue;
 import jakarta.enterprise.context.ApplicationScoped;

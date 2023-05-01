@@ -1,7 +1,8 @@
 package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.document.Directive;
+import io.graphoenix.core.document.Variable;
+import io.graphoenix.core.operation.Directive;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.operation.*;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -95,7 +96,7 @@ public class MethodToOperation {
         operation.addVariableDefinitions(
                 executableElement.getParameters().stream()
                         .map(parameter ->
-                                new VariableDefinition()
+                                new Variable()
                                         .setVariable(parameter.getSimpleName().toString())
                                         .setTypeName(elementManager.variableElementToInputTypeName(parameter, typeUtils))
                         )

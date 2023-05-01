@@ -1,11 +1,12 @@
 package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.operation.Directive;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
@@ -15,7 +16,7 @@ public class InputValue {
     private String name;
     private String typeName;
     private String defaultValue;
-    private Set<String> directives;
+    private Collection<Directive> directives;
     private String description;
 
     public InputValue() {
@@ -28,7 +29,7 @@ public class InputValue {
             this.defaultValue = inputValueDefinitionContext.defaultValue().value().getText();
         }
         if (inputValueDefinitionContext.directives() != null) {
-            this.directives = inputValueDefinitionContext.directives().directive().stream().map(Directive::new).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = inputValueDefinitionContext.directives().directive().stream().map(Directive::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (inputValueDefinitionContext.description() != null) {
             this.description = DOCUMENT_UTIL.getStringValue(inputValueDefinitionContext.description().StringValue());
@@ -72,13 +73,13 @@ public class InputValue {
         return this;
     }
 
-    public Set<String> getDirectives() {
+    public Collection<Directive> getDirectives() {
         return directives;
     }
 
-    public InputValue setDirectives(Set<Directive> directives) {
+    public InputValue setDirectives(Collection<Directive> directives) {
         if (directives != null) {
-            this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = new LinkedHashSet<>(directives);
         }
         return this;
     }

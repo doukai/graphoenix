@@ -1,12 +1,12 @@
 package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.operation.Directive;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,8 +15,8 @@ import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 public class InputObjectType {
 
     private String name;
-    private Set<String> directives;
-    private Set<InputValue> inputValues;
+    private Collection<Directive> directives;
+    private Collection<InputValue> inputValues;
     private String description;
 
     public InputObjectType() {
@@ -28,7 +28,7 @@ public class InputObjectType {
             this.description = DOCUMENT_UTIL.getStringValue(inputObjectTypeDefinitionContext.description().StringValue());
         }
         if (inputObjectTypeDefinitionContext.directives() != null) {
-            this.directives = inputObjectTypeDefinitionContext.directives().directive().stream().map(Directive::new).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = inputObjectTypeDefinitionContext.directives().directive().stream().map(Directive::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (inputObjectTypeDefinitionContext.inputObjectValueDefinitions() != null) {
             this.inputValues = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream().map(InputValue::new).collect(Collectors.toCollection(LinkedHashSet::new));
@@ -43,7 +43,7 @@ public class InputObjectType {
         InputObjectType inputObjectType = new InputObjectType();
         inputObjectType.name = inputObjectTypes[0].getName();
         inputObjectType.description = inputObjectTypes[0].getDescription();
-        inputObjectType.directives = Stream.of(inputObjectTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream).distinct()).collect(Collectors.toCollection(LinkedHashSet::new));
+        inputObjectType.directives = Stream.of(inputObjectTypes).flatMap(item -> io.vavr.collection.Stream.ofAll(Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream)).distinctBy(Directive::getName).toJavaStream()).collect(Collectors.toCollection(LinkedHashSet::new));
         inputObjectType.inputValues = inputObjectTypes[0].getInputValues();
         for (InputObjectType item : inputObjectTypes) {
             for (InputValue itemInputValue : item.getInputValues()) {
@@ -64,13 +64,13 @@ public class InputObjectType {
         return this;
     }
 
-    public Set<String> getDirectives() {
+    public Collection<Directive> getDirectives() {
         return directives;
     }
 
-    public InputObjectType setDirectives(Set<Directive> directives) {
+    public InputObjectType setDirectives(Collection<Directive> directives) {
         if (directives != null) {
-            this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = new LinkedHashSet<>(directives);
         }
         return this;
     }
@@ -79,15 +79,15 @@ public class InputObjectType {
         if (this.directives == null) {
             this.directives = new LinkedHashSet<>();
         }
-        this.directives.add(directive.toString());
+        this.directives.add(directive);
         return this;
     }
 
-    public Set<InputValue> getInputValues() {
+    public Collection<InputValue> getInputValues() {
         return inputValues;
     }
 
-    public InputObjectType setInputValues(Set<InputValue> inputValues) {
+    public InputObjectType setInputValues(Collection<InputValue> inputValues) {
         this.inputValues = inputValues;
         return this;
     }
@@ -100,7 +100,7 @@ public class InputObjectType {
         return this;
     }
 
-    public InputObjectType addInputValues(Set<InputValue> inputValues) {
+    public InputObjectType addInputValues(Collection<InputValue> inputValues) {
         if (this.inputValues == null) {
             this.inputValues = new LinkedHashSet<>();
         }

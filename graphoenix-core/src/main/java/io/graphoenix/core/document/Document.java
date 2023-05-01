@@ -1,28 +1,25 @@
 package io.graphoenix.core.document;
 
-import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
 
 public class Document {
 
-    private Schema schema;
+    private Collection<Object> definitions;
 
-    private Set<String> definitions;
-
-    public Set<String> getDefinitions() {
+    public Collection<Object> getDefinitions() {
         return definitions;
     }
 
-    public Document setDefinitions(Set<String> definitions) {
+    public Document setDefinitions(Collection<Object> definitions) {
         this.definitions = definitions;
         return this;
     }
 
-    public Document addDefinition(String definition) {
+    public Document addDefinition(Object definition) {
         if (this.definitions == null) {
             this.definitions = new LinkedHashSet<>();
         }
@@ -30,17 +27,12 @@ public class Document {
         return this;
     }
 
-    public Document addDefinitions(Set<String> definitions) {
+    public Document addDefinitions(Collection<Object> definitions) {
         if (this.definitions == null) {
             this.definitions = definitions;
         }
         this.definitions.addAll(definitions);
         return this;
-    }
-
-    public String toString(IGraphQLDocumentManager manager) {
-
-        return null;
     }
 
     @Override

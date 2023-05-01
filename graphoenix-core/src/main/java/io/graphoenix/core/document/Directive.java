@@ -1,35 +1,49 @@
 package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.operation.Arguments;
-import io.graphoenix.core.operation.ValueWithVariable;
-import io.graphoenix.core.operation.ValueWithVariableRenderer;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonValue;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
+
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 
 public class Directive {
 
     private String name;
-    private Arguments arguments;
-
-    public String getName() {
-        return name;
-    }
+    private Collection<InputValue> arguments;
+    private Collection<String> directiveLocations;
+    private String description;
 
     public Directive() {
     }
 
-    public Directive(GraphqlParser.DirectiveContext directiveContext) {
-        this.name = directiveContext.name().getText();
-        if (directiveContext.arguments() != null) {
-            this.arguments = new Arguments(directiveContext.arguments());
+    public Directive(GraphqlParser.DirectiveDefinitionContext directiveDefinitionContext) {
+        this.name = directiveDefinitionContext.name().getText();
+        if (directiveDefinitionContext.argumentsDefinition() != null) {
+            this.arguments = directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream().map(InputValue::new).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+        this.directiveLocations = directiveLocationList(directiveDefinitionContext.directiveLocations());
+        if (directiveDefinitionContext.description() != null) {
+            this.description = DOCUMENT_UTIL.getStringValue(directiveDefinitionContext.description().StringValue());
         }
     }
 
-    public Directive(String name) {
-        this.name = name;
+    public Collection<String> directiveLocationList(GraphqlParser.DirectiveLocationsContext directiveLocationsContext) {
+        Collection<String> directiveLocationList = new LinkedHashSet<>();
+        if (directiveLocationsContext.directiveLocation() != null) {
+            directiveLocationList.add(directiveLocationsContext.directiveLocation().name().getText());
+        }
+        if (directiveLocationsContext.directiveLocations() != null) {
+            directiveLocationList.addAll(directiveLocationList(directiveLocationsContext.directiveLocations()));
+        }
+        return directiveLocationList;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Directive setName(String name) {
@@ -37,69 +51,36 @@ public class Directive {
         return this;
     }
 
-    public Arguments getArguments() {
+    public Collection<InputValue> getArguments() {
         return arguments;
     }
 
-    public Directive setArguments(GraphqlParser.ArgumentsContext argumentsContext) {
-        this.arguments = new Arguments(argumentsContext);
-        return this;
-    }
-
-    public Directive setArguments(Arguments arguments) {
+    public Directive setArguments(Collection<InputValue> arguments) {
         this.arguments = arguments;
         return this;
     }
 
-    public Directive setArguments(JsonObject jsonObject) {
-        this.arguments = new Arguments(jsonObject);
+    public Collection<String> getDirectiveLocations() {
+        return directiveLocations;
+    }
+
+    public Directive setDirectiveLocations(Collection<String> directiveLocations) {
+        this.directiveLocations = directiveLocations;
         return this;
     }
 
-    public Directive addArguments(Arguments arguments) {
-        if (this.arguments == null) {
-            this.arguments = new Arguments();
-        }
-        this.arguments.putAll(arguments);
-        return this;
+    public String getDescription() {
+        return description;
     }
 
-    public Directive addArguments(JsonObject jsonObject) {
-        if (this.arguments == null) {
-            this.arguments = new Arguments();
-        }
-        this.arguments.putAll(jsonObject);
-        return this;
-    }
-
-    public Directive addArgument(String name, Object valueWithVariable) {
-        if (this.arguments == null) {
-            this.arguments = new Arguments();
-        }
-        this.arguments.put(name, valueWithVariable);
-        return this;
-    }
-
-    public Directive addArgument(String name, ValueWithVariable valueWithVariable) {
-        if (this.arguments == null) {
-            this.arguments = new Arguments();
-        }
-        this.arguments.put(name, valueWithVariable);
-        return this;
-    }
-
-    public Directive addArgument(String name, JsonValue valueWithVariable) {
-        if (this.arguments == null) {
-            this.arguments = new Arguments();
-        }
-        this.arguments.put(name, valueWithVariable);
+    public Directive setDescription(String description) {
+        this.description = description;
         return this;
     }
 
     @Override
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/document/Directive.stg");
-        stGroupFile.registerRenderer(JsonValue.class, new ValueWithVariableRenderer());
         ST st = stGroupFile.getInstanceOf("directiveDefinition");
         st.add("directive", this);
         String render = st.render();

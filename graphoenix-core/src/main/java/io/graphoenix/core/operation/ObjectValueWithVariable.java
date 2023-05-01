@@ -183,13 +183,7 @@ public class ObjectValueWithVariable extends AbstractMap<String, JsonValue> impl
 
     @Override
     public String toString() {
-        return render();
-    }
-
-    @Override
-    public String render() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/ObjectValueWithVariable.stg");
-        stGroupFile.registerRenderer(JsonValue.class, new ValueWithVariableRenderer());
         ST st = stGroupFile.getInstanceOf("objectValueWithVariableDefinition");
         st.add("objectValueWithVariable", objectValueWithVariable);
         String render = st.render();

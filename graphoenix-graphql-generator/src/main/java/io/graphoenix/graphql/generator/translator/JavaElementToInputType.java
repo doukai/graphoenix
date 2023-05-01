@@ -1,7 +1,7 @@
 package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.document.Directive;
+import io.graphoenix.core.operation.Directive;
 import io.graphoenix.core.document.InputObjectType;
 import io.graphoenix.core.document.InputValue;
 import jakarta.enterprise.context.ApplicationScoped;

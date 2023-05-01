@@ -1,3 +1,3 @@
 directiveDefinition(directive) ::= <<
-@<directive.name><if(directive.arguments)><directive.arguments><endif>
+<if(directive.description)>"<directive.description>" <endif>directive @<directive.name><if(directive.arguments)>(<directive.arguments:{argument|<argument>};separator=" ">)<endif> on <if(directive.directiveLocations)><directive.directiveLocations:{directiveLocation|<directiveLocation>};separator=" | "><endif>
 >>

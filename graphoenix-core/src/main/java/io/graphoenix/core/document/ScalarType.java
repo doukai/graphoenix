@@ -1,11 +1,12 @@
 package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.operation.Directive;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
@@ -13,7 +14,7 @@ import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 public class ScalarType {
 
     private String name;
-    private Set<String> directives;
+    private Collection<Directive> directives;
     private String description;
 
     public ScalarType() {
@@ -25,7 +26,7 @@ public class ScalarType {
             this.description = DOCUMENT_UTIL.getStringValue(scalarTypeDefinitionContext.description().StringValue());
         }
         if (scalarTypeDefinitionContext.directives() != null) {
-            this.directives = scalarTypeDefinitionContext.directives().directive().stream().map(Directive::new).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = scalarTypeDefinitionContext.directives().directive().stream().map(Directive::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
     }
 
@@ -38,13 +39,13 @@ public class ScalarType {
         return this;
     }
 
-    public Set<String> getDirectives() {
+    public Collection<Directive> getDirectives() {
         return directives;
     }
 
-    public ScalarType setDirectives(Set<Directive> directives) {
+    public ScalarType setDirectives(Collection<Directive> directives) {
         if (directives != null) {
-            this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = new LinkedHashSet<>(directives);
         }
         return this;
     }
