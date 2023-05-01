@@ -182,6 +182,11 @@ public class ObjectValueWithVariable extends AbstractMap<String, JsonValue> impl
     }
 
     @Override
+    public boolean isObject() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/ObjectValueWithVariable.stg");
         ST st = stGroupFile.getInstanceOf("objectValueWithVariableDefinition");

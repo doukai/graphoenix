@@ -124,10 +124,9 @@ public class ArrayValueWithVariable extends AbstractList<JsonValue> implements V
         return valueWithVariables.size();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
-    public Iterator<JsonValue> iterator() {
-        return null;
+    public boolean isArray() {
+        return true;
     }
 
     @Override

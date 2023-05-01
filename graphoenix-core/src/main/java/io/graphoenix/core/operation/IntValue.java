@@ -84,6 +84,11 @@ public class IntValue implements ValueWithVariable, JsonNumber {
     }
 
     @Override
+    public boolean isInt() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/IntValue.stg");
         ST st = stGroupFile.getInstanceOf("intValueDefinition");

@@ -51,6 +51,11 @@ public class EnumValue implements ValueWithVariable, JsonString {
     }
 
     @Override
+    public boolean isEnum() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/EnumValue.stg");
         ST st = stGroupFile.getInstanceOf("enumValueDefinition");

@@ -66,6 +66,11 @@ public class StringValue implements ValueWithVariable, JsonString {
     }
 
     @Override
+    public boolean isString() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/StringValue.stg");
         ST st = stGroupFile.getInstanceOf("stringValueDefinition");

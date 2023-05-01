@@ -84,6 +84,11 @@ public class FloatValue implements ValueWithVariable, JsonNumber {
     }
 
     @Override
+    public boolean isFloat() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/FloatValue.stg");
         ST st = stGroupFile.getInstanceOf("floatValueDefinition");

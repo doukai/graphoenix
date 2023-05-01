@@ -12,6 +12,11 @@ public class NullValue implements ValueWithVariable, JsonValue {
     }
 
     @Override
+    public boolean isNull() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/NullValue.stg");
         ST st = stGroupFile.getInstanceOf("nullValueDefinition");

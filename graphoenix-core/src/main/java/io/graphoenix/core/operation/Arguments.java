@@ -163,6 +163,11 @@ public class Arguments extends AbstractMap<String, JsonValue> implements ValueWi
     }
 
     @Override
+    public boolean isObject() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/operation/Arguments.stg");
         ST st = stGroupFile.getInstanceOf("argumentsDefinition");
