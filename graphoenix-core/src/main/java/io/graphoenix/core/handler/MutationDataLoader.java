@@ -458,22 +458,19 @@ public abstract class MutationDataLoader {
 
     public JsonValue replaceAll(JsonObject jsonObject) {
         JsonPatchBuilder patchBuilder = jsonProvider.createPatchBuilder();
-        JsonObject replaced = jsonObject;
-        if (!removeFiledMap.isEmpty()) {
-            removeFiledMap.forEach((key, value) ->
-                    value.forEach((filedName) -> patchBuilder.remove(key.concat("/").concat(filedName)))
-            );
-            replaced = patchBuilder.build().apply(replaced);
-            removeFiledMap.clear();
-        }
         if (!addFiledMap.isEmpty()) {
             addFiledMap.forEach((key, value) ->
                     value.forEach((tuple2) -> patchBuilder.add(key.concat("/").concat(tuple2._1()), tuple2._2()))
             );
-            replaced = patchBuilder.build().apply(replaced);
             addFiledMap.clear();
         }
-        return replaced;
+        if (!removeFiledMap.isEmpty()) {
+            removeFiledMap.forEach((key, value) ->
+                    value.forEach((filedName) -> patchBuilder.remove(key.concat("/").concat(filedName)))
+            );
+            removeFiledMap.clear();
+        }
+        return patchBuilder.build().apply(jsonObject);
     }
 
     private String typeToLowerCamelName(String fieldTypeName) {
