@@ -1,3 +1,3 @@
 arrayValueWithVariableDefinition(valueWithVariables) ::= <<
-[<valueWithVariables:{valueWithVariable|<if(valueWithVariable && valueWithVariable.array)>[<valueWithVariable;separator=", ">]<else><valueWithVariable><endif>};separator=", ">]
+[<valueWithVariables:{valueWithVariable|<if(valueWithVariable.array)>[<valueWithVariable;separator=", ">]<else><valueWithVariable><endif>};separator=", ">]
 >>

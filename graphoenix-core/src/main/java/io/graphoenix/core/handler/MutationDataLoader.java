@@ -47,7 +47,8 @@ public abstract class MutationDataLoader {
     private final Map<String, Map<String, Map<String, Set<String>>>> selectionMap = new ConcurrentHashMap<>();
     private final Map<String, Map<String, Map<String, Map<Integer, List<Tuple2<String, String>>>>>> indexMap = new ConcurrentHashMap<>();
     private final Map<String, Map<String, JsonValue>> resultMap = new ConcurrentHashMap<>();
-    private final Map<String, Tuple3<String, String, JsonValue>> withTypeFiledMap = new ConcurrentHashMap<>();
+    private final Map<String, List<String>> removeFiledMap = new ConcurrentHashMap<>();
+    private final Map<String, List<Tuple2<String, JsonValue>>> addFiledMap = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> updateMap = new ConcurrentHashMap<>();
     private final Map<String, Map<String, JsonObject>> updateWhereMap = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> createMap = new ConcurrentHashMap<>();
@@ -92,8 +93,19 @@ public abstract class MutationDataLoader {
         registerArray(packageName, protocol, typeName, null, keyName, null, null, jsonValue, false);
     }
 
+    public void registerRemoveFiled(String jsonPointer, String removeFiled) {
+        removeFiledMap.computeIfAbsent(jsonPointer, k -> new ArrayList<>());
+        removeFiledMap.get(jsonPointer).add(removeFiled);
+    }
+
+    public void registerAddFiled(String jsonPointer, String addField, JsonValue jsonValue) {
+        addFiledMap.computeIfAbsent(jsonPointer, k -> new ArrayList<>());
+        addFiledMap.get(jsonPointer).add(Tuple.of(addField, jsonValue));
+    }
+
     public void registerReplaceFiled(String jsonPointer, String removeFiled, String addField, JsonValue jsonValue) {
-        withTypeFiledMap.put(jsonPointer, Tuple.of(removeFiled, addField, jsonValue));
+        registerRemoveFiled(jsonPointer, removeFiled);
+        registerAddFiled(jsonPointer, addField, jsonValue);
     }
 
     public void registerUpdate(String typeName, JsonValue jsonValue) {
@@ -290,16 +302,16 @@ public abstract class MutationDataLoader {
         String idFieldName = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST));
         String selectionName = typeToLowerCamelName(typeName).concat("List");
         return io.vavr.collection.Stream.ofAll(
-                        Stream.concat(
-                                Stream.of(data)
-                                        .filter(jsonObject ->
-                                                data.containsKey(selectionName) &&
-                                                        data.get(selectionName).getValueType().equals(JsonValue.ValueType.ARRAY) &&
-                                                        data.get(selectionName).asJsonArray().size() > 0)
-                                        .flatMap(jsonObject -> jsonObject.get(selectionName).asJsonArray().stream()),
-                                getUpdateWhereJsonArray(typeName, data)
-                        ).collect(Collectors.toList())
-                )
+                Stream.concat(
+                        Stream.of(data)
+                                .filter(jsonObject ->
+                                        data.containsKey(selectionName) &&
+                                                data.get(selectionName).getValueType().equals(JsonValue.ValueType.ARRAY) &&
+                                                data.get(selectionName).asJsonArray().size() > 0)
+                                .flatMap(jsonObject -> jsonObject.get(selectionName).asJsonArray().stream()),
+                        getUpdateWhereJsonArray(typeName, data)
+                ).collect(Collectors.toList())
+        )
                 .distinctBy(jsonValue -> jsonValue.asJsonObject().get(idFieldName).toString())
                 .toJavaStream();
     }
@@ -445,14 +457,23 @@ public abstract class MutationDataLoader {
     }
 
     public JsonValue replaceAll(JsonObject jsonObject) {
-        if (!withTypeFiledMap.isEmpty()) {
-            JsonPatchBuilder patchBuilder = jsonProvider.createPatchBuilder();
-            withTypeFiledMap.forEach((jsonPointer, tuple3) -> patchBuilder.add(jsonPointer.concat("/").concat(tuple3._2()), tuple3._3()).remove(jsonPointer.concat("/").concat(tuple3._1())));
-            JsonObject replaced = patchBuilder.build().apply(jsonObject);
-            withTypeFiledMap.clear();
-            return replaced;
+        JsonPatchBuilder patchBuilder = jsonProvider.createPatchBuilder();
+        JsonObject replaced = jsonObject;
+        if (!removeFiledMap.isEmpty()) {
+            removeFiledMap.forEach((key, value) ->
+                    value.forEach((filedName) -> patchBuilder.remove(key.concat("/").concat(filedName)))
+            );
+            replaced = patchBuilder.build().apply(replaced);
+            removeFiledMap.clear();
         }
-        return jsonObject;
+        if (!addFiledMap.isEmpty()) {
+            addFiledMap.forEach((key, value) ->
+                    value.forEach((tuple2) -> patchBuilder.add(key.concat("/").concat(tuple2._1()), tuple2._2()))
+            );
+            replaced = patchBuilder.build().apply(replaced);
+            addFiledMap.clear();
+        }
+        return replaced;
     }
 
     private String typeToLowerCamelName(String fieldTypeName) {
