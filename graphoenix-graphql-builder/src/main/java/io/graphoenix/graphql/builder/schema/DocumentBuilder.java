@@ -89,6 +89,7 @@ public class DocumentBuilder {
                                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                                         .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
                         )
+                        .filter(tuple -> manager.getFetchAnchor(tuple._2()))
                         .filter(tuple -> manager.hasFetchWith(tuple._2()))
         )
                 .distinctBy(tuple -> manager.getFetchWithType(tuple._2()))
@@ -295,9 +296,14 @@ public class DocumentBuilder {
                                                 Field field = new Field(getSchemaFieldName(withType))
                                                         .setTypeName(manager.fieldTypeIsList(fieldDefinitionContext.type()) ? "[" + withType + "]" : withType)
                                                         .addDirective(
-                                                                new io.graphoenix.core.operation.Directive(MAP_DIRECTIVE_NAME)
-                                                                        .addArgument("from", manager.getFetchFrom(fieldDefinitionContext))
-                                                                        .addArgument("to", manager.getFetchWithFrom(fieldDefinitionContext))
+                                                                manager.getFetchAnchor(fieldDefinitionContext) ?
+                                                                        new io.graphoenix.core.operation.Directive(MAP_DIRECTIVE_NAME)
+                                                                                .addArgument("from", manager.getFetchFrom(fieldDefinitionContext))
+                                                                                .addArgument("to", manager.getFetchWithFrom(fieldDefinitionContext)) :
+                                                                        new io.graphoenix.core.operation.Directive(FETCH_DIRECTIVE_NAME)
+                                                                                .addArgument("from", manager.getFetchFrom(fieldDefinitionContext))
+                                                                                .addArgument("to", manager.getFetchWithFrom(fieldDefinitionContext))
+                                                                                .addArgument("protocol", manager.getProtocol(fieldDefinitionContext))
                                                         );
                                                 if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                                                     return Stream.of(
@@ -361,6 +367,7 @@ public class DocumentBuilder {
         String fetchToFieldName = manager.getFetchTo(fieldDefinitionContext);
         String fetchWithFromFieldName = manager.getFetchWithFrom(fieldDefinitionContext);
         String fetchWithToFieldName = manager.getFetchWithTo(fieldDefinitionContext);
+        String protocol = manager.getProtocol(fieldDefinitionContext);
 
         String fetchWithFromObjectFieldName = "from";
         String fetchWithToObjectFieldName = "to";
@@ -380,10 +387,16 @@ public class DocumentBuilder {
                         new Field(fetchWithFromObjectFieldName)
                                 .setTypeName(fetchFromTypeName)
                                 .addDirective(
-                                        new io.graphoenix.core.operation.Directive(MAP_DIRECTIVE_NAME)
-                                                .addArgument("from", fetchWithFromFieldName)
-                                                .addArgument("to", fetchFromFieldName)
-                                                .addArgument("anchor", true)
+                                        manager.getFetchAnchor(fieldDefinitionContext) ?
+                                                new io.graphoenix.core.operation.Directive(MAP_DIRECTIVE_NAME)
+                                                        .addArgument("from", fetchWithFromFieldName)
+                                                        .addArgument("to", fetchFromFieldName)
+                                                        .addArgument("anchor", true) :
+                                                new io.graphoenix.core.operation.Directive(FETCH_DIRECTIVE_NAME)
+                                                        .addArgument("from", fetchWithFromFieldName)
+                                                        .addArgument("to", fetchFromFieldName)
+                                                        .addArgument("anchor", true)
+                                                        .addArgument("protocol", protocol)
                                 )
                 );
 
@@ -398,7 +411,7 @@ public class DocumentBuilder {
                                                     .addArgument("from", fetchWithToFieldName)
                                                     .addArgument("to", fetchToFieldName)
                                                     .addArgument("anchor", true)
-                                                    .addArgument("protocol", manager.getProtocol(fieldDefinitionContext))
+                                                    .addArgument("protocol", protocol)
                                     )
                     );
         } else {

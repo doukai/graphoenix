@@ -4,7 +4,9 @@ import com.dslplatform.json.CompiledJson;
 import io.graphoenix.core.dto.enumType.Conditional;
 import io.graphoenix.core.dto.inputObjectType.IntExpression;
 import io.graphoenix.core.dto.inputObjectType.StringExpression;
+import io.graphoenix.showcase.user.dto.inputObjectType.RoleExpression;
 import io.graphoenix.showcase.user.dto.inputObjectType.UserExpression;
+import io.graphoenix.showcase.user.dto.inputObjectType.UserRoleExpression;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -27,6 +29,8 @@ public class OrderExpression {
 
   private GoodExpression goods;
 
+  private RoleExpression roles;
+
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
@@ -45,6 +49,8 @@ public class OrderExpression {
   private StringExpression createGroupId;
 
   private StringExpression __typename;
+
+  private UserRoleExpression userRole;
 
   @DefaultValue("AND")
   private Conditional cond;
@@ -89,6 +95,14 @@ public class OrderExpression {
 
   public void setGoods(GoodExpression goods) {
     this.goods = goods;
+  }
+
+  public RoleExpression getRoles() {
+    return this.roles;
+  }
+
+  public void setRoles(RoleExpression roles) {
+    this.roles = roles;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -161,6 +175,14 @@ public class OrderExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public UserRoleExpression getUserRole() {
+    return this.userRole;
+  }
+
+  public void setUserRole(UserRoleExpression userRole) {
+    this.userRole = userRole;
   }
 
   public Conditional getCond() {

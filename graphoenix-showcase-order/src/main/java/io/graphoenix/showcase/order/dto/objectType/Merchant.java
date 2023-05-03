@@ -86,7 +86,6 @@ public class Merchant implements Meta {
 
   private MerchantPartnersConnection merchantPartnersConnection;
 
-  @NonNull
   private MerchantDirector merchantDirector;
 
   public String getId() {

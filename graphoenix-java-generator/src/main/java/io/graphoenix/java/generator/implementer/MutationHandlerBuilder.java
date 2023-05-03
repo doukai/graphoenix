@@ -209,7 +209,7 @@ public class MutationHandlerBuilder {
                                             fieldDefinitionContext.name().getText(),
                                             withObjectField.name().getText()
                                     )
-                                    .addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue(), true)",
+                                    .addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue(), false)",
                                             packageName,
                                             protocol,
                                             typeName,

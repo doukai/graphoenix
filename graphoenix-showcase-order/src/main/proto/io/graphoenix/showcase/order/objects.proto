@@ -16,26 +16,30 @@ message Order {
     string buyer_id = 3;
     io.graphoenix.showcase.user.grpc.User buyer = 4;
     repeated Good goods = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional google.protobuf.Timestamp create_time = 10;
-    optional string update_user_id = 11;
-    optional google.protobuf.Timestamp update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
-    optional int32 id_count = 15;
-    optional string id_max = 16;
-    optional string id_min = 17;
-    optional int32 number_count = 18;
-    optional string number_max = 19;
-    optional string number_min = 20;
-    optional int32 buyer_id_count = 21;
-    optional string buyer_id_max = 22;
-    optional string buyer_id_min = 23;
-    optional Good goods_aggregate = 24;
-    optional GoodConnection goods_connection = 25;
+    repeated io.graphoenix.showcase.user.grpc.Role roles = 6;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional google.protobuf.Timestamp create_time = 11;
+    optional string update_user_id = 12;
+    optional google.protobuf.Timestamp update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+    optional int32 id_count = 16;
+    optional string id_max = 17;
+    optional string id_min = 18;
+    optional int32 number_count = 19;
+    optional string number_max = 20;
+    optional string number_min = 21;
+    optional int32 buyer_id_count = 22;
+    optional string buyer_id_max = 23;
+    optional string buyer_id_min = 24;
+    optional Good goods_aggregate = 25;
+    optional GoodConnection goods_connection = 26;
+    repeated io.graphoenix.showcase.user.grpc.UserRole user_role = 27;
+    optional io.graphoenix.showcase.user.grpc.UserRole user_role_aggregate = 28;
+    optional io.graphoenix.showcase.user.grpc.UserRoleConnection user_role_connection = 29;
 }
 message Good {
     optional string id = 1;
@@ -135,7 +139,7 @@ message Merchant {
     repeated MerchantPartners merchant_partners = 28;
     optional MerchantPartners merchant_partners_aggregate = 29;
     optional MerchantPartnersConnection merchant_partners_connection = 30;
-    MerchantDirector merchant_director = 31;
+    optional MerchantDirector merchant_director = 31;
 }
 message MerchantPartners {
     optional string id = 1;

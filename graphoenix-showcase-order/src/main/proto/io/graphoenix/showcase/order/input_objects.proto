@@ -17,17 +17,19 @@ message OrderExpression {
     optional io.graphoenix.core.grpc.StringExpression buyer_id = 3;
     optional io.graphoenix.showcase.user.grpc.UserExpression buyer = 4;
     optional GoodExpression goods = 5;
-    optional bool include_deprecated = 6;
-    optional io.graphoenix.core.grpc.IntExpression version = 7;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
-    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
-    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
-    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
-    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
-    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
-    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
-    optional io.graphoenix.core.grpc.Conditional cond = 15;
-    repeated OrderExpression exs = 16;
+    optional io.graphoenix.showcase.user.grpc.RoleExpression roles = 6;
+    optional bool include_deprecated = 7;
+    optional io.graphoenix.core.grpc.IntExpression version = 8;
+    optional io.graphoenix.core.grpc.StringExpression realm_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 10;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 12;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 13;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 14;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
+    optional io.graphoenix.showcase.user.grpc.UserRoleExpression user_role = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated OrderExpression exs = 18;
 }
 message OrderInput {
     optional string id = 1;
@@ -35,15 +37,17 @@ message OrderInput {
     optional string buyer_id = 3;
     optional io.graphoenix.showcase.user.grpc.UserInput buyer = 4;
     repeated GoodInput goods = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional google.protobuf.Timestamp create_time = 10;
-    optional string update_user_id = 11;
-    optional google.protobuf.Timestamp update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
+    repeated io.graphoenix.showcase.user.grpc.RoleInput roles = 6;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional google.protobuf.Timestamp create_time = 11;
+    optional string update_user_id = 12;
+    optional google.protobuf.Timestamp update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+    repeated io.graphoenix.showcase.user.grpc.UserRoleInput user_role = 16;
 }
 message OrderOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;

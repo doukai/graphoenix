@@ -14,7 +14,6 @@ import io.graphoenix.spi.handler.FetchHandler;
 import io.graphoenix.spi.handler.OperationHandler;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import io.vavr.Tuple3;
 import jakarta.json.*;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.spi.JsonProvider;
@@ -315,7 +314,6 @@ public abstract class MutationDataLoader {
                 .distinctBy(jsonValue -> jsonValue.asJsonObject().get(idFieldName).toString())
                 .toJavaStream();
     }
-
 
     private Stream<JsonValue> getUpdateWhereJsonArray(String typeName, JsonObject data) {
         return Stream.ofNullable(updateWhereMap.get(typeName))

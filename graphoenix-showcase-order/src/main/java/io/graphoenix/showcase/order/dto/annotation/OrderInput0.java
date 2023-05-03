@@ -43,6 +43,8 @@ public @interface OrderInput0 {
 
   String $goods() default "";
 
+  String $roles() default "";
+
   String $isDeprecated() default "";
 
   String $version() default "";
@@ -64,4 +66,10 @@ public @interface OrderInput0 {
   String $goodsAggregate() default "";
 
   String $goodsConnection() default "";
+
+  String $userRole() default "";
+
+  String $userRoleAggregate() default "";
+
+  String $userRoleConnection() default "";
 }
