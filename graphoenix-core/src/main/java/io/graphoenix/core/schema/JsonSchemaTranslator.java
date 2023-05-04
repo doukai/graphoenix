@@ -190,7 +190,7 @@ public class JsonSchemaTranslator {
     }
 
     protected JsonObjectBuilder buildNullableType(JsonObjectBuilder typeBuilder) {
-        return jsonProvider.createObjectBuilder().add("oneOf",
+        return jsonProvider.createObjectBuilder().add("anyOf",
                 jsonProvider.createArrayBuilder()
                         .add(typeBuilder)
                         .add(jsonProvider.createObjectBuilder().add("type", jsonProvider.createValue("null")))
@@ -247,13 +247,13 @@ public class JsonSchemaTranslator {
                         }
                 );
 
-        VALIDATION_UTIL.getValidationArrayArgument(directiveContext, "oneOf")
+        VALIDATION_UTIL.getValidationArrayArgument(directiveContext, "anyOf")
                 .ifPresent(arrayValueWithVariableContext -> {
                             JsonArrayBuilder oneOfBuilder = jsonProvider.createArrayBuilder();
                             arrayValueWithVariableContext.valueWithVariable().stream()
                                     .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
                                     .forEach(valueWithVariableContext -> oneOfBuilder.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
-                            validationBuilder.add("oneOf", oneOfBuilder);
+                            validationBuilder.add("anyOf", oneOfBuilder);
                         }
                 );
 
@@ -328,13 +328,13 @@ public class JsonSchemaTranslator {
                         }
                 );
 
-        VALIDATION_UTIL.getValidationArrayArgument(objectValueWithVariableContext, "oneOf")
+        VALIDATION_UTIL.getValidationArrayArgument(objectValueWithVariableContext, "anyOf")
                 .ifPresent(arrayValueWithVariableContext -> {
                             JsonArrayBuilder oneOfBuilder = jsonProvider.createArrayBuilder();
                             arrayValueWithVariableContext.valueWithVariable().stream()
                                     .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
                                     .forEach(valueWithVariableContext -> oneOfBuilder.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
-                            validationBuilder.add("oneOf", oneOfBuilder);
+                            validationBuilder.add("anyOf", oneOfBuilder);
                         }
                 );
 

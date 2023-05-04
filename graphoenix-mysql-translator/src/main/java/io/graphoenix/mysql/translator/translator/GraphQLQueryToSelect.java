@@ -176,6 +176,7 @@ public class GraphQLQueryToSelect {
                         selectionContextList.stream()
                                 .flatMap(subSelectionContext -> manager.fragmentUnzip(typeName, subSelectionContext))
                                 .filter(subSelectionContext -> manager.getField(typeName, subSelectionContext.field().name().getText()).isPresent())
+                                .filter(subSelectionContext -> manager.isNotFetchField(typeName, subSelectionContext.field().name().getText()))
                                 .filter(subSelectionContext -> manager.isNotInvokeField(typeName, subSelectionContext.field().name().getText()))
                                 .flatMap(subSelectionContext -> selectionToExpressionStream(typeName, selectionContextList, subSelectionContext, level, parentTypeName == null))
                                 .collect(Collectors.toList())
@@ -309,27 +310,6 @@ public class GraphQLQueryToSelect {
                 }
             }
             throw new GraphQLErrors(CONNECTION_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
-        } else if (manager.isFetchField(typeName, fieldDefinitionContext.name().getText())) {
-            return manager.getField(typeName, manager.getFetchFrom(fieldDefinitionContext)).stream()
-                    .flatMap(fromFieldDefinitionContext -> {
-                                boolean exists = selectionContextList.stream()
-                                        .map(subSelectionContext ->
-                                                Optional.ofNullable(subSelectionContext.field().alias())
-                                                        .map(aliasContext -> aliasContext.name().getText())
-                                                        .orElse(subSelectionContext.field().name().getText())
-                                        )
-                                        .anyMatch(name -> fromFieldDefinitionContext.name().getText().equals(name));
-                                if (exists) {
-                                    return Stream.empty();
-                                }
-
-                                StringValue selectionKey = fieldDefinitionToStringValueKey(fromFieldDefinitionContext);
-                                return Stream.of(
-                                        selectionKey,
-                                        fieldToExpression(typeName, fromFieldDefinitionContext, selectionContext, level)
-                                );
-                            }
-                    );
         } else {
             StringValue selectionKey = selectionToStringValueKey(selectionContext, isOperation);
             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
