@@ -293,6 +293,7 @@ public class DocumentBuilder {
                                     .filter(manager::hasFetchWith)
                                     .flatMap(fieldDefinitionContext -> {
                                                 String withType = manager.getFetchWithType(fieldDefinitionContext);
+                                                String protocol = manager.getProtocol(fieldDefinitionContext);
                                                 Field field = new Field(getSchemaFieldName(withType))
                                                         .setTypeName(manager.fieldTypeIsList(fieldDefinitionContext.type()) ? "[" + withType + "]" : withType)
                                                         .addDirective(
@@ -303,7 +304,7 @@ public class DocumentBuilder {
                                                                         new io.graphoenix.core.operation.Directive(FETCH_DIRECTIVE_NAME)
                                                                                 .addArgument("from", manager.getFetchFrom(fieldDefinitionContext))
                                                                                 .addArgument("to", manager.getFetchWithFrom(fieldDefinitionContext))
-                                                                                .addArgument("protocol", manager.getProtocol(fieldDefinitionContext))
+                                                                                .addArgument("protocol", EnumValue.forName(protocol))
                                                         );
                                                 if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                                                     return Stream.of(
@@ -396,7 +397,7 @@ public class DocumentBuilder {
                                                         .addArgument("from", fetchWithFromFieldName)
                                                         .addArgument("to", fetchFromFieldName)
                                                         .addArgument("anchor", true)
-                                                        .addArgument("protocol", protocol)
+                                                        .addArgument("protocol", EnumValue.forName(protocol))
                                 )
                 );
 
@@ -411,7 +412,7 @@ public class DocumentBuilder {
                                                     .addArgument("from", fetchWithToFieldName)
                                                     .addArgument("to", fetchToFieldName)
                                                     .addArgument("anchor", true)
-                                                    .addArgument("protocol", protocol)
+                                                    .addArgument("protocol", EnumValue.forName(protocol))
                                     )
                     );
         } else {

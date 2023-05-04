@@ -68,10 +68,6 @@ public class GraphQLVariablesProcessor {
                                         operationDefinitionContext,
                                         processedDefaultValue
                                 );
-                                processFetchSelection(fieldDefinitionContext, selectionContext.field());
-                                if (operationDefinitionContext.operationType().MUTATION() != null) {
-                                    processFetchArgument(fieldDefinitionContext, selectionContext.field());
-                                }
                             }
                     );
             if (operationDefinitionContext.directives() != null) {
@@ -121,57 +117,6 @@ public class GraphQLVariablesProcessor {
         if (directiveContext.arguments() != null) {
             directiveContext.arguments().argument()
                     .forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables));
-        }
-    }
-
-    private void processFetchSelection(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.FieldContext fieldContext) {
-        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        if (fieldContext != null && fieldContext.selectionSet() != null) {
-            fieldContext.selectionSet().selection().stream()
-                    .map(selectionContext -> manager.getField(fieldTypeName, selectionContext.field().name().getText()))
-                    .flatMap(Optional::stream)
-                    .filter(manager::isFetchField)
-                    .map(manager::getFetchFrom)
-                    .map(fromFieldName -> manager.getField(fieldTypeName, fromFieldName))
-                    .flatMap(Optional::stream)
-                    .filter(fromFieldDefinitionContext -> fieldContext.selectionSet().selection().stream().noneMatch(selectionContext -> selectionContext.field().name().getText().equals(fromFieldDefinitionContext.name().getText())))
-                    .findFirst()
-                    .ifPresent(fromFieldDefinitionContext -> fieldContext.selectionSet().selection().add(DOCUMENT_UTIL.graphqlToSelection(fromFieldDefinitionContext.name().getText())));
-
-            fieldContext.selectionSet().selection()
-                    .forEach(subSelectionContext ->
-                            processFetchSelection(
-                                    manager.getField(manager.getFieldTypeName(fieldDefinitionContext.type()), subSelectionContext.field().name().getText())
-                                            .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), subSelectionContext.field().name().getText()))),
-                                    subSelectionContext.field()
-                            )
-                    );
-        }
-    }
-
-    private void processFetchArgument(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.FieldContext fieldContext) {
-        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        if (fieldContext != null && fieldContext.selectionSet() != null && fieldContext.arguments() != null) {
-            fieldContext.arguments().argument().stream()
-                    .map(argumentContext -> manager.getField(fieldTypeName, argumentContext.name().getText()))
-                    .flatMap(Optional::stream)
-                    .filter(manager::isFetchField)
-                    .filter(fetchFieldDefinitionContext -> !manager.getFetchAnchor(fetchFieldDefinitionContext))
-                    .map(manager::getFetchFrom)
-                    .map(fromFieldName -> manager.getField(fieldTypeName, fromFieldName))
-                    .flatMap(Optional::stream)
-                    .filter(fromFieldDefinitionContext -> fieldContext.selectionSet().selection().stream().noneMatch(selectionContext -> selectionContext.field().name().getText().equals(fromFieldDefinitionContext.name().getText())))
-                    .findFirst()
-                    .ifPresent(fromFieldDefinitionContext -> fieldContext.selectionSet().selection().add(DOCUMENT_UTIL.graphqlToSelection(fromFieldDefinitionContext.name().getText())));
-
-            fieldContext.selectionSet().selection()
-                    .forEach(subSelectionContext ->
-                            processFetchArgument(
-                                    manager.getField(manager.getFieldTypeName(fieldDefinitionContext.type()), subSelectionContext.field().name().getText())
-                                            .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), subSelectionContext.field().name().getText()))),
-                                    subSelectionContext.field()
-                            )
-                    );
         }
     }
 

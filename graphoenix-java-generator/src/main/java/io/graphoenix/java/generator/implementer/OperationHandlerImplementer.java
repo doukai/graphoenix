@@ -135,6 +135,14 @@ public class OperationHandlerImplementer {
                 )
                 .addField(
                         FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLFetchFieldProcessor.class)),
+                                "fetchFieldProcessor",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationHandler.class)),
                                 "defaultOperationHandler",
                                 Modifier.PRIVATE,
@@ -360,7 +368,7 @@ public class OperationHandlerImplementer {
                                             CodeBlock.builder()
                                                     .add(".flatMap(operation ->\n")
                                                     .indent()
-                                                    .add("operationHandler.$L($T.DOCUMENT_UTIL.graphqlToOperation(operation.toString()))\n", operationName, ClassName.get(DocumentUtil.class))
+                                                    .add("operationHandler.$L(fetchFieldProcessor.get().buildFetchFields(operation))\n", operationName)
                                                     .add(".map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())\n", ClassName.get(StringReader.class))
                                                     .add(".flatMap(jsonObject -> mutationAfterHandler.get().handle(operationDefinitionContext, mutationLoader.then(), operation, jsonObject))\n")
                                                     .unindent()
@@ -381,7 +389,7 @@ public class OperationHandlerImplementer {
                     .addStatement(
                             CodeBlock.join(
                                     List.of(
-                                            CodeBlock.of("return operationHandler.$L(operationDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
+                                            CodeBlock.of("return operationHandler.$L(fetchFieldProcessor.get().buildFetchFields(operationDefinitionContext)).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
                                                     operationName,
                                                     ClassName.get(StringReader.class)
                                             ),
@@ -526,6 +534,7 @@ public class OperationHandlerImplementer {
                 .addParameter(ClassName.get(GraphQLConfig.class), "graphQLConfig")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLVariablesProcessor.class)), "variablesProcessor")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLFetchFieldProcessor.class)), "fetchFieldProcessor")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")), "invokeHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "ConnectionHandler")), "connectionHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "SelectionFilter")), "selectionFilter")
@@ -537,6 +546,7 @@ public class OperationHandlerImplementer {
                 .addStatement("this.graphQLConfig = graphQLConfig")
                 .addStatement("this.manager = manager")
                 .addStatement("this.variablesProcessor = variablesProcessor")
+                .addStatement("this.fetchFieldProcessor = fetchFieldProcessor")
                 .addStatement("this.defaultOperationHandler = $T.ofNullable(graphQLConfig.getDefaultOperationHandlerName()).map(name -> $T.getProvider($T.class, name)).orElseGet(() -> $T.getProvider($T.class))",
                         ClassName.get(Optional.class),
                         ClassName.get(BeanContext.class),

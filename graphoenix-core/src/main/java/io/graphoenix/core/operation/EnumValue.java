@@ -1,5 +1,6 @@
 package io.graphoenix.core.operation;
 
+import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import jakarta.json.JsonString;
 import org.stringtemplate.v4.ST;
@@ -25,6 +26,10 @@ public class EnumValue implements ValueWithVariable, JsonString {
 
     public EnumValue(GraphqlParser.EnumValueContext enumValueContext) {
         this.value = enumValueContext.getText();
+    }
+
+    public static EnumValue forName(String enumName) {
+        return new EnumValue(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, enumName));
     }
 
     public String getValue() {
