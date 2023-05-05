@@ -129,10 +129,9 @@ public class ConnectionHandlerBuilder {
             builder.beginControlFlow("if (jsonValue != null && !jsonValue.getValueType().equals($T.ValueType.NULL) && parentSelectionContext.field().selectionSet() != null && parentSelectionContext.field().selectionSet().selection().size() > 0)", ClassName.get(JsonValue.class))
                     .addStatement("$T connection = builder.build(jsonValue, typeName, parentSelectionContext)", ClassName.get(JsonValue.class))
                     .addStatement("jsonPatchBuilder.add(path, connection)")
-                    .beginControlFlow("for ($T selectionContext : parentSelectionContext.field().selectionSet().selection().stream().flatMap(selectionContext -> manager.fragmentUnzip($S, selectionContext)).collect($T.toList()))",
-                            ClassName.get(GraphqlParser.SelectionContext.class),
-                            objectTypeDefinitionContext.name().getText(),
-                            ClassName.get(Collectors.class)
+//                    .beginControlFlow("for ($T selectionContext : parentSelectionContext.field().selectionSet().selection().stream().flatMap(selectionContext -> manager.fragmentUnzip($S, selectionContext)).collect($T.toList()))",
+                    .beginControlFlow("for ($T selectionContext : parentSelectionContext.field().selectionSet().selection())",
+                            ClassName.get(GraphqlParser.SelectionContext.class)
                     )
                     .beginControlFlow("if (selectionContext.field().name().getText().equals($S))", "edges")
                     .addStatement("String selectionName = $T.ofNullable(selectionContext.field().alias()).map(aliasContext -> aliasContext.name().getText()).orElse(selectionContext.field().name().getText())", ClassName.get(Optional.class))
@@ -148,17 +147,15 @@ public class ConnectionHandlerBuilder {
         } else {
             if (manager.isOperationType(objectTypeDefinitionContext)) {
                 builder.beginControlFlow("if (operationDefinitionContext.selectionSet() != null && operationDefinitionContext.selectionSet().selection().size() > 0)")
-                        .beginControlFlow("for ($T selectionContext : operationDefinitionContext.selectionSet().selection().stream().flatMap(selectionContext -> manager.fragmentUnzip($S, selectionContext)).collect($T.toList()))",
-                                ClassName.get(GraphqlParser.SelectionContext.class),
-                                objectTypeDefinitionContext.name().getText(),
-                                ClassName.get(Collectors.class)
+//                        .beginControlFlow("for ($T selectionContext : operationDefinitionContext.selectionSet().selection().stream().flatMap(selectionContext -> manager.fragmentUnzip($S, selectionContext)).collect($T.toList()))",
+                        .beginControlFlow("for ($T selectionContext : operationDefinitionContext.selectionSet().selection())",
+                                ClassName.get(GraphqlParser.SelectionContext.class)
                         );
             } else {
                 builder.beginControlFlow("if (jsonValue != null && !jsonValue.getValueType().equals($T.ValueType.NULL) && parentSelectionContext.field().selectionSet() != null && parentSelectionContext.field().selectionSet().selection().size() > 0)", ClassName.get(JsonValue.class))
-                        .beginControlFlow("for ($T selectionContext : parentSelectionContext.field().selectionSet().selection().stream().flatMap(selectionContext -> manager.fragmentUnzip($S, selectionContext)).collect($T.toList()))",
-                                ClassName.get(GraphqlParser.SelectionContext.class),
-                                objectTypeDefinitionContext.name().getText(),
-                                ClassName.get(Collectors.class)
+//                        .beginControlFlow("for ($T selectionContext : parentSelectionContext.field().selectionSet().selection().stream().flatMap(selectionContext -> manager.fragmentUnzip($S, selectionContext)).collect($T.toList()))",
+                        .beginControlFlow("for ($T selectionContext : parentSelectionContext.field().selectionSet().selection())",
+                                ClassName.get(GraphqlParser.SelectionContext.class)
                         );
             }
             builder.addStatement("String selectionName = $T.ofNullable(selectionContext.field().alias()).map(aliasContext -> aliasContext.name().getText()).orElse(selectionContext.field().name().getText())", ClassName.get(Optional.class));

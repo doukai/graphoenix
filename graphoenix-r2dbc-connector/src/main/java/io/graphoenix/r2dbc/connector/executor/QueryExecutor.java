@@ -2,7 +2,6 @@ package io.graphoenix.r2dbc.connector.executor;
 
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import io.r2dbc.spi.Connection;
-import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Statement;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
@@ -14,6 +13,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.stream.Stream;
+
+import static io.graphoenix.r2dbc.connector.utils.ResultUtil.RESULT_UTIL;
 
 @ApplicationScoped
 public class QueryExecutor {
@@ -44,7 +45,7 @@ public class QueryExecutor {
                         },
                         Connection::close
                 )
-                .flatMap(this::getJsonStringFromResult);
+                .flatMap(RESULT_UTIL::getJsonStringFromResult);
     }
 
     public Flux<Tuple2<String, String>> executeQuery(Stream<Tuple2<String, String>> sqlStream) {
@@ -66,15 +67,11 @@ public class QueryExecutor {
                                                         parameters.forEach(statement::bind);
                                                     }
                                                     return Mono.from(statement.execute())
-                                                            .flatMap(this::getJsonStringFromResult)
+                                                            .flatMap(RESULT_UTIL::getJsonStringFromResult)
                                                             .map(jsonString -> Tuple.of(tuple2._1(), jsonString));
                                                 }
                                         ),
                         Connection::close
                 );
-    }
-
-    private Mono<String> getJsonStringFromResult(Result result) {
-        return Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class)));
     }
 }

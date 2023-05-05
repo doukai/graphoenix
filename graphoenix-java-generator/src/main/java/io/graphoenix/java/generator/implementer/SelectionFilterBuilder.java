@@ -121,10 +121,9 @@ public class SelectionFilterBuilder {
 
         builder.beginControlFlow("if (selectionSet != null && $L != null)", typeParameterName)
                 .addStatement("$T objectBuilder = jsonProvider.get().createObjectBuilder()", ClassName.get(JsonObjectBuilder.class))
-                .beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.get().fragmentUnzip($S, selectionContext)).collect($T.toList()))",
-                        ClassName.get(GraphqlParser.SelectionContext.class),
-                        objectTypeDefinitionContext.name().getText(),
-                        ClassName.get(Collectors.class)
+//                .beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.get().fragmentUnzip($S, selectionContext)).collect($T.toList()))",
+                .beginControlFlow("for ($T selectionContext : selectionSet.selection())",
+                        ClassName.get(GraphqlParser.SelectionContext.class)
                 )
                 .addStatement("String selectionName = $T.ofNullable(selectionContext.field().alias()).map(aliasContext -> aliasContext.name().getText()).orElse(selectionContext.field().name().getText())", ClassName.get(Optional.class));
 

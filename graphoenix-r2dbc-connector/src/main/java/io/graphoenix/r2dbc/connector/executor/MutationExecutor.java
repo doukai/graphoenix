@@ -3,7 +3,6 @@ package io.graphoenix.r2dbc.connector.executor;
 import com.google.common.collect.Lists;
 import io.r2dbc.spi.Batch;
 import io.r2dbc.spi.Connection;
-import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Statement;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -17,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.graphoenix.r2dbc.connector.utils.ResultUtil.RESULT_UTIL;
 
 @ApplicationScoped
 public class MutationExecutor {
@@ -41,8 +42,9 @@ public class MutationExecutor {
                             return Flux.from(batch.execute());
                         }
                 )
+                .onErrorResume(Mono::error)
                 .last()
-                .flatMap(this::getJsonStringFromResult);
+                .flatMap(RESULT_UTIL::getJsonStringFromResult);
     }
 
     public Flux<Integer> executeMutationsInBatchByGroup(Stream<String> sqlStream, int itemCount) {
@@ -70,19 +72,28 @@ public class MutationExecutor {
         return this.connectionMonoProvider.get()
                 .flatMap(connection ->
                         Flux.fromStream(sqlStream)
-                                .flatMap(sql -> {
-                                            Logger.info("execute statement:\r\n{}", sql);
+                                .collectList()
+                                .flatMap(sqlList -> {
+                                            String mutation = String.join(";", sqlList.subList(0, sqlList.size() - 1));
+                                            String query = sqlList.get(sqlList.size() - 1);
+                                            Logger.info("execute mutation:\r\n{}", mutation);
+                                            Logger.info("execute query:\r\n{}", query);
                                             Logger.info("sql parameters:\r\n{}", parameters);
-                                            Statement statement = connection.createStatement(sql);
+
+                                            Statement mutationStatement = connection.createStatement(mutation);
+                                            Statement queryStatement = connection.createStatement(query);
+
                                             if (parameters != null) {
-                                                parameters.forEach(statement::bind);
+                                                parameters.forEach(mutationStatement::bind);
+                                                parameters.forEach(queryStatement::bind);
                                             }
-                                            return Mono.from(statement.execute()).doOnError(throwable -> Mono.error(throwable));
+                                            return Mono.from(mutationStatement.execute())
+                                                    .flatMap(RESULT_UTIL::getUpdateCountFromResult)
+                                                    .then(Mono.from(queryStatement.execute()));
                                         }
                                 )
-                                .last()
                 )
-                .flatMap(this::getJsonStringFromResult);
+                .flatMap(RESULT_UTIL::getJsonStringFromResult);
     }
 
     public Mono<String> executeMutations(String sql) {
@@ -102,10 +113,6 @@ public class MutationExecutor {
                             return Mono.from(statement.execute());
                         }
                 )
-                .flatMap(this::getJsonStringFromResult);
-    }
-
-    private Mono<String> getJsonStringFromResult(Result result) {
-        return Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class))).doOnError(throwable -> Mono.error(throwable));
+                .flatMap(RESULT_UTIL::getJsonStringFromResult);
     }
 }

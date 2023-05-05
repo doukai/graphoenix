@@ -115,6 +115,7 @@ public class GraphQLFetchFieldProcessor {
                     .map(argumentName -> manager.getField(fieldTypeName, argumentName))
                     .flatMap(Optional::stream)
                     .filter(manager::isFetchField)
+                    .filter(fetchFieldDefinitionContext -> !manager.getFetchAnchor(fetchFieldDefinitionContext))
                     .map(manager::getFetchFrom)
                     .map(fromFieldName -> manager.getField(fieldTypeName, fromFieldName))
                     .flatMap(Optional::stream)

@@ -174,7 +174,7 @@ public class GraphQLQueryToSelect {
         Function function = jsonObjectFunction(
                 new ExpressionList(
                         selectionContextList.stream()
-                                .flatMap(subSelectionContext -> manager.fragmentUnzip(typeName, subSelectionContext))
+//                                .flatMap(subSelectionContext -> manager.fragmentUnzip(typeName, subSelectionContext))
                                 .filter(subSelectionContext -> manager.getField(typeName, subSelectionContext.field().name().getText()).isPresent())
                                 .filter(subSelectionContext -> manager.isNotFetchField(typeName, subSelectionContext.field().name().getText()))
                                 .filter(subSelectionContext -> manager.isNotInvokeField(typeName, subSelectionContext.field().name().getText()))

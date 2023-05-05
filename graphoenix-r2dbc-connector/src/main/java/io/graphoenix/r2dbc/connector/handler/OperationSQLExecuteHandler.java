@@ -46,10 +46,10 @@ public class OperationSQLExecuteHandler {
     }
 
     public Mono<String> mutation(Stream<String> sqlStream) {
-        return mutationExecutor.executeMutations(sqlStream.collect(Collectors.joining(";")));
+        return mutationExecutor.executeMutations(sqlStream);
     }
 
     public Mono<String> mutation(Stream<String> sqlStream, Map<String, Object> parameters) {
-        return mutationExecutor.executeMutations(sqlStream.collect(Collectors.joining(";")), r2dbcParameterProcessor.process(parameters));
+        return mutationExecutor.executeMutations(sqlStream, r2dbcParameterProcessor.process(parameters));
     }
 }

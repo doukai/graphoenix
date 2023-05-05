@@ -53,6 +53,9 @@ public class GraphQLVariablesProcessor {
         } else {
             throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
         }
+
+        processFragment(objectTypeDefinitionContext.name().getText(), operationDefinitionContext.selectionSet());
+
         if (operationDefinitionContext.variableDefinitions() != null) {
             Map<String, JsonValue> processedDefaultValue = processDefaultValue(operationDefinitionContext, variables);
             operationDefinitionContext.selectionSet().selection()
@@ -75,6 +78,30 @@ public class GraphQLVariablesProcessor {
             }
         }
         return operationDefinitionContext;
+    }
+
+    private void processFragment(String typeName, GraphqlParser.SelectionSetContext selectionSetContext) {
+        if (selectionSetContext != null) {
+            List<GraphqlParser.SelectionContext> selectionContexts = selectionSetContext.selection().stream().flatMap(selectionContext -> manager.fragmentUnzip(typeName, selectionContext)).collect(Collectors.toList());
+            if (selectionContexts.size() > 0) {
+                ParseTree left = selectionSetContext.getChild(0);
+                ParseTree right = selectionSetContext.getChild(selectionSetContext.getChildCount() - 1);
+                IntStream.range(0, selectionSetContext.getChildCount()).forEach(index -> selectionSetContext.removeLastChild());
+                selectionSetContext.addChild((TerminalNode) left);
+                for (GraphqlParser.SelectionContext selectionContext : selectionContexts) {
+                    selectionSetContext.addChild(selectionContext);
+                }
+                selectionSetContext.addChild((TerminalNode) right);
+            }
+
+            selectionSetContext.selection()
+                    .forEach(selectionContext -> {
+                                GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, selectionContext.field().name().getText())
+                                        .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText())));
+                                processFragment(manager.getFieldTypeName(fieldDefinitionContext.type()), selectionContext.field().selectionSet());
+                            }
+                    );
+        }
     }
 
     private Map<String, JsonValue> processDefaultValue(GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {

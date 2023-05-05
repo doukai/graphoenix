@@ -77,8 +77,7 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                                     try {
                                                                         return Mono.from(connection.setAutoCommit(false))
                                                                                 .then(Mono.from(connection.beginTransaction()))
-                                                                                .then((Mono<Object>) invocationContext.proceed())
-                                                                                .doOnError(throwable -> Mono.error(throwable));
+                                                                                .then((Mono<Object>) invocationContext.proceed());
                                                                     } catch (Exception e) {
                                                                         return Mono.error(e);
                                                                     }
