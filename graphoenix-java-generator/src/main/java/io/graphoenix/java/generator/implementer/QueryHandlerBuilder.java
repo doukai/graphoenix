@@ -17,6 +17,7 @@ import jakarta.inject.Provider;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
+import org.antlr.v4.runtime.RuleContext;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
@@ -28,6 +29,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static io.graphoenix.core.utils.NameUtil.NAME_UTIL;
 
 @ApplicationScoped
 public class QueryHandlerBuilder {
@@ -125,7 +128,9 @@ public class QueryHandlerBuilder {
 
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> manager.isFetchField(fieldDefinitionContext) || manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext ->
+                        manager.isFetchField(fieldDefinitionContext) ||
+                                manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .collect(Collectors.toList());
 
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {
@@ -143,15 +148,27 @@ public class QueryHandlerBuilder {
                     String from = manager.getFetchFrom(fieldDefinitionContext);
                     String to = manager.getFetchTo(fieldDefinitionContext);
 
-                    builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
-                            .addStatement("loader.registerArray($S, $S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
-                                    packageName,
-                                    protocol,
-                                    typeName,
-                                    to,
-                                    from
-                            )
-                            .endControlFlow();
+                    if (manager.hasFetchWith(fieldDefinitionContext)) {
+                        GraphqlParser.FieldDefinitionContext fetchWithObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
+                        GraphqlParser.FieldDefinitionContext fetchWithToObjectField = manager.getFetchWithToObjectField(fieldDefinitionContext);
+                        String fetchWithTo = manager.getFetchWithTo(fieldDefinitionContext);
+                        builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, jsonProvider.get().createPointer(jsonPointer + \"/\" + $S), $S)",
+                                fetchWithObjectField.name().getText(),
+                                fieldDefinitionContext.name().getText(),
+                                fetchWithObjectField.name().getText(),
+                                Optional.ofNullable(fetchWithToObjectField).map(GraphqlParser.FieldDefinitionContext::name).map(RuleContext::getText).orElse(fetchWithTo)
+                        );
+                    } else {
+                        builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
+                                .addStatement("loader.registerArray($S, $S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
+                                        packageName,
+                                        protocol,
+                                        typeName,
+                                        to,
+                                        from
+                                )
+                                .endControlFlow();
+                    }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     builder.addStatement("$L(jsonValue.asJsonObject().get(selectionName), selectionContext.field().selectionSet(), loader, jsonPointer + \"/\" + selectionName)",
                             fieldParameterName.concat("List")
@@ -165,15 +182,27 @@ public class QueryHandlerBuilder {
                     String from = manager.getFetchFrom(fieldDefinitionContext);
                     String to = manager.getFetchTo(fieldDefinitionContext);
 
-                    builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
-                            .addStatement("loader.register($S, $S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
-                                    packageName,
-                                    protocol,
-                                    typeName,
-                                    to,
-                                    from
-                            )
-                            .endControlFlow();
+                    if (manager.hasFetchWith(fieldDefinitionContext)) {
+                        GraphqlParser.FieldDefinitionContext fetchWithObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
+                        GraphqlParser.FieldDefinitionContext fetchWithToObjectField = manager.getFetchWithToObjectField(fieldDefinitionContext);
+                        String fetchWithTo = manager.getFetchWithTo(fieldDefinitionContext);
+                        builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, jsonProvider.get().createPointer(jsonPointer + \"/\" + $S), $S)",
+                                fetchWithObjectField.name().getText(),
+                                fieldDefinitionContext.name().getText(),
+                                fetchWithObjectField.name().getText(),
+                                Optional.ofNullable(fetchWithToObjectField).map(GraphqlParser.FieldDefinitionContext::name).map(RuleContext::getText).orElse(fetchWithTo)
+                        );
+                    } else {
+                        builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
+                                .addStatement("loader.register($S, $S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
+                                        packageName,
+                                        protocol,
+                                        typeName,
+                                        to,
+                                        from
+                                )
+                                .endControlFlow();
+                    }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     builder.addStatement("$L(jsonValue.asJsonObject().get(selectionName), selectionContext.field().selectionSet(), loader, jsonPointer + \"/\" + selectionName)",
                             fieldParameterName
@@ -246,7 +275,7 @@ public class QueryHandlerBuilder {
         }
         builder.endControlFlow()
                 .endControlFlow()
-                .addStatement("return loader.load(jsonObject)");
+                .addStatement("return loader.load(jsonObject).map(jsonValue -> loader.replaceAll(jsonValue.asJsonObject()))");
         return builder.build();
     }
 }

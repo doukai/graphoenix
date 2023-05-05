@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ApplicationScoped
@@ -45,10 +46,10 @@ public class OperationSQLExecuteHandler {
     }
 
     public Mono<String> mutation(Stream<String> sqlStream) {
-        return mutationExecutor.executeMutations(sqlStream);
+        return mutationExecutor.executeMutations(sqlStream.collect(Collectors.joining(";")));
     }
 
     public Mono<String> mutation(Stream<String> sqlStream, Map<String, Object> parameters) {
-        return mutationExecutor.executeMutations(sqlStream, r2dbcParameterProcessor.process(parameters));
+        return mutationExecutor.executeMutations(sqlStream.collect(Collectors.joining(";")), r2dbcParameterProcessor.process(parameters));
     }
 }

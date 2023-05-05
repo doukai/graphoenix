@@ -1364,7 +1364,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext) != null)
                 .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext).equals(getFetchWithTo(fieldDefinitionContext)))
                 .findFirst()
-                .orElseThrow(() -> new GraphQLErrors(FETCH_TO_OBJECT_FIELD_NOT_EXIST.bind(getFetchWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
+                .orElse(null);
     }
 
     @Override
@@ -1489,7 +1489,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .filter(witTypeFieldDefinitionContext -> getMapFrom(witTypeFieldDefinitionContext) != null)
                 .filter(witTypeFieldDefinitionContext -> getMapFrom(witTypeFieldDefinitionContext).equals(getMapWithTo(fieldDefinitionContext)))
                 .findFirst()
-                .orElseThrow(() -> new GraphQLErrors(MAP_TO_OBJECT_FIELD_NOT_EXIST.bind(getMapWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
+                .orElse(null);
     }
 
     @Override

@@ -8,8 +8,10 @@ import io.graphoenix.core.operation.*;
 import io.graphoenix.spi.handler.FetchHandler;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import io.vavr.Tuple3;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonPatchBuilder;
+import jakarta.json.JsonPointer;
 import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import jakarta.json.bind.Jsonb;
@@ -36,6 +38,8 @@ public abstract class QueryDataLoader {
     private final Map<String, Map<String, Set<Tuple2<String, Field>>>> operationTypeFields = new ConcurrentHashMap<>();
 
     private final Map<String, Map<String, JsonValue>> resultMap = new ConcurrentHashMap<>();
+    private final Map<String, List<String>> removeFiledMap = new ConcurrentHashMap<>();
+    private final Map<String, List<Tuple3<String, JsonPointer, String>>> addFiledMap = new ConcurrentHashMap<>();
 
     public QueryDataLoader() {
         this.jsonProvider = BeanContext.get(JsonProvider.class);
@@ -58,6 +62,21 @@ public abstract class QueryDataLoader {
         addSelection(packageName, protocol, typeName, fieldName, fieldName);
         mergeSelection(packageName, protocol, typeName, fieldName, selectionSetContext);
         addCondition(packageName, protocol, typeName, fieldName, getKeyValue(key), JsonValue.ValueType.ARRAY, jsonPointer, selectionSetContext);
+    }
+
+    public void registerRemoveFiled(String jsonPointer, String removeFiled) {
+        removeFiledMap.computeIfAbsent(jsonPointer, k -> new ArrayList<>());
+        removeFiledMap.get(jsonPointer).add(removeFiled);
+    }
+
+    public void registerAddFiled(String jsonPointer, String addField, JsonPointer addFieldJsonPointer, String element) {
+        addFiledMap.computeIfAbsent(jsonPointer, k -> new ArrayList<>());
+        addFiledMap.get(jsonPointer).add(Tuple.of(addField, addFieldJsonPointer, element));
+    }
+
+    public void registerReplaceFiled(String jsonPointer, String removeFiled, String addField, JsonPointer addFieldJsonPointer, String element) {
+        registerRemoveFiled(jsonPointer, removeFiled);
+        registerAddFiled(jsonPointer, addField, addFieldJsonPointer, element);
     }
 
     protected Mono<Operation> build(String packageName, String protocol) {
@@ -204,6 +223,31 @@ public abstract class QueryDataLoader {
                         }
                     }
             );
+        }
+        return patchBuilder.build().apply(jsonObject);
+    }
+
+    public JsonValue replaceAll(JsonObject jsonObject) {
+        JsonPatchBuilder patchBuilder = jsonProvider.createPatchBuilder();
+        if (!addFiledMap.isEmpty()) {
+            addFiledMap.forEach((key, value) ->
+                    value.forEach((tuple3) -> {
+                                JsonValue jsonValue = tuple3._2().getValue(jsonObject);
+                                if (jsonValue.getValueType().equals(JsonValue.ValueType.ARRAY)) {
+                                    patchBuilder.add(key.concat("/").concat(tuple3._1()), tuple3._2().getValue(jsonObject).asJsonArray().stream().map(item -> item.asJsonObject().get(tuple3._3())).collect(JsonCollectors.toJsonArray()));
+                                } else {
+                                    patchBuilder.add(key.concat("/").concat(tuple3._1()), tuple3._2().getValue(jsonObject).asJsonObject().get(tuple3._3()));
+                                }
+                            }
+                    )
+            );
+            addFiledMap.clear();
+        }
+        if (!removeFiledMap.isEmpty()) {
+            removeFiledMap.forEach((key, value) ->
+                    value.forEach((filedName) -> patchBuilder.remove(key.concat("/").concat(filedName)))
+            );
+            removeFiledMap.clear();
         }
         return patchBuilder.build().apply(jsonObject);
     }

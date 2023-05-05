@@ -77,7 +77,7 @@ public class MutationExecutor {
                                             if (parameters != null) {
                                                 parameters.forEach(statement::bind);
                                             }
-                                            return Mono.from(statement.execute());
+                                            return Mono.from(statement.execute()).doOnError(throwable -> Mono.error(throwable));
                                         }
                                 )
                                 .last()
@@ -106,6 +106,6 @@ public class MutationExecutor {
     }
 
     private Mono<String> getJsonStringFromResult(Result result) {
-        return Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class)));
+        return Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class))).doOnError(throwable -> Mono.error(throwable));
     }
 }

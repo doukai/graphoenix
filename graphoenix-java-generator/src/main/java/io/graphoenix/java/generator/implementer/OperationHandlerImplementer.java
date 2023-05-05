@@ -17,7 +17,6 @@ import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.*;
 import io.graphoenix.core.schema.JsonSchemaValidator;
-import io.graphoenix.core.utils.DocumentUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.OperationType;
 import io.graphoenix.spi.handler.MutationHandler;
@@ -368,32 +367,38 @@ public class OperationHandlerImplementer {
                                             CodeBlock.builder()
                                                     .add(".flatMap(operation ->\n")
                                                     .indent()
-                                                    .add("operationHandler.$L(fetchFieldProcessor.get().buildFetchFields(operation))\n", operationName)
+                                                    .add("$T.just(fetchFieldProcessor.get().buildFetchFields(operation))\n", ClassName.get(Mono.class))
+                                                    .add(".flatMap(operationWithFetchFieldDefinitionContext ->\n")
+                                                    .indent()
+                                                    .add("operationHandler.$L(operationWithFetchFieldDefinitionContext)\n", operationName)
                                                     .add(".map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())\n", ClassName.get(StringReader.class))
                                                     .add(".flatMap(jsonObject -> mutationAfterHandler.get().handle(operationDefinitionContext, mutationLoader.then(), operation, jsonObject))\n")
+                                                    .add(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationWithFetchFieldDefinitionContext, queryLoader))\n")
+                                                    .unindent()
+                                                    .add(")\n")
                                                     .unindent()
                                                     .add(")")
                                                     .build(),
+                                            CodeBlock.of(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName)),
+                                            CodeBlock.of(".flatMap(jsonValue -> invoke(jsonValue, operationDefinitionContext))"),
                                             graphQLConfig.getCompensating() ?
                                                     CodeBlock.of(".onErrorResume(throwable -> mutationLoader.compensating(throwable).then($T.error(throwable)))", ClassName.get(Mono.class)) :
-                                                    CodeBlock.of(".onErrorResume(throwable -> $T.error(throwable))", ClassName.get(Mono.class)),
-                                            CodeBlock.of(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationDefinitionContext, queryLoader))"),
-                                            CodeBlock.of(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName)),
-                                            CodeBlock.of(".flatMap(jsonValue -> invoke(jsonValue, operationDefinitionContext))")
+                                                    CodeBlock.of(".onErrorResume(throwable -> $T.error(throwable))", ClassName.get(Mono.class))
                                     ),
                                     System.lineSeparator()
                             )
                     );
         } else if (type.equals(QUERY)) {
-            builder.addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
+            builder.addStatement("$T operationWithFetchFieldDefinitionContext = fetchFieldProcessor.get().buildFetchFields(operationDefinitionContext)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
+                    .addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
                     .addStatement(
                             CodeBlock.join(
                                     List.of(
-                                            CodeBlock.of("return operationHandler.$L(fetchFieldProcessor.get().buildFetchFields(operationDefinitionContext)).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
+                                            CodeBlock.of("return operationHandler.$L(operationWithFetchFieldDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
                                                     operationName,
                                                     ClassName.get(StringReader.class)
                                             ),
-                                            CodeBlock.of(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationDefinitionContext, queryLoader))"),
+                                            CodeBlock.of(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationWithFetchFieldDefinitionContext, queryLoader))"),
                                             CodeBlock.of(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName)),
                                             CodeBlock.of(".flatMap(jsonValue -> invoke(jsonValue, operationDefinitionContext))")
                                     ),

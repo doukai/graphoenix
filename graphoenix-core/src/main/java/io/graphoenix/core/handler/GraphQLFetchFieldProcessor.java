@@ -61,6 +61,7 @@ public class GraphQLFetchFieldProcessor {
                     .map(subField -> manager.getField(fieldTypeName, subField.getName()))
                     .flatMap(Optional::stream)
                     .filter(manager::isFetchField)
+                    .filter(subField -> !manager.hasFetchWith(subField))
                     .map(manager::getFetchFrom)
                     .map(fromFieldName -> manager.getField(fieldTypeName, fromFieldName))
                     .flatMap(Optional::stream)
@@ -68,8 +69,32 @@ public class GraphQLFetchFieldProcessor {
                     .map(fromFieldDefinitionContext -> new Field(fromFieldDefinitionContext.name().getText()))
                     .collect(Collectors.toList());
 
+            List<Field> withObjectFieldSelectionList = field.getFields().stream()
+                    .flatMap(subField ->
+                            manager.getField(fieldTypeName, subField.getName())
+                                    .filter(manager::isFetchField)
+                                    .filter(manager::hasFetchWith)
+                                    .flatMap(fetchFieldDefinitionContext ->
+                                            manager.getObject(fieldTypeName)
+                                                    .map(objectTypeDefinitionContext -> manager.getFetchWithObjectField(objectTypeDefinitionContext, fetchFieldDefinitionContext))
+                                                    .map(withObjectFieldDefinitionContext ->
+                                                            new Field(withObjectFieldDefinitionContext.name().getText())
+                                                                    .addField(
+                                                                            new Field(manager.getFetchWithToObjectField(fetchFieldDefinitionContext).name().getText())
+                                                                                    .setFields(subField.getFields())
+                                                                    )
+                                                    )
+                                    )
+                                    .stream()
+                    )
+                    .collect(Collectors.toList());
+
             if (fromFieldSelectionList.size() > 0) {
                 field.addFields(fromFieldSelectionList);
+            }
+
+            if (withObjectFieldSelectionList.size() > 0) {
+                field.addFields(withObjectFieldSelectionList);
             }
 
             field.getFields()
@@ -90,7 +115,6 @@ public class GraphQLFetchFieldProcessor {
                     .map(argumentName -> manager.getField(fieldTypeName, argumentName))
                     .flatMap(Optional::stream)
                     .filter(manager::isFetchField)
-                    .filter(fetchFieldDefinitionContext -> !manager.getFetchAnchor(fetchFieldDefinitionContext))
                     .map(manager::getFetchFrom)
                     .map(fromFieldName -> manager.getField(fieldTypeName, fromFieldName))
                     .flatMap(Optional::stream)
