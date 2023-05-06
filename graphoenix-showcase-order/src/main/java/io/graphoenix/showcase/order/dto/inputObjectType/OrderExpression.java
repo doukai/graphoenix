@@ -23,8 +23,6 @@ public class OrderExpression {
 
   private StringExpression number;
 
-  private StringExpression buyerId;
-
   private UserExpression buyer;
 
   private GoodExpression goods;
@@ -50,6 +48,8 @@ public class OrderExpression {
 
   private StringExpression __typename;
 
+  private IntExpression buyerId;
+
   private UserRoleExpression userRole;
 
   @DefaultValue("AND")
@@ -71,14 +71,6 @@ public class OrderExpression {
 
   public void setNumber(StringExpression number) {
     this.number = number;
-  }
-
-  public StringExpression getBuyerId() {
-    return this.buyerId;
-  }
-
-  public void setBuyerId(StringExpression buyerId) {
-    this.buyerId = buyerId;
   }
 
   public UserExpression getBuyer() {
@@ -175,6 +167,14 @@ public class OrderExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public IntExpression getBuyerId() {
+    return this.buyerId;
+  }
+
+  public void setBuyerId(IntExpression buyerId) {
+    this.buyerId = buyerId;
   }
 
   public UserRoleExpression getUserRole() {

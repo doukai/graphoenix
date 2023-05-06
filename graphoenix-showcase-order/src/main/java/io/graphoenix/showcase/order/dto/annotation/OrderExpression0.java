@@ -16,8 +16,6 @@ public @interface OrderExpression0 {
 
   StringExpression number() default @StringExpression;
 
-  StringExpression buyerId() default @StringExpression;
-
   BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
@@ -35,6 +33,8 @@ public @interface OrderExpression0 {
   StringExpression createGroupId() default @StringExpression;
 
   StringExpression __typename() default @StringExpression;
+
+  IntExpression buyerId() default @IntExpression;
 
   String[] groupBy() default {};
 

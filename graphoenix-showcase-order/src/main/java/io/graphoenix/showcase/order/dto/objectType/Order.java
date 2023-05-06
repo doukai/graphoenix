@@ -29,13 +29,8 @@ public class Order implements Meta {
   @NonNull
   private String number;
 
-  @NonNull
-  private String buyerId;
-
-  @NonNull
   private User buyer;
 
-  @NonNull
   private Collection<Good> goods;
 
   private Collection<Role> roles;
@@ -72,15 +67,21 @@ public class Order implements Meta {
 
   private String numberMin;
 
-  private Integer buyerIdCount;
-
-  private String buyerIdMax;
-
-  private String buyerIdMin;
-
   private Good goodsAggregate;
 
   private GoodConnection goodsConnection;
+
+  private Integer buyerId;
+
+  private Integer buyerIdCount;
+
+  private Integer buyerIdSum;
+
+  private Integer buyerIdAvg;
+
+  private Integer buyerIdMax;
+
+  private Integer buyerIdMin;
 
   private Collection<UserRole> userRole;
 
@@ -102,14 +103,6 @@ public class Order implements Meta {
 
   public void setNumber(String number) {
     this.number = number;
-  }
-
-  public String getBuyerId() {
-    return this.buyerId;
-  }
-
-  public void setBuyerId(String buyerId) {
-    this.buyerId = buyerId;
   }
 
   public User getBuyer() {
@@ -272,30 +265,6 @@ public class Order implements Meta {
     this.numberMin = numberMin;
   }
 
-  public Integer getBuyerIdCount() {
-    return this.buyerIdCount;
-  }
-
-  public void setBuyerIdCount(Integer buyerIdCount) {
-    this.buyerIdCount = buyerIdCount;
-  }
-
-  public String getBuyerIdMax() {
-    return this.buyerIdMax;
-  }
-
-  public void setBuyerIdMax(String buyerIdMax) {
-    this.buyerIdMax = buyerIdMax;
-  }
-
-  public String getBuyerIdMin() {
-    return this.buyerIdMin;
-  }
-
-  public void setBuyerIdMin(String buyerIdMin) {
-    this.buyerIdMin = buyerIdMin;
-  }
-
   public Good getGoodsAggregate() {
     return this.goodsAggregate;
   }
@@ -310,6 +279,54 @@ public class Order implements Meta {
 
   public void setGoodsConnection(GoodConnection goodsConnection) {
     this.goodsConnection = goodsConnection;
+  }
+
+  public Integer getBuyerId() {
+    return this.buyerId;
+  }
+
+  public void setBuyerId(Integer buyerId) {
+    this.buyerId = buyerId;
+  }
+
+  public Integer getBuyerIdCount() {
+    return this.buyerIdCount;
+  }
+
+  public void setBuyerIdCount(Integer buyerIdCount) {
+    this.buyerIdCount = buyerIdCount;
+  }
+
+  public Integer getBuyerIdSum() {
+    return this.buyerIdSum;
+  }
+
+  public void setBuyerIdSum(Integer buyerIdSum) {
+    this.buyerIdSum = buyerIdSum;
+  }
+
+  public Integer getBuyerIdAvg() {
+    return this.buyerIdAvg;
+  }
+
+  public void setBuyerIdAvg(Integer buyerIdAvg) {
+    this.buyerIdAvg = buyerIdAvg;
+  }
+
+  public Integer getBuyerIdMax() {
+    return this.buyerIdMax;
+  }
+
+  public void setBuyerIdMax(Integer buyerIdMax) {
+    this.buyerIdMax = buyerIdMax;
+  }
+
+  public Integer getBuyerIdMin() {
+    return this.buyerIdMin;
+  }
+
+  public void setBuyerIdMin(Integer buyerIdMin) {
+    this.buyerIdMin = buyerIdMin;
   }
 
   public Collection<UserRole> getUserRole() {

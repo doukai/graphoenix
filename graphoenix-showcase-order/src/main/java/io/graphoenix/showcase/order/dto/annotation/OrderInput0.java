@@ -13,8 +13,6 @@ public @interface OrderInput0 {
 
   String number() default "";
 
-  String buyerId() default "";
-
   boolean isDeprecated() default false;
 
   int version() default 0;
@@ -33,11 +31,11 @@ public @interface OrderInput0 {
 
   String __typename() default "";
 
+  int buyerId() default 0;
+
   String $id() default "";
 
   String $number() default "";
-
-  String $buyerId() default "";
 
   String $buyer() default "";
 
@@ -66,6 +64,8 @@ public @interface OrderInput0 {
   String $goodsAggregate() default "";
 
   String $goodsConnection() default "";
+
+  String $buyerId() default "";
 
   String $userRole() default "";
 

@@ -81,17 +81,17 @@ public class DocumentBuilder {
 
     public Document buildDocument() {
         io.vavr.collection.Stream.ofAll(
-                manager.getObjects()
-                        .filter(packageManager::isOwnPackage)
-                        .filter(manager::isNotOperationType)
-                        .filter(manager::isNotContainerType)
-                        .flatMap(objectTypeDefinitionContext ->
-                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                        )
-                        .filter(tuple -> manager.getFetchAnchor(tuple._2()))
-                        .filter(tuple -> manager.hasFetchWith(tuple._2()))
-        )
+                        manager.getObjects()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isNotOperationType)
+                                .filter(manager::isNotContainerType)
+                                .flatMap(objectTypeDefinitionContext ->
+                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                                )
+                                .filter(tuple -> manager.getFetchAnchor(tuple._2()))
+                                .filter(tuple -> manager.hasFetchWith(tuple._2()))
+                )
                 .distinctBy(tuple -> manager.getFetchWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildFetchWithObject(tuple._1(), tuple._2()).stream())
@@ -99,16 +99,16 @@ public class DocumentBuilder {
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
         io.vavr.collection.Stream.ofAll(
-                manager.getObjects()
-                        .filter(packageManager::isOwnPackage)
-                        .filter(manager::isNotOperationType)
-                        .filter(manager::isNotContainerType)
-                        .flatMap(objectTypeDefinitionContext ->
-                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                        )
-                        .filter(tuple -> manager.hasMapWith(tuple._2()))
-        )
+                        manager.getObjects()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isNotOperationType)
+                                .filter(manager::isNotContainerType)
+                                .flatMap(objectTypeDefinitionContext ->
+                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                                )
+                                .filter(tuple -> manager.hasMapWith(tuple._2()))
+                )
                 .distinctBy(tuple -> manager.getMapWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildMapWithObject(tuple._1(), tuple._2()).stream())
@@ -286,6 +286,7 @@ public class DocumentBuilder {
                                     .filter(fieldDefinitionContext -> !manager.hasFetchWith(fieldDefinitionContext))
                                     .map(fieldDefinitionContext -> new Field(manager.getFetchFrom(fieldDefinitionContext)).setTypeName(getMapFieldType(manager.getFieldTypeName(fieldDefinitionContext.type()), manager.getFetchTo(fieldDefinitionContext))))
                                     .filter(field -> fieldDefinitionContextList.stream().noneMatch(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(field.getName())))
+                                    .flatMap(field -> Stream.concat(Stream.of(field), buildFunctionFieldStream(field, field.getTypeName())))
                                     .collect(Collectors.toList())
                     )
                     .addFields(
@@ -326,6 +327,7 @@ public class DocumentBuilder {
                                     .filter(fieldDefinitionContext -> !manager.hasMapWith(fieldDefinitionContext))
                                     .map(fieldDefinitionContext -> new Field(manager.getMapFrom(fieldDefinitionContext)).setTypeName(getMapFieldType(manager.getFieldTypeName(fieldDefinitionContext.type()), manager.getMapTo(fieldDefinitionContext))))
                                     .filter(field -> fieldDefinitionContextList.stream().noneMatch(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(field.getName())))
+                                    .flatMap(field -> Stream.concat(Stream.of(field), buildFunctionFieldStream(field, field.getTypeName())))
                                     .collect(Collectors.toList())
                     )
                     .addFields(
@@ -998,7 +1000,7 @@ public class DocumentBuilder {
     public String getMapFieldType(String typeName, String filedName) {
         return manager.getField(typeName, filedName)
                 .map(fieldDefinitionContext -> {
-                            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                            String fieldTypeName = manager.getDataTypeName(fieldDefinitionContext).orElseGet(() -> manager.getFieldTypeName(fieldDefinitionContext.type()));
                             if ("ID".equals(fieldTypeName)) {
                                 return manager.getDataTypeName(fieldDefinitionContext).orElse("String");
                             }
@@ -1006,6 +1008,75 @@ public class DocumentBuilder {
                         }
                 )
                 .orElse("String");
+    }
+
+    public Stream<Field> buildFunctionFieldStream(Field field, String fieldTypeName) {
+        switch (fieldTypeName) {
+            case "ID":
+            case "String":
+            case "Date":
+            case "Time":
+            case "DateTime":
+            case "Timestamp":
+                return Stream.of(
+                        Function.COUNT.toField(
+                                field.getName(),
+                                "Int",
+                                fieldTypeName,
+                                false
+                        ),
+                        Function.MAX.toField(
+                                field.getName(),
+                                fieldTypeName,
+                                fieldTypeName,
+                                false
+                        ),
+                        Function.MIN.toField(
+                                field.getName(),
+                                fieldTypeName,
+                                fieldTypeName,
+                                false
+                        )
+                );
+            case "Int":
+            case "Float":
+            case "BigInteger":
+            case "BigDecimal":
+                return Stream.of(
+                        Function.COUNT.toField(
+                                field.getName(),
+                                "Int",
+                                fieldTypeName,
+                                false
+                        ),
+                        Function.SUM.toField(
+                                field.getName(),
+                                fieldTypeName,
+                                fieldTypeName,
+                                false
+                        ),
+                        Function.AVG.toField(
+                                field.getName(),
+                                fieldTypeName,
+                                fieldTypeName,
+                                false
+                        ),
+                        Function.MAX.toField(
+                                field.getName(),
+                                fieldTypeName,
+                                fieldTypeName,
+                                false
+                        ),
+                        Function.MIN.toField(
+                                field.getName(),
+                                fieldTypeName,
+                                fieldTypeName,
+                                false
+                        )
+                );
+            default:
+                return Stream.empty();
+        }
     }
 
     public List<Field> buildFunctionFieldList(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {

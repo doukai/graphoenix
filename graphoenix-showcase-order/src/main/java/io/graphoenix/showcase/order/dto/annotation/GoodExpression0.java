@@ -16,12 +16,6 @@ public @interface GoodExpression0 {
 
   IntExpression quantity() default @IntExpression;
 
-  IntExpression orderId() default @IntExpression;
-
-  IntExpression productId() default @IntExpression;
-
-  IntExpression merchantId() default @IntExpression;
-
   BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
@@ -39,6 +33,12 @@ public @interface GoodExpression0 {
   StringExpression createGroupId() default @StringExpression;
 
   StringExpression __typename() default @StringExpression;
+
+  IntExpression orderId() default @IntExpression;
+
+  IntExpression productId() default @IntExpression;
+
+  IntExpression merchantId() default @IntExpression;
 
   String[] groupBy() default {};
 

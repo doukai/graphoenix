@@ -15,12 +15,6 @@ public class GoodOrderBy {
 
   private Sort quantity;
 
-  private Sort orderId;
-
-  private Sort productId;
-
-  private Sort merchantId;
-
   private Sort isDeprecated;
 
   private Sort version;
@@ -39,6 +33,12 @@ public class GoodOrderBy {
 
   private Sort __typename;
 
+  private Sort orderId;
+
+  private Sort productId;
+
+  private Sort merchantId;
+
   public Sort getId() {
     return this.id;
   }
@@ -53,30 +53,6 @@ public class GoodOrderBy {
 
   public void setQuantity(Sort quantity) {
     this.quantity = quantity;
-  }
-
-  public Sort getOrderId() {
-    return this.orderId;
-  }
-
-  public void setOrderId(Sort orderId) {
-    this.orderId = orderId;
-  }
-
-  public Sort getProductId() {
-    return this.productId;
-  }
-
-  public void setProductId(Sort productId) {
-    this.productId = productId;
-  }
-
-  public Sort getMerchantId() {
-    return this.merchantId;
-  }
-
-  public void setMerchantId(Sort merchantId) {
-    this.merchantId = merchantId;
   }
 
   public Sort getIsDeprecated() {
@@ -149,5 +125,29 @@ public class GoodOrderBy {
 
   public void set__typename(Sort __typename) {
     this.__typename = __typename;
+  }
+
+  public Sort getOrderId() {
+    return this.orderId;
+  }
+
+  public void setOrderId(Sort orderId) {
+    this.orderId = orderId;
+  }
+
+  public Sort getProductId() {
+    return this.productId;
+  }
+
+  public void setProductId(Sort productId) {
+    this.productId = productId;
+  }
+
+  public Sort getMerchantId() {
+    return this.merchantId;
+  }
+
+  public void setMerchantId(Sort merchantId) {
+    this.merchantId = merchantId;
   }
 }

@@ -25,19 +25,10 @@ public class Good implements Meta {
   private Integer quantity;
 
   @NonNull
-  private Integer orderId;
-
-  @NonNull
   private Order order;
 
   @NonNull
-  private Integer productId;
-
-  @NonNull
   private Product product;
-
-  @NonNull
-  private Integer merchantId;
 
   @NonNull
   private Merchant merchant;
@@ -78,6 +69,8 @@ public class Good implements Meta {
 
   private Integer quantityMin;
 
+  private Integer orderId;
+
   private Integer orderIdCount;
 
   private Integer orderIdSum;
@@ -88,6 +81,8 @@ public class Good implements Meta {
 
   private Integer orderIdMin;
 
+  private Integer productId;
+
   private Integer productIdCount;
 
   private Integer productIdSum;
@@ -97,6 +92,8 @@ public class Good implements Meta {
   private Integer productIdMax;
 
   private Integer productIdMin;
+
+  private Integer merchantId;
 
   private Integer merchantIdCount;
 
@@ -124,14 +121,6 @@ public class Good implements Meta {
     this.quantity = quantity;
   }
 
-  public Integer getOrderId() {
-    return this.orderId;
-  }
-
-  public void setOrderId(Integer orderId) {
-    this.orderId = orderId;
-  }
-
   public Order getOrder() {
     return this.order;
   }
@@ -140,28 +129,12 @@ public class Good implements Meta {
     this.order = order;
   }
 
-  public Integer getProductId() {
-    return this.productId;
-  }
-
-  public void setProductId(Integer productId) {
-    this.productId = productId;
-  }
-
   public Product getProduct() {
     return this.product;
   }
 
   public void setProduct(Product product) {
     this.product = product;
-  }
-
-  public Integer getMerchantId() {
-    return this.merchantId;
-  }
-
-  public void setMerchantId(Integer merchantId) {
-    this.merchantId = merchantId;
   }
 
   public Merchant getMerchant() {
@@ -324,6 +297,14 @@ public class Good implements Meta {
     this.quantityMin = quantityMin;
   }
 
+  public Integer getOrderId() {
+    return this.orderId;
+  }
+
+  public void setOrderId(Integer orderId) {
+    this.orderId = orderId;
+  }
+
   public Integer getOrderIdCount() {
     return this.orderIdCount;
   }
@@ -364,6 +345,14 @@ public class Good implements Meta {
     this.orderIdMin = orderIdMin;
   }
 
+  public Integer getProductId() {
+    return this.productId;
+  }
+
+  public void setProductId(Integer productId) {
+    this.productId = productId;
+  }
+
   public Integer getProductIdCount() {
     return this.productIdCount;
   }
@@ -402,6 +391,14 @@ public class Good implements Meta {
 
   public void setProductIdMin(Integer productIdMin) {
     this.productIdMin = productIdMin;
+  }
+
+  public Integer getMerchantId() {
+    return this.merchantId;
+  }
+
+  public void setMerchantId(Integer merchantId) {
+    this.merchantId = merchantId;
   }
 
   public Integer getMerchantIdCount() {

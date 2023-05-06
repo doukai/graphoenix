@@ -19,15 +19,9 @@ public class GoodInput {
 
   private Integer quantity;
 
-  private Integer orderId;
-
   private OrderInput order;
 
-  private Integer productId;
-
   private ProductInput product;
-
-  private Integer merchantId;
 
   private MerchantInput merchant;
 
@@ -50,6 +44,12 @@ public class GoodInput {
   @DefaultValue("\"Good\"")
   private String __typename;
 
+  private Integer orderId;
+
+  private Integer productId;
+
+  private Integer merchantId;
+
   public String getId() {
     return this.id;
   }
@@ -66,14 +66,6 @@ public class GoodInput {
     this.quantity = quantity;
   }
 
-  public Integer getOrderId() {
-    return this.orderId;
-  }
-
-  public void setOrderId(Integer orderId) {
-    this.orderId = orderId;
-  }
-
   public OrderInput getOrder() {
     return this.order;
   }
@@ -82,28 +74,12 @@ public class GoodInput {
     this.order = order;
   }
 
-  public Integer getProductId() {
-    return this.productId;
-  }
-
-  public void setProductId(Integer productId) {
-    this.productId = productId;
-  }
-
   public ProductInput getProduct() {
     return this.product;
   }
 
   public void setProduct(ProductInput product) {
     this.product = product;
-  }
-
-  public Integer getMerchantId() {
-    return this.merchantId;
-  }
-
-  public void setMerchantId(Integer merchantId) {
-    this.merchantId = merchantId;
   }
 
   public MerchantInput getMerchant() {
@@ -184,5 +160,29 @@ public class GoodInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getOrderId() {
+    return this.orderId;
+  }
+
+  public void setOrderId(Integer orderId) {
+    this.orderId = orderId;
+  }
+
+  public Integer getProductId() {
+    return this.productId;
+  }
+
+  public void setProductId(Integer productId) {
+    this.productId = productId;
+  }
+
+  public Integer getMerchantId() {
+    return this.merchantId;
+  }
+
+  public void setMerchantId(Integer merchantId) {
+    this.merchantId = merchantId;
   }
 }

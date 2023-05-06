@@ -13,8 +13,6 @@ public @interface OrderOrderBy0 {
 
   Sort number() default Sort.ASC;
 
-  Sort buyerId() default Sort.ASC;
-
   Sort isDeprecated() default Sort.ASC;
 
   Sort version() default Sort.ASC;
@@ -32,4 +30,6 @@ public @interface OrderOrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
+
+  Sort buyerId() default Sort.ASC;
 }

@@ -67,7 +67,6 @@ public class Role implements Meta {
 
   private UserConnection usersConnection;
 
-  @NonNull
   private Collection<RoleRoleType> roleRoleType;
 
   private RoleRoleType roleRoleTypeAggregate;

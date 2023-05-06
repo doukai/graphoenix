@@ -15,8 +15,6 @@ public class MerchantOrderBy {
 
   private Sort name;
 
-  private Sort organizationId;
-
   private Sort isDeprecated;
 
   private Sort version;
@@ -35,6 +33,8 @@ public class MerchantOrderBy {
 
   private Sort __typename;
 
+  private Sort organizationId;
+
   public Sort getId() {
     return this.id;
   }
@@ -49,14 +49,6 @@ public class MerchantOrderBy {
 
   public void setName(Sort name) {
     this.name = name;
-  }
-
-  public Sort getOrganizationId() {
-    return this.organizationId;
-  }
-
-  public void setOrganizationId(Sort organizationId) {
-    this.organizationId = organizationId;
   }
 
   public Sort getIsDeprecated() {
@@ -129,5 +121,13 @@ public class MerchantOrderBy {
 
   public void set__typename(Sort __typename) {
     this.__typename = __typename;
+  }
+
+  public Sort getOrganizationId() {
+    return this.organizationId;
+  }
+
+  public void setOrganizationId(Sort organizationId) {
+    this.organizationId = organizationId;
   }
 }

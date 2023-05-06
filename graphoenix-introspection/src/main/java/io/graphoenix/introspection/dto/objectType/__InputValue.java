@@ -98,13 +98,13 @@ public class __InputValue implements Meta {
 
   private String ofTypeName;
 
-  private String typeName;
-
   private Integer ofTypeNameCount;
 
   private String ofTypeNameMax;
 
   private String ofTypeNameMin;
+
+  private String typeName;
 
   private Integer typeNameCount;
 
@@ -432,14 +432,6 @@ public class __InputValue implements Meta {
     this.ofTypeName = ofTypeName;
   }
 
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
-  }
-
   public Integer getOfTypeNameCount() {
     return this.ofTypeNameCount;
   }
@@ -462,6 +454,14 @@ public class __InputValue implements Meta {
 
   public void setOfTypeNameMin(String ofTypeNameMin) {
     this.ofTypeNameMin = ofTypeNameMin;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
   }
 
   public Integer getTypeNameCount() {

@@ -20,15 +20,9 @@ public class GoodExpression {
 
   private IntExpression quantity;
 
-  private IntExpression orderId;
-
   private OrderExpression order;
 
-  private IntExpression productId;
-
   private ProductExpression product;
-
-  private IntExpression merchantId;
 
   private MerchantExpression merchant;
 
@@ -51,6 +45,12 @@ public class GoodExpression {
 
   private StringExpression __typename;
 
+  private IntExpression orderId;
+
+  private IntExpression productId;
+
+  private IntExpression merchantId;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -72,14 +72,6 @@ public class GoodExpression {
     this.quantity = quantity;
   }
 
-  public IntExpression getOrderId() {
-    return this.orderId;
-  }
-
-  public void setOrderId(IntExpression orderId) {
-    this.orderId = orderId;
-  }
-
   public OrderExpression getOrder() {
     return this.order;
   }
@@ -88,28 +80,12 @@ public class GoodExpression {
     this.order = order;
   }
 
-  public IntExpression getProductId() {
-    return this.productId;
-  }
-
-  public void setProductId(IntExpression productId) {
-    this.productId = productId;
-  }
-
   public ProductExpression getProduct() {
     return this.product;
   }
 
   public void setProduct(ProductExpression product) {
     this.product = product;
-  }
-
-  public IntExpression getMerchantId() {
-    return this.merchantId;
-  }
-
-  public void setMerchantId(IntExpression merchantId) {
-    this.merchantId = merchantId;
   }
 
   public MerchantExpression getMerchant() {
@@ -190,6 +166,30 @@ public class GoodExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public IntExpression getOrderId() {
+    return this.orderId;
+  }
+
+  public void setOrderId(IntExpression orderId) {
+    this.orderId = orderId;
+  }
+
+  public IntExpression getProductId() {
+    return this.productId;
+  }
+
+  public void setProductId(IntExpression productId) {
+    this.productId = productId;
+  }
+
+  public IntExpression getMerchantId() {
+    return this.merchantId;
+  }
+
+  public void setMerchantId(IntExpression merchantId) {
+    this.merchantId = merchantId;
   }
 
   public Conditional getCond() {

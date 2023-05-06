@@ -75,13 +75,6 @@ public class __Directive implements Meta {
 
   private Integer schemaId;
 
-  @NonNull
-  private Collection<__DirectiveLocations> __directiveLocations;
-
-  private __DirectiveLocations __directiveLocationsAggregate;
-
-  private __DirectiveLocationsConnection __directiveLocationsConnection;
-
   private Integer schemaIdCount;
 
   private Integer schemaIdSum;
@@ -91,6 +84,12 @@ public class __Directive implements Meta {
   private Integer schemaIdMax;
 
   private Integer schemaIdMin;
+
+  private Collection<__DirectiveLocations> __directiveLocations;
+
+  private __DirectiveLocations __directiveLocationsAggregate;
+
+  private __DirectiveLocationsConnection __directiveLocationsConnection;
 
   public String getName() {
     return this.name;
@@ -300,31 +299,6 @@ public class __Directive implements Meta {
     this.schemaId = schemaId;
   }
 
-  public Collection<__DirectiveLocations> get__directiveLocations() {
-    return this.__directiveLocations;
-  }
-
-  public void set__directiveLocations(Collection<__DirectiveLocations> __directiveLocations) {
-    this.__directiveLocations = __directiveLocations;
-  }
-
-  public __DirectiveLocations get__directiveLocationsAggregate() {
-    return this.__directiveLocationsAggregate;
-  }
-
-  public void set__directiveLocationsAggregate(__DirectiveLocations __directiveLocationsAggregate) {
-    this.__directiveLocationsAggregate = __directiveLocationsAggregate;
-  }
-
-  public __DirectiveLocationsConnection get__directiveLocationsConnection() {
-    return this.__directiveLocationsConnection;
-  }
-
-  public void set__directiveLocationsConnection(
-      __DirectiveLocationsConnection __directiveLocationsConnection) {
-    this.__directiveLocationsConnection = __directiveLocationsConnection;
-  }
-
   public Integer getSchemaIdCount() {
     return this.schemaIdCount;
   }
@@ -363,5 +337,30 @@ public class __Directive implements Meta {
 
   public void setSchemaIdMin(Integer schemaIdMin) {
     this.schemaIdMin = schemaIdMin;
+  }
+
+  public Collection<__DirectiveLocations> get__directiveLocations() {
+    return this.__directiveLocations;
+  }
+
+  public void set__directiveLocations(Collection<__DirectiveLocations> __directiveLocations) {
+    this.__directiveLocations = __directiveLocations;
+  }
+
+  public __DirectiveLocations get__directiveLocationsAggregate() {
+    return this.__directiveLocationsAggregate;
+  }
+
+  public void set__directiveLocationsAggregate(__DirectiveLocations __directiveLocationsAggregate) {
+    this.__directiveLocationsAggregate = __directiveLocationsAggregate;
+  }
+
+  public __DirectiveLocationsConnection get__directiveLocationsConnection() {
+    return this.__directiveLocationsConnection;
+  }
+
+  public void set__directiveLocationsConnection(
+      __DirectiveLocationsConnection __directiveLocationsConnection) {
+    this.__directiveLocationsConnection = __directiveLocationsConnection;
   }
 }

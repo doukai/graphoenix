@@ -22,8 +22,6 @@ public class MerchantExpression {
 
   private StringExpression name;
 
-  private IntExpression organizationId;
-
   private OrganizationExpression organization;
 
   private UserExpression customerServices;
@@ -51,6 +49,8 @@ public class MerchantExpression {
 
   private StringExpression __typename;
 
+  private IntExpression organizationId;
+
   private MerchantPartnersExpression merchantPartners;
 
   private MerchantDirectorExpression merchantDirector;
@@ -74,14 +74,6 @@ public class MerchantExpression {
 
   public void setName(StringExpression name) {
     this.name = name;
-  }
-
-  public IntExpression getOrganizationId() {
-    return this.organizationId;
-  }
-
-  public void setOrganizationId(IntExpression organizationId) {
-    this.organizationId = organizationId;
   }
 
   public OrganizationExpression getOrganization() {
@@ -186,6 +178,14 @@ public class MerchantExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public IntExpression getOrganizationId() {
+    return this.organizationId;
+  }
+
+  public void setOrganizationId(IntExpression organizationId) {
+    this.organizationId = organizationId;
   }
 
   public MerchantPartnersExpression getMerchantPartners() {

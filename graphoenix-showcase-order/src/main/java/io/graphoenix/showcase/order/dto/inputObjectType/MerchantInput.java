@@ -22,8 +22,6 @@ public class MerchantInput {
 
   private String name;
 
-  private Integer organizationId;
-
   private OrganizationInput organization;
 
   private Collection<UserInput> customerServices;
@@ -51,6 +49,8 @@ public class MerchantInput {
   @DefaultValue("\"Merchant\"")
   private String __typename;
 
+  private Integer organizationId;
+
   private Collection<MerchantPartnersInput> merchantPartners;
 
   private MerchantDirectorInput merchantDirector;
@@ -69,14 +69,6 @@ public class MerchantInput {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public Integer getOrganizationId() {
-    return this.organizationId;
-  }
-
-  public void setOrganizationId(Integer organizationId) {
-    this.organizationId = organizationId;
   }
 
   public OrganizationInput getOrganization() {
@@ -181,6 +173,14 @@ public class MerchantInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getOrganizationId() {
+    return this.organizationId;
+  }
+
+  public void setOrganizationId(Integer organizationId) {
+    this.organizationId = organizationId;
   }
 
   public Collection<MerchantPartnersInput> getMerchantPartners() {

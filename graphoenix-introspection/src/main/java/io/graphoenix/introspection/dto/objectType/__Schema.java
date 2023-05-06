@@ -71,21 +71,21 @@ public class __Schema implements Meta {
 
   private String queryTypeName;
 
-  private String mutationTypeName;
-
-  private String subscriptionTypeName;
-
   private Integer queryTypeNameCount;
 
   private String queryTypeNameMax;
 
   private String queryTypeNameMin;
 
+  private String mutationTypeName;
+
   private Integer mutationTypeNameCount;
 
   private String mutationTypeNameMax;
 
   private String mutationTypeNameMin;
+
+  private String subscriptionTypeName;
 
   private Integer subscriptionTypeNameCount;
 
@@ -293,22 +293,6 @@ public class __Schema implements Meta {
     this.queryTypeName = queryTypeName;
   }
 
-  public String getMutationTypeName() {
-    return this.mutationTypeName;
-  }
-
-  public void setMutationTypeName(String mutationTypeName) {
-    this.mutationTypeName = mutationTypeName;
-  }
-
-  public String getSubscriptionTypeName() {
-    return this.subscriptionTypeName;
-  }
-
-  public void setSubscriptionTypeName(String subscriptionTypeName) {
-    this.subscriptionTypeName = subscriptionTypeName;
-  }
-
   public Integer getQueryTypeNameCount() {
     return this.queryTypeNameCount;
   }
@@ -333,6 +317,14 @@ public class __Schema implements Meta {
     this.queryTypeNameMin = queryTypeNameMin;
   }
 
+  public String getMutationTypeName() {
+    return this.mutationTypeName;
+  }
+
+  public void setMutationTypeName(String mutationTypeName) {
+    this.mutationTypeName = mutationTypeName;
+  }
+
   public Integer getMutationTypeNameCount() {
     return this.mutationTypeNameCount;
   }
@@ -355,6 +347,14 @@ public class __Schema implements Meta {
 
   public void setMutationTypeNameMin(String mutationTypeNameMin) {
     this.mutationTypeNameMin = mutationTypeNameMin;
+  }
+
+  public String getSubscriptionTypeName() {
+    return this.subscriptionTypeName;
+  }
+
+  public void setSubscriptionTypeName(String subscriptionTypeName) {
+    this.subscriptionTypeName = subscriptionTypeName;
   }
 
   public Integer getSubscriptionTypeNameCount() {

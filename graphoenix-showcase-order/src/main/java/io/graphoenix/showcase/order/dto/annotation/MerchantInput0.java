@@ -13,8 +13,6 @@ public @interface MerchantInput0 {
 
   String name() default "";
 
-  int organizationId() default 0;
-
   boolean isDeprecated() default false;
 
   int version() default 0;
@@ -33,11 +31,11 @@ public @interface MerchantInput0 {
 
   String __typename() default "";
 
+  int organizationId() default 0;
+
   String $id() default "";
 
   String $name() default "";
-
-  String $organizationId() default "";
 
   String $organization() default "";
 
@@ -64,6 +62,8 @@ public @interface MerchantInput0 {
   String $createGroupId() default "";
 
   String $__typename() default "";
+
+  String $organizationId() default "";
 
   String $merchantPartners() default "";
 

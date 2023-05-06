@@ -97,7 +97,23 @@ public class __Type implements Meta {
 
   private Integer schemaId;
 
+  private Integer schemaIdCount;
+
+  private Integer schemaIdSum;
+
+  private Integer schemaIdAvg;
+
+  private Integer schemaIdMax;
+
+  private Integer schemaIdMin;
+
   private String ofTypeName;
+
+  private Integer ofTypeNameCount;
+
+  private String ofTypeNameMax;
+
+  private String ofTypeNameMin;
 
   private Collection<__TypeInterfaces> __typeInterfaces;
 
@@ -110,22 +126,6 @@ public class __Type implements Meta {
   private __TypePossibleTypes __typePossibleTypesAggregate;
 
   private __TypePossibleTypesConnection __typePossibleTypesConnection;
-
-  private Integer ofTypeNameCount;
-
-  private String ofTypeNameMax;
-
-  private String ofTypeNameMin;
-
-  private Integer schemaIdCount;
-
-  private Integer schemaIdSum;
-
-  private Integer schemaIdAvg;
-
-  private Integer schemaIdMax;
-
-  private Integer schemaIdMin;
 
   public String getName() {
     return this.name;
@@ -431,12 +431,76 @@ public class __Type implements Meta {
     this.schemaId = schemaId;
   }
 
+  public Integer getSchemaIdCount() {
+    return this.schemaIdCount;
+  }
+
+  public void setSchemaIdCount(Integer schemaIdCount) {
+    this.schemaIdCount = schemaIdCount;
+  }
+
+  public Integer getSchemaIdSum() {
+    return this.schemaIdSum;
+  }
+
+  public void setSchemaIdSum(Integer schemaIdSum) {
+    this.schemaIdSum = schemaIdSum;
+  }
+
+  public Integer getSchemaIdAvg() {
+    return this.schemaIdAvg;
+  }
+
+  public void setSchemaIdAvg(Integer schemaIdAvg) {
+    this.schemaIdAvg = schemaIdAvg;
+  }
+
+  public Integer getSchemaIdMax() {
+    return this.schemaIdMax;
+  }
+
+  public void setSchemaIdMax(Integer schemaIdMax) {
+    this.schemaIdMax = schemaIdMax;
+  }
+
+  public Integer getSchemaIdMin() {
+    return this.schemaIdMin;
+  }
+
+  public void setSchemaIdMin(Integer schemaIdMin) {
+    this.schemaIdMin = schemaIdMin;
+  }
+
   public String getOfTypeName() {
     return this.ofTypeName;
   }
 
   public void setOfTypeName(String ofTypeName) {
     this.ofTypeName = ofTypeName;
+  }
+
+  public Integer getOfTypeNameCount() {
+    return this.ofTypeNameCount;
+  }
+
+  public void setOfTypeNameCount(Integer ofTypeNameCount) {
+    this.ofTypeNameCount = ofTypeNameCount;
+  }
+
+  public String getOfTypeNameMax() {
+    return this.ofTypeNameMax;
+  }
+
+  public void setOfTypeNameMax(String ofTypeNameMax) {
+    this.ofTypeNameMax = ofTypeNameMax;
+  }
+
+  public String getOfTypeNameMin() {
+    return this.ofTypeNameMin;
+  }
+
+  public void setOfTypeNameMin(String ofTypeNameMin) {
+    this.ofTypeNameMin = ofTypeNameMin;
   }
 
   public Collection<__TypeInterfaces> get__typeInterfaces() {
@@ -486,69 +550,5 @@ public class __Type implements Meta {
   public void set__typePossibleTypesConnection(
       __TypePossibleTypesConnection __typePossibleTypesConnection) {
     this.__typePossibleTypesConnection = __typePossibleTypesConnection;
-  }
-
-  public Integer getOfTypeNameCount() {
-    return this.ofTypeNameCount;
-  }
-
-  public void setOfTypeNameCount(Integer ofTypeNameCount) {
-    this.ofTypeNameCount = ofTypeNameCount;
-  }
-
-  public String getOfTypeNameMax() {
-    return this.ofTypeNameMax;
-  }
-
-  public void setOfTypeNameMax(String ofTypeNameMax) {
-    this.ofTypeNameMax = ofTypeNameMax;
-  }
-
-  public String getOfTypeNameMin() {
-    return this.ofTypeNameMin;
-  }
-
-  public void setOfTypeNameMin(String ofTypeNameMin) {
-    this.ofTypeNameMin = ofTypeNameMin;
-  }
-
-  public Integer getSchemaIdCount() {
-    return this.schemaIdCount;
-  }
-
-  public void setSchemaIdCount(Integer schemaIdCount) {
-    this.schemaIdCount = schemaIdCount;
-  }
-
-  public Integer getSchemaIdSum() {
-    return this.schemaIdSum;
-  }
-
-  public void setSchemaIdSum(Integer schemaIdSum) {
-    this.schemaIdSum = schemaIdSum;
-  }
-
-  public Integer getSchemaIdAvg() {
-    return this.schemaIdAvg;
-  }
-
-  public void setSchemaIdAvg(Integer schemaIdAvg) {
-    this.schemaIdAvg = schemaIdAvg;
-  }
-
-  public Integer getSchemaIdMax() {
-    return this.schemaIdMax;
-  }
-
-  public void setSchemaIdMax(Integer schemaIdMax) {
-    this.schemaIdMax = schemaIdMax;
-  }
-
-  public Integer getSchemaIdMin() {
-    return this.schemaIdMin;
-  }
-
-  public void setSchemaIdMin(Integer schemaIdMin) {
-    this.schemaIdMin = schemaIdMin;
   }
 }

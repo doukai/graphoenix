@@ -16,8 +16,6 @@ public @interface MerchantExpression0 {
 
   StringExpression name() default @StringExpression;
 
-  IntExpression organizationId() default @IntExpression;
-
   BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
@@ -35,6 +33,8 @@ public @interface MerchantExpression0 {
   StringExpression createGroupId() default @StringExpression;
 
   StringExpression __typename() default @StringExpression;
+
+  IntExpression organizationId() default @IntExpression;
 
   String[] groupBy() default {};
 

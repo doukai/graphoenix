@@ -13,12 +13,6 @@ public @interface GoodOrderBy0 {
 
   Sort quantity() default Sort.ASC;
 
-  Sort orderId() default Sort.ASC;
-
-  Sort productId() default Sort.ASC;
-
-  Sort merchantId() default Sort.ASC;
-
   Sort isDeprecated() default Sort.ASC;
 
   Sort version() default Sort.ASC;
@@ -36,4 +30,10 @@ public @interface GoodOrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
+
+  Sort orderId() default Sort.ASC;
+
+  Sort productId() default Sort.ASC;
+
+  Sort merchantId() default Sort.ASC;
 }

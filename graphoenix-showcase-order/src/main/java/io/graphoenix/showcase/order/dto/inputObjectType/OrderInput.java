@@ -23,8 +23,6 @@ public class OrderInput {
 
   private String number;
 
-  private String buyerId;
-
   private UserInput buyer;
 
   private Collection<GoodInput> goods;
@@ -50,6 +48,8 @@ public class OrderInput {
   @DefaultValue("\"Order\"")
   private String __typename;
 
+  private Integer buyerId;
+
   private Collection<UserRoleInput> userRole;
 
   public String getId() {
@@ -66,14 +66,6 @@ public class OrderInput {
 
   public void setNumber(String number) {
     this.number = number;
-  }
-
-  public String getBuyerId() {
-    return this.buyerId;
-  }
-
-  public void setBuyerId(String buyerId) {
-    this.buyerId = buyerId;
   }
 
   public UserInput getBuyer() {
@@ -170,6 +162,14 @@ public class OrderInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getBuyerId() {
+    return this.buyerId;
+  }
+
+  public void setBuyerId(Integer buyerId) {
+    this.buyerId = buyerId;
   }
 
   public Collection<UserRoleInput> getUserRole() {

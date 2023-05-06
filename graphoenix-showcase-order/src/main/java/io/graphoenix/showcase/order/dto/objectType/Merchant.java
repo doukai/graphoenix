@@ -27,8 +27,6 @@ public class Merchant implements Meta {
   @NonNull
   private String name;
 
-  private Integer organizationId;
-
   private Organization organization;
 
   private Collection<User> customerServices;
@@ -70,6 +68,8 @@ public class Merchant implements Meta {
 
   private String nameMin;
 
+  private Integer organizationId;
+
   private Integer organizationIdCount;
 
   private Integer organizationIdSum;
@@ -102,14 +102,6 @@ public class Merchant implements Meta {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public Integer getOrganizationId() {
-    return this.organizationId;
-  }
-
-  public void setOrganizationId(Integer organizationId) {
-    this.organizationId = organizationId;
   }
 
   public Organization getOrganization() {
@@ -278,6 +270,14 @@ public class Merchant implements Meta {
 
   public void setNameMin(String nameMin) {
     this.nameMin = nameMin;
+  }
+
+  public Integer getOrganizationId() {
+    return this.organizationId;
+  }
+
+  public void setOrganizationId(Integer organizationId) {
+    this.organizationId = organizationId;
   }
 
   public Integer getOrganizationIdCount() {

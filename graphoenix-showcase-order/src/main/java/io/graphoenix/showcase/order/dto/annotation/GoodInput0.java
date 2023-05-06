@@ -13,12 +13,6 @@ public @interface GoodInput0 {
 
   int quantity() default 0;
 
-  int orderId() default 0;
-
-  int productId() default 0;
-
-  int merchantId() default 0;
-
   boolean isDeprecated() default false;
 
   int version() default 0;
@@ -37,19 +31,19 @@ public @interface GoodInput0 {
 
   String __typename() default "";
 
+  int orderId() default 0;
+
+  int productId() default 0;
+
+  int merchantId() default 0;
+
   String $id() default "";
 
   String $quantity() default "";
 
-  String $orderId() default "";
-
   String $order() default "";
 
-  String $productId() default "";
-
   String $product() default "";
-
-  String $merchantId() default "";
 
   String $merchant() default "";
 
@@ -70,4 +64,10 @@ public @interface GoodInput0 {
   String $createGroupId() default "";
 
   String $__typename() default "";
+
+  String $orderId() default "";
+
+  String $productId() default "";
+
+  String $merchantId() default "";
 }

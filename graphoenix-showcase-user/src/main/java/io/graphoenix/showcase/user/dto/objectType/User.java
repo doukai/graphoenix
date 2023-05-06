@@ -106,6 +106,16 @@ public class User implements Meta {
 
   private Integer organizationId;
 
+  private Integer organizationIdCount;
+
+  private Integer organizationIdSum;
+
+  private Integer organizationIdAvg;
+
+  private Integer organizationIdMax;
+
+  private Integer organizationIdMin;
+
   private Collection<UserRole> userRole;
 
   private UserRole userRoleAggregate;
@@ -117,16 +127,6 @@ public class User implements Meta {
   private UserMobileNumbers userMobileNumbersAggregate;
 
   private UserMobileNumbersConnection userMobileNumbersConnection;
-
-  private Integer organizationIdCount;
-
-  private Integer organizationIdSum;
-
-  private Integer organizationIdAvg;
-
-  private Integer organizationIdMax;
-
-  private Integer organizationIdMin;
 
   public String getId() {
     return this.id;
@@ -464,6 +464,46 @@ public class User implements Meta {
     this.organizationId = organizationId;
   }
 
+  public Integer getOrganizationIdCount() {
+    return this.organizationIdCount;
+  }
+
+  public void setOrganizationIdCount(Integer organizationIdCount) {
+    this.organizationIdCount = organizationIdCount;
+  }
+
+  public Integer getOrganizationIdSum() {
+    return this.organizationIdSum;
+  }
+
+  public void setOrganizationIdSum(Integer organizationIdSum) {
+    this.organizationIdSum = organizationIdSum;
+  }
+
+  public Integer getOrganizationIdAvg() {
+    return this.organizationIdAvg;
+  }
+
+  public void setOrganizationIdAvg(Integer organizationIdAvg) {
+    this.organizationIdAvg = organizationIdAvg;
+  }
+
+  public Integer getOrganizationIdMax() {
+    return this.organizationIdMax;
+  }
+
+  public void setOrganizationIdMax(Integer organizationIdMax) {
+    this.organizationIdMax = organizationIdMax;
+  }
+
+  public Integer getOrganizationIdMin() {
+    return this.organizationIdMin;
+  }
+
+  public void setOrganizationIdMin(Integer organizationIdMin) {
+    this.organizationIdMin = organizationIdMin;
+  }
+
   public Collection<UserRole> getUserRole() {
     return this.userRole;
   }
@@ -511,45 +551,5 @@ public class User implements Meta {
   public void setUserMobileNumbersConnection(
       UserMobileNumbersConnection userMobileNumbersConnection) {
     this.userMobileNumbersConnection = userMobileNumbersConnection;
-  }
-
-  public Integer getOrganizationIdCount() {
-    return this.organizationIdCount;
-  }
-
-  public void setOrganizationIdCount(Integer organizationIdCount) {
-    this.organizationIdCount = organizationIdCount;
-  }
-
-  public Integer getOrganizationIdSum() {
-    return this.organizationIdSum;
-  }
-
-  public void setOrganizationIdSum(Integer organizationIdSum) {
-    this.organizationIdSum = organizationIdSum;
-  }
-
-  public Integer getOrganizationIdAvg() {
-    return this.organizationIdAvg;
-  }
-
-  public void setOrganizationIdAvg(Integer organizationIdAvg) {
-    this.organizationIdAvg = organizationIdAvg;
-  }
-
-  public Integer getOrganizationIdMax() {
-    return this.organizationIdMax;
-  }
-
-  public void setOrganizationIdMax(Integer organizationIdMax) {
-    this.organizationIdMax = organizationIdMax;
-  }
-
-  public Integer getOrganizationIdMin() {
-    return this.organizationIdMin;
-  }
-
-  public void setOrganizationIdMin(Integer organizationIdMin) {
-    this.organizationIdMin = organizationIdMin;
   }
 }
