@@ -1,6 +1,7 @@
 package io.graphoenix.r2dbc.connector.transaction;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.transaction.TransactionInterceptorProcessor;
 import io.r2dbc.spi.Connection;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -79,18 +80,18 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                                                 .then(Mono.from(connection.beginTransaction()))
                                                                                 .then((Mono<Object>) invocationContext.proceed());
                                                                     } catch (Exception e) {
-                                                                        return Mono.error(e);
+                                                                        return Mono.error(new GraphQLErrors(e));
                                                                     }
                                                                 },
                                                                 connection -> Mono.from(connection.commitTransaction()).thenEmpty(connection.close()),
                                                                 (connection, throwable) -> {
                                                                     Logger.error(throwable);
-                                                                    return Mono.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Mono.error(throwable));
+                                                                    return Mono.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Mono.error(new GraphQLErrors(throwable)));
                                                                 },
                                                                 connection -> Mono.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                                                         ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId(), TRANSACTION_TYPE, IN_TRANSACTION));
                                             } catch (Exception e) {
-                                                return Mono.error(e);
+                                                return Mono.error(new GraphQLErrors(e));
                                             }
                                         }
                                 );
@@ -103,13 +104,13 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                 .then(Mono.from(connection.beginTransaction()))
                                                 .then((Mono<Object>) invocationContext.proceed());
                                     } catch (Exception e) {
-                                        return Mono.error(e);
+                                        return Mono.error(new GraphQLErrors(e));
                                     }
                                 },
                                 connection -> Mono.from(connection.commitTransaction()).thenEmpty(connection.close()),
                                 (connection, throwable) -> {
                                     Logger.error(throwable);
-                                    return Mono.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Mono.error(throwable));
+                                    return Mono.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Mono.error(new GraphQLErrors(throwable)));
                                 },
                                 connection -> Mono.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                         ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId(), TRANSACTION_TYPE, IN_TRANSACTION));
@@ -122,7 +123,7 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                         (Mono<Object>) invocationContext.proceed() :
                                                         Mono.error(new TransactionRequiredException());
                                             } catch (Exception e) {
-                                                return Mono.error(e);
+                                                return Mono.error(new GraphQLErrors(e));
                                             }
                                         }
                                 );
@@ -133,7 +134,7 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                     try {
                                         return Mono.from(connection.setAutoCommit(true)).then((Mono<Object>) invocationContext.proceed());
                                     } catch (Exception e) {
-                                        return Mono.error(e);
+                                        return Mono.error(new GraphQLErrors(e));
                                     }
                                 },
                                 Connection::close
@@ -151,13 +152,13 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                                     try {
                                                                         return Mono.from(connection.setAutoCommit(true)).then((Mono<Object>) invocationContext.proceed());
                                                                     } catch (Exception e) {
-                                                                        return Mono.error(e);
+                                                                        return Mono.error(new GraphQLErrors(e));
                                                                     }
                                                                 },
                                                                 Connection::close
                                                         ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId(), TRANSACTION_TYPE, NO_TRANSACTION));
                                             } catch (Exception e) {
-                                                return Mono.error(e);
+                                                return Mono.error(new GraphQLErrors(e));
                                             }
                                         }
                                 );
@@ -173,7 +174,7 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                                     try {
                                                                         return Mono.from(connection.setAutoCommit(true)).then((Mono<Object>) invocationContext.proceed());
                                                                     } catch (Exception e) {
-                                                                        return Mono.error(e);
+                                                                        return Mono.error(new GraphQLErrors(e));
                                                                     }
                                                                 },
                                                                 Connection::close
@@ -200,18 +201,18 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                                                 .thenMany(Flux.from(connection.beginTransaction()))
                                                                                 .thenMany((Flux<Object>) invocationContext.proceed());
                                                                     } catch (Exception e) {
-                                                                        return Flux.error(e);
+                                                                        return Flux.error(new GraphQLErrors(e));
                                                                     }
                                                                 },
                                                                 connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
                                                                 (connection, throwable) -> {
                                                                     Logger.error(throwable);
-                                                                    return Flux.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Flux.error(throwable));
+                                                                    return Flux.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Flux.error(new GraphQLErrors(throwable)));
                                                                 },
                                                                 connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                                                         ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId(), TRANSACTION_TYPE, IN_TRANSACTION));
                                             } catch (Exception e) {
-                                                return Flux.error(e);
+                                                return Flux.error(new GraphQLErrors(e));
                                             }
                                         }
                                 );
@@ -224,13 +225,13 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                 .thenMany(Flux.from(connection.beginTransaction()))
                                                 .thenMany((Flux<Object>) invocationContext.proceed());
                                     } catch (Exception e) {
-                                        return Flux.error(e);
+                                        return Flux.error(new GraphQLErrors(e));
                                     }
                                 },
                                 connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
                                 (connection, throwable) -> {
                                     Logger.error(throwable);
-                                    return Flux.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Flux.error(throwable));
+                                    return Flux.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Flux.error(new GraphQLErrors(throwable)));
                                 },
                                 connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                         ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId(), TRANSACTION_TYPE, IN_TRANSACTION));
@@ -243,7 +244,7 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                         (Flux<Object>) invocationContext.proceed() :
                                                         Flux.error(new TransactionRequiredException());
                                             } catch (Exception e) {
-                                                return Flux.error(e);
+                                                return Flux.error(new GraphQLErrors(e));
                                             }
                                         }
                                 );
@@ -254,7 +255,7 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                     try {
                                         return Flux.from(connection.setAutoCommit(true)).thenMany((Flux<Object>) invocationContext.proceed());
                                     } catch (Exception e) {
-                                        return Flux.error(e);
+                                        return Flux.error(new GraphQLErrors(e));
                                     }
                                 },
                                 Connection::close
@@ -272,13 +273,13 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                                     try {
                                                                         return Flux.from(connection.setAutoCommit(true)).thenMany((Flux<Object>) invocationContext.proceed());
                                                                     } catch (Exception e) {
-                                                                        return Flux.error(e);
+                                                                        return Flux.error(new GraphQLErrors(e));
                                                                     }
                                                                 },
                                                                 Connection::close
                                                         ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId(), TRANSACTION_TYPE, NO_TRANSACTION));
                                             } catch (Exception e) {
-                                                return Flux.error(e);
+                                                return Flux.error(new GraphQLErrors(e));
                                             }
                                         }
                                 );
@@ -294,7 +295,7 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                                     try {
                                                                         return Flux.from(connection.setAutoCommit(true)).thenMany((Flux<Object>) invocationContext.proceed());
                                                                     } catch (Exception e) {
-                                                                        return Flux.error(e);
+                                                                        return Flux.error(new GraphQLErrors(e));
                                                                     }
                                                                 },
                                                                 Connection::close
@@ -329,18 +330,18 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                                                 .thenMany(Flux.from(connection.beginTransaction()))
                                                                                 .thenMany(proceed);
                                                                     } catch (Exception e) {
-                                                                        return Flux.error(e);
+                                                                        return Flux.error(new GraphQLErrors(e));
                                                                     }
                                                                 },
                                                                 connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
                                                                 (connection, throwable) -> {
                                                                     Logger.error(throwable);
-                                                                    return Flux.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Flux.error(throwable));
+                                                                    return Flux.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Flux.error(new GraphQLErrors(throwable)));
                                                                 },
                                                                 connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                                                         ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId(), TRANSACTION_TYPE, IN_TRANSACTION));
                                             } catch (Exception e) {
-                                                return Flux.error(e);
+                                                return Flux.error(new GraphQLErrors(e));
                                             }
                                         }
                                 );
@@ -354,13 +355,13 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                 .thenMany(Flux.from(connection.beginTransaction()))
                                                 .thenMany(proceed);
                                     } catch (Exception e) {
-                                        return Flux.error(e);
+                                        return Flux.error(new GraphQLErrors(e));
                                     }
                                 },
                                 connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
                                 (connection, throwable) -> {
                                     Logger.error(throwable);
-                                    return Flux.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Flux.error(throwable));
+                                    return Flux.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Flux.error(new GraphQLErrors(throwable)));
                                 },
                                 connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                         ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId(), TRANSACTION_TYPE, IN_TRANSACTION));
@@ -374,7 +375,7 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                         proceed :
                                                         Flux.error(new TransactionRequiredException());
                                             } catch (Exception e) {
-                                                return Flux.error(e);
+                                                return Flux.error(new GraphQLErrors(e));
                                             }
                                         }
                                 );
@@ -386,7 +387,7 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                     try {
                                         return Flux.from(connection.setAutoCommit(true)).thenMany(proceed);
                                     } catch (Exception e) {
-                                        return Flux.error(e);
+                                        return Flux.error(new GraphQLErrors(e));
                                     }
                                 },
                                 Connection::close
@@ -405,13 +406,13 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                                     try {
                                                                         return Flux.from(connection.setAutoCommit(true)).thenMany(proceed);
                                                                     } catch (Exception e) {
-                                                                        return Flux.error(e);
+                                                                        return Flux.error(new GraphQLErrors(e));
                                                                     }
                                                                 },
                                                                 Connection::close
                                                         ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId(), TRANSACTION_TYPE, NO_TRANSACTION));
                                             } catch (Exception e) {
-                                                return Flux.error(e);
+                                                return Flux.error(new GraphQLErrors(e));
                                             }
                                         }
                                 );
@@ -428,7 +429,7 @@ public class R2dbcTransactionInterceptorProcessor implements TransactionIntercep
                                                                     try {
                                                                         return Flux.from(connection.setAutoCommit(true)).thenMany(proceed);
                                                                     } catch (Exception e) {
-                                                                        return Flux.error(e);
+                                                                        return Flux.error(new GraphQLErrors(e));
                                                                     }
                                                                 },
                                                                 Connection::close

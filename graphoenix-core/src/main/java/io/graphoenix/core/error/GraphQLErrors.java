@@ -12,7 +12,7 @@ public class GraphQLErrors extends RuntimeException {
 
     private Object data = null;
 
-    private final List<GraphQLError> errors = new ArrayList<>();
+    private List<GraphQLError> errors = new ArrayList<>();
 
     public GraphQLErrors() {
     }
@@ -35,17 +35,36 @@ public class GraphQLErrors extends RuntimeException {
         this.errors.add(new GraphQLError(graphQLErrorType.toString(), line, column));
     }
 
+    public GraphQLErrors(GraphQLErrors graphQLErrors) {
+        this.data = graphQLErrors.getData();
+        this.errors = graphQLErrors.getErrors();
+    }
+
     public GraphQLErrors(GraphQLException graphQLException) {
         this.data = graphQLException.getPartialResults();
         this.errors.add(new GraphQLError(graphQLException.getMessage()));
     }
 
-    public GraphQLErrors(Exception exception) {
-        this.errors.add(new GraphQLError(exception.getMessage()));
+    public GraphQLErrors(Throwable throwable) {
+        addThrowable(throwable);
     }
 
     public GraphQLErrors(String message) {
         this.errors.add(new GraphQLError(message));
+    }
+
+    public void addThrowable(Throwable throwable) {
+        if (throwable.getCause() != null) {
+            addThrowable(throwable.getCause());
+        } else if (throwable instanceof GraphQLErrors) {
+            this.data = ((GraphQLErrors) throwable).getData();
+            this.errors = ((GraphQLErrors) throwable).getErrors();
+        } else if (throwable instanceof GraphQLException) {
+            this.data = ((GraphQLException) throwable).getPartialResults();
+            this.errors.add(new GraphQLError(throwable.getMessage()));
+        } else {
+            this.errors.add(new GraphQLError(throwable.getMessage()));
+        }
     }
 
     public GraphQLErrors add(GraphQLErrorType graphQLErrorType) {

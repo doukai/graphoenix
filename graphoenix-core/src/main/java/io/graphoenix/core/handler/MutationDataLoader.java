@@ -265,7 +265,7 @@ public abstract class MutationDataLoader {
                 .flatMap(v -> buildCompensatingMutation())
                 .flatMap(operation -> operationHandler.mutation(DOCUMENT_UTIL.graphqlToOperation(operation.toString())))
                 .then()
-                .switchIfEmpty(Mono.error(throwable));
+                .switchIfEmpty(Mono.error(new GraphQLErrors(throwable)));
     }
 
     private Mono<Operation> buildCompensatingMutation() {
@@ -301,16 +301,16 @@ public abstract class MutationDataLoader {
         String idFieldName = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST));
         String selectionName = typeToLowerCamelName(typeName).concat("List");
         return io.vavr.collection.Stream.ofAll(
-                Stream.concat(
-                        Stream.of(data)
-                                .filter(jsonObject ->
-                                        data.containsKey(selectionName) &&
-                                                data.get(selectionName).getValueType().equals(JsonValue.ValueType.ARRAY) &&
-                                                data.get(selectionName).asJsonArray().size() > 0)
-                                .flatMap(jsonObject -> jsonObject.get(selectionName).asJsonArray().stream()),
-                        getUpdateWhereJsonArray(typeName, data)
-                ).collect(Collectors.toList())
-        )
+                        Stream.concat(
+                                Stream.of(data)
+                                        .filter(jsonObject ->
+                                                data.containsKey(selectionName) &&
+                                                        data.get(selectionName).getValueType().equals(JsonValue.ValueType.ARRAY) &&
+                                                        data.get(selectionName).asJsonArray().size() > 0)
+                                        .flatMap(jsonObject -> jsonObject.get(selectionName).asJsonArray().stream()),
+                                getUpdateWhereJsonArray(typeName, data)
+                        ).collect(Collectors.toList())
+                )
                 .distinctBy(jsonValue -> jsonValue.asJsonObject().get(idFieldName).toString())
                 .toJavaStream();
     }

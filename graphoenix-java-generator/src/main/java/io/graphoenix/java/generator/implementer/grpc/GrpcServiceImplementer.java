@@ -19,7 +19,6 @@ import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.core.schema.JsonSchemaValidator;
 import io.graphoenix.core.utils.CodecUtil;
 import io.graphoenix.core.utils.DocumentUtil;
-import io.graphoenix.core.utils.GraphQLResponseUtil;
 import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.constant.Hammurabi;
@@ -438,16 +437,24 @@ public class GrpcServiceImplementer {
 
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                 if (manager.isScalar(fieldTypeName)) {
-                    if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
-                        wrapperCodeBlock = Optional.of(
-                                CodeBlock.of(".map($L -> $L.stream().map($T.CODEC_UTIL::encode).collect($T.toList()))",
-                                        fieldDefinitionContext.name().getText(),
-                                        fieldDefinitionContext.name().getText(),
-                                        ClassName.get(CodecUtil.class)
-                                )
-                        );
-                    } else {
-                        wrapperCodeBlock = Optional.empty();
+                    switch (fieldTypeName) {
+                        case "DateTime":
+                        case "Timestamp":
+                        case "Date":
+                        case "Time":
+                        case "BigInteger":
+                        case "BigDecimal":
+                            wrapperCodeBlock = Optional.of(
+                                    CodeBlock.of(".map($L -> $L.stream().map($T.CODEC_UTIL::encode).collect($T.toList()))",
+                                            fieldDefinitionContext.name().getText(),
+                                            fieldDefinitionContext.name().getText(),
+                                            ClassName.get(CodecUtil.class)
+                                    )
+                            );
+                            break;
+                        default:
+                            wrapperCodeBlock = Optional.empty();
+                            break;
                     }
                 } else if (manager.isEnum(fieldTypeName)) {
                     wrapperCodeBlock = Optional.of(
@@ -493,10 +500,18 @@ public class GrpcServiceImplementer {
                 );
             } else {
                 if (manager.isScalar(fieldTypeName)) {
-                    if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
-                        wrapperCodeBlock = Optional.of(CodeBlock.of(".map($T.CODEC_UTIL::encode)", ClassName.get(CodecUtil.class)));
-                    } else {
-                        wrapperCodeBlock = Optional.empty();
+                    switch (fieldTypeName) {
+                        case "DateTime":
+                        case "Timestamp":
+                        case "Date":
+                        case "Time":
+                        case "BigInteger":
+                        case "BigDecimal":
+                            wrapperCodeBlock = Optional.of(CodeBlock.of(".map($T.CODEC_UTIL::encode)", ClassName.get(CodecUtil.class)));
+                            break;
+                        default:
+                            wrapperCodeBlock = Optional.empty();
+                            break;
                     }
                 } else if (manager.isEnum(fieldTypeName)) {
                     wrapperCodeBlock = Optional.of(
@@ -556,8 +571,9 @@ public class GrpcServiceImplementer {
 
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                 if (manager.isObject(fieldTypeName)) {
-                    invokeCodeBlock = CodeBlock.of(".map(operationType -> $T.from(Mono.justOrEmpty(operationType.$L())).flatMap($T::fromIterable).flatMap(item -> invokeHandler.get().$L(item, operationDefinitionContext.selectionSet().selection(0).field().selectionSet())))",
+                    invokeCodeBlock = CodeBlock.of(".map(operationType -> $T.from($T.justOrEmpty(operationType.$L())).flatMap($T::fromIterable).flatMap(item -> invokeHandler.get().$L(item, operationDefinitionContext.selectionSet().selection(0).field().selectionSet())))",
                             ClassName.get(Flux.class),
+                            ClassName.get(Mono.class),
                             fieldGetterName,
                             ClassName.get(Flux.class),
                             typeInvokeMethodName
@@ -567,15 +583,23 @@ public class GrpcServiceImplementer {
                 }
 
                 if (manager.isScalar(fieldTypeName)) {
-                    if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
-                        wrapperCodeBlock = Optional.of(
-                                CodeBlock.of(".flatMap($L -> $L.map($T.CODEC_UTIL::encode).collectList())",
-                                        fieldDefinitionContext.name().getText(),
-                                        fieldDefinitionContext.name().getText(),
-                                        ClassName.get(CodecUtil.class))
-                        );
-                    } else {
-                        wrapperCodeBlock = Optional.empty();
+                    switch (fieldTypeName) {
+                        case "DateTime":
+                        case "Timestamp":
+                        case "Date":
+                        case "Time":
+                        case "BigInteger":
+                        case "BigDecimal":
+                            wrapperCodeBlock = Optional.of(
+                                    CodeBlock.of(".flatMap($L -> $L.map($T.CODEC_UTIL::encode).collectList())",
+                                            fieldDefinitionContext.name().getText(),
+                                            fieldDefinitionContext.name().getText(),
+                                            ClassName.get(CodecUtil.class))
+                            );
+                            break;
+                        default:
+                            wrapperCodeBlock = Optional.empty();
+                            break;
                     }
                 } else if (manager.isEnum(fieldTypeName)) {
                     wrapperCodeBlock = Optional.of(
@@ -664,10 +688,18 @@ public class GrpcServiceImplementer {
                 }
 
                 if (manager.isScalar(fieldTypeName)) {
-                    if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
-                        wrapperCodeBlock = Optional.of(CodeBlock.of(".map($T.CODEC_UTIL::encode)", ClassName.get(CodecUtil.class)));
-                    } else {
-                        wrapperCodeBlock = Optional.empty();
+                    switch (fieldTypeName) {
+                        case "DateTime":
+                        case "Timestamp":
+                        case "Date":
+                        case "Time":
+                        case "BigInteger":
+                        case "BigDecimal":
+                            wrapperCodeBlock = Optional.of(CodeBlock.of(".map($T.CODEC_UTIL::encode)", ClassName.get(CodecUtil.class)));
+                            break;
+                        default:
+                            wrapperCodeBlock = Optional.empty();
+                            break;
                     }
                 } else if (manager.isEnum(fieldTypeName)) {
                     wrapperCodeBlock = Optional.of(
@@ -784,7 +816,7 @@ public class GrpcServiceImplementer {
                                         CodeBlock.of("return request.map($T::getRequest)", ClassName.get(grpcPackageName, "GraphQLRequest")),
                                         CodeBlock.of(".map(io.graphoenix.core.dto.GraphQLRequest::new)", ClassName.get(io.graphoenix.core.dto.GraphQLRequest.class)),
                                         CodeBlock.of(".flatMap(graphQLRequestHandler.get()::handle)"),
-                                        CodeBlock.of(".onErrorResume(throwable -> Mono.just($T.GRAPHQL_RESPONSE_UTIL.error(throwable)))", ClassName.get(GraphQLResponseUtil.class)),
+                                        CodeBlock.of(".onErrorResume(throwable -> $T.error(new $T(throwable)))", ClassName.get(Mono.class), ClassName.get(GraphQLErrors.class)),
                                         CodeBlock.of(".map($T.newBuilder()::setResponse)", ClassName.get(grpcPackageName, "GraphQLResponse")),
                                         CodeBlock.of(".map($T.Builder::build)", ClassName.get(grpcPackageName, "GraphQLResponse")),
                                         CodeBlock.of(".contextWrite($T.of($T.REQUEST_ID, $T.randomNanoId()))", ClassName.get(Context.class), ClassName.get(Hammurabi.class), ClassName.get(NanoIdUtils.class))

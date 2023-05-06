@@ -61,7 +61,6 @@ public class GraphQLFetchFieldProcessor {
                     .map(subField -> manager.getField(fieldTypeName, subField.getName()))
                     .flatMap(Optional::stream)
                     .filter(manager::isFetchField)
-                    .filter(subField -> !manager.hasFetchWith(subField))
                     .map(manager::getFetchFrom)
                     .map(fromFieldName -> manager.getField(fieldTypeName, fromFieldName))
                     .flatMap(Optional::stream)
