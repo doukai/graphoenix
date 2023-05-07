@@ -38,7 +38,7 @@ public class GraphQLApiBuilder {
         Field field = new Field()
                 .setName(elementManager.getNameFromElement(executableElement))
                 .setDescription(elementManager.getDescriptionFromElement(executableElement))
-                .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
+                .setType(elementManager.executableElementToTypeName(executableElement, typeUtils))
                 .setArguments(elementManager.executableElementParametersToInputValues(executableElement, typeUtils))
                 .addDirective(
                         new Directive()
@@ -87,7 +87,7 @@ public class GraphQLApiBuilder {
                 new Field()
                         .setName(elementManager.getSourceNameFromExecutableElement(executableElement).orElseGet(() -> elementManager.getNameFromElement(executableElement)))
                         .setDescription(elementManager.getDescriptionFromElement(executableElement))
-                        .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
+                        .setType(elementManager.executableElementToTypeName(executableElement, typeUtils))
                         .setArguments(elementManager.executableElementParametersToInputValues(executableElement, typeUtils))
                         .addDirective(
                                 new Directive()

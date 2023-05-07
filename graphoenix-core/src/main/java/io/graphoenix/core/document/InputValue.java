@@ -14,7 +14,7 @@ import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 public class InputValue {
 
     private String name;
-    private String typeName;
+    private Type type;
     private String defaultValue;
     private Collection<Directive> directives;
     private String description;
@@ -24,7 +24,7 @@ public class InputValue {
 
     public InputValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         this.name = inputValueDefinitionContext.name().getText();
-        this.typeName = inputValueDefinitionContext.type().getText();
+        this.type = Type.of(inputValueDefinitionContext.type());
         if (inputValueDefinitionContext.defaultValue() != null) {
             this.defaultValue = inputValueDefinitionContext.defaultValue().value().getText();
         }
@@ -49,12 +49,17 @@ public class InputValue {
         return this;
     }
 
-    public String getTypeName() {
-        return typeName;
+    public Type getType() {
+        return type;
     }
 
-    public InputValue setTypeName(String typeName) {
-        this.typeName = typeName;
+    public InputValue setType(Type type) {
+        this.type = type;
+        return this;
+    }
+
+    public InputValue setType(String typeName) {
+        this.type = new TypeName(typeName);
         return this;
     }
 
@@ -64,8 +69,8 @@ public class InputValue {
 
     public InputValue setDefaultValue(String defaultValue) {
         if (defaultValue != null) {
-            if (this.getTypeName() != null && (this.getTypeName().equals("String") || this.getTypeName().equals("String!"))) {
-                this.defaultValue = "\"".concat(defaultValue).concat("\"");
+            if (this.type.getTypeName().getName().equals("String")) {
+                this.defaultValue = "\"" + defaultValue + "\"";
             } else {
                 this.defaultValue = defaultValue;
             }

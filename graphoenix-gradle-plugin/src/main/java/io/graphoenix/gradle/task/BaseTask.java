@@ -229,7 +229,7 @@ public class BaseTask extends DefaultTask {
                                                             .addField(
                                                                     new Field()
                                                                             .setName(getSourceNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
-                                                                            .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
+                                                                            .setType(getInvokeFieldTypeName(methodDeclaration.getType()))
                                                                             .addDirective(
                                                                                     new Directive().setName(INVOKE_DIRECTIVE_NAME)
                                                                                             .addArgument("className",
@@ -277,13 +277,13 @@ public class BaseTask extends DefaultTask {
                                                             .addField(
                                                                     new Field()
                                                                             .setName(getQueryNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
-                                                                            .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
+                                                                            .setType(getInvokeFieldTypeName(methodDeclaration.getType()))
                                                                             .setArguments(
                                                                                     methodDeclaration.getParameters().stream()
                                                                                             .map(parameter ->
                                                                                                     new InputValue()
                                                                                                             .setName(parameter.getName().getIdentifier())
-                                                                                                            .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType())))
+                                                                                                            .setType(getInvokeFieldArgumentTypeName(parameter.getType())))
                                                                                             .collect(Collectors.toCollection(LinkedHashSet::new))
                                                                             )
                                                                             .addDirective(
@@ -333,13 +333,13 @@ public class BaseTask extends DefaultTask {
                                                             .addField(
                                                                     new Field()
                                                                             .setName(getMutationNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
-                                                                            .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
+                                                                            .setType(getInvokeFieldTypeName(methodDeclaration.getType()))
                                                                             .setArguments(
                                                                                     methodDeclaration.getParameters().stream()
                                                                                             .map(parameter ->
                                                                                                     new InputValue()
                                                                                                             .setName(parameter.getName().getIdentifier())
-                                                                                                            .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType())))
+                                                                                                            .setType(getInvokeFieldArgumentTypeName(parameter.getType())))
                                                                                             .collect(Collectors.toCollection(LinkedHashSet::new))
                                                                             )
                                                                             .addDirective(
@@ -543,7 +543,7 @@ public class BaseTask extends DefaultTask {
 
     protected Field buildField(ResolvedMethodDeclaration resolvedMethodDeclaration) {
         return new Field(getInvokeFieldName(resolvedMethodDeclaration.getName()))
-                .setTypeName(getInvokeFieldTypeName(resolvedMethodDeclaration.getReturnType()));
+                .setType(getInvokeFieldTypeName(resolvedMethodDeclaration.getReturnType()));
     }
 
     protected EnumValue buildEnumValue(ResolvedEnumConstantDeclaration resolvedEnumConstantDeclaration) {

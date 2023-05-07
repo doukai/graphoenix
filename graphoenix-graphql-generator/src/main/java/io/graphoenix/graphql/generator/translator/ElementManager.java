@@ -387,7 +387,7 @@ public class ElementManager {
                             new InputValue()
                                     .setName(getNameFromElement(variableElement))
                                     .setDefaultValue(getDefaultValueFromElement(variableElement))
-                                    .setTypeName(variableElementToTypeName(variableElement, typeUtils))
+                                    .setType(variableElementToTypeName(variableElement, typeUtils))
                                     .setDescription(getDescriptionFromElement(variableElement))
                     )
                     .collect(Collectors.toCollection(LinkedHashSet::new));

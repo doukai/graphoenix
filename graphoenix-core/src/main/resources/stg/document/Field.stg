@@ -1,4 +1,4 @@
 fieldDefinition(filed) ::= <<
 <if(filed.description)>"<filed.description>"<endif>
-<filed.name><if(filed.arguments)>(<filed.arguments:{argument|<argument>};separator=", ">)<endif>: <filed.typeName><if(filed.directives)> <filed.directives:{directive|<directive>};separator=" "><endif>
+<filed.name><if(filed.arguments)>(<filed.arguments:{argument|<argument>};separator=", ">)<endif>: <filed.type><if(filed.directives)> <filed.directives:{directive|<directive>};separator=" "><endif>
 >>

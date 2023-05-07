@@ -120,6 +120,12 @@ public enum DocumentUtil {
         return graphqlToInputValueDefinition(charStream);
     }
 
+    public GraphqlParser.TypeContext graphqlToType(String graphql) {
+        CodePointCharStream charStream;
+        charStream = CharStreams.fromString(graphql);
+        return graphqlToType(charStream);
+    }
+
     public GraphqlParser.DocumentContext graphqlToDocument(CharStream charStream) {
         return getGraphqlParser(charStream).document();
     }
@@ -166,6 +172,10 @@ public enum DocumentUtil {
 
     public GraphqlParser.InputValueDefinitionContext graphqlToInputValueDefinition(CharStream charStream) {
         return getGraphqlParser(charStream).inputValueDefinition();
+    }
+
+    public GraphqlParser.TypeContext graphqlToType(CharStream charStream) {
+        return getGraphqlParser(charStream).type();
     }
 
     public String getStringValue(TerminalNode stringValue) {

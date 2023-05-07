@@ -15,7 +15,7 @@ public class Field {
 
     private String name;
     private Collection<InputValue> arguments;
-    private String typeName;
+    private Type type;
     private Collection<Directive> directives;
     private String description;
 
@@ -28,7 +28,7 @@ public class Field {
 
     public Field(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         this.name = fieldDefinitionContext.name().getText();
-        this.typeName = fieldDefinitionContext.type().getText();
+        this.type = Type.of(fieldDefinitionContext.type());
         if (fieldDefinitionContext.description() != null) {
             this.description = DOCUMENT_UTIL.getStringValue(fieldDefinitionContext.description().StringValue());
         }
@@ -74,12 +74,17 @@ public class Field {
         return this;
     }
 
-    public String getTypeName() {
-        return typeName;
+    public Type getType() {
+        return type;
     }
 
-    public Field setTypeName(String typeName) {
-        this.typeName = typeName;
+    public Field setType(Type type) {
+        this.type = type;
+        return this;
+    }
+
+    public Field setType(String typeName) {
+        this.type = Type.of(DOCUMENT_UTIL.graphqlToType(typeName));
         return this;
     }
 

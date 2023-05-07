@@ -44,7 +44,7 @@ public class JavaElementToInterface {
                                 .map(element -> {
                                             Field field = new Field()
                                                     .setName(elementManager.getNameFromElement(element))
-                                                    .setTypeName(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
+                                                    .setType(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
                                                     .setDescription(elementManager.getDescriptionFromElement(element));
                                             NumberFormat numberFormat = element.getAnnotation(NumberFormat.class);
                                             if (numberFormat != null) {

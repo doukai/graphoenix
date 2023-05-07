@@ -44,7 +44,7 @@ public class JavaElementToInputType {
                                                 .setName(elementManager.getNameFromElement(element))
                                                 .setDescription(elementManager.getDescriptionFromElement(element))
                                                 .setDefaultValue(elementManager.getDefaultValueFromElement(element))
-                                                .setTypeName(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
+                                                .setType(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
                                 )
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 )
