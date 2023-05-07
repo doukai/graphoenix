@@ -2,10 +2,7 @@ package io.graphoenix.showcase.order.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
 import io.graphoenix.core.dto.interfaceType.Meta;
-import io.graphoenix.showcase.user.dto.objectType.Role;
 import io.graphoenix.showcase.user.dto.objectType.User;
-import io.graphoenix.showcase.user.dto.objectType.UserRole;
-import io.graphoenix.showcase.user.dto.objectType.UserRoleConnection;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -32,8 +29,6 @@ public class Order implements Meta {
   private User buyer;
 
   private Collection<Good> goods;
-
-  private Collection<Role> roles;
 
   private Boolean isDeprecated;
 
@@ -83,12 +78,6 @@ public class Order implements Meta {
 
   private Integer buyerIdMin;
 
-  private Collection<UserRole> userRole;
-
-  private UserRole userRoleAggregate;
-
-  private UserRoleConnection userRoleConnection;
-
   public String getId() {
     return this.id;
   }
@@ -119,14 +108,6 @@ public class Order implements Meta {
 
   public void setGoods(Collection<Good> goods) {
     this.goods = goods;
-  }
-
-  public Collection<Role> getRoles() {
-    return this.roles;
-  }
-
-  public void setRoles(Collection<Role> roles) {
-    this.roles = roles;
   }
 
   @Override
@@ -327,29 +308,5 @@ public class Order implements Meta {
 
   public void setBuyerIdMin(Integer buyerIdMin) {
     this.buyerIdMin = buyerIdMin;
-  }
-
-  public Collection<UserRole> getUserRole() {
-    return this.userRole;
-  }
-
-  public void setUserRole(Collection<UserRole> userRole) {
-    this.userRole = userRole;
-  }
-
-  public UserRole getUserRoleAggregate() {
-    return this.userRoleAggregate;
-  }
-
-  public void setUserRoleAggregate(UserRole userRoleAggregate) {
-    this.userRoleAggregate = userRoleAggregate;
-  }
-
-  public UserRoleConnection getUserRoleConnection() {
-    return this.userRoleConnection;
-  }
-
-  public void setUserRoleConnection(UserRoleConnection userRoleConnection) {
-    this.userRoleConnection = userRoleConnection;
   }
 }

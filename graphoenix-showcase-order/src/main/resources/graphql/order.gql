@@ -3,7 +3,6 @@ type Order {
     number: String!
     buyer: User @fetch(from: "buyerId" to:"id" anchor: true protocol: GRPC)
     goods: [Good!] @map(from: "id" to: "orderId")
-    roles: [Role!] @fetch(from: "buyerId" with: {type: "UserRole" from: "userId" to: "roleId"} to: "id" protocol: GRPC)
 }
 
 type Good {

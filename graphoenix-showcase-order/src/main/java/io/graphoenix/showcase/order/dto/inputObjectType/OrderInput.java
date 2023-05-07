@@ -1,9 +1,7 @@
 package io.graphoenix.showcase.order.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.showcase.user.dto.inputObjectType.RoleInput;
 import io.graphoenix.showcase.user.dto.inputObjectType.UserInput;
-import io.graphoenix.showcase.user.dto.inputObjectType.UserRoleInput;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -27,8 +25,6 @@ public class OrderInput {
 
   private Collection<GoodInput> goods;
 
-  private Collection<RoleInput> roles;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -49,8 +45,6 @@ public class OrderInput {
   private String __typename;
 
   private Integer buyerId;
-
-  private Collection<UserRoleInput> userRole;
 
   public String getId() {
     return this.id;
@@ -82,14 +76,6 @@ public class OrderInput {
 
   public void setGoods(Collection<GoodInput> goods) {
     this.goods = goods;
-  }
-
-  public Collection<RoleInput> getRoles() {
-    return this.roles;
-  }
-
-  public void setRoles(Collection<RoleInput> roles) {
-    this.roles = roles;
   }
 
   public Boolean getIsDeprecated() {
@@ -170,13 +156,5 @@ public class OrderInput {
 
   public void setBuyerId(Integer buyerId) {
     this.buyerId = buyerId;
-  }
-
-  public Collection<UserRoleInput> getUserRole() {
-    return this.userRole;
-  }
-
-  public void setUserRole(Collection<UserRoleInput> userRole) {
-    this.userRole = userRole;
   }
 }

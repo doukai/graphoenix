@@ -52,19 +52,17 @@ message MutationOrderRequest {
     optional string number = 4;
     optional io.graphoenix.showcase.user.grpc.UserInput buyer = 5;
     repeated GoodInput goods = 6;
-    repeated io.graphoenix.showcase.user.grpc.RoleInput roles = 7;
-    optional bool is_deprecated = 8;
-    optional int32 version = 9;
-    optional string realm_id = 10;
-    optional string create_user_id = 11;
-    optional google.protobuf.Timestamp create_time = 12;
-    optional string update_user_id = 13;
-    optional google.protobuf.Timestamp update_time = 14;
-    optional string create_group_id = 15;
-    optional string intro_typename = 16;
-    optional int32 buyer_id = 17;
-    repeated io.graphoenix.showcase.user.grpc.UserRoleInput user_role = 18;
-    optional OrderExpression where = 19;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional google.protobuf.Timestamp create_time = 11;
+    optional string update_user_id = 12;
+    optional google.protobuf.Timestamp update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+    optional int32 buyer_id = 16;
+    optional OrderExpression where = 17;
 }
 message MutationOrderListRequest {
     optional string selection_set = 1;
@@ -73,20 +71,18 @@ message MutationOrderListRequest {
     optional string number = 4;
     optional io.graphoenix.showcase.user.grpc.UserInput buyer = 5;
     repeated GoodInput goods = 6;
-    repeated io.graphoenix.showcase.user.grpc.RoleInput roles = 7;
-    optional bool is_deprecated = 8;
-    optional int32 version = 9;
-    optional string realm_id = 10;
-    optional string create_user_id = 11;
-    optional google.protobuf.Timestamp create_time = 12;
-    optional string update_user_id = 13;
-    optional google.protobuf.Timestamp update_time = 14;
-    optional string create_group_id = 15;
-    optional string intro_typename = 16;
-    optional int32 buyer_id = 17;
-    repeated io.graphoenix.showcase.user.grpc.UserRoleInput user_role = 18;
-    repeated OrderInput list = 19;
-    optional OrderExpression where = 20;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional google.protobuf.Timestamp create_time = 11;
+    optional string update_user_id = 12;
+    optional google.protobuf.Timestamp update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+    optional int32 buyer_id = 16;
+    repeated OrderInput list = 17;
+    optional OrderExpression where = 18;
 }
 message MutationGoodRequest {
     optional string selection_set = 1;

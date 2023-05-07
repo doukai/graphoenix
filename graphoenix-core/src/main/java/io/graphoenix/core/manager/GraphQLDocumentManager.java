@@ -1333,21 +1333,12 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public GraphqlParser.FieldDefinitionContext getFetchWithFromObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        if (getFetchAnchor(fieldDefinitionContext)) {
-            return getObject(getFetchWithType(fieldDefinitionContext)).stream()
-                    .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
-                    .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext) != null)
-                    .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext).equals(getFetchWithFrom(fieldDefinitionContext)))
-                    .findFirst()
-                    .orElseThrow(() -> new GraphQLErrors(FETCH_FROM_OBJECT_FIELD_NOT_EXIST.bind(getFetchWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
-        } else {
-            return getObject(getFetchWithType(fieldDefinitionContext)).stream()
-                    .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
-                    .filter(witTypeFieldDefinitionContext -> getMapFrom(witTypeFieldDefinitionContext) != null)
-                    .filter(witTypeFieldDefinitionContext -> getMapFrom(witTypeFieldDefinitionContext).equals(getFetchWithFrom(fieldDefinitionContext)))
-                    .findFirst()
-                    .orElseThrow(() -> new GraphQLErrors(FETCH_FROM_OBJECT_FIELD_NOT_EXIST.bind(getFetchWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
-        }
+        return getObject(getFetchWithType(fieldDefinitionContext)).stream()
+                .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext) != null)
+                .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext).equals(getFetchWithFrom(fieldDefinitionContext)))
+                .findFirst()
+                .orElseThrow(() -> new GraphQLErrors(FETCH_FROM_OBJECT_FIELD_NOT_EXIST.bind(getFetchWithType(fieldDefinitionContext), fieldDefinitionContext.name().getText())));
     }
 
     @Override
@@ -1368,21 +1359,12 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public GraphqlParser.FieldDefinitionContext getFetchWithToObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        if (getFetchAnchor(fieldDefinitionContext)) {
-            return getObject(getFetchWithType(fieldDefinitionContext)).stream()
-                    .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
-                    .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext) != null)
-                    .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext).equals(getFetchWithTo(fieldDefinitionContext)))
-                    .findFirst()
-                    .orElse(null);
-        } else {
-            return getObject(getFetchWithType(fieldDefinitionContext)).stream()
-                    .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
-                    .filter(witTypeFieldDefinitionContext -> getMapFrom(witTypeFieldDefinitionContext) != null)
-                    .filter(witTypeFieldDefinitionContext -> getMapFrom(witTypeFieldDefinitionContext).equals(getFetchWithTo(fieldDefinitionContext)))
-                    .findFirst()
-                    .orElse(null);
-        }
+        return getObject(getFetchWithType(fieldDefinitionContext)).stream()
+                .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext) != null)
+                .filter(witTypeFieldDefinitionContext -> getFetchFrom(witTypeFieldDefinitionContext).equals(getFetchWithTo(fieldDefinitionContext)))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
