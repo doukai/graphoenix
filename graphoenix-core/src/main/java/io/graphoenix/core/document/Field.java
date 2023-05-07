@@ -84,7 +84,7 @@ public class Field {
     }
 
     public Field setType(String typeName) {
-        this.type = Type.of(DOCUMENT_UTIL.graphqlToType(typeName));
+        this.type = Type.of(typeName);
         return this;
     }
 

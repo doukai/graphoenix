@@ -4,8 +4,13 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 
 public interface Type {
+
+    static Type of(String typeName) {
+        return of(DOCUMENT_UTIL.graphqlToType(typeName));
+    }
 
     static Type of(GraphqlParser.TypeContext typeContext) {
         if (typeContext.typeName() != null) {

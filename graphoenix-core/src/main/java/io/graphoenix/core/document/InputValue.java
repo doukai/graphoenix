@@ -59,7 +59,7 @@ public class InputValue {
     }
 
     public InputValue setType(String typeName) {
-        this.type = new TypeName(typeName);
+        this.type = Type.of(typeName);
         return this;
     }
 
