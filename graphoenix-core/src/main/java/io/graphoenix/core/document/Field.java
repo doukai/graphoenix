@@ -2,14 +2,19 @@ package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.operation.Directive;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.DATA_TYPE_DIRECTIVE_NAME;
 
 public class Field {
 
@@ -119,6 +124,16 @@ public class Field {
     public Field setDescription(String description) {
         this.description = description;
         return this;
+    }
+
+    public Optional<String> getDataTypeName() {
+        return Stream.ofNullable(this.directives).flatMap(Collection::stream)
+                .filter(directive -> directive.getName().equals(DATA_TYPE_DIRECTIVE_NAME))
+                .flatMap(directive -> directive.getArguments().entrySet().stream())
+                .filter(entry -> entry.getKey().equals("type"))
+                .filter(entry -> entry.getValue().getValueType().equals(JsonValue.ValueType.STRING))
+                .map(entry -> ((JsonString) entry.getValue()).getString())
+                .findFirst();
     }
 
     @Override

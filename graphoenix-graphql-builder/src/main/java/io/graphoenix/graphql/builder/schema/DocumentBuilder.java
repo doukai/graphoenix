@@ -72,17 +72,17 @@ public class DocumentBuilder {
 
     public Document buildDocument() {
         io.vavr.collection.Stream.ofAll(
-                manager.getObjects()
-                        .filter(packageManager::isOwnPackage)
-                        .filter(manager::isNotOperationType)
-                        .filter(manager::isNotContainerType)
-                        .flatMap(objectTypeDefinitionContext ->
-                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                        )
-                        .filter(tuple -> manager.getFetchAnchor(tuple._2()))
-                        .filter(tuple -> manager.hasFetchWith(tuple._2()))
-        )
+                        manager.getObjects()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isNotOperationType)
+                                .filter(manager::isNotContainerType)
+                                .flatMap(objectTypeDefinitionContext ->
+                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                                )
+                                .filter(tuple -> manager.getFetchAnchor(tuple._2()))
+                                .filter(tuple -> manager.hasFetchWith(tuple._2()))
+                )
                 .distinctBy(tuple -> manager.getFetchWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildFetchWithObject(tuple._1(), tuple._2()).stream())
@@ -90,16 +90,16 @@ public class DocumentBuilder {
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
         io.vavr.collection.Stream.ofAll(
-                manager.getObjects()
-                        .filter(packageManager::isOwnPackage)
-                        .filter(manager::isNotOperationType)
-                        .filter(manager::isNotContainerType)
-                        .flatMap(objectTypeDefinitionContext ->
-                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                        )
-                        .filter(tuple -> manager.hasMapWith(tuple._2()))
-        )
+                        manager.getObjects()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isNotOperationType)
+                                .filter(manager::isNotContainerType)
+                                .flatMap(objectTypeDefinitionContext ->
+                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                                )
+                                .filter(tuple -> manager.hasMapWith(tuple._2()))
+                )
                 .distinctBy(tuple -> manager.getMapWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildMapWithObject(tuple._1(), tuple._2()).stream())
@@ -275,7 +275,7 @@ public class DocumentBuilder {
                                     .filter(manager::isFetchField)
                                     .filter(manager::getFetchAnchor)
                                     .filter(fieldDefinitionContext -> !manager.hasFetchWith(fieldDefinitionContext))
-                                    .map(fieldDefinitionContext -> new Field(manager.getFetchFrom(fieldDefinitionContext)).setType(getMapFieldType(manager.getFieldTypeName(fieldDefinitionContext.type()), manager.getFetchTo(fieldDefinitionContext))))
+                                    .map(fieldDefinitionContext -> new Field(manager.getFetchFrom(fieldDefinitionContext)).setType(getFieldTypeWithoutID(manager.getFieldTypeName(fieldDefinitionContext.type()), manager.getFetchTo(fieldDefinitionContext))))
                                     .filter(field -> fieldDefinitionContextList.stream().noneMatch(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(field.getName())))
                                     .flatMap(field -> Stream.concat(Stream.of(field), buildFunctionFieldStream(field)))
                                     .collect(Collectors.toList())
@@ -316,7 +316,7 @@ public class DocumentBuilder {
                                     .filter(manager::isMapField)
                                     .filter(manager::getMapAnchor)
                                     .filter(fieldDefinitionContext -> !manager.hasMapWith(fieldDefinitionContext))
-                                    .map(fieldDefinitionContext -> new Field(manager.getMapFrom(fieldDefinitionContext)).setType(getMapFieldType(manager.getFieldTypeName(fieldDefinitionContext.type()), manager.getMapTo(fieldDefinitionContext))))
+                                    .map(fieldDefinitionContext -> new Field(manager.getMapFrom(fieldDefinitionContext)).setType(getFieldTypeWithoutID(manager.getFieldTypeName(fieldDefinitionContext.type()), manager.getMapTo(fieldDefinitionContext))))
                                     .filter(field -> fieldDefinitionContextList.stream().noneMatch(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(field.getName())))
                                     .flatMap(field -> Stream.concat(Stream.of(field), buildFunctionFieldStream(field)))
                                     .collect(Collectors.toList())
@@ -376,7 +376,7 @@ public class DocumentBuilder {
                                                 .addArgument("autoIncrement", true)
                                 )
                 )
-                .addField(new Field(fetchWithFromFieldName).setType(getMapFieldType(fetchFromTypeName, manager.getFetchFrom(fieldDefinitionContext))))
+                .addField(new Field(fetchWithFromFieldName).setType(getFieldTypeWithoutID(fetchFromTypeName, manager.getFetchFrom(fieldDefinitionContext))))
                 .addField(
                         new Field(fetchWithFromObjectFieldName)
                                 .setType(fetchFromTypeName)
@@ -396,7 +396,7 @@ public class DocumentBuilder {
 
         if (fetchToFieldName != null) {
             objectType
-                    .addField(new Field(fetchWithToFieldName).setType(getMapFieldType(fetchToTypeName, manager.getFetchTo(fieldDefinitionContext))))
+                    .addField(new Field(fetchWithToFieldName).setType(getFieldTypeWithoutID(fetchToTypeName, manager.getFetchTo(fieldDefinitionContext))))
                     .addField(
                             new Field(fetchWithToObjectFieldName)
                                     .setType(fetchToTypeName)
@@ -440,7 +440,7 @@ public class DocumentBuilder {
                                                 .addArgument("autoIncrement", true)
                                 )
                 )
-                .addField(new Field(mapWithFromFieldName).setType(getMapFieldType(mapFromTypeName, manager.getMapFrom(fieldDefinitionContext))))
+                .addField(new Field(mapWithFromFieldName).setType(getFieldTypeWithoutID(mapFromTypeName, manager.getMapFrom(fieldDefinitionContext))))
                 .addField(
                         new Field(mapWithFromObjectFieldName)
                                 .setType(mapFromTypeName)
@@ -454,7 +454,7 @@ public class DocumentBuilder {
 
         if (mapToFieldName != null) {
             objectType
-                    .addField(new Field(mapWithToFieldName).setType(getMapFieldType(mapToTypeName, manager.getMapTo(fieldDefinitionContext))))
+                    .addField(new Field(mapWithToFieldName).setType(getFieldTypeWithoutID(mapToTypeName, manager.getMapTo(fieldDefinitionContext))))
                     .addField(
                             new Field(mapWithToObjectFieldName)
                                     .setType(mapToTypeName)
@@ -746,7 +746,7 @@ public class DocumentBuilder {
     public Field buildSchemaTypeFieldList(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
         Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext).concat("List"))
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
-                .setType("[".concat(objectTypeDefinitionContext.name().getText()).concat("]"))
+                .setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText())))
                 .addDirective(
                         new io.graphoenix.core.operation.Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                                 .addArgument("packageName", graphQLConfig.getPackageName())
@@ -990,17 +990,26 @@ public class DocumentBuilder {
         return new io.graphoenix.core.operation.Directive(directiveContext);
     }
 
-    public String getMapFieldType(String typeName, String filedName) {
+    public String getFieldTypeWithoutID(String typeName, String filedName) {
         return manager.getField(typeName, filedName)
-                .map(fieldDefinitionContext -> {
-                            String fieldTypeName = manager.getDataTypeName(fieldDefinitionContext).orElseGet(() -> manager.getFieldTypeName(fieldDefinitionContext.type()));
-                            if ("ID".equals(fieldTypeName)) {
-                                return manager.getDataTypeName(fieldDefinitionContext).orElse("String");
-                            }
-                            return fieldTypeName;
-                        }
-                )
-                .orElse("String");
+                .map(this::getFieldTypeWithoutID)
+                .orElse(null);
+    }
+
+    public String getFieldTypeWithoutID(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        String fieldTypeName = manager.getDataTypeName(fieldDefinitionContext).orElseGet(() -> manager.getFieldTypeName(fieldDefinitionContext.type()));
+        if ("ID".equals(fieldTypeName)) {
+            return "String";
+        }
+        return fieldTypeName;
+    }
+
+    public String getFieldTypeWithoutID(Field field) {
+        String fieldTypeName = field.getDataTypeName().orElseGet(() -> field.getType().getTypeName().getName());
+        if ("ID".equals(fieldTypeName)) {
+            return "String";
+        }
+        return fieldTypeName;
     }
 
     public Stream<Field> buildFunctionFieldStream(Field field) {
@@ -1016,20 +1025,20 @@ public class DocumentBuilder {
                         Function.COUNT.toField(
                                 field.getName(),
                                 "Int",
-                                fieldTypeName,
-                                false
+                                getFieldTypeWithoutID(field),
+                                field.getType().isList()
                         ),
                         Function.MAX.toField(
                                 field.getName(),
-                                fieldTypeName,
-                                fieldTypeName,
-                                false
+                                getFieldTypeWithoutID(field),
+                                getFieldTypeWithoutID(field),
+                                field.getType().isList()
                         ),
                         Function.MIN.toField(
                                 field.getName(),
-                                fieldTypeName,
-                                fieldTypeName,
-                                false
+                                getFieldTypeWithoutID(field),
+                                getFieldTypeWithoutID(field),
+                                field.getType().isList()
                         )
                 );
             case "Int":
@@ -1041,31 +1050,31 @@ public class DocumentBuilder {
                                 field.getName(),
                                 "Int",
                                 fieldTypeName,
-                                false
+                                field.getType().isList()
                         ),
                         Function.SUM.toField(
                                 field.getName(),
-                                fieldTypeName,
-                                fieldTypeName,
-                                false
+                                getFieldTypeWithoutID(field),
+                                getFieldTypeWithoutID(field),
+                                field.getType().isList()
                         ),
                         Function.AVG.toField(
                                 field.getName(),
-                                fieldTypeName,
-                                fieldTypeName,
-                                false
+                                getFieldTypeWithoutID(field),
+                                getFieldTypeWithoutID(field),
+                                field.getType().isList()
                         ),
                         Function.MAX.toField(
                                 field.getName(),
-                                fieldTypeName,
-                                fieldTypeName,
-                                false
+                                getFieldTypeWithoutID(field),
+                                getFieldTypeWithoutID(field),
+                                field.getType().isList()
                         ),
                         Function.MIN.toField(
                                 field.getName(),
-                                fieldTypeName,
-                                fieldTypeName,
-                                false
+                                getFieldTypeWithoutID(field),
+                                getFieldTypeWithoutID(field),
+                                field.getType().isList()
                         )
                 );
             default:
@@ -1102,14 +1111,14 @@ public class DocumentBuilder {
                                         ),
                                         Function.MAX.toField(
                                                 fieldDefinitionContext.name().getText(),
-                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
-                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                getFieldTypeWithoutID(fieldDefinitionContext),
+                                                getFieldTypeWithoutID(fieldDefinitionContext),
                                                 manager.fieldTypeIsList(fieldDefinitionContext.type())
                                         ),
                                         Function.MIN.toField(
                                                 fieldDefinitionContext.name().getText(),
-                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
-                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                getFieldTypeWithoutID(fieldDefinitionContext),
+                                                getFieldTypeWithoutID(fieldDefinitionContext),
                                                 manager.fieldTypeIsList(fieldDefinitionContext.type())
                                         )
                                 )
@@ -1134,31 +1143,31 @@ public class DocumentBuilder {
                                         Function.COUNT.toField(
                                                 fieldDefinitionContext.name().getText(),
                                                 "Int",
-                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                getFieldTypeWithoutID(fieldDefinitionContext),
                                                 manager.fieldTypeIsList(fieldDefinitionContext.type())
                                         ),
                                         Function.SUM.toField(
                                                 fieldDefinitionContext.name().getText(),
-                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
-                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                getFieldTypeWithoutID(fieldDefinitionContext),
+                                                getFieldTypeWithoutID(fieldDefinitionContext),
                                                 manager.fieldTypeIsList(fieldDefinitionContext.type())
                                         ),
                                         Function.AVG.toField(
                                                 fieldDefinitionContext.name().getText(),
-                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
-                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                getFieldTypeWithoutID(fieldDefinitionContext),
+                                                getFieldTypeWithoutID(fieldDefinitionContext),
                                                 manager.fieldTypeIsList(fieldDefinitionContext.type())
                                         ),
                                         Function.MAX.toField(
                                                 fieldDefinitionContext.name().getText(),
-                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
-                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                getFieldTypeWithoutID(fieldDefinitionContext),
+                                                getFieldTypeWithoutID(fieldDefinitionContext),
                                                 manager.fieldTypeIsList(fieldDefinitionContext.type())
                                         ),
                                         Function.MIN.toField(
                                                 fieldDefinitionContext.name().getText(),
-                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
-                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                getFieldTypeWithoutID(fieldDefinitionContext),
+                                                getFieldTypeWithoutID(fieldDefinitionContext),
                                                 manager.fieldTypeIsList(fieldDefinitionContext.type())
                                         )
                                 )

@@ -63,10 +63,8 @@ public class __Type implements Meta {
 
   private Integer nameCount;
 
-  @Id
   private String nameMax;
 
-  @Id
   private String nameMin;
 
   private Integer descriptionCount;

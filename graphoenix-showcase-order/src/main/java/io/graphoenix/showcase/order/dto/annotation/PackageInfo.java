@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.METHOD,ElementType.TYPE,ElementType.FIELD})
+@Target({ElementType.FIELD,ElementType.TYPE,ElementType.METHOD})
 public @interface PackageInfo {
   String packageName();
 

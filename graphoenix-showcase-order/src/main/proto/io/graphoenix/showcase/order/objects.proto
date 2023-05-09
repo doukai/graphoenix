@@ -25,8 +25,8 @@ message Order {
     optional string create_group_id = 12;
     optional string intro_typename = 13;
     optional int32 id_count = 14;
-    optional string id_max = 15;
-    optional string id_min = 16;
+    optional int32 id_max = 15;
+    optional int32 id_min = 16;
     optional int32 number_count = 17;
     optional string number_max = 18;
     optional string number_min = 19;
@@ -55,8 +55,8 @@ message Good {
     optional string create_group_id = 13;
     optional string intro_typename = 14;
     optional int32 id_count = 15;
-    optional string id_max = 16;
-    optional string id_min = 17;
+    optional int32 id_max = 16;
+    optional int32 id_min = 17;
     optional int32 quantity_count = 18;
     optional int32 quantity_sum = 19;
     optional int32 quantity_avg = 20;
@@ -95,8 +95,8 @@ message Product {
     optional string create_group_id = 11;
     optional string intro_typename = 12;
     optional int32 id_count = 13;
-    optional string id_max = 14;
-    optional string id_min = 15;
+    optional int32 id_max = 14;
+    optional int32 id_min = 15;
     optional int32 name_count = 16;
     optional string name_max = 17;
     optional string name_min = 18;
@@ -123,8 +123,8 @@ message Merchant {
     optional string create_group_id = 14;
     optional string intro_typename = 15;
     optional int32 id_count = 16;
-    optional string id_max = 17;
-    optional string id_min = 18;
+    optional int32 id_max = 17;
+    optional int32 id_min = 18;
     optional int32 name_count = 19;
     optional string name_max = 20;
     optional string name_min = 21;
@@ -155,8 +155,8 @@ message MerchantPartners {
     optional string create_group_id = 13;
     optional string intro_typename = 14;
     optional int32 id_count = 15;
-    optional string id_max = 16;
-    optional string id_min = 17;
+    optional int32 id_max = 16;
+    optional int32 id_min = 17;
     optional int32 merchant_id_count = 18;
     optional int32 merchant_id_sum = 19;
     optional int32 merchant_id_avg = 20;
@@ -184,8 +184,8 @@ message MerchantDirector {
     optional string create_group_id = 13;
     optional string intro_typename = 14;
     optional int32 id_count = 15;
-    optional string id_max = 16;
-    optional string id_min = 17;
+    optional int32 id_max = 16;
+    optional int32 id_min = 17;
     optional int32 merchant_id_count = 18;
     optional int32 merchant_id_sum = 19;
     optional int32 merchant_id_avg = 20;

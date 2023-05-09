@@ -27,8 +27,8 @@ message IntroSchema {
     optional string create_group_id = 14;
     optional string intro_typename = 15;
     optional int32 id_count = 16;
-    optional string id_max = 17;
-    optional string id_min = 18;
+    optional int32 id_max = 17;
+    optional int32 id_min = 18;
     optional IntroType types_aggregate = 19;
     optional IntroTypeConnection types_connection = 20;
     optional IntroDirective directives_aggregate = 21;
@@ -117,8 +117,8 @@ message IntroField {
     optional string create_group_id = 15;
     optional string intro_typename = 16;
     optional int32 id_count = 17;
-    optional string id_max = 18;
-    optional string id_min = 19;
+    optional int32 id_max = 18;
+    optional int32 id_min = 19;
     optional int32 name_count = 20;
     optional string name_max = 21;
     optional string name_min = 22;
@@ -158,8 +158,8 @@ message IntroInputValue {
     optional string create_group_id = 16;
     optional string intro_typename = 17;
     optional int32 id_count = 18;
-    optional string id_max = 19;
-    optional string id_min = 20;
+    optional int32 id_max = 19;
+    optional int32 id_min = 20;
     optional int32 name_count = 21;
     optional string name_max = 22;
     optional string name_min = 23;
@@ -202,8 +202,8 @@ message IntroEnumValue {
     optional string create_group_id = 13;
     optional string intro_typename = 14;
     optional int32 id_count = 15;
-    optional string id_max = 16;
-    optional string id_min = 17;
+    optional int32 id_max = 16;
+    optional int32 id_min = 17;
     optional int32 name_count = 18;
     optional string name_max = 19;
     optional string name_min = 20;
@@ -268,8 +268,8 @@ message IntroTypeInterfaces {
     optional string create_group_id = 13;
     optional string intro_typename = 14;
     optional int32 id_count = 15;
-    optional string id_max = 16;
-    optional string id_min = 17;
+    optional int32 id_max = 16;
+    optional int32 id_min = 17;
     optional int32 type_name_count = 18;
     optional string type_name_max = 19;
     optional string type_name_min = 20;
@@ -293,8 +293,8 @@ message IntroTypePossibleTypes {
     optional string create_group_id = 13;
     optional string intro_typename = 14;
     optional int32 id_count = 15;
-    optional string id_max = 16;
-    optional string id_min = 17;
+    optional int32 id_max = 16;
+    optional int32 id_min = 17;
     optional int32 type_name_count = 18;
     optional string type_name_max = 19;
     optional string type_name_min = 20;
@@ -317,8 +317,8 @@ message IntroDirectiveLocations {
     optional string create_group_id = 12;
     optional string intro_typename = 13;
     optional int32 id_count = 14;
-    optional string id_max = 15;
-    optional string id_min = 16;
+    optional int32 id_max = 15;
+    optional int32 id_min = 16;
     optional int32 directive_name_count = 17;
     optional string directive_name_max = 18;
     optional string directive_name_min = 19;

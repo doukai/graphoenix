@@ -31,8 +31,8 @@ message User {
     optional string create_group_id = 19;
     optional string intro_typename = 20;
     optional int32 id_count = 21;
-    optional string id_max = 22;
-    optional string id_min = 23;
+    optional int32 id_max = 22;
+    optional int32 id_min = 23;
     optional int32 login_count = 24;
     optional string login_max = 25;
     optional string login_min = 26;
@@ -77,8 +77,8 @@ message UserProfile {
     optional string create_group_id = 12;
     optional string intro_typename = 13;
     optional int32 id_count = 14;
-    optional string id_max = 15;
-    optional string id_min = 16;
+    optional int32 id_max = 15;
+    optional int32 id_min = 16;
     optional int32 email_count = 17;
     optional string email_max = 18;
     optional string email_min = 19;
@@ -107,8 +107,8 @@ message Role {
     optional string create_group_id = 12;
     optional string intro_typename = 13;
     optional int32 id_count = 14;
-    optional string id_max = 15;
-    optional string id_min = 16;
+    optional int32 id_max = 15;
+    optional int32 id_min = 16;
     optional int32 name_count = 17;
     optional string name_max = 18;
     optional string name_min = 19;
@@ -136,8 +136,8 @@ message Organization {
     optional string create_group_id = 12;
     optional string intro_typename = 13;
     optional int32 id_count = 14;
-    optional string id_max = 15;
-    optional string id_min = 16;
+    optional int32 id_max = 15;
+    optional int32 id_min = 16;
     optional int32 name_count = 17;
     optional string name_max = 18;
     optional string name_min = 19;
@@ -198,8 +198,8 @@ message UserRole {
     optional string create_group_id = 13;
     optional string intro_typename = 14;
     optional int32 id_count = 15;
-    optional string id_max = 16;
-    optional string id_min = 17;
+    optional int32 id_max = 16;
+    optional int32 id_min = 17;
     optional int32 user_id_count = 18;
     optional int32 user_id_sum = 19;
     optional int32 user_id_avg = 20;
@@ -226,8 +226,8 @@ message UserMobileNumbers {
     optional string create_group_id = 12;
     optional string intro_typename = 13;
     optional int32 id_count = 14;
-    optional string id_max = 15;
-    optional string id_min = 16;
+    optional int32 id_max = 15;
+    optional int32 id_min = 16;
     optional int32 mobile_number_count = 17;
     optional string mobile_number_max = 18;
     optional string mobile_number_min = 19;
@@ -252,8 +252,8 @@ message RoleRoleType {
     optional string create_group_id = 12;
     optional string intro_typename = 13;
     optional int32 id_count = 14;
-    optional string id_max = 15;
-    optional string id_min = 16;
+    optional int32 id_max = 15;
+    optional int32 id_min = 16;
     optional int32 role_id_count = 17;
     optional int32 role_id_sum = 18;
     optional int32 role_id_avg = 19;

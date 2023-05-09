@@ -51,11 +51,9 @@ public class Role implements Meta {
 
   private Integer idCount;
 
-  @Id
-  private String idMax;
+  private Integer idMax;
 
-  @Id
-  private String idMin;
+  private Integer idMin;
 
   private Integer nameCount;
 
@@ -207,19 +205,19 @@ public class Role implements Meta {
     this.idCount = idCount;
   }
 
-  public String getIdMax() {
+  public Integer getIdMax() {
     return this.idMax;
   }
 
-  public void setIdMax(String idMax) {
+  public void setIdMax(Integer idMax) {
     this.idMax = idMax;
   }
 
-  public String getIdMin() {
+  public Integer getIdMin() {
     return this.idMin;
   }
 
-  public void setIdMin(String idMin) {
+  public void setIdMin(Integer idMin) {
     this.idMin = idMin;
   }
 
