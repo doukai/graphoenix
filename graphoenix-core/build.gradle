@@ -65,12 +65,12 @@ dependencies {
     compile 'org.eclipse.microprofile.reactive-streams-operators:microprofile-reactive-streams-operators-core:2.0'
     compile 'com.lightbend.microprofile.reactive.streams:lightbend-microprofile-reactive-streams-zerodep:1.0.0'
     compile 'com.aventrix.jnanoid:jnanoid:2.0.0'
+    compile 'com.github.ben-manes.caffeine:caffeine:3.1.1'
 
     implementation project(':graphoenix-config')
     implementation project(':graphoenix-json')
     implementation 'org.antlr:ST4:4.3.2'
     implementation 'com.networknt:json-schema-validator:1.0.70'
-    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.1'
     implementation 'com.jcabi:jcabi-manifests:1.2.1'
     implementation 'org.tinylog:tinylog-impl:2.4.1'
     implementation 'org.tinylog:slf4j-tinylog:2.4.1'
