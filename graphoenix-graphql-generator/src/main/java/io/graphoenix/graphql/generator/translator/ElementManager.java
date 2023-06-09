@@ -77,7 +77,7 @@ public class ElementManager {
                 .flatMap(fieldDefinitionContext -> {
                             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                             if (manager.isObject(fieldTypeName)) {
-                                if (level <= layers) {
+                                if (level < layers) {
                                     return Stream.of(
                                             new Field(fieldDefinitionContext.name().getText())
                                                     .setFields(buildFields(fieldTypeName, level + 1, layers))

@@ -1,6 +1,7 @@
 package io.graphoenix.config;
 
 import com.typesafe.config.ConfigBeanFactory;
+import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 import org.tinylog.Logger;
@@ -52,6 +53,8 @@ public enum ConfigUtil {
                     .forEach(filePath -> typesafeConfig.mergeConfig(ConfigFactory.parseFile(filePath.toFile())));
         } catch (IOException e) {
             Logger.error(e);
+        } catch (ConfigException e) {
+            Logger.warn(e);
         }
         return typesafeConfig;
     }

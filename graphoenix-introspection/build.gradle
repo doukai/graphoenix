@@ -16,6 +16,7 @@ plugins {
 
 compileJava.options.sourcepath = files('src/main/resources')
 
+apply plugin: 'maven'
 apply plugin: 'io.graphoenix'
 
 protobuf {
