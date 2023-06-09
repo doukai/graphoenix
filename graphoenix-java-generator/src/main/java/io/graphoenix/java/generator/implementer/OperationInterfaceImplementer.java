@@ -231,7 +231,7 @@ public class OperationInterfaceImplementer {
                 .returns(typeName);
 
         if (parameters.size() == 0) {
-            builder.addStatement(getCodeBlock(operationDefinitionContext, CodeBlock.of("$T.empty().toJavaMap()", ClassName.get(HashMap.class))));
+            builder.addStatement(getCodeBlock(operationDefinitionContext, CodeBlock.of("new $T<>()", ClassName.get(java.util.HashMap.class))));
         } else {
             CodeBlock mapOf = CodeBlock.of(
                     "$T.of($L).toJavaMap()",

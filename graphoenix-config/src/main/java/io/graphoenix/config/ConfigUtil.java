@@ -48,9 +48,12 @@ public enum ConfigUtil {
 
     public TypesafeConfig merge(String path) {
         try {
-            Files.list(Paths.get(path))
-                    .filter(filePath -> filePath.toString().endsWith(".conf") || filePath.toString().endsWith(".json") || filePath.toString().endsWith(".properties"))
-                    .forEach(filePath -> typesafeConfig.mergeConfig(ConfigFactory.parseFile(filePath.toFile())));
+            Path configPath = Paths.get(path);
+            if (Files.exists(configPath)) {
+                Files.list(configPath)
+                        .filter(filePath -> filePath.toString().endsWith(".conf") || filePath.toString().endsWith(".json") || filePath.toString().endsWith(".properties"))
+                        .forEach(filePath -> typesafeConfig.mergeConfig(ConfigFactory.parseFile(filePath.toFile())));
+            }
         } catch (IOException e) {
             Logger.error(e);
         } catch (ConfigException e) {

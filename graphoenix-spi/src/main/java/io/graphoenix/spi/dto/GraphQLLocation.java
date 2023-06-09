@@ -26,4 +26,12 @@ public class GraphQLLocation {
     public void setColumn(int column) {
         this.column = column;
     }
+
+    @Override
+    public String toString() {
+        return "GraphQLLocation{" +
+                "line=" + line +
+                ", column=" + column +
+                '}';
+    }
 }

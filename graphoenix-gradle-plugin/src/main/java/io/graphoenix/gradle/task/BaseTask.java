@@ -444,6 +444,7 @@ public class BaseTask extends DefaultTask {
                 .setFields(
                         resolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
                                 .filter(resolvedMethodDeclaration -> !resolvedMethodDeclaration.getReturnType().isVoid())
+                                .filter(resolvedMethodDeclaration -> resolvedMethodDeclaration.getName().startsWith("get"))
                                 .map(this::buildField)
                                 .collect(Collectors.toSet())
                 )
@@ -465,6 +466,7 @@ public class BaseTask extends DefaultTask {
                 .setFields(
                         resolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
                                 .filter(resolvedMethodDeclaration -> !resolvedMethodDeclaration.getReturnType().isVoid())
+                                .filter(resolvedMethodDeclaration -> resolvedMethodDeclaration.getName().startsWith("get"))
                                 .map(this::buildField)
                                 .collect(Collectors.toSet())
                 )

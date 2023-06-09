@@ -76,4 +76,14 @@ public class GraphQLError {
         this.schemaPath = schemaPath;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "GraphQLError{" +
+                "message='" + message + '\'' +
+                ", locations=" + locations +
+                ", path='" + path + '\'' +
+                ", schemaPath='" + schemaPath + '\'' +
+                '}';
+    }
 }
