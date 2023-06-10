@@ -22,7 +22,11 @@ public class Operation {
     }
 
     public Operation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        this.operationType = operationDefinitionContext.operationType().getText();
+        if (operationDefinitionContext.operationType() != null) {
+            this.operationType = operationDefinitionContext.operationType().getText();
+        } else {
+            this.operationType = "query";
+        }
         if (operationDefinitionContext.name() != null) {
             this.name = operationDefinitionContext.name().getText();
         }
