@@ -50,13 +50,13 @@ public class ProtobufFileBuilder {
                 )
                 .addImports(
                         io.vavr.collection.List
-                                .ofAll(manager.getObjects().filter(packageManager::isOwnPackage).flatMap(objectTypeDefinitionContext -> getImportPath(objectTypeDefinitionContext.fieldsDefinition())))
+                                .ofAll(manager.getObjects().filter(manager::isNotOperationType).filter(packageManager::isOwnPackage).flatMap(objectTypeDefinitionContext -> getImportPath(objectTypeDefinitionContext.fieldsDefinition())))
                                 .distinctBy(Import::getName)
                                 .toJavaList()
                 )
                 .addImports(
                         io.vavr.collection.List
-                                .ofAll(manager.getObjects().filter(packageManager::isOwnPackage).flatMap(objectTypeDefinitionContext -> getImportScalarTypePath(objectTypeDefinitionContext.fieldsDefinition())))
+                                .ofAll(manager.getObjects().filter(manager::isNotOperationType).filter(packageManager::isOwnPackage).flatMap(objectTypeDefinitionContext -> getImportScalarTypePath(objectTypeDefinitionContext.fieldsDefinition())))
                                 .distinctBy(Import::getName)
                                 .toJavaList()
                 )
@@ -67,7 +67,7 @@ public class ProtobufFileBuilder {
                         )
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
-                .setTopLevelDefs(manager.getObjects().filter(packageManager::isOwnPackage).map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
+                .setTopLevelDefs(manager.getObjects().filter(manager::isNotOperationType).filter(packageManager::isOwnPackage).map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
                 .toString()
         );
         protoFileMap.put("interfaces", new ProtoFile()
