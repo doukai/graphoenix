@@ -1,4 +1,9 @@
 package io.graphoenix.jsonpath.translator.expression.operators;
 
-public class GreaterThanEquals {
+import io.graphoenix.jsonpath.translator.expression.Expression;
+
+public class GreaterThanEquals extends ComparisonOperator {
+    public GreaterThanEquals(String element, Expression expression) {
+        super(element, ">=", expression);
+    }
 }

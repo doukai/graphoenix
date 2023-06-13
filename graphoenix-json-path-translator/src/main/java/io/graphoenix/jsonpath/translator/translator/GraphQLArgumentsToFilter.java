@@ -1,6 +1,6 @@
 package io.graphoenix.jsonpath.translator.translator;
 
-import com.google.common.base.CharMatcher;
+import  com.google.common.base.CharMatcher;
 import com.google.common.collect.Lists;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
