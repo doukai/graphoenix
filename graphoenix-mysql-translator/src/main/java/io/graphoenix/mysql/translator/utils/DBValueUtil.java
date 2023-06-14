@@ -1,6 +1,5 @@
 package io.graphoenix.mysql.translator.utils;
 
-import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -115,7 +114,7 @@ public class DBValueUtil {
 
     public Expression scalarValueToDBValue(TerminalNode stringValue, TerminalNode intValue, TerminalNode floatValue, TerminalNode booleanValue, TerminalNode nullValue, GraphqlParser.VariableContext variableContext) {
         if (stringValue != null) {
-            return new StringValue(CharMatcher.is('"').trimFrom(stringValue.getText()));
+            return new StringValue(DOCUMENT_UTIL.getStringValue(stringValue));
         } else if (intValue != null) {
             return new LongValue(intValue.getText());
         } else if (floatValue != null) {
@@ -142,7 +141,7 @@ public class DBValueUtil {
         function.setName("LAST_INSERT_ID");
         return new SetStatement(idVariableName, Collections.singletonList(function));
     }
-    
+
     public Expression createGreaterThanLastInsertIDExpression(String typeName, String idFieldName) {
         Function function = new Function();
         function.setName("LAST_INSERT_ID");

@@ -735,7 +735,8 @@ public class DocumentBuilder {
                                 .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
                 );
         if (inputType.equals(InputType.EXPRESSION)) {
-            field.addArgument(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"));
+            field.addArgument(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
+                    .addArgument(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + inputType))));
         } else if (inputType.equals(InputType.INPUT)) {
             field.addArgument(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
         }
@@ -757,6 +758,7 @@ public class DocumentBuilder {
             field.addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.ORDER_BY))
                     .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
                     .addArgument(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
+                    .addArgument(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + inputType))))
                     .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
                     .addArgument(new InputValue().setName(LAST_INPUT_NAME).setType("Int"))
                     .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setType("Int"));

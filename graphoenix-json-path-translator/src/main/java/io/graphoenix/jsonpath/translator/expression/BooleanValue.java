@@ -1,9 +1,9 @@
 package io.graphoenix.jsonpath.translator.expression;
 
 public class BooleanValue implements Expression {
-    private final Boolean value;
+    private final String value;
 
-    public BooleanValue(Boolean value) {
+    public BooleanValue(String value) {
         this.value = value;
     }
 

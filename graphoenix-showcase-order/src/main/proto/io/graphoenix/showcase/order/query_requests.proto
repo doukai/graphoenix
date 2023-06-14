@@ -64,6 +64,7 @@ message QueryOrderRequest {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
     optional io.graphoenix.core.grpc.IntExpression buyer_id = 16;
     optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated OrderExpression exs = 18;
 }
 message QueryOrderListRequest {
     optional string selection_set = 1;
@@ -85,11 +86,12 @@ message QueryOrderListRequest {
     optional OrderOrderBy order_by = 17;
     repeated string group_by = 18;
     optional io.graphoenix.core.grpc.Conditional cond = 19;
-    optional int32 first = 20;
-    optional int32 last = 21;
-    optional int32 offset = 22;
-    optional string after = 23;
-    optional string before = 24;
+    repeated OrderExpression exs = 20;
+    optional int32 first = 21;
+    optional int32 last = 22;
+    optional int32 offset = 23;
+    optional string after = 24;
+    optional string before = 25;
 }
 message QueryOrderConnectionRequest {
     optional string selection_set = 1;
@@ -139,6 +141,7 @@ message QueryGoodRequest {
     optional io.graphoenix.core.grpc.IntExpression product_id = 18;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 19;
     optional io.graphoenix.core.grpc.Conditional cond = 20;
+    repeated GoodExpression exs = 21;
 }
 message QueryGoodListRequest {
     optional string selection_set = 1;
@@ -163,11 +166,12 @@ message QueryGoodListRequest {
     optional GoodOrderBy order_by = 20;
     repeated string group_by = 21;
     optional io.graphoenix.core.grpc.Conditional cond = 22;
-    optional int32 first = 23;
-    optional int32 last = 24;
-    optional int32 offset = 25;
-    optional string after = 26;
-    optional string before = 27;
+    repeated GoodExpression exs = 23;
+    optional int32 first = 24;
+    optional int32 last = 25;
+    optional int32 offset = 26;
+    optional string after = 27;
+    optional string before = 28;
 }
 message QueryGoodConnectionRequest {
     optional string selection_set = 1;
@@ -215,6 +219,7 @@ message QueryProductRequest {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional io.graphoenix.core.grpc.Conditional cond = 15;
+    repeated ProductExpression exs = 16;
 }
 message QueryProductListRequest {
     optional string selection_set = 1;
@@ -234,11 +239,12 @@ message QueryProductListRequest {
     optional ProductOrderBy order_by = 15;
     repeated string group_by = 16;
     optional io.graphoenix.core.grpc.Conditional cond = 17;
-    optional int32 first = 18;
-    optional int32 last = 19;
-    optional int32 offset = 20;
-    optional string after = 21;
-    optional string before = 22;
+    repeated ProductExpression exs = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
 }
 message QueryProductConnectionRequest {
     optional string selection_set = 1;
@@ -287,6 +293,7 @@ message QueryMerchantRequest {
     optional MerchantPartnersExpression merchant_partners = 19;
     optional MerchantDirectorExpression merchant_director = 20;
     optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated MerchantExpression exs = 22;
 }
 message QueryMerchantListRequest {
     optional string selection_set = 1;
@@ -312,11 +319,12 @@ message QueryMerchantListRequest {
     optional MerchantOrderBy order_by = 21;
     repeated string group_by = 22;
     optional io.graphoenix.core.grpc.Conditional cond = 23;
-    optional int32 first = 24;
-    optional int32 last = 25;
-    optional int32 offset = 26;
-    optional string after = 27;
-    optional string before = 28;
+    repeated MerchantExpression exs = 24;
+    optional int32 first = 25;
+    optional int32 last = 26;
+    optional int32 offset = 27;
+    optional string after = 28;
+    optional string before = 29;
 }
 message QueryMerchantConnectionRequest {
     optional string selection_set = 1;
@@ -367,6 +375,7 @@ message QueryMerchantPartnersRequest {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 15;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 16;
     optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated MerchantPartnersExpression exs = 18;
 }
 message QueryMerchantPartnersListRequest {
     optional string selection_set = 1;
@@ -388,11 +397,12 @@ message QueryMerchantPartnersListRequest {
     optional MerchantPartnersOrderBy order_by = 17;
     repeated string group_by = 18;
     optional io.graphoenix.core.grpc.Conditional cond = 19;
-    optional int32 first = 20;
-    optional int32 last = 21;
-    optional int32 offset = 22;
-    optional string after = 23;
-    optional string before = 24;
+    repeated MerchantPartnersExpression exs = 20;
+    optional int32 first = 21;
+    optional int32 last = 22;
+    optional int32 offset = 23;
+    optional string after = 24;
+    optional string before = 25;
 }
 message QueryMerchantPartnersConnectionRequest {
     optional string selection_set = 1;
@@ -439,6 +449,7 @@ message QueryMerchantDirectorRequest {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 15;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 16;
     optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated MerchantDirectorExpression exs = 18;
 }
 message QueryMerchantDirectorListRequest {
     optional string selection_set = 1;
@@ -460,11 +471,12 @@ message QueryMerchantDirectorListRequest {
     optional MerchantDirectorOrderBy order_by = 17;
     repeated string group_by = 18;
     optional io.graphoenix.core.grpc.Conditional cond = 19;
-    optional int32 first = 20;
-    optional int32 last = 21;
-    optional int32 offset = 22;
-    optional string after = 23;
-    optional string before = 24;
+    repeated MerchantDirectorExpression exs = 20;
+    optional int32 first = 21;
+    optional int32 last = 22;
+    optional int32 offset = 23;
+    optional string after = 24;
+    optional string before = 25;
 }
 message QueryMerchantDirectorConnectionRequest {
     optional string selection_set = 1;

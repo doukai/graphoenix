@@ -1,5 +1,6 @@
 package io.graphoenix.core.utils;
 
+import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlLexer;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
@@ -179,7 +180,7 @@ public enum DocumentUtil {
     }
 
     public String getStringValue(TerminalNode stringValue) {
-        return stringValue.getText().substring(1, stringValue.getText().length() - 1);
+        return CharMatcher.is('"').trimFrom(stringValue.getText());
     }
 
     public GraphqlParser getGraphqlParser(String graphql) {
