@@ -5,16 +5,7 @@ import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.jsonpath.translator.expression.Expression;
 import io.graphoenix.jsonpath.translator.expression.MultiAndExpression;
 import io.graphoenix.jsonpath.translator.expression.MultiOrExpression;
-import io.graphoenix.jsonpath.translator.expression.operators.EqualsTo;
-import io.graphoenix.jsonpath.translator.expression.operators.GreaterThan;
-import io.graphoenix.jsonpath.translator.expression.operators.GreaterThanEquals;
-import io.graphoenix.jsonpath.translator.expression.operators.InExpression;
-import io.graphoenix.jsonpath.translator.expression.operators.IsNullExpression;
-import io.graphoenix.jsonpath.translator.expression.operators.MinorThan;
-import io.graphoenix.jsonpath.translator.expression.operators.MinorThanEquals;
-import io.graphoenix.jsonpath.translator.expression.operators.NotEqualsTo;
-import io.graphoenix.jsonpath.translator.expression.operators.NotInExpression;
-import io.graphoenix.jsonpath.translator.expression.operators.NotNullExpression;
+import io.graphoenix.jsonpath.translator.expression.operators.*;
 import io.graphoenix.jsonpath.translator.utils.JsonValueUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -26,8 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_VALUE;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_INPUT_NAME;
@@ -52,8 +43,8 @@ public class GraphQLArgumentsToFilter {
         this.jsonValueUtil = jsonValueUtil;
     }
 
-    protected Optional<Expression> argumentsToMultipleExpression(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext,
-                                                                 GraphqlParser.ArgumentsContext argumentsContext) {
+    public Optional<Expression> argumentsToMultipleExpression(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext,
+                                                              GraphqlParser.ArgumentsContext argumentsContext) {
         if (argumentsContext == null) {
             return Optional.empty();
         }
@@ -152,7 +143,7 @@ public class GraphQLArgumentsToFilter {
                 }
             }
         }
-        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+        return Stream.empty();
     }
 
     protected Stream<Expression> objectValueContextToExpression(String element, GraphqlParser.ValueContext valueContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
@@ -172,7 +163,7 @@ public class GraphQLArgumentsToFilter {
                 }
             }
         }
-        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+        return Stream.empty();
     }
 
     private Optional<Expression> getOperatorExpression(String element, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
@@ -191,11 +182,14 @@ public class GraphQLArgumentsToFilter {
                                                         )
                                                 )
                                                 .orElse(
-                                                        operatorToExpression(
-                                                                element,
-                                                                getOperator(objectValueWithVariableContext, inputValueDefinitionContext),
-                                                                fieldInputValueDefinitionContext.defaultValue().value()
-                                                        )
+                                                        Optional.ofNullable(fieldInputValueDefinitionContext.defaultValue())
+                                                                .flatMap(defaultValueContext ->
+                                                                        operatorToExpression(
+                                                                                element,
+                                                                                getOperator(objectValueWithVariableContext, inputValueDefinitionContext),
+                                                                                defaultValueContext.value()
+                                                                        )
+                                                                )
                                                 )
                                 )
                 )
@@ -218,11 +212,14 @@ public class GraphQLArgumentsToFilter {
                                                         )
                                                 )
                                                 .orElse(
-                                                        operatorToExpression(
-                                                                element,
-                                                                getOperator(objectValueContext, inputValueDefinitionContext),
-                                                                fieldInputValueDefinitionContext.defaultValue().value()
-                                                        )
+                                                        Optional.ofNullable(fieldInputValueDefinitionContext.defaultValue())
+                                                                .flatMap(defaultValueContext ->
+                                                                        operatorToExpression(
+                                                                                element,
+                                                                                getOperator(objectValueContext, inputValueDefinitionContext),
+                                                                                defaultValueContext.value()
+                                                                        )
+                                                                )
                                                 )
                                 )
                 )
@@ -271,9 +268,11 @@ public class GraphQLArgumentsToFilter {
                 expression = new NotEqualsTo(element, jsonValueUtil.valueToJsonValue(valueContext));
                 break;
             case "LK":
-                throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
+                expression = new Like(element, DOCUMENT_UTIL.getStringValue(valueContext.StringValue()));
+                break;
             case "NLK":
-                throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
+                expression = new NotLike(element, DOCUMENT_UTIL.getStringValue(valueContext.StringValue()));
+                break;
             case "GT":
             case "NLTE":
                 expression = new GreaterThan(element, jsonValueUtil.valueToJsonValue(valueContext));
@@ -320,9 +319,11 @@ public class GraphQLArgumentsToFilter {
                 expression = new NotEqualsTo(element, jsonValueUtil.valueWithVariableToJsonValue(valueWithVariableContext));
                 break;
             case "LK":
-                throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
+                expression = new Like(element, DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue()));
+                break;
             case "NLK":
-                throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
+                expression = new NotLike(element, DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue()));
+                break;
             case "GT":
             case "NLTE":
                 expression = new GreaterThan(element, jsonValueUtil.valueWithVariableToJsonValue(valueWithVariableContext));

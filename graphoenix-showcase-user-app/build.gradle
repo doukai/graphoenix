@@ -23,6 +23,7 @@ dependencies {
     implementation project(':graphoenix-grpc-server')
     implementation project(':graphoenix-grpc-client')
     implementation project(':graphoenix-gossip')
+    implementation project(':graphoenix-json-path-translator')
 
     annotationProcessor project(':graphoenix-core')
     annotationProcessor project(":graphoenix-showcase-user")
@@ -36,7 +37,20 @@ dependencies {
     annotationProcessor project(':graphoenix-http-server')
     annotationProcessor project(':graphoenix-grpc-server')
     annotationProcessor project(':graphoenix-grpc-client')
+    annotationProcessor project(':graphoenix-json-path-translator')
 
+    testImplementation project(':graphoenix-core')
+    testImplementation project(":graphoenix-showcase-user")
+    testImplementation project(":graphoenix-graphql-builder")
+    testImplementation project(":graphoenix-introspection")
+    testImplementation project(':graphoenix-interceptor')
+    testImplementation project(':graphoenix-json')
+    testImplementation project(":graphoenix-mysql")
+    testImplementation project(':graphoenix-http-server')
+    testImplementation project(':graphoenix-grpc-server')
+    testImplementation project(':graphoenix-grpc-client')
+    testImplementation project(':graphoenix-gossip')
+    testImplementation project(':graphoenix-json-path-translator')
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }

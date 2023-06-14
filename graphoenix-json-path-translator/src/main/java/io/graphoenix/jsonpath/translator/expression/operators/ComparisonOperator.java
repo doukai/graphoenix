@@ -10,14 +10,29 @@ public abstract class ComparisonOperator implements Expression {
 
     private final Expression expression;
 
+    private final boolean not;
+
     public ComparisonOperator(String element, String operator, Expression expression) {
         this.element = element;
         this.operator = operator;
         this.expression = expression;
+        this.not = false;
+    }
+
+    public ComparisonOperator(String element, String operator, Expression expression, boolean not) {
+        this.element = element;
+        this.operator = operator;
+        this.expression = expression;
+        this.not = not;
     }
 
     @Override
     public String toString() {
-        return "@." + element + " " + operator + " " + expression;
+        String comparisonOperator = "@." + element + " " + operator + " " + expression;
+        if (not) {
+            return "!(" + comparisonOperator + ")";
+        } else {
+            return comparisonOperator;
+        }
     }
 }

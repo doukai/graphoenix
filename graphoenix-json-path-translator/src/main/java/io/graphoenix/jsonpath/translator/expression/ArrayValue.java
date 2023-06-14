@@ -18,6 +18,6 @@ public class ArrayValue implements Expression {
 
     @Override
     public String toString() {
-        return expressionList.stream().map(Object::toString).collect(Collectors.joining(" , ", "[", "]"));
+        return expressionList.stream().map(Object::toString).collect(Collectors.joining(", ", "[", "]"));
     }
 }
