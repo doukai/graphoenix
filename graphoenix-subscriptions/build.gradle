@@ -10,7 +10,19 @@ repositories {
 }
 
 dependencies {
-    compile "io.projectreactor.kafka:reactor-kafka:1.1.0.RELEASE"
+    implementation project(':graphoenix-core')
+    implementation project(':graphoenix-interceptor')
+    implementation project(':graphoenix-config')
+    implementation project(':graphoenix-json')
+    implementation project(':graphoenix-http-server')
+
+    compile "io.projectreactor.rabbitmq:reactor-rabbitmq:1.5.6"
+
+    annotationProcessor project(':graphoenix-core')
+    annotationProcessor project(':graphoenix-inject')
+    annotationProcessor project(':graphoenix-interceptor')
+    annotationProcessor project(':graphoenix-config')
+    annotationProcessor project(':graphoenix-json')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
