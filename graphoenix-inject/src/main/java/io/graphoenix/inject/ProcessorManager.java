@@ -12,6 +12,7 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
@@ -331,6 +332,7 @@ public class ProcessorManager {
     }
 
     public void importAllClassOrInterfaceType(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, ClassOrInterfaceDeclaration sourceClassOrInterfaceDeclaration) {
+
         classOrInterfaceDeclaration.getMembers().stream()
                 .flatMap(bodyDeclaration ->
                         bodyDeclaration.findAll(ClassOrInterfaceType.class).stream()
@@ -347,8 +349,7 @@ public class ProcessorManager {
                         }
                 );
 
-        classOrInterfaceDeclaration.findAll(AnnotationExpr.class).stream()
-                .filter(annotationExpr -> !tryResolve(annotationExpr))
+        classOrInterfaceDeclaration.findAll(AnnotationExpr.class)
                 .forEach(annotationExpr -> {
                             if (sourceClassOrInterfaceDeclaration.getNameAsString().equals(annotationExpr.getNameAsString())) {
                                 classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(getQualifiedNameByDeclaration(sourceClassOrInterfaceDeclaration)));
@@ -361,11 +362,20 @@ public class ProcessorManager {
                                     );
                         }
                 );
+
+        sourceClassOrInterfaceDeclaration.findCompilationUnit()
+                .ifPresent(sourceCompilationUnit ->
+                        classOrInterfaceDeclaration.findCompilationUnit()
+                                .ifPresent(compilationUnit ->
+                                        compilationUnit.getImports().stream().filter(ImportDeclaration::isAsterisk).forEach(sourceCompilationUnit::addImport)
+                                )
+                );
     }
 
     private void importClassOrInterfaceType(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, ClassOrInterfaceDeclaration sourceClassOrInterfaceDeclaration, ClassOrInterfaceType classOrInterfaceType) {
         sourceClassOrInterfaceDeclaration.findAll(ClassOrInterfaceType.class).stream()
                 .filter(sourceClassOrInterfaceType -> sourceClassOrInterfaceType.getNameAsString().equals(classOrInterfaceType.getNameAsString()))
+                .filter(this::resolvedReferenceType)
                 .findFirst()
                 .ifPresentOrElse(
                         sourceClassOrInterfaceType -> classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(getQualifiedNameByType(sourceClassOrInterfaceType))),
@@ -399,11 +409,11 @@ public class ProcessorManager {
                 );
     }
 
-    private boolean tryResolve(Node node) {
+    public boolean resolvedReferenceType(ClassOrInterfaceType type) {
         try {
-            javaSymbolSolver.resolveDeclaration(node, ResolvedAnnotationDeclaration.class);
+            javaSymbolSolver.toResolvedType(type, ResolvedReferenceType.class);
             return true;
-        } catch (Exception e) {
+        } catch (UnsolvedSymbolException e) {
             return false;
         }
     }

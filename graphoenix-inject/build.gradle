@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.javaparser:javaparser-symbol-solver-core:3.24.2'
+    compile 'com.github.javaparser:javaparser-symbol-solver-core:3.25.3'
 
     implementation project(':graphoenix-spi')
     implementation 'com.google.dagger:dagger-compiler:2.41'

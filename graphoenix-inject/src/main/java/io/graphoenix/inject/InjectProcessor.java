@@ -898,7 +898,7 @@ public class InjectProcessor extends AbstractProcessor {
                                     .collect(Collectors.toCollection(NodeList::new));
 
                             compilationUnit.getPackageDeclaration().ifPresent(packageDeclaration -> moduleCompilationUnit.setPackageDeclaration(packageDeclaration.getNameAsString()));
-                            compilationUnit.getImports().forEach(importDeclaration -> moduleCompilationUnit.addImport(importDeclaration.getNameAsString()));
+                            compilationUnit.getImports().forEach(moduleCompilationUnit::addImport);
 
                             moduleClassDeclaration.setExtendedTypes(extendedTypes);
                             moduleClassDeclaration.setImplementedTypes(implementedTypes);

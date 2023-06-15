@@ -20,7 +20,7 @@ dependencies {
     implementation('org.antlr:antlr4:4.9.3') {
         exclude group: 'org.glassfish', module: 'javax.json'
     }
-    implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.24.2'
+    implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.25.3'
     implementation 'io.leego:banana:2.1.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'

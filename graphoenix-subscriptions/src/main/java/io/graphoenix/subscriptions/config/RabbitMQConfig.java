@@ -1,5 +1,8 @@
 package io.graphoenix.subscriptions.config;
 
+import org.eclipse.microprofile.config.inject.ConfigProperties;
+
+@ConfigProperties(prefix = "rabbitmq")
 public class RabbitMQConfig {
 
     private String host;
