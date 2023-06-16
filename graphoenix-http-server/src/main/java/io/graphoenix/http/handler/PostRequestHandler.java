@@ -28,7 +28,7 @@ import static io.graphoenix.spi.constant.Hammurabi.RESPONSE;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
 @ApplicationScoped
-public class PostRequestHandler extends BaseRequestHandler {
+public class PostRequestHandler extends BaseHandler {
 
     private final GraphQLRequestHandler graphQLRequestHandler;
     private final JsonProvider jsonProvider;

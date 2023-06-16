@@ -47,6 +47,9 @@ public class Hammurabi {
     public static final String TRANSACTION_TYPE = "TransactionType";
     public static final String REQUEST = "request";
     public static final String RESPONSE = "response";
+    public static final String INBOUND = "inbound";
+    public static final String OUTBOUND = "outbound";
+    public static final String SUBSCRIPTION_DATA_NAME = "subscription-data";
     public static final String GRAPHQL_REQUEST = "graphQLRequest";
     public static final String CURRENT_USER = "currentUser";
     public static final String OPERATION_DEFINITION = "operationDefinition";

@@ -4,6 +4,7 @@ import io.graphoenix.http.config.HttpServerConfig;
 import io.graphoenix.http.handler.GetRequestHandler;
 import io.graphoenix.http.handler.PostRequestHandler;
 import io.graphoenix.http.handler.SchemaRequestHandler;
+import io.graphoenix.http.handler.SubscriptionWebSocketHandler;
 import io.graphoenix.spi.handler.RunningServer;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -27,13 +28,15 @@ public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
     private final SchemaRequestHandler schemaRequestHandler;
     private final GetRequestHandler getRequestHandler;
     private final PostRequestHandler postRequestHandler;
+    private final SubscriptionWebSocketHandler subscriptionWebSocketHandler;
 
     @Inject
-    public GraphQLHttpGraphoenixServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler) {
+    public GraphQLHttpGraphoenixServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler, SubscriptionWebSocketHandler subscriptionWebSocketHandler) {
         this.httpServerConfig = httpServerConfig;
         this.schemaRequestHandler = schemaRequestHandler;
         this.getRequestHandler = getRequestHandler;
         this.postRequestHandler = postRequestHandler;
+        this.subscriptionWebSocketHandler = subscriptionWebSocketHandler;
     }
 
     @Override
@@ -54,6 +57,7 @@ public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
                                 .get(httpServerConfig.getSchemaContextPath().concat("/{").concat(SCHEMA_PARAM_NAME).concat("}"), schemaRequestHandler::handle)
                                 .get(httpServerConfig.getGraphqlContextPath(), getRequestHandler::handle)
                                 .post(httpServerConfig.getGraphqlContextPath(), postRequestHandler::handle)
+                                .ws(httpServerConfig.getGraphqlContextPath(), subscriptionWebSocketHandler::handle)
                 )
                 .port(httpServerConfig.getPort())
                 .bindNow();
