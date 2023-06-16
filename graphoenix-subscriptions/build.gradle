@@ -16,6 +16,7 @@ dependencies {
     implementation project(':graphoenix-config')
     implementation project(':graphoenix-json')
     implementation project(':graphoenix-http-server')
+    implementation project(':graphoenix-json-path-translator')
 
     compile "io.projectreactor.rabbitmq:reactor-rabbitmq:1.5.6"
 
@@ -24,6 +25,7 @@ dependencies {
     annotationProcessor project(':graphoenix-interceptor')
     annotationProcessor project(':graphoenix-config')
     annotationProcessor project(':graphoenix-json')
+    annotationProcessor project(':graphoenix-json-path-translator')
     annotationProcessor "io.projectreactor.rabbitmq:reactor-rabbitmq:1.5.6"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'

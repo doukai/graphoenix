@@ -3,7 +3,6 @@ package io.graphoenix.subscriptions.handler;
 import com.rabbitmq.client.Delivery;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.handler.GraphQLVariablesProcessor;
-import io.graphoenix.core.handler.SubscriptionDataListener;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.OperationHandler;
 import io.graphoenix.spi.handler.QueryHandler;
@@ -31,29 +30,29 @@ public class RabbitMQSubscriptionHandler implements SubscriptionHandler {
 
     private static final String SUBSCRIPTION_EXCHANGE_NAME = "subscription-exchange";
 
-    private final Provider<IGraphQLDocumentManager> manager;
+    private final IGraphQLDocumentManager manager;
 
-    private final Provider<GraphQLVariablesProcessor> variablesProcessor;
+    private final GraphQLVariablesProcessor variablesProcessor;
 
-    private final Provider<JsonProvider> jsonProviderProvider;
+    private final JsonProvider jsonProvider;
 
-    private final Provider<SubscriptionDataListener> subscriptionDataListenerProvider;
+    private final Provider<Mono<SubscriptionDataListener>> subscriptionDataListenerProvider;
+
+    private final QueryHandler queryHandler;
 
     private final Sender sender;
 
     private final Receiver receiver;
 
-    private final QueryHandler queryHandler;
-
     @Inject
-    public RabbitMQSubscriptionHandler(Provider<IGraphQLDocumentManager> manager, Provider<GraphQLVariablesProcessor> variablesProcessor, Provider<JsonProvider> jsonProviderProvider, Provider<SubscriptionDataListener> subscriptionDataListenerProvider, Sender sender, Receiver receiver, QueryHandler queryHandler) {
+    public RabbitMQSubscriptionHandler(IGraphQLDocumentManager manager, GraphQLVariablesProcessor variablesProcessor, JsonProvider jsonProvider, Provider<Mono<SubscriptionDataListener>> subscriptionDataListenerProvider, QueryHandler queryHandler, Sender sender, Receiver receiver) {
         this.manager = manager;
         this.variablesProcessor = variablesProcessor;
-        this.jsonProviderProvider = jsonProviderProvider;
+        this.jsonProvider = jsonProvider;
         this.subscriptionDataListenerProvider = subscriptionDataListenerProvider;
+        this.queryHandler = queryHandler;
         this.sender = sender;
         this.receiver = receiver;
-        this.queryHandler = queryHandler;
     }
 
     @Override
@@ -63,16 +62,16 @@ public class RabbitMQSubscriptionHandler implements SubscriptionHandler {
 
     @Override
     public Flux<JsonValue> subscription(OperationHandler operationHandler, String graphQL, Map<String, JsonValue> variables) {
-        manager.get().registerFragment(graphQL);
-        GraphqlParser.OperationDefinitionContext operationDefinitionContext = variablesProcessor.get().buildVariables(graphQL, variables);
+        manager.registerFragment(graphQL);
+        GraphqlParser.OperationDefinitionContext operationDefinitionContext = variablesProcessor.buildVariables(graphQL, variables);
 
         Stream<String> typeNameString = operationDefinitionContext.selectionSet().selection().stream()
                 .flatMap(selectionContext ->
-                        manager.get().getSubscriptionOperationTypeName()
-                                .flatMap(name -> manager.get().getField(name, selectionContext.field().name().getText()))
+                        manager.getSubscriptionOperationTypeName()
+                                .flatMap(name -> manager.getField(name, selectionContext.field().name().getText()))
                                 .stream()
                 )
-                .map(fieldDefinitionContext -> manager.get().getFieldTypeName(fieldDefinitionContext.type()))
+                .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
                 .distinct();
 
         return Mono.deferContextual(contextView -> Mono.justOrEmpty(contextView.getOrEmpty(REQUEST_ID)))
@@ -83,17 +82,20 @@ public class RabbitMQSubscriptionHandler implements SubscriptionHandler {
                                         Flux.fromStream(typeNameString)
                                                 .flatMap(typeName -> sender.bind(binding(SUBSCRIPTION_EXCHANGE_NAME, typeName, requestId)))
                                 )
-                                .flatMap(ok ->
+                                .flatMap(bindOk ->
                                         Flux.concat(
                                                 queryHandler.query(operationHandler, graphQL, variables),
                                                 receiver.consumeAutoAck(requestId).map(this::toJsonValue)
                                         )
                                 )
-                                .flatMap(jsonValue -> subscriptionDataListenerProvider.get().merge(operationDefinitionContext, jsonValue))
+                                .flatMap(jsonValue ->
+                                        subscriptionDataListenerProvider.get()
+                                                .flatMap(subscriptionDataListener -> subscriptionDataListener.merge(operationDefinitionContext, jsonValue))
+                                )
                 );
     }
 
     private JsonValue toJsonValue(Delivery delivery) {
-        return jsonProviderProvider.get().createReader(new StringReader(new String(delivery.getBody()))).readValue();
+        return jsonProvider.createReader(new StringReader(new String(delivery.getBody()))).readValue();
     }
 }
