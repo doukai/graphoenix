@@ -14,6 +14,7 @@ repositories {
 dependencies {
     compile 'org.eclipse.parsson:jakarta.json:1.1.1'
     compile 'com.dslplatform:dsl-json-java8:1.9.9'
+    compile 'com.jayway.jsonpath:json-path:2.8.0'
 
     implementation project(':graphoenix-spi')
     implementation 'com.google.auto.service:auto-service:1.0.1'

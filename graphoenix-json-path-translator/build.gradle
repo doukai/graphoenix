@@ -13,7 +13,6 @@ repositories {
 
 dependencies {
     implementation project(':graphoenix-core')
-    implementation 'com.jayway.jsonpath:json-path:2.8.0'
 
     annotationProcessor project(':graphoenix-core')
     annotationProcessor project(':graphoenix-inject')

@@ -8,6 +8,7 @@ public class Schema {
 
     private String query;
     private String mutation;
+    private String subscription;
 
     public Schema() {
     }
@@ -21,6 +22,12 @@ public class Schema {
 
         this.mutation = schemaDefinitionContext.operationTypeDefinition().stream()
                 .filter(operationTypeDefinitionContext -> operationTypeDefinitionContext.operationType().MUTATION() != null)
+                .findFirst()
+                .map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText())
+                .orElse(null);
+
+        this.subscription = schemaDefinitionContext.operationTypeDefinition().stream()
+                .filter(operationTypeDefinitionContext -> operationTypeDefinitionContext.operationType().SUBSCRIPTION() != null)
                 .findFirst()
                 .map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText())
                 .orElse(null);
@@ -41,6 +48,15 @@ public class Schema {
 
     public Schema setMutation(String mutation) {
         this.mutation = mutation;
+        return this;
+    }
+
+    public String getSubscription() {
+        return subscription;
+    }
+
+    public Schema setSubscription(String subscription) {
+        this.subscription = subscription;
         return this;
     }
 

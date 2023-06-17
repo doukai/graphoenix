@@ -72,17 +72,17 @@ public class DocumentBuilder {
 
     public Document buildDocument() {
         io.vavr.collection.Stream.ofAll(
-                        manager.getObjects()
-                                .filter(packageManager::isOwnPackage)
-                                .filter(manager::isNotOperationType)
-                                .filter(manager::isNotContainerType)
-                                .flatMap(objectTypeDefinitionContext ->
-                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                                )
-                                .filter(tuple -> manager.getFetchAnchor(tuple._2()))
-                                .filter(tuple -> manager.hasFetchWith(tuple._2()))
-                )
+                manager.getObjects()
+                        .filter(packageManager::isOwnPackage)
+                        .filter(manager::isNotOperationType)
+                        .filter(manager::isNotContainerType)
+                        .flatMap(objectTypeDefinitionContext ->
+                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                        )
+                        .filter(tuple -> manager.getFetchAnchor(tuple._2()))
+                        .filter(tuple -> manager.hasFetchWith(tuple._2()))
+        )
                 .distinctBy(tuple -> manager.getFetchWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildFetchWithObject(tuple._1(), tuple._2()).stream())
@@ -90,16 +90,16 @@ public class DocumentBuilder {
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
         io.vavr.collection.Stream.ofAll(
-                        manager.getObjects()
-                                .filter(packageManager::isOwnPackage)
-                                .filter(manager::isNotOperationType)
-                                .filter(manager::isNotContainerType)
-                                .flatMap(objectTypeDefinitionContext ->
-                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                                )
-                                .filter(tuple -> manager.hasMapWith(tuple._2()))
-                )
+                manager.getObjects()
+                        .filter(packageManager::isOwnPackage)
+                        .filter(manager::isNotOperationType)
+                        .filter(manager::isNotContainerType)
+                        .flatMap(objectTypeDefinitionContext ->
+                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                        )
+                        .filter(tuple -> manager.hasMapWith(tuple._2()))
+        )
                 .distinctBy(tuple -> manager.getMapWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildMapWithObject(tuple._1(), tuple._2()).stream())
@@ -128,9 +128,23 @@ public class DocumentBuilder {
                     .addInterface(META_INTERFACE_NAME)
                     .addFields(getMetaInterfaceFields());
 
+            ObjectType subscriptionType = manager.getObject(manager.getSubscriptionOperationTypeName().orElse(SUBSCRIPTION_TYPE_NAME))
+                    .map(this::buildObject)
+                    .orElseGet(() -> new ObjectType(SUBSCRIPTION_TYPE_NAME))
+                    .addFields(buildSubscriptionTypeFields())
+                    .addInterface(META_INTERFACE_NAME)
+                    .addFields(getMetaInterfaceFields());
+
             manager.registerGraphQL(queryType.toString());
             manager.registerGraphQL(mutationType.toString());
-            manager.registerGraphQL(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString());
+            manager.registerGraphQL(subscriptionType.toString());
+            manager.registerGraphQL(
+                    new Schema()
+                            .setQuery(queryType.getName())
+                            .setMutation(mutationType.getName())
+                            .setSubscription(subscriptionType.getName())
+                            .toString()
+            );
         }
 
         buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
@@ -697,6 +711,21 @@ public class DocumentBuilder {
     }
 
     public List<Field> buildQueryTypeFields() {
+        return manager.getObjects()
+                .filter(packageManager::isOwnPackage)
+                .filter(manager::isNotOperationType)
+                .filter(manager::isNotContainerType)
+                .flatMap(objectTypeDefinitionContext ->
+                        Stream.of(
+                                buildSchemaTypeField(objectTypeDefinitionContext, InputType.EXPRESSION),
+                                buildSchemaTypeFieldList(objectTypeDefinitionContext, InputType.EXPRESSION),
+                                buildSchemaTypeFieldConnection(objectTypeDefinitionContext, InputType.EXPRESSION)
+                        )
+                )
+                .collect(Collectors.toList());
+    }
+
+    public List<Field> buildSubscriptionTypeFields() {
         return manager.getObjects()
                 .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
