@@ -24,5 +24,5 @@ include 'graphoenix-showcase-user-app'
 include 'graphoenix-showcase-order'
 include 'graphoenix-showcase-order-app'
 include 'graphoenix-subscriptions'
-include 'graphoenix-json-path-translator'
+include 'graphoenix-json-path'
 

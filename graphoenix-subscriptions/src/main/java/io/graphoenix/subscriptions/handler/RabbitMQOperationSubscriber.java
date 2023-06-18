@@ -4,6 +4,7 @@ import com.rabbitmq.client.Delivery;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.OperationSubscriber;
+import io.graphoenix.spi.handler.SubscriptionDataListener;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;

@@ -28,7 +28,6 @@ import jakarta.json.bind.Jsonb;
 import jakarta.json.spi.JsonProvider;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
-import org.reactivestreams.Publisher;
 import org.tinylog.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -293,12 +292,15 @@ public class OperationHandlerImplementer {
     private Set<MethodSpec> buildMethods(OperationType type) {
         switch (type) {
             case QUERY:
-            case SUBSCRIPTION:
                 return manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
                         .map(this::buildMethod)
                         .collect(Collectors.toCollection(LinkedHashSet::new));
             case MUTATION:
                 return manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
+                        .map(this::buildMethod)
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
+            case SUBSCRIPTION:
+                return manager.getFields(manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
                         .map(this::buildMethod)
                         .collect(Collectors.toCollection(LinkedHashSet::new));
             default:
@@ -308,6 +310,7 @@ public class OperationHandlerImplementer {
 
     private Set<FieldSpec> buildQueryFields() {
         return manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
+                .filter(packageManager::isLocalPackage)
                 .filter(manager::isInvokeField)
                 .map(typeManager::getClassName)
                 .distinct()
@@ -322,6 +325,7 @@ public class OperationHandlerImplementer {
 
     private Set<FieldSpec> buildMutationFields() {
         return manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
+                .filter(packageManager::isLocalPackage)
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
                 .filter(manager::isInvokeField)
                 .map(typeManager::getClassName)
@@ -337,6 +341,7 @@ public class OperationHandlerImplementer {
 
     private Set<FieldSpec> buildSubscriptionFields() {
         return manager.getFields(manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIBE_TYPE_NOT_EXIST)))
+                .filter(packageManager::isLocalPackage)
                 .filter(manager::isInvokeField)
                 .map(typeManager::getClassName)
                 .distinct()
@@ -381,21 +386,25 @@ public class OperationHandlerImplementer {
 
     private MethodSpec buildOperationMethod(OperationType type) {
         String operationName;
+        String operationMethodName;
         Class<?> publisherClass;
         String operationTypeName;
         switch (type) {
             case QUERY:
                 operationName = "query";
+                operationMethodName = "query";
                 publisherClass = Mono.class;
                 operationTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
                 break;
             case MUTATION:
                 operationName = "mutation";
+                operationMethodName = "mutation";
                 publisherClass = Mono.class;
                 operationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
                 break;
             case SUBSCRIPTION:
                 operationName = "subscription";
+                operationMethodName = "query";
                 publisherClass = Flux.class;
                 operationTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIBE_TYPE_NOT_EXIST));
                 break;
@@ -421,7 +430,7 @@ public class OperationHandlerImplementer {
                                 CodeBlock.join(
                                         List.of(
                                                 CodeBlock.of("return operationHandler.$L(operationWithFetchFieldDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
-                                                        operationName,
+                                                        operationMethodName,
                                                         ClassName.get(StringReader.class)
                                                 ),
                                                 CodeBlock.of(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationWithFetchFieldDefinitionContext, queryLoader))"),
@@ -447,7 +456,7 @@ public class OperationHandlerImplementer {
                                                         .add("$T.just(fetchFieldProcessor.get().buildFetchFields(operation))\n", ClassName.get(Mono.class))
                                                         .add(".flatMap(operationWithFetchFieldDefinitionContext ->\n")
                                                         .indent()
-                                                        .add("operationHandler.$L(operationWithFetchFieldDefinitionContext)\n", operationName)
+                                                        .add("operationHandler.$L(operationWithFetchFieldDefinitionContext)\n", operationMethodName)
                                                         .add(".map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())\n", ClassName.get(StringReader.class))
                                                         .add(".flatMap(jsonObject -> mutationAfterHandler.get().handle(operationDefinitionContext, mutationLoader.then(), operation, jsonObject))\n")
                                                         .add(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationWithFetchFieldDefinitionContext, queryLoader))\n")
@@ -472,12 +481,20 @@ public class OperationHandlerImplementer {
                         .addStatement(
                                 CodeBlock.join(
                                         List.of(
-                                                CodeBlock.of("return operationHandler.$L(operationWithFetchFieldDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
-                                                        operationName,
-                                                        ClassName.get(StringReader.class)
-                                                ),
-                                                CodeBlock.of(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationWithFetchFieldDefinitionContext, queryLoader))"),
-                                                CodeBlock.of(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName)),
+                                                CodeBlock.of("return operationSubscriber.get().subscriptionOperation("),
+                                                CodeBlock.builder()
+                                                        .indent()
+                                                        .add("operationDefinitionContext,\n")
+                                                        .add("operationHandler.$L(operationWithFetchFieldDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())\n",
+                                                                operationMethodName,
+                                                                ClassName.get(StringReader.class))
+                                                        .indent()
+                                                        .add(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationWithFetchFieldDefinitionContext, queryLoader))\n")
+                                                        .add(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))\n", typeManager.typeToLowerCamelName(operationTypeName))
+                                                        .unindent()
+                                                        .unindent()
+                                                        .add(")")
+                                                        .build(),
                                                 CodeBlock.of(".flatMap(jsonValue -> invoke(jsonValue, operationDefinitionContext))")
                                         ),
                                         System.lineSeparator()
@@ -650,6 +667,7 @@ public class OperationHandlerImplementer {
         switch (type) {
             case QUERY:
                 manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
+                        .filter(packageManager::isLocalPackage)
                         .filter(manager::isInvokeField)
                         .map(typeManager::getClassName)
                         .distinct()
@@ -683,6 +701,7 @@ public class OperationHandlerImplementer {
                         .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationSubscriber.class)), "operationSubscriber")
                         .addStatement("this.operationSubscriber = operationSubscriber");
                 manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
+                        .filter(packageManager::isLocalPackage)
                         .filter(manager::isInvokeField)
                         .map(typeManager::getClassName)
                         .distinct()
@@ -707,7 +726,8 @@ public class OperationHandlerImplementer {
             case SUBSCRIPTION:
                 builder.addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationSubscriber.class)), "operationSubscriber")
                         .addStatement("this.operationSubscriber = operationSubscriber");
-                manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
+                manager.getFields(manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
+                        .filter(packageManager::isLocalPackage)
                         .filter(manager::isInvokeField)
                         .map(typeManager::getClassName)
                         .distinct()
@@ -721,7 +741,7 @@ public class OperationHandlerImplementer {
                                         typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName())
                                 )
                         );
-                manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
+                manager.getFields(manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
                         .forEach(fieldDefinitionContext ->
                                 builder.addStatement("put($S, this::$L)",
                                         fieldDefinitionContext.name().getText(),

@@ -515,7 +515,7 @@ public class InjectProcessor extends AbstractProcessor {
                                     if (bodyDeclaration.isConstructorDeclaration()) {
                                         return new MethodCallExpr()
                                                 .setName("get")
-                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
                                                 .addArgument(
                                                         new LambdaExpr()
                                                                 .setEnclosingParameters(true)
@@ -538,7 +538,7 @@ public class InjectProcessor extends AbstractProcessor {
                                         moduleCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration));
                                         return new MethodCallExpr()
                                                 .setName("get")
-                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
                                                 .addArgument(
                                                         new LambdaExpr()
                                                                 .setEnclosingParameters(true)
@@ -564,7 +564,7 @@ public class InjectProcessor extends AbstractProcessor {
                         .orElseGet(() ->
                                 new MethodCallExpr()
                                         .setName("get")
-                                        .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                        .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
                                         .addArgument(
                                                 new LambdaExpr()
                                                         .setEnclosingParameters(true)
@@ -605,7 +605,7 @@ public class InjectProcessor extends AbstractProcessor {
                                     if (bodyDeclaration.isConstructorDeclaration()) {
                                         return new MethodCallExpr()
                                                 .setName("get")
-                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
                                                 .addArgument(
                                                         new LambdaExpr()
                                                                 .setEnclosingParameters(true)
@@ -628,7 +628,7 @@ public class InjectProcessor extends AbstractProcessor {
                                         moduleCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration));
                                         return new MethodCallExpr()
                                                 .setName("get")
-                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
                                                 .addArgument(
                                                         new LambdaExpr()
                                                                 .setEnclosingParameters(true)
@@ -654,7 +654,7 @@ public class InjectProcessor extends AbstractProcessor {
                         .orElseGet(() ->
                                 new MethodCallExpr()
                                         .setName("get")
-                                        .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                        .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
                                         .addArgument(
                                                 new LambdaExpr()
                                                         .setEnclosingParameters(true)
@@ -695,7 +695,7 @@ public class InjectProcessor extends AbstractProcessor {
                                     if (bodyDeclaration.isConstructorDeclaration()) {
                                         return new MethodCallExpr()
                                                 .setName("get")
-                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
                                                 .addArgument(
                                                         new LambdaExpr()
                                                                 .setEnclosingParameters(true)
@@ -718,7 +718,7 @@ public class InjectProcessor extends AbstractProcessor {
                                         moduleCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration));
                                         return new MethodCallExpr()
                                                 .setName("get")
-                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
                                                 .addArgument(
                                                         new LambdaExpr()
                                                                 .setEnclosingParameters(true)
@@ -744,7 +744,7 @@ public class InjectProcessor extends AbstractProcessor {
                         .orElseGet(() ->
                                 new MethodCallExpr()
                                         .setName("get")
-                                        .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                        .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
                                         .addArgument(
                                                 new LambdaExpr()
                                                         .setEnclosingParameters(true)

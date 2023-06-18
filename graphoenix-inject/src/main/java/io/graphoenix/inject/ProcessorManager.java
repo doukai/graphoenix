@@ -312,11 +312,6 @@ public class ProcessorManager {
         return elements.getTypeElement(getQualifiedNameByAnnotationExpr(annotationExpr));
     }
 
-    public String getTypeNameByExpression(Expression expression) {
-        ResolvedType resolvedType = javaSymbolSolver.calculateType(expression);
-        return resolvedType.toString();
-    }
-
     public String getQualifiedNameByDeclaration(ClassOrInterfaceDeclaration declaration) {
         ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = javaSymbolSolver.resolveDeclaration(declaration, ResolvedReferenceTypeDeclaration.class);
         return resolvedReferenceTypeDeclaration.getQualifiedName();
