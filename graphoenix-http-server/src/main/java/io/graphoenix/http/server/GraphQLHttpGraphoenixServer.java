@@ -15,6 +15,8 @@ import io.netty.handler.codec.http.cors.CorsHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 
@@ -48,16 +50,17 @@ public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
                 .build();
 
         DisposableServer server = HttpServer.create()
-                .option(ChannelOption.SO_BACKLOG, httpServerConfig.getSoBackLog())
-                .childOption(ChannelOption.TCP_NODELAY, httpServerConfig.getTcpNoDelay())
-                .childOption(ChannelOption.SO_KEEPALIVE, httpServerConfig.getSoKeepAlive())
-                .doOnConnection(connection -> connection.addHandlerLast("cors", new CorsHandler(corsConfig)))
+//                .option(ChannelOption.SO_BACKLOG, httpServerChangonfig.getSoBackLog())
+//                .childOption(ChannelOption.TCP_NODELAY, httpServerConfig.getTcpNoDelay())
+//                .childOption(ChannelOption.SO_KEEPALIVE, httpServerConfig.getSoKeepAlive())
+//                .doOnConnection(connection -> connection.addHandlerLast("cors", new CorsHandler(corsConfig)))
                 .route(httpServerRoutes ->
                         httpServerRoutes
                                 .get(httpServerConfig.getSchemaContextPath().concat("/{").concat(SCHEMA_PARAM_NAME).concat("}"), schemaRequestHandler::handle)
                                 .get(httpServerConfig.getGraphqlContextPath(), getRequestHandler::handle)
                                 .post(httpServerConfig.getGraphqlContextPath(), postRequestHandler::handle)
-                                .ws(httpServerConfig.getGraphqlContextPath(), subscriptionWebSocketHandler::handle)
+                                .get(httpServerConfig.getSubscriptionsContextPath(), (request, response) -> response.sse().sendString(Flux.just("hello", "world")))
+                                .post(httpServerConfig.getSubscriptionsContextPath(), (request, response) -> response.sse().sendString(Flux.just("hello", "world")))
                 )
                 .port(httpServerConfig.getPort())
                 .bindNow();

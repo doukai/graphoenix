@@ -10,6 +10,9 @@ public class HttpServerConfig {
     private String graphqlContextPath = "graphql";
 
     @Optional
+    private String subscriptionsContextPath = "subscriptions";
+
+    @Optional
     private String schemaContextPath = "schema";
 
     @Optional
@@ -37,6 +40,18 @@ public class HttpServerConfig {
 
     public void setGraphqlContextPath(String graphqlContextPath) {
         this.graphqlContextPath = graphqlContextPath;
+    }
+
+    public String getSubscriptionsContextPath() {
+        if (subscriptionsContextPath.startsWith("/")) {
+            return subscriptionsContextPath;
+        } else {
+            return "/".concat(subscriptionsContextPath);
+        }
+    }
+
+    public void setSubscriptionsContextPath(String subscriptionsContextPath) {
+        this.subscriptionsContextPath = subscriptionsContextPath;
     }
 
     public String getSchemaContextPath() {

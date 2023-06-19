@@ -1,13 +1,14 @@
 package io.graphoenix.spi.handler;
 
+import graphql.parser.antlr.GraphqlParser;
 import jakarta.json.JsonValue;
-import reactor.core.publisher.Flux;
-
-import java.util.Map;
+import reactor.core.publisher.Mono;
 
 public interface SubscriptionHandler {
 
-    Flux<JsonValue> subscription(String graphQL, Map<String, JsonValue> variables);
+    Mono<JsonValue> subscription(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
 
-    Flux<JsonValue> subscription(OperationHandler operationHandler, String graphQL, Map<String, JsonValue> variables);
+    Mono<JsonValue> subscription(OperationHandler operationHandler, GraphqlParser.OperationDefinitionContext operationDefinitionContext);
+
+    Mono<JsonValue> invoke(GraphqlParser.OperationDefinitionContext operationDefinitionContext, JsonValue jsonValue);
 }

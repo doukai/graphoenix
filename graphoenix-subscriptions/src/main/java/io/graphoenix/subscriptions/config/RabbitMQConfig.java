@@ -1,13 +1,16 @@
 package io.graphoenix.subscriptions.config;
 
+import com.typesafe.config.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 
 @ConfigProperties(prefix = "rabbitmq")
 public class RabbitMQConfig {
 
-    private String host;
+    @Optional
+    private String host = "localhost";
 
-    private Integer port;
+    @Optional
+    private Integer port = 5672;
 
     private String username;
 

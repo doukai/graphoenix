@@ -1,6 +1,7 @@
 package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.error.GraphQLErrors;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import org.stringtemplate.v4.ST;
@@ -9,6 +10,8 @@ import org.stringtemplate.v4.STGroupFile;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
+
+import static io.graphoenix.core.error.GraphQLErrorType.SELECTION_NOT_EXIST;
 
 public class Field {
 
@@ -44,6 +47,27 @@ public class Field {
         if (fieldContext.directives() != null) {
             this.directives = fieldContext.directives().directive().stream().map(Directive::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
+    }
+
+    public static void mergeSelection(Collection<Field> originalSet, Collection<Field> fieldSet) {
+        fieldSet.forEach(
+                field -> {
+                    if (originalSet.stream().map(Field::getName).noneMatch(name -> name.equals(field.getName()))) {
+                        originalSet.add(field);
+                    } else {
+                        if (field.getFields() != null && field.getFields().size() > 0) {
+                            mergeSelection(
+                                    originalSet.stream()
+                                            .filter(original -> original.getName().equals(field.getName()))
+                                            .findFirst()
+                                            .orElseThrow(() -> new GraphQLErrors(SELECTION_NOT_EXIST.bind(field.getName())))
+                                            .getFields(),
+                                    field.getFields()
+                            );
+                        }
+                    }
+                }
+        );
     }
 
     public String getName() {
