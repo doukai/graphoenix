@@ -40,6 +40,15 @@ public enum GraphQLResponseUtil {
         return stringWriter.toString();
     }
 
+    public String next(JsonValue jsonValue) {
+        JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
+        responseBuilder.add("event", "next");
+        responseBuilder.add("data", jsonValue);
+        StringWriter stringWriter = new StringWriter();
+        jsonProvider.createWriter(stringWriter).write(responseBuilder.build());
+        return stringWriter.toString();
+    }
+
     public String success(Object object) {
         JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
         responseBuilder.add("data", jsonProvider.createReader(new StringReader(jsonb.toJson(object))).read());

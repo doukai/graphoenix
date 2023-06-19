@@ -35,6 +35,8 @@ public class GraphQLFetchFieldProcessor {
             objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
         } else if (operation.getOperationType().equals("mutation")) {
             objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
+        } else if (operation.getOperationType().equals("subscription")) {
+            objectTypeDefinitionContext = manager.getSubscriptionOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(SUBSCRIBE_TYPE_NOT_EXIST));
         } else {
             throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE.bind(operation.getOperationType()));
         }

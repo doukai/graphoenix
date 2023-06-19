@@ -115,20 +115,30 @@ public class GraphQLQueryToSelect {
 
     public Select operationDefinitionToSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
-            Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
-            if (queryOperationTypeDefinition.isPresent()) {
-                String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors().add(QUERY_TYPE_NOT_EXIST));
-                return objectSelectionToSelect(
-                        queryOperationTypeDefinition.get().typeName().name().getText(),
-                        operationDefinitionContext.selectionSet().selection().stream()
-                                .filter(selectionContext -> packageManager.isLocalPackage(queryTypeName, selectionContext.field().name().getText()))
-                                .collect(Collectors.toList())
-                );
-            } else {
-                throw new GraphQLErrors().add(OPERATION_NOT_EXIST);
-            }
+            return manager.getQueryOperationTypeDefinition()
+                    .map(operationTypeDefinitionContext ->
+                            objectSelectionToSelect(
+                                    operationTypeDefinitionContext.typeName().name().getText(),
+                                    operationDefinitionContext.selectionSet().selection().stream()
+                                            .filter(selectionContext -> packageManager.isLocalPackage(operationTypeDefinitionContext.typeName().name().getText(), selectionContext.field().name().getText()))
+                                            .collect(Collectors.toList())
+                            )
+                    )
+                    .orElseThrow(() -> new GraphQLErrors().add(QUERY_TYPE_NOT_EXIST));
+
+        } else if (operationDefinitionContext.operationType().SUBSCRIPTION() != null) {
+            return manager.getSubscriptionOperationTypeDefinition()
+                    .map(operationTypeDefinitionContext ->
+                            objectSelectionToSelect(
+                                    operationTypeDefinitionContext.typeName().name().getText(),
+                                    operationDefinitionContext.selectionSet().selection().stream()
+                                            .filter(selectionContext -> packageManager.isLocalPackage(operationTypeDefinitionContext.typeName().name().getText(), selectionContext.field().name().getText()))
+                                            .collect(Collectors.toList())
+                            )
+                    )
+                    .orElseThrow(() -> new GraphQLErrors().add(SUBSCRIBE_TYPE_NOT_EXIST));
         }
-        throw new GraphQLErrors().add(QUERY_NOT_EXIST);
+        throw new GraphQLErrors().add(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
     }
 
     public Stream<Tuple2<String, Select>> operationDefinitionToSelects(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
@@ -188,11 +198,11 @@ public class GraphQLQueryToSelect {
         SelectExpressionItem selectExpressionItem = new SelectExpressionItem(function);
         plainSelect.setSelectItems(Collections.singletonList(selectExpressionItem));
 
-        if (manager.isQueryOperationType(typeName)) {
+        if (manager.isQueryOperationType(typeName) || manager.isSubscriptionOperationType(typeName)) {
             selectExpressionItem.setAlias(new Alias("`data`"));
         } else if (manager.isMutationOperationType(typeName)) {
             selectExpressionItem.setAlias(new Alias("`data`"));
-        } else if (fieldDefinitionContext != null && !manager.isQueryOperationType(parentTypeName) && !manager.isMutationOperationType(parentTypeName) && !manager.isSubscriptionOperationType(parentTypeName)) {
+        } else if (fieldDefinitionContext != null && !manager.isQueryOperationType(parentTypeName) && !manager.isSubscriptionOperationType(parentTypeName) && !manager.isMutationOperationType(parentTypeName) && !manager.isSubscriptionOperationType(parentTypeName)) {
             String fieldName = fieldDefinitionContext.name().getText();
             Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = mapper.getFromFieldDefinition(parentTypeName, fieldName);
             Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = mapper.getToFieldDefinition(parentTypeName, fieldName);
@@ -901,7 +911,7 @@ public class GraphQLQueryToSelect {
     }
 
     protected Table typeToTable(String typeName, int level) {
-        if (manager.isQueryOperationType(typeName) || manager.isMutationOperationType(typeName)) {
+        if (manager.isQueryOperationType(typeName) || manager.isSubscriptionOperationType(typeName) || manager.isMutationOperationType(typeName)) {
             return dbNameUtil.dualTable();
         }
         return dbNameUtil.typeToTable(typeName, level);

@@ -50,6 +50,8 @@ public class GraphQLVariablesProcessor {
             objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
         } else if (operationDefinitionContext.operationType().MUTATION() != null) {
             objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
+        } else if (operationDefinitionContext.operationType().SUBSCRIPTION() != null) {
+            objectTypeDefinitionContext = manager.getSubscriptionOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(SUBSCRIBE_TYPE_NOT_EXIST));
         } else {
             throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
         }

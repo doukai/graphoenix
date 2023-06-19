@@ -40,7 +40,7 @@ public class GraphQLSubscriptionHandler {
         OperationType type = graphQLOperationRouter.getType(requestBody.getQuery());
         if (type == OperationType.SUBSCRIPTION) {
             return operationSubscriber.subscriptionOperation(operationHandler, requestBody.getQuery(), requestBody.getVariables())
-                    .map(GRAPHQL_RESPONSE_UTIL::success);
+                    .map(GRAPHQL_RESPONSE_UTIL::next);
         }
         throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
     }

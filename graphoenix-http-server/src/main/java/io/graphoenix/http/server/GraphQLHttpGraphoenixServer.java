@@ -1,10 +1,7 @@
 package io.graphoenix.http.server;
 
 import io.graphoenix.http.config.HttpServerConfig;
-import io.graphoenix.http.handler.GetRequestHandler;
-import io.graphoenix.http.handler.PostRequestHandler;
-import io.graphoenix.http.handler.SchemaRequestHandler;
-import io.graphoenix.http.handler.SubscriptionWebSocketHandler;
+import io.graphoenix.http.handler.*;
 import io.graphoenix.spi.handler.RunningServer;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -30,15 +27,15 @@ public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
     private final SchemaRequestHandler schemaRequestHandler;
     private final GetRequestHandler getRequestHandler;
     private final PostRequestHandler postRequestHandler;
-    private final SubscriptionWebSocketHandler subscriptionWebSocketHandler;
+    private final PostRequestSubscriptionHandler postRequestSubscriptionHandler;
 
     @Inject
-    public GraphQLHttpGraphoenixServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler, SubscriptionWebSocketHandler subscriptionWebSocketHandler) {
+    public GraphQLHttpGraphoenixServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler, PostRequestSubscriptionHandler postRequestSubscriptionHandler) {
         this.httpServerConfig = httpServerConfig;
         this.schemaRequestHandler = schemaRequestHandler;
         this.getRequestHandler = getRequestHandler;
         this.postRequestHandler = postRequestHandler;
-        this.subscriptionWebSocketHandler = subscriptionWebSocketHandler;
+        this.postRequestSubscriptionHandler = postRequestSubscriptionHandler;
     }
 
     @Override
@@ -60,7 +57,7 @@ public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
                                 .get(httpServerConfig.getGraphqlContextPath(), getRequestHandler::handle)
                                 .post(httpServerConfig.getGraphqlContextPath(), postRequestHandler::handle)
                                 .get(httpServerConfig.getSubscriptionsContextPath(), (request, response) -> response.sse().sendString(Flux.just("hello", "world")))
-                                .post(httpServerConfig.getSubscriptionsContextPath(), (request, response) -> response.sse().sendString(Flux.just("hello", "world")))
+                                .post(httpServerConfig.getSubscriptionsContextPath(), postRequestSubscriptionHandler::handle)
                 )
                 .port(httpServerConfig.getPort())
                 .bindNow();
