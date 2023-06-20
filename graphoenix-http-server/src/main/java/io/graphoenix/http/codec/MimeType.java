@@ -398,6 +398,11 @@ public class MimeType {
          */
         public static final String YAML = PREFIX + "yaml";
 
+        /**
+         * text/event-stream
+         */
+        public static final String EVENT_STREAM = PREFIX + "event-stream";
+
         private Text() {
         }
     }

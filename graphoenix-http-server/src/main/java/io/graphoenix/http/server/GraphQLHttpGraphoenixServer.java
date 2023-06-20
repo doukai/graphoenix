@@ -12,8 +12,6 @@ import io.netty.handler.codec.http.cors.CorsHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 
@@ -27,15 +25,15 @@ public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
     private final SchemaRequestHandler schemaRequestHandler;
     private final GetRequestHandler getRequestHandler;
     private final PostRequestHandler postRequestHandler;
-    private final PostRequestSubscriptionHandler postRequestSubscriptionHandler;
+    private final DeleteRequestHandler deleteRequestHandler;
 
     @Inject
-    public GraphQLHttpGraphoenixServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler, PostRequestSubscriptionHandler postRequestSubscriptionHandler) {
+    public GraphQLHttpGraphoenixServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler, DeleteRequestHandler deleteRequestHandler) {
         this.httpServerConfig = httpServerConfig;
         this.schemaRequestHandler = schemaRequestHandler;
         this.getRequestHandler = getRequestHandler;
         this.postRequestHandler = postRequestHandler;
-        this.postRequestSubscriptionHandler = postRequestSubscriptionHandler;
+        this.deleteRequestHandler = deleteRequestHandler;
     }
 
     @Override
@@ -47,17 +45,16 @@ public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
                 .build();
 
         DisposableServer server = HttpServer.create()
-//                .option(ChannelOption.SO_BACKLOG, httpServerChangonfig.getSoBackLog())
-//                .childOption(ChannelOption.TCP_NODELAY, httpServerConfig.getTcpNoDelay())
-//                .childOption(ChannelOption.SO_KEEPALIVE, httpServerConfig.getSoKeepAlive())
-//                .doOnConnection(connection -> connection.addHandlerLast("cors", new CorsHandler(corsConfig)))
+                .option(ChannelOption.SO_BACKLOG, httpServerConfig.getSoBackLog())
+                .childOption(ChannelOption.TCP_NODELAY, httpServerConfig.getTcpNoDelay())
+                .childOption(ChannelOption.SO_KEEPALIVE, httpServerConfig.getSoKeepAlive())
+                .doOnConnection(connection -> connection.addHandlerLast("cors", new CorsHandler(corsConfig)))
                 .route(httpServerRoutes ->
                         httpServerRoutes
                                 .get(httpServerConfig.getSchemaContextPath().concat("/{").concat(SCHEMA_PARAM_NAME).concat("}"), schemaRequestHandler::handle)
                                 .get(httpServerConfig.getGraphqlContextPath(), getRequestHandler::handle)
                                 .post(httpServerConfig.getGraphqlContextPath(), postRequestHandler::handle)
-                                .get(httpServerConfig.getSubscriptionsContextPath(), (request, response) -> response.sse().sendString(Flux.just("hello", "world")))
-                                .post(httpServerConfig.getSubscriptionsContextPath(), postRequestSubscriptionHandler::handle)
+                                .delete(httpServerConfig.getGraphqlContextPath(), getRequestHandler::handle)
                 )
                 .port(httpServerConfig.getPort())
                 .bindNow();

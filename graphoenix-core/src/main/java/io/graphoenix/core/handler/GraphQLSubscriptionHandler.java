@@ -31,16 +31,16 @@ public class GraphQLSubscriptionHandler {
         this.defaultOperationHandlerProvider = Optional.ofNullable(graphQLConfig.getDefaultOperationHandlerName()).map(name -> BeanContext.getProvider(OperationHandler.class, name)).orElseGet(() -> BeanContext.getProvider(OperationHandler.class));
     }
 
-    public Flux<String> handle(GraphQLRequest requestBody) {
-        return handle(defaultOperationHandlerProvider.get(), requestBody);
+    public Flux<String> handle(GraphQLRequest requestBody, String id) {
+        return handle(defaultOperationHandlerProvider.get(), requestBody, id);
     }
 
-    public Flux<String> handle(OperationHandler operationHandler, GraphQLRequest requestBody) {
+    public Flux<String> handle(OperationHandler operationHandler, GraphQLRequest requestBody, String id) {
         Logger.info("Handle websocket subscription:{}", requestBody.getQuery());
         OperationType type = graphQLOperationRouter.getType(requestBody.getQuery());
         if (type == OperationType.SUBSCRIPTION) {
             return operationSubscriber.subscriptionOperation(operationHandler, requestBody.getQuery(), requestBody.getVariables())
-                    .map(GRAPHQL_RESPONSE_UTIL::next);
+                    .map(jsonValue -> GRAPHQL_RESPONSE_UTIL.next(jsonValue, id));
         }
         throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
     }

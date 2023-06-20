@@ -3,7 +3,6 @@ package io.graphoenix.http.handler;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerResponse;
-import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.context.Context;
 import reactor.util.context.ContextView;
 
@@ -27,8 +26,8 @@ public abstract class BaseHandler {
         return Mono.just(GRAPHQL_RESPONSE_UTIL.error(throwable));
     }
 
-    protected Mono<Void> errorHandler(Throwable throwable, WebsocketOutbound outbound) {
+    protected Mono<String> errorSSEHandler(Throwable throwable, HttpServerResponse response, String id) {
         Logger.error(throwable);
-        return outbound.sendClose(HTTP_ERROR_STATUS_UTIL.getStatus(throwable.getClass()).code(), GRAPHQL_RESPONSE_UTIL.error(throwable));
+        return Mono.just(GRAPHQL_RESPONSE_UTIL.next(throwable, id));
     }
 }

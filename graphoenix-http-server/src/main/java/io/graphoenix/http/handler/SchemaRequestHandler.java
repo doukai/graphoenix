@@ -5,6 +5,7 @@ import io.graphoenix.http.codec.MimeType;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.reactivestreams.Publisher;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerRequest;
@@ -24,7 +25,7 @@ public class SchemaRequestHandler {
         this.jsonSchemaManager = jsonSchemaManager;
     }
 
-    public Mono<Void> handle(HttpServerRequest request, HttpServerResponse response) {
+    public Publisher<Void> handle(HttpServerRequest request, HttpServerResponse response) {
         return response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                 .sendString(
                         Mono.just(jsonSchemaManager.getJsonSchema(request.param(SCHEMA_PARAM_NAME)))
@@ -35,7 +36,6 @@ public class SchemaRequestHandler {
                                             return Mono.just(GRAPHQL_RESPONSE_UTIL.error(throwable));
                                         }
                                 )
-                )
-                .then();
+                );
     }
 }

@@ -34,14 +34,14 @@ import static io.netty.handler.codec.http.HttpHeaderNames.ACCEPT;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
 @ApplicationScoped
-public class GetRequestHandler extends BaseHandler {
+public class DeleteRequestHandler extends BaseHandler {
 
     private final GraphQLRequestHandler graphQLRequestHandler;
     private final GraphQLSubscriptionHandler graphQLSubscriptionHandler;
     private final JsonProvider jsonProvider;
 
     @Inject
-    public GetRequestHandler(GraphQLRequestHandler graphQLRequestHandler, GraphQLSubscriptionHandler graphQLSubscriptionHandler, JsonProvider jsonProvider) {
+    public DeleteRequestHandler(GraphQLRequestHandler graphQLRequestHandler, GraphQLSubscriptionHandler graphQLSubscriptionHandler, JsonProvider jsonProvider) {
         this.graphQLRequestHandler = graphQLRequestHandler;
         this.graphQLSubscriptionHandler = graphQLSubscriptionHandler;
         this.jsonProvider = jsonProvider;
