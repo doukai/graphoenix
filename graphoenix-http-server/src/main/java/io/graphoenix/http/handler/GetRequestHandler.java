@@ -55,10 +55,11 @@ public class GetRequestHandler extends BaseHandler {
 
         QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
         String accept = decoder.parameters().getOrDefault(ACCEPT.toString(), Collections.singletonList(request.requestHeaders().get(ACCEPT))).get(0);
+        String operationId = decoder.parameters().containsKey("operationId") ? decoder.parameters().get("operationId").get(0) : null;
         GraphQLRequest graphQLRequest = new GraphQLRequest(
                 decoder.parameters().get("query").get(0),
-                decoder.parameters().getOrDefault("operationName", null) == null ? null : decoder.parameters().get("operationName").get(0),
-                decoder.parameters().getOrDefault("variables", null) == null ? null : jsonProvider.createReader(new StringReader(Objects.requireNonNull(decoder.parameters().get("variables").get(0)))).readObject()
+                decoder.parameters().containsKey("operationName") ? decoder.parameters().get("operationName").get(0) : null,
+                decoder.parameters().containsKey("variables") ? jsonProvider.createReader(new StringReader(Objects.requireNonNull(decoder.parameters().get("variables").get(0)))).readObject() : null
         );
         context.put(GRAPHQL_REQUEST, graphQLRequest);
 
@@ -70,8 +71,8 @@ public class GetRequestHandler extends BaseHandler {
                     .send(
                             ScopeEventResolver.initialized(context, RequestScoped.class)
                                     .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
-                                    .thenMany(graphQLSubscriptionHandler.handle(graphQLRequest, requestId))
-                                    .onErrorResume(throwable -> this.errorSSEHandler(throwable, response, requestId))
+                                    .thenMany(graphQLSubscriptionHandler.handle(graphQLRequest, operationId))
+                                    .onErrorResume(throwable -> this.errorSSEHandler(throwable, response, operationId))
                                     .map(eventString -> ByteBufAllocator.DEFAULT.buffer().writeBytes(eventString.getBytes(StandardCharsets.UTF_8)))
                                     .contextWrite(Context.of(REQUEST_ID, requestId)),
                             byteBuf -> true

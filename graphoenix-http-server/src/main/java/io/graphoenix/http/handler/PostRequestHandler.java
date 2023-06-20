@@ -9,6 +9,7 @@ import io.graphoenix.spi.handler.ScopeEventResolver;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -55,6 +56,9 @@ public class PostRequestHandler extends BaseHandler {
         String accept = request.requestHeaders().get(ACCEPT);
         String contentType = request.requestHeaders().get(CONTENT_TYPE);
 
+        QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
+        String operationId = decoder.parameters().containsKey("operationId") ? decoder.parameters().get("operationId").get(0) : null;
+
         if (contentType.startsWith(MimeType.Application.JSON)) {
             return response
                     .addHeader(CONTENT_TYPE, MimeType.Application.JSON)
@@ -99,9 +103,9 @@ public class PostRequestHandler extends BaseHandler {
                                     .flatMapMany(graphQLRequest ->
                                             ScopeEventResolver.initialized(context, RequestScoped.class)
                                                     .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
-                                                    .thenMany(graphQLSubscriptionHandler.handle(graphQLRequest, requestId))
+                                                    .thenMany(graphQLSubscriptionHandler.handle(graphQLRequest, operationId))
                                     )
-                                    .onErrorResume(throwable -> this.errorSSEHandler(throwable, response, requestId))
+                                    .onErrorResume(throwable -> this.errorSSEHandler(throwable, response, operationId))
                                     .map(eventString -> ByteBufAllocator.DEFAULT.buffer().writeBytes(eventString.getBytes(StandardCharsets.UTF_8)))
                                     .contextWrite(Context.of(REQUEST_ID, requestId)),
                             byteBuf -> true

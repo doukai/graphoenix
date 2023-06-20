@@ -35,12 +35,12 @@ public class GraphQLSubscriptionHandler {
         return handle(defaultOperationHandlerProvider.get(), requestBody, id);
     }
 
-    public Flux<String> handle(OperationHandler operationHandler, GraphQLRequest requestBody, String id) {
+    public Flux<String> handle(OperationHandler operationHandler, GraphQLRequest requestBody, String operationId) {
         Logger.info("Handle websocket subscription:{}", requestBody.getQuery());
         OperationType type = graphQLOperationRouter.getType(requestBody.getQuery());
         if (type == OperationType.SUBSCRIPTION) {
-            return operationSubscriber.subscriptionOperation(operationHandler, requestBody.getQuery(), requestBody.getVariables())
-                    .map(jsonValue -> GRAPHQL_RESPONSE_UTIL.next(jsonValue, id));
+            return operationSubscriber.subscriptionOperation(operationHandler, requestBody.getQuery(), requestBody.getVariables(), operationId)
+                    .map(jsonValue -> GRAPHQL_RESPONSE_UTIL.next(jsonValue, operationId));
         }
         throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
     }
