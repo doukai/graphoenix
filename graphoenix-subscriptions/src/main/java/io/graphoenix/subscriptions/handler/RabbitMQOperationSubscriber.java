@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static io.graphoenix.spi.constant.Hammurabi.REQUEST_ID;
-import static io.graphoenix.spi.constant.Hammurabi.SESSION_ID;
 import static reactor.rabbitmq.BindingSpecification.binding;
 import static reactor.rabbitmq.QueueSpecification.queue;
 
@@ -67,7 +66,7 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
     }
 
     @Override
-    public Flux<JsonValue> subscriptionOperation(OperationHandler operationHandler, String graphQL, Map<String, JsonValue> variables, String operationId) {
+    public Flux<JsonValue> subscriptionOperation(OperationHandler operationHandler, String graphQL, Map<String, JsonValue> variables, String token, String operationId) {
         manager.registerFragment(graphQL);
         GraphqlParser.OperationDefinitionContext operationDefinitionContext = variablesProcessor.buildVariables(graphQL, variables);
 
@@ -82,53 +81,28 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
                 .map(fieldDefinitionContext -> manager.getPackageName(fieldDefinitionContext.type()).orElse(graphQLConfig.getPackageName()) + "." + manager.getFieldTypeName(fieldDefinitionContext.type()))
                 .distinct();
 
-        if (operationId != null) {
-            return Mono.deferContextual(contextView -> Mono.justOrEmpty(contextView.getOrEmpty(SESSION_ID)))
-                    .map(sessionId -> (String) sessionId)
-                    .flatMapMany(sessionId ->
-                            sender.declare(queue(sessionId))
-                                    .thenMany(
-                                            Flux.fromStream(typeNameStream)
-                                                    .flatMap(typeName -> sender.bind(binding(SUBSCRIPTION_EXCHANGE_NAME, typeName, sessionId)))
-                                    )
-                                    .flatMap(bindOk ->
-                                            subscriptionDataListenerProvider.get()
-                                                    .map(subscriptionDataListener -> subscriptionDataListener.indexFilter(operationDefinitionContext))
-                                                    .flatMapMany(subscriptionDataListener ->
-                                                            Flux.concat(subscriptionHandler.subscription(operationHandler, operationDefinitionContext),
-                                                                    receiver.consumeAutoAck(sessionId)
-                                                                            .map(this::toJsonValue)
-                                                                            .filter(subscriptionDataListener::merged)
-                                                                            .flatMap(jsonValue -> subscriptionHandler.subscription(operationHandler, operationDefinitionContext))
-                                                            )
-                                                                    .flatMap(jsonValue -> subscriptionHandler.invoke(operationDefinitionContext, jsonValue))
-                                                    )
-                                    )
-                    );
-        } else {
-            return Mono.deferContextual(contextView -> Mono.justOrEmpty(contextView.getOrEmpty(REQUEST_ID)))
-                    .map(requestId -> (String) requestId)
-                    .flatMapMany(requestId ->
-                            sender.declare(queue(requestId))
-                                    .thenMany(
-                                            Flux.fromStream(typeNameStream)
-                                                    .flatMap(typeName -> sender.bind(binding(SUBSCRIPTION_EXCHANGE_NAME, typeName, requestId)))
-                                    )
-                                    .flatMap(bindOk ->
-                                            subscriptionDataListenerProvider.get()
-                                                    .map(subscriptionDataListener -> subscriptionDataListener.indexFilter(operationDefinitionContext))
-                                                    .flatMapMany(subscriptionDataListener ->
-                                                            Flux.concat(subscriptionHandler.subscription(operationHandler, operationDefinitionContext),
-                                                                    receiver.consumeAutoAck(requestId)
-                                                                            .map(this::toJsonValue)
-                                                                            .filter(subscriptionDataListener::merged)
-                                                                            .flatMap(jsonValue -> subscriptionHandler.subscription(operationHandler, operationDefinitionContext))
-                                                            )
-                                                                    .flatMap(jsonValue -> subscriptionHandler.invoke(operationDefinitionContext, jsonValue))
-                                                    )
-                                    )
-                    );
-        }
+        return Mono.deferContextual(contextView -> Mono.justOrEmpty(contextView.getOrEmpty(REQUEST_ID)))
+                .map(requestId -> (String) requestId)
+                .flatMapMany(requestId ->
+                        sender.declare(queue(requestId).autoDelete(true))
+                                .thenMany(
+                                        Flux.fromStream(typeNameStream)
+                                                .flatMap(typeName -> sender.bind(binding(SUBSCRIPTION_EXCHANGE_NAME, typeName, requestId)))
+                                )
+                                .flatMap(bindOk ->
+                                        subscriptionDataListenerProvider.get()
+                                                .map(subscriptionDataListener -> subscriptionDataListener.indexFilter(operationDefinitionContext))
+                                                .flatMapMany(subscriptionDataListener ->
+                                                        Flux.concat(subscriptionHandler.subscription(operationHandler, operationDefinitionContext),
+                                                                        receiver.consumeAutoAck(requestId)
+                                                                                .map(this::toJsonValue)
+                                                                                .filter(subscriptionDataListener::merged)
+                                                                                .flatMap(jsonValue -> subscriptionHandler.subscription(operationHandler, operationDefinitionContext))
+                                                                )
+                                                                .flatMap(jsonValue -> subscriptionHandler.invoke(operationDefinitionContext, jsonValue))
+                                                )
+                                )
+                );
     }
 
     @Override

@@ -56,19 +56,22 @@ public abstract class OperationSubscriber {
 
                 String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                 filterSelectionList.computeIfAbsent(fieldTypeName, k -> new CopyOnWriteArrayList<>());
-                List<Field> fields = argumentsToFields(selectionContext.field().arguments());
+                List<Field> fields = argumentsToFields(fieldTypeName, selectionContext.field().arguments());
                 Field.mergeSelection(filterSelectionList.get(fieldTypeName), fields);
             }
         }
     }
 
-    private List<Field> argumentsToFields(GraphqlParser.ArgumentsContext argumentsContext) {
+    private List<Field> argumentsToFields(String typeName, GraphqlParser.ArgumentsContext argumentsContext) {
         return argumentsContext.argument().stream()
                 .filter(argumentContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(argumentContext.name().getText())))
                 .map(argumentContext -> {
+                            GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, argumentContext.name().getText())
+                                    .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, argumentContext.name().getText())));
+                            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                             Field field = new Field(argumentContext.name().getText());
-                            if (argumentContext.valueWithVariable().objectValueWithVariable() != null) {
-                                field.setFields(objectValueToFields(argumentContext.valueWithVariable().objectValueWithVariable()));
+                            if (manager.isObject(fieldTypeName) && argumentContext.valueWithVariable().objectValueWithVariable() != null) {
+                                field.setFields(objectValueToFields(fieldTypeName, argumentContext.valueWithVariable().objectValueWithVariable()));
                             }
                             return field;
                         }
@@ -76,13 +79,16 @@ public abstract class OperationSubscriber {
                 .collect(Collectors.toList());
     }
 
-    private List<Field> objectValueToFields(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+    private List<Field> objectValueToFields(String typeName, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
         return objectValueWithVariableContext.objectFieldWithVariable().stream()
                 .filter(objectFieldWithVariableContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(objectFieldWithVariableContext.name().getText())))
                 .map(objectFieldWithVariableContext -> {
+                            GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, objectFieldWithVariableContext.name().getText())
+                                    .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, objectFieldWithVariableContext.name().getText())));
+                            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                             Field field = new Field(objectFieldWithVariableContext.name().getText());
-                            if (objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable() != null) {
-                                field.setFields(objectValueToFields(objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable()));
+                            if (manager.isObject(fieldTypeName) && objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable() != null) {
+                                field.setFields(objectValueToFields(fieldTypeName, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable()));
                             }
                             return field;
                         }
@@ -90,7 +96,7 @@ public abstract class OperationSubscriber {
                 .collect(Collectors.toList());
     }
 
-    public abstract Flux<JsonValue> subscriptionOperation(OperationHandler operationHandler, String graphQL, Map<String, JsonValue> variables, String operationId);
+    public abstract Flux<JsonValue> subscriptionOperation(OperationHandler operationHandler, String graphQL, Map<String, JsonValue> variables, String token, String operationId);
 
     public abstract Mono<JsonValue> sendMutation(GraphqlParser.OperationDefinitionContext operationDefinitionContext, JsonValue jsonValue);
 }

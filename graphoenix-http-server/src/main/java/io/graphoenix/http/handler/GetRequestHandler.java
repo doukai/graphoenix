@@ -1,6 +1,5 @@
 package io.graphoenix.http.handler;
 
-import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import io.graphoenix.core.dto.GraphQLRequest;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.core.handler.GraphQLSubscriptionHandler;
@@ -24,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.graphoenix.spi.constant.Hammurabi.GRAPHQL_REQUEST;
@@ -48,14 +48,19 @@ public class GetRequestHandler extends BaseHandler {
     }
 
     public Publisher<Void> handle(HttpServerRequest request, HttpServerResponse response) {
-        String requestId = NanoIdUtils.randomNanoId();
+        String requestId = request.requestId();
         Map<String, Object> context = new ConcurrentHashMap<>();
         context.put(REQUEST, request);
         context.put(RESPONSE, response);
 
+        request = request.withConnection(connection -> {
+            if (connection.isDisposed()) {
+                System.out.println(requestId);
+            }
+        });
+
         QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
         String accept = decoder.parameters().getOrDefault(ACCEPT.toString(), Collections.singletonList(request.requestHeaders().get(ACCEPT))).get(0);
-        String operationId = decoder.parameters().containsKey("operationId") ? decoder.parameters().get("operationId").get(0) : null;
         GraphQLRequest graphQLRequest = new GraphQLRequest(
                 decoder.parameters().get("query").get(0),
                 decoder.parameters().containsKey("operationName") ? decoder.parameters().get("operationName").get(0) : null,
@@ -64,6 +69,8 @@ public class GetRequestHandler extends BaseHandler {
         context.put(GRAPHQL_REQUEST, graphQLRequest);
 
         if (accept.startsWith(MimeType.Text.EVENT_STREAM)) {
+            String token = Optional.ofNullable(request.requestHeaders().get("X-GraphQL-Event-Stream-Token")).orElseGet(() -> decoder.parameters().containsKey("token") ? decoder.parameters().get("token").get(0) : null);
+            String operationId = decoder.parameters().containsKey("operationId") ? decoder.parameters().get("operationId").get(0) : null;
             return response.sse()
                     .addHeader(HttpHeaderNames.CACHE_CONTROL, "no-cache")
                     .addHeader(HttpHeaderNames.CONNECTION, "keep-alive")
@@ -71,7 +78,7 @@ public class GetRequestHandler extends BaseHandler {
                     .send(
                             ScopeEventResolver.initialized(context, RequestScoped.class)
                                     .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
-                                    .thenMany(graphQLSubscriptionHandler.handle(graphQLRequest, operationId))
+                                    .thenMany(graphQLSubscriptionHandler.handle(graphQLRequest, token, operationId))
                                     .onErrorResume(throwable -> this.errorSSEHandler(throwable, response, operationId))
                                     .map(eventString -> ByteBufAllocator.DEFAULT.buffer().writeBytes(eventString.getBytes(StandardCharsets.UTF_8)))
                                     .contextWrite(Context.of(REQUEST_ID, requestId)),

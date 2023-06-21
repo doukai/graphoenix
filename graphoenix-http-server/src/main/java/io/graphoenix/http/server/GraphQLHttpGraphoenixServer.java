@@ -25,15 +25,13 @@ public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
     private final SchemaRequestHandler schemaRequestHandler;
     private final GetRequestHandler getRequestHandler;
     private final PostRequestHandler postRequestHandler;
-    private final DeleteRequestHandler deleteRequestHandler;
 
     @Inject
-    public GraphQLHttpGraphoenixServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler, DeleteRequestHandler deleteRequestHandler) {
+    public GraphQLHttpGraphoenixServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler) {
         this.httpServerConfig = httpServerConfig;
         this.schemaRequestHandler = schemaRequestHandler;
         this.getRequestHandler = getRequestHandler;
         this.postRequestHandler = postRequestHandler;
-        this.deleteRequestHandler = deleteRequestHandler;
     }
 
     @Override
@@ -54,7 +52,6 @@ public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
                                 .get(httpServerConfig.getSchemaContextPath().concat("/{").concat(SCHEMA_PARAM_NAME).concat("}"), schemaRequestHandler::handle)
                                 .get(httpServerConfig.getGraphqlContextPath(), getRequestHandler::handle)
                                 .post(httpServerConfig.getGraphqlContextPath(), postRequestHandler::handle)
-                                .delete(httpServerConfig.getGraphqlContextPath(), getRequestHandler::handle)
                 )
                 .port(httpServerConfig.getPort())
                 .bindNow();

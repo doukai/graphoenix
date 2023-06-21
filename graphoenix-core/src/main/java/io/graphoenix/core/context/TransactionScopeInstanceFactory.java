@@ -2,9 +2,6 @@ package io.graphoenix.core.context;
 
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigBeanFactory;
-import com.typesafe.config.ConfigFactory;
 import io.graphoenix.core.config.TimeoutConfig;
 import io.graphoenix.spi.context.ScopeInstances;
 import jakarta.inject.Provider;
@@ -23,17 +20,12 @@ public class TransactionScopeInstanceFactory {
     private static final ReactiveStreamsFactory reactiveStreamsFactory = BeanContext.get(ReactiveStreamsFactory.class);
 
     private static AsyncLoadingCache<String, ScopeInstances> buildCache() {
-        Caffeine<Object, Object> builder = Caffeine.newBuilder()
+        TimeoutConfig timeoutConfig = BeanContext.getOptional(TimeoutConfig.class).orElseGet(TimeoutConfig::new);
+        return Caffeine.newBuilder()
+                .expireAfterAccess(timeoutConfig.getTransaction(), TimeUnit.SECONDS)
                 .evictionListener((key, value, cause) -> Logger.info("transaction id: {} eviction", key))
-                .removalListener((key, value, cause) -> Logger.info("transaction id: {} removed", key));
-        Config config = ConfigFactory.load();
-        if (config != null && config.hasPath("timeout")) {
-            TimeoutConfig timeout = ConfigBeanFactory.create(config.getConfig("timeout"), TimeoutConfig.class);
-            builder.expireAfterWrite(timeout.getTransaction(), TimeUnit.SECONDS);
-        } else {
-            builder.expireAfterWrite(new TimeoutConfig().getTransaction(), TimeUnit.SECONDS);
-        }
-        return builder.buildAsync(key -> new ScopeInstances());
+                .removalListener((key, value, cause) -> Logger.info("transaction id: {} removed", key))
+                .buildAsync(key -> new ScopeInstances());
     }
 
     private TransactionScopeInstanceFactory() {
