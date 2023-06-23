@@ -12,15 +12,15 @@ import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.jsonpath.expression.Expression;
 import io.graphoenix.jsonpath.translator.GraphQLArgumentsToFilter;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.handler.SubscriptionDataListener;
-import jakarta.enterprise.context.RequestScoped;
+import io.graphoenix.core.handler.SubscriptionDataListener;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.json.*;
 
 import java.util.*;
 
-@RequestScoped
-public class JsonPathSubscriptionDataListener implements SubscriptionDataListener {
+@Dependent
+public class JsonPathSubscriptionDataListener extends SubscriptionDataListener {
 
     private final IGraphQLDocumentManager manager;
 
@@ -44,8 +44,12 @@ public class JsonPathSubscriptionDataListener implements SubscriptionDataListene
     @Override
     public boolean merged(JsonValue jsonValue) {
         JsonObject jsonObject = jsonValue.asJsonObject();
+        JsonValue operation = jsonObject.get("operation");
+
         String typeName = jsonObject.getString("type");
         JsonValue mutation = jsonObject.get("mutation");
+
+
         DocumentContext documentContext = JsonPath.using(configuration).parse(mutation.asJsonArray());
         return merge(typeName, documentContext);
     }

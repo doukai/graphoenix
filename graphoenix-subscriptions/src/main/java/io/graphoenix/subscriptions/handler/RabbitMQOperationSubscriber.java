@@ -3,20 +3,24 @@ package io.graphoenix.subscriptions.handler;
 import com.rabbitmq.client.Delivery;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.context.PublisherBeanContext;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLVariablesProcessor;
+import io.graphoenix.core.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.OperationHandler;
 import io.graphoenix.core.handler.OperationSubscriber;
-import io.graphoenix.spi.handler.SubscriptionDataListener;
+import io.graphoenix.core.handler.SubscriptionDataListener;
 import io.graphoenix.spi.handler.SubscriptionHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
+import jakarta.json.stream.JsonCollectors;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.rabbitmq.OutboundMessage;
@@ -24,6 +28,7 @@ import reactor.rabbitmq.Receiver;
 import reactor.rabbitmq.Sender;
 
 import java.io.StringReader;
+import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -47,14 +52,14 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
 
     private final JsonProvider jsonProvider;
 
-    private final Provider<Mono<SubscriptionDataListener>> subscriptionDataListenerProvider;
+    private final Provider<SubscriptionDataListener> subscriptionDataListenerProvider;
 
     private final Sender sender;
 
     private final Receiver receiver;
 
     @Inject
-    public RabbitMQOperationSubscriber(GraphQLConfig graphQLConfig, IGraphQLDocumentManager manager, GraphQLVariablesProcessor variablesProcessor, SubscriptionHandler subscriptionHandler, JsonProvider jsonProvider, Provider<Mono<SubscriptionDataListener>> subscriptionDataListenerProvider, Sender sender, Receiver receiver) {
+    public RabbitMQOperationSubscriber(GraphQLConfig graphQLConfig, IGraphQLDocumentManager manager, GraphQLVariablesProcessor variablesProcessor, SubscriptionHandler subscriptionHandler, JsonProvider jsonProvider, Provider<SubscriptionDataListener> subscriptionDataListenerProvider, Sender sender, Receiver receiver) {
         this.graphQLConfig = graphQLConfig;
         this.manager = manager;
         this.variablesProcessor = variablesProcessor;
@@ -90,23 +95,25 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
                                                 .flatMap(typeName -> sender.bind(binding(SUBSCRIPTION_EXCHANGE_NAME, typeName, requestId)))
                                 )
                                 .flatMap(bindOk ->
-                                        subscriptionDataListenerProvider.get()
+                                        PublisherBeanContext.getMono(SubscriptionDataListener.class)
                                                 .map(subscriptionDataListener -> subscriptionDataListener.indexFilter(operationDefinitionContext))
                                                 .flatMapMany(subscriptionDataListener ->
                                                         Flux.concat(subscriptionHandler.subscription(operationHandler, operationDefinitionContext),
-                                                                        receiver.consumeAutoAck(requestId)
-                                                                                .map(this::toJsonValue)
-                                                                                .filter(subscriptionDataListener::merged)
-                                                                                .flatMap(jsonValue -> subscriptionHandler.subscription(operationHandler, operationDefinitionContext))
-                                                                )
+                                                                receiver.consumeAutoAck(requestId)
+                                                                        .map(this::toJsonValue)
+                                                                        .filter(subscriptionDataListener::merged)
+                                                                        .flatMap(jsonValue -> subscriptionHandler.subscription(operationHandler, operationDefinitionContext))
+                                                        )
+                                                                .doOnNext(jsonValue -> subscriptionDataListener.indexData(operationDefinitionContext, jsonValue))
                                                                 .flatMap(jsonValue -> subscriptionHandler.invoke(operationDefinitionContext, jsonValue))
                                                 )
                                 )
-                );
+                )
+                .contextWrite(PublisherBeanContext.of(subscriptionDataListenerProvider.get()));
     }
 
     @Override
-    public Mono<JsonValue> sendMutation(GraphqlParser.OperationDefinitionContext operationDefinitionContext, JsonValue jsonValue) {
+    public Mono<JsonValue> sendMutation(GraphqlParser.OperationDefinitionContext operationDefinitionContext, Operation operation, JsonValue jsonValue) {
         Flux<OutboundMessage> messageFlux = Flux.fromIterable(operationDefinitionContext.selectionSet().selection())
                 .map(selectionContext -> {
                             GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getMutationOperationTypeName()
@@ -116,7 +123,12 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
                                     .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST));
                             String packageName = manager.getPackageName(fieldDefinitionContext.type()).orElse(graphQLConfig.getPackageName());
                             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                            JsonObjectBuilder mutation = jsonProvider.createObjectBuilder().add("type", fieldTypeName);
+                            JsonObject operationJson = operation.getFields().stream()
+                                    .filter(field -> field.getArguments() != null && !field.getArguments().isEmpty())
+                                    .map(field -> new AbstractMap.SimpleEntry<>(field.getAlias() != null ? field.getAlias() : field.getName(), (JsonValue) field.getArguments()))
+                                    .collect(JsonCollectors.toJsonObject());
+                            JsonObjectBuilder mutation = jsonProvider.createObjectBuilder().add("type", fieldTypeName)
+                                    .add("operation", jsonProvider.createObjectBuilder(operationJson));
 
                             String selectionName = Optional.ofNullable(selectionContext.field().alias()).map(aliasContext -> aliasContext.name().getText()).orElse(selectionContext.field().name().getText());
                             JsonValue selectionJsonValue = jsonValue.asJsonObject().get(selectionName);
