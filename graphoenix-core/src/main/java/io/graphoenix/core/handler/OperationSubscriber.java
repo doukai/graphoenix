@@ -12,10 +12,7 @@ import jakarta.json.JsonValue;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -30,6 +27,27 @@ public abstract class OperationSubscriber {
 
     public OperationSubscriber() {
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
+    }
+
+    public Operation buildIDSelection(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        Operation operation = new Operation(operationDefinitionContext);
+        String subscriptionTypeName = manager.getSubscriptionOperationTypeName()
+                .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST));
+        buildIDSelection(subscriptionTypeName, operation.getFields());
+        return operation;
+    }
+
+    private void buildIDSelection(String typeName, Collection<Field> fields) {
+        for (Field field : fields) {
+            GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, field.getName())
+                    .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, field.getName())));
+            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+            if (field.getFields() != null) {
+                Optional<String> idFieldName = manager.getObjectTypeIDFieldName(fieldTypeName);
+                idFieldName.ifPresent(name -> Field.mergeSelection(field.getFields(), Collections.singleton(new Field(name))));
+                buildIDSelection(fieldTypeName, field.getFields());
+            }
+        }
     }
 
     public Operation buildSubscriptionFilterSelection(Operation operation) {
@@ -56,14 +74,7 @@ public abstract class OperationSubscriber {
                         .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST));
 
                 String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                Optional<String> idFieldName = manager.getObjectTypeIDFieldName(fieldTypeName);
-                if (idFieldName.isPresent()) {
-                    filterSelectionList.computeIfAbsent(fieldTypeName, k -> new CopyOnWriteArrayList<>() {{
-                        add(new Field(idFieldName.get()));
-                    }});
-                } else {
-                    filterSelectionList.computeIfAbsent(fieldTypeName, k -> new CopyOnWriteArrayList<>());
-                }
+                filterSelectionList.computeIfAbsent(fieldTypeName, k -> new CopyOnWriteArrayList<>());
                 List<Field> fields = argumentsToFields(fieldTypeName, selectionContext.field().arguments());
                 Field.mergeSelection(filterSelectionList.get(fieldTypeName), fields);
             }

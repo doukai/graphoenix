@@ -274,6 +274,14 @@ public class OperationHandlerImplementer {
                 break;
             case SUBSCRIPTION:
                 builder.addFields(buildSubscriptionFields())
+                        .addField(
+                                FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationSubscriber.class)),
+                                        "operationSubscriber",
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL
+                                ).build()
+                        )
                         .addMethod(buildInvokeMethod());
                 break;
             default:
@@ -498,7 +506,7 @@ public class OperationHandlerImplementer {
                 break;
             case SUBSCRIPTION:
                 builder.addParameter(ParameterSpec.builder(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinitionContext").build())
-                        .addStatement("$T operationWithFetchFieldDefinitionContext = fetchFieldProcessor.get().buildFetchFields(operationDefinitionContext)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
+                        .addStatement("$T operationWithFetchFieldDefinitionContext = fetchFieldProcessor.get().buildFetchFields(operationSubscriber.get().buildIDSelection(operationDefinitionContext))", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
                         .addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
                         .addStatement(
                                 CodeBlock.join(
@@ -735,6 +743,8 @@ public class OperationHandlerImplementer {
                         );
                 break;
             case SUBSCRIPTION:
+                builder.addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationSubscriber.class)), "operationSubscriber")
+                        .addStatement("this.operationSubscriber = operationSubscriber");
                 manager.getFields(manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
                         .filter(packageManager::isLocalPackage)
                         .filter(manager::isInvokeField)
