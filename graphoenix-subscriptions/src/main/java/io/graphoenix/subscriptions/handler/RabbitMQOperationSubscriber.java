@@ -97,7 +97,8 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
                                         PublisherBeanContext.getMono(SubscriptionDataListener.class)
                                                 .map(subscriptionDataListener -> subscriptionDataListener.indexFilter(operationDefinitionContext))
                                                 .flatMapMany(subscriptionDataListener ->
-                                                        Flux.concat(subscriptionHandler.subscription(operationHandler, operationDefinitionContext),
+                                                        Flux.concat(
+                                                                subscriptionHandler.subscription(operationHandler, operationDefinitionContext),
                                                                 receiver.consumeAutoAck(requestId)
                                                                         .map(this::toJsonValue)
                                                                         .filter(subscriptionDataListener::merged)
