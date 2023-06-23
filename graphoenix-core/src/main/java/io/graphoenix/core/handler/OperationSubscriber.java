@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -55,7 +56,14 @@ public abstract class OperationSubscriber {
                         .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST));
 
                 String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                filterSelectionList.computeIfAbsent(fieldTypeName, k -> new CopyOnWriteArrayList<>());
+                Optional<String> idFieldName = manager.getObjectTypeIDFieldName(fieldTypeName);
+                if (idFieldName.isPresent()) {
+                    filterSelectionList.computeIfAbsent(fieldTypeName, k -> new CopyOnWriteArrayList<>() {{
+                        add(new Field(idFieldName.get()));
+                    }});
+                } else {
+                    filterSelectionList.computeIfAbsent(fieldTypeName, k -> new CopyOnWriteArrayList<>());
+                }
                 List<Field> fields = argumentsToFields(fieldTypeName, selectionContext.field().arguments());
                 Field.mergeSelection(filterSelectionList.get(fieldTypeName), fields);
             }

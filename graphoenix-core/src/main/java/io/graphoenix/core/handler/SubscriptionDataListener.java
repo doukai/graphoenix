@@ -4,14 +4,11 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.core.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import jakarta.json.JsonObject;
+import jakarta.json.JsonArray;
 import jakarta.json.JsonValue;
 
 import java.util.*;
-
-import static io.graphoenix.spi.constant.Hammurabi.EXCLUDE_INPUT;
 
 public abstract class SubscriptionDataListener {
 
@@ -23,71 +20,36 @@ public abstract class SubscriptionDataListener {
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
     }
 
-    public boolean merged(JsonObject operation) {
-        for (GraphqlParser.SelectionContext selectionContext : operationDefinitionContext.selectionSet().selection()) {
-            if (selectionContext.field().arguments() != null) {
-                GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getMutationOperationTypeName()
-                        .map(name ->
-                                manager.getField(name, selectionContext.field().name().getText())
-                                        .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(name, selectionContext.field().name().getText())))
-                        )
-                        .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST));
-
-                String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                String fieldName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText();
-                if (operation.get(fieldName) != null) {
-                    return merge(fieldTypeName, selectionContext.field().arguments(), operation.get(fieldName));
-                }
+    public boolean merged(String typeName, JsonArray arguments) {
+        for (JsonValue argument : arguments) {
+            if (merged(typeName, argument)) {
+                return true;
             }
         }
         return false;
     }
 
-    private boolean merge(String typeName, GraphqlParser.ArgumentsContext argumentsContext, JsonValue jsonValue) {
-        if (jsonValue.getValueType().equals(JsonValue.ValueType.OBJECT)) {
-            if (argumentsContext != null) {
-                for (GraphqlParser.ArgumentContext argumentContext : argumentsContext.argument()) {
-                    if (Arrays.stream(EXCLUDE_INPUT).noneMatch(name -> name.equals(argumentContext.name().getText()))) {
-                        GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, argumentContext.name().getText())
-                                .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, argumentContext.name().getText())));
-                        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                        JsonValue fieldJsonValue = jsonValue.asJsonObject().get(argumentContext.name().getText());
-                        if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                            for (JsonValue item : fieldJsonValue.asJsonArray()) {
-                                return merge(fieldTypeName, argumentContext.valueWithVariable().objectValueWithVariable(), item);
-                            }
-                        } else {
-                            return merge(fieldTypeName, argumentContext.valueWithVariable().objectValueWithVariable(), fieldJsonValue);
+    private boolean merged(String typeName, JsonValue argument) {
+        Optional<String> idFieldName = manager.getObjectTypeIDFieldName(typeName);
+        if (idFieldName.isPresent() && argument.asJsonObject().containsKey(idFieldName.get()) && !argument.asJsonObject().isNull(idFieldName.get())) {
+            if (idMap.get(typeName) != null && idMap.get(typeName).contains(argument.asJsonObject().getString(idFieldName.get()))) {
+                return true;
+            }
+        }
+        for (Map.Entry<String, JsonValue> entry : argument.asJsonObject().entrySet()) {
+            GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, entry.getKey())
+                    .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, entry.getKey())));
+            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+            if (manager.isObject(fieldTypeName)) {
+                if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                    for (JsonValue item : entry.getValue().asJsonArray()) {
+                        if (merged(fieldTypeName, item)) {
+                            return true;
                         }
                     }
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean merge(String typeName, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext, JsonValue jsonValue) {
-        if (jsonValue.getValueType().equals(JsonValue.ValueType.OBJECT)) {
-            Optional<String> idFieldName = manager.getObjectTypeIDFieldName(typeName);
-            if (idFieldName.isPresent() && !jsonValue.asJsonObject().isNull(idFieldName.get())) {
-                if (idMap.get(typeName) != null && idMap.get(typeName).contains(jsonValue.asJsonObject().getString(idFieldName.get()))) {
-                    return true;
-                }
-            }
-            if (objectValueWithVariableContext != null) {
-                for (GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext : objectValueWithVariableContext.objectFieldWithVariable()) {
-                    if (Arrays.stream(EXCLUDE_INPUT).noneMatch(name -> name.equals(objectFieldWithVariableContext.name().getText()))) {
-                        GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, objectFieldWithVariableContext.name().getText())
-                                .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, objectFieldWithVariableContext.name().getText())));
-                        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                        JsonValue fieldJsonValue = jsonValue.asJsonObject().get(objectFieldWithVariableContext.name().getText());
-                        if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                            for (JsonValue item : fieldJsonValue.asJsonArray()) {
-                                return merge(fieldTypeName, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable(), item);
-                            }
-                        } else {
-                            return merge(fieldTypeName, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable(), fieldJsonValue);
-                        }
+                } else {
+                    if (merged(fieldTypeName, entry.getValue())) {
+                        return true;
                     }
                 }
             }

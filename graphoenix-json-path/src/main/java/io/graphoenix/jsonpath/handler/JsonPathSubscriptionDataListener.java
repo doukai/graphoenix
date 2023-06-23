@@ -44,17 +44,13 @@ public class JsonPathSubscriptionDataListener extends SubscriptionDataListener {
     @Override
     public boolean merged(JsonValue jsonValue) {
         JsonObject jsonObject = jsonValue.asJsonObject();
-        JsonValue operation = jsonObject.get("operation");
-
         String typeName = jsonObject.getString("type");
+        JsonValue arguments = jsonObject.get("arguments");
         JsonValue mutation = jsonObject.get("mutation");
-
-
-        DocumentContext documentContext = JsonPath.using(configuration).parse(mutation.asJsonArray());
-        return merge(typeName, documentContext);
+        return merged(typeName, arguments.asJsonArray()) || merged(typeName, JsonPath.using(configuration).parse(mutation.asJsonArray()));
     }
 
-    private boolean merge(String typeName, DocumentContext documentContext) {
+    private boolean merged(String typeName, DocumentContext documentContext) {
         if (filterMap.get(typeName) != null) {
             for (String filter : filterMap.get(typeName)) {
                 List<JsonValue> jsonValueList = documentContext.read(filter);

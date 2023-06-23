@@ -480,7 +480,7 @@ public class OperationHandlerImplementer {
                                                         .add(".map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())\n", ClassName.get(StringReader.class))
                                                         .add(".flatMap(jsonObject -> mutationAfterHandler.get().handle(operationDefinitionContext, mutationLoader.then(), operation, jsonObject))\n")
                                                         .add(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationWithFetchFieldDefinitionContext, queryLoader))\n")
-                                                        .add(".flatMap(jsonValue -> operationSubscriber.get().sendMutation(operationWithFetchFieldDefinitionContext, jsonValue))\n")
+                                                        .add(".flatMap(jsonValue -> operationSubscriber.get().sendMutation(operationWithFetchFieldDefinitionContext, operation, jsonValue))\n")
                                                         .unindent()
                                                         .add(")\n")
                                                         .unindent()
@@ -592,11 +592,11 @@ public class OperationHandlerImplementer {
                 if (manager.isObject(fieldTypeName)) {
                     if (fieldTypeIsList) {
                         builder.addStatement(
-                                        "$T type = new $T<$T>() {}.getType()",
-                                        ClassName.get(Type.class),
-                                        ClassName.get(TypeToken.class),
-                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                                )
+                                "$T type = new $T<$T>() {}.getType()",
+                                ClassName.get(Type.class),
+                                ClassName.get(TypeToken.class),
+                                typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                        )
                                 .addStatement(
                                         "$T $L = jsonb.get().fromJson(jsonValue.toString(), type)",
                                         typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
@@ -616,11 +616,11 @@ public class OperationHandlerImplementer {
                                 );
                     } else {
                         builder.addStatement(
-                                        "$T $L = jsonb.get().fromJson(jsonValue.toString(), $T.class)",
-                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                                        fieldTypeParameterName,
-                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                                )
+                                "$T $L = jsonb.get().fromJson(jsonValue.toString(), $T.class)",
+                                typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
+                                fieldTypeParameterName,
+                                typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                        )
                                 .addStatement(
                                         CodeBlock.of("return invokeHandler.get().$L($L, selectionContext.field().selectionSet()).map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
                                                 fieldTypeParameterName,

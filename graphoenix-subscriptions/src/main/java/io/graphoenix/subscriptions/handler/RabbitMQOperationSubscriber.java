@@ -20,7 +20,6 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
-import jakarta.json.stream.JsonCollectors;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.rabbitmq.OutboundMessage;
@@ -28,11 +27,11 @@ import reactor.rabbitmq.Receiver;
 import reactor.rabbitmq.Sender;
 
 import java.io.StringReader;
-import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.REQUEST_ID;
 import static reactor.rabbitmq.BindingSpecification.binding;
 import static reactor.rabbitmq.QueueSpecification.queue;
@@ -117,25 +116,23 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
         Flux<OutboundMessage> messageFlux = Flux.fromIterable(operationDefinitionContext.selectionSet().selection())
                 .map(selectionContext -> {
                             GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getMutationOperationTypeName()
-                                    .map(name -> manager.getField(name, selectionContext.field().name().getText())
-                                            .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(name, selectionContext.field().name().getText())))
+                                    .map(name ->
+                                            manager.getField(name, selectionContext.field().name().getText())
+                                                    .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(name, selectionContext.field().name().getText())))
                                     )
                                     .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST));
                             String packageName = manager.getPackageName(fieldDefinitionContext.type()).orElse(graphQLConfig.getPackageName());
                             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                            JsonObject operationJson = operation.getFields().stream()
-                                    .filter(field -> field.getArguments() != null && !field.getArguments().isEmpty())
-                                    .map(field -> new AbstractMap.SimpleEntry<>(field.getAlias() != null ? field.getAlias() : field.getName(), (JsonValue) field.getArguments()))
-                                    .collect(JsonCollectors.toJsonObject());
-                            JsonObjectBuilder mutation = jsonProvider.createObjectBuilder().add("type", fieldTypeName)
-                                    .add("operation", jsonProvider.createObjectBuilder(operationJson));
-
+                            JsonObjectBuilder mutation = jsonProvider.createObjectBuilder().add("type", fieldTypeName);
+                            JsonObject arguments = operation.getField(selectionContext.field().name().getText()).getArguments();
                             String selectionName = Optional.ofNullable(selectionContext.field().alias()).map(aliasContext -> aliasContext.name().getText()).orElse(selectionContext.field().name().getText());
                             JsonValue selectionJsonValue = jsonValue.asJsonObject().get(selectionName);
-                            if (selectionJsonValue.getValueType().equals(JsonValue.ValueType.ARRAY)) {
-                                mutation.add("mutation", jsonProvider.createArrayBuilder(selectionJsonValue.asJsonArray()));
+                            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                                mutation.add("arguments", jsonProvider.createArrayBuilder(arguments.get(LIST_INPUT_NAME).asJsonArray()))
+                                        .add("mutation", jsonProvider.createArrayBuilder(selectionJsonValue.asJsonArray()));
                             } else {
-                                mutation.add("mutation", jsonProvider.createArrayBuilder().add(jsonProvider.createObjectBuilder(selectionJsonValue.asJsonObject())));
+                                mutation.add("arguments", jsonProvider.createArrayBuilder().add(jsonProvider.createObjectBuilder(arguments.asJsonObject())))
+                                        .add("mutation", jsonProvider.createArrayBuilder().add(jsonProvider.createObjectBuilder(selectionJsonValue.asJsonObject())));
                             }
                             return new OutboundMessage(
                                     SUBSCRIPTION_EXCHANGE_NAME,
