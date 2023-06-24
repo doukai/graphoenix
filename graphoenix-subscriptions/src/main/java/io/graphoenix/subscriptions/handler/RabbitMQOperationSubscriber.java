@@ -109,7 +109,7 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
                                                 )
                                 )
                 )
-                .contextWrite(PublisherBeanContext.of(subscriptionDataListenerProvider.get()));
+                .contextWrite(PublisherBeanContext.of(SubscriptionDataListener.class, subscriptionDataListenerProvider.get()));
     }
 
     @Override

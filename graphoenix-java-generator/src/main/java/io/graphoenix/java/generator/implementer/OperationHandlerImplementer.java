@@ -16,6 +16,7 @@ import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.*;
+import io.graphoenix.core.operation.Operation;
 import io.graphoenix.core.schema.JsonSchemaValidator;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.OperationType;
@@ -506,7 +507,8 @@ public class OperationHandlerImplementer {
                 break;
             case SUBSCRIPTION:
                 builder.addParameter(ParameterSpec.builder(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinitionContext").build())
-                        .addStatement("$T operationWithFetchFieldDefinitionContext = fetchFieldProcessor.get().buildFetchFields(operationSubscriber.get().buildIDSelection(operationDefinitionContext))", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
+                        .addStatement("$T operation = operationSubscriber.get().buildIDSelection(operationDefinitionContext)", ClassName.get(Operation.class))
+                        .addStatement("$T operationWithFetchFieldDefinitionContext = fetchFieldProcessor.get().buildFetchFields(operation)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
                         .addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
                         .addStatement(
                                 CodeBlock.join(
