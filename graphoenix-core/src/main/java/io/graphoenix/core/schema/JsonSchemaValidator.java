@@ -12,11 +12,11 @@ import io.graphoenix.spi.dto.GraphQLError;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.json.JsonArrayBuilder;
-import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
+import jakarta.json.stream.JsonCollectors;
 
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.EXCLUDE_INPUT;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.UPDATE;
+import static io.graphoenix.spi.constant.Hammurabi.SCHEMA_EXCLUDE_INPUT;
 import static jakarta.json.JsonValue.FALSE;
 import static jakarta.json.JsonValue.NULL;
 import static jakarta.json.JsonValue.TRUE;
@@ -88,25 +88,25 @@ public class JsonSchemaValidator {
     }
 
     protected JsonValue argumentsToJsonElement(GraphqlParser.ArgumentsContext argumentsContext) {
-        JsonObjectBuilder jsonObjectBuilder = jsonProvider.createObjectBuilder();
         if (argumentsContext != null) {
-            argumentsContext.argument().stream()
-                    .filter(argumentContext -> argumentContext.valueWithVariable().NullValue() == null)
-                    .filter(argumentContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(argumentContext.name().getText())))
-                    .forEach(argumentContext -> jsonObjectBuilder.add(argumentContext.name().getText(), valueWithVariableToJsonElement(argumentContext.valueWithVariable())));
+            return argumentsContext.argument().stream()
+//                    .filter(argumentContext -> argumentContext.valueWithVariable().NullValue() == null)
+                    .filter(argumentContext -> Arrays.stream(SCHEMA_EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(argumentContext.name().getText())))
+                    .map(argumentContext -> new AbstractMap.SimpleEntry<>(argumentContext.name().getText(), valueWithVariableToJsonElement(argumentContext.valueWithVariable())))
+                    .collect(JsonCollectors.toJsonObject());
         }
-        return jsonObjectBuilder.build();
+        return NULL;
     }
 
     protected JsonValue objectValueWithVariableToJsonElement(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        JsonObjectBuilder jsonObjectBuilder = jsonProvider.createObjectBuilder();
         if (objectValueWithVariableContext.objectFieldWithVariable() != null) {
-            objectValueWithVariableContext.objectFieldWithVariable().stream()
-                    .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().NullValue() == null)
-                    .filter(objectFieldWithVariableContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(objectFieldWithVariableContext.name().getText())))
-                    .forEach(objectFieldWithVariableContext -> jsonObjectBuilder.add(objectFieldWithVariableContext.name().getText(), valueWithVariableToJsonElement(objectFieldWithVariableContext.valueWithVariable())));
+            return objectValueWithVariableContext.objectFieldWithVariable().stream()
+//                    .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().NullValue() == null)
+//                    .filter(objectFieldWithVariableContext -> Arrays.stream(SCHEMA_EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(objectFieldWithVariableContext.name().getText())))
+                    .map(objectFieldWithVariableContext -> new AbstractMap.SimpleEntry<>(objectFieldWithVariableContext.name().getText(), valueWithVariableToJsonElement(objectFieldWithVariableContext.valueWithVariable())))
+                    .collect(JsonCollectors.toJsonObject());
         }
-        return jsonObjectBuilder.build();
+        return NULL;
     }
 
     protected JsonValue valueWithVariableToJsonElement(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
@@ -123,11 +123,10 @@ public class JsonSchemaValidator {
         } else if (valueWithVariableContext.objectValueWithVariable() != null) {
             return objectValueWithVariableToJsonElement(valueWithVariableContext.objectValueWithVariable());
         } else if (valueWithVariableContext.arrayValueWithVariable() != null) {
-            JsonArrayBuilder jsonArrayBuilder = jsonProvider.createArrayBuilder();
-            valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
-                    .filter(subValueWithVariableContext -> subValueWithVariableContext.NullValue() == null)
-                    .forEach(subValueWithVariableContext -> jsonArrayBuilder.add(valueWithVariableToJsonElement(subValueWithVariableContext)));
-            return jsonArrayBuilder.build();
+            return valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
+//                    .filter(subValueWithVariableContext -> subValueWithVariableContext.NullValue() == null)
+                    .map(this::valueWithVariableToJsonElement)
+                    .collect(JsonCollectors.toJsonArray());
         } else if (valueWithVariableContext.NullValue() != null) {
             return NULL;
         }

@@ -13,6 +13,7 @@ import java.util.Optional;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.utils.ValidationUtil.VALIDATION_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
 import static jakarta.json.JsonValue.TRUE;
 
 @ApplicationScoped
@@ -69,9 +70,10 @@ public class JsonSchemaTranslator {
                 .add("type", jsonProvider.createValue("object"))
                 .add("properties",
                         jsonProvider.createObjectBuilder()
-                                .add("list",
+                                .add(LIST_INPUT_NAME,
                                         jsonProvider.createObjectBuilder()
                                                 .add("type", jsonProvider.createValue("array"))
+                                                .add("minItems", jsonProvider.createValue(1))
                                                 .add("items", jsonProvider.createObjectBuilder().add("$ref", objectTypeDefinitionContext.name().getText().concat(isUpdate ? "Update" : "")))
                                 )
                 )

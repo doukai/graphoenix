@@ -50,24 +50,26 @@ public class Field {
     }
 
     public static void mergeSelection(Collection<Field> originalSet, Collection<Field> fieldSet) {
-        fieldSet.forEach(
-                field -> {
-                    if (originalSet.stream().map(Field::getName).noneMatch(name -> name.equals(field.getName()))) {
-                        originalSet.add(field);
-                    } else {
-                        if (field.getFields() != null && field.getFields().size() > 0) {
-                            mergeSelection(
-                                    originalSet.stream()
-                                            .filter(original -> original.getName().equals(field.getName()))
-                                            .findFirst()
-                                            .orElseThrow(() -> new GraphQLErrors(SELECTION_NOT_EXIST.bind(field.getName())))
-                                            .getFields(),
-                                    field.getFields()
-                            );
+        if (fieldSet != null) {
+            fieldSet.forEach(
+                    field -> {
+                        if (originalSet.stream().map(Field::getName).noneMatch(name -> name.equals(field.getName()))) {
+                            originalSet.add(field);
+                        } else {
+                            if (field.getFields() != null && field.getFields().size() > 0) {
+                                mergeSelection(
+                                        originalSet.stream()
+                                                .filter(original -> original.getName().equals(field.getName()))
+                                                .findFirst()
+                                                .orElseThrow(() -> new GraphQLErrors(SELECTION_NOT_EXIST.bind(field.getName())))
+                                                .getFields(),
+                                        field.getFields()
+                                );
+                            }
                         }
                     }
-                }
-        );
+            );
+        }
     }
 
     public String getName() {
