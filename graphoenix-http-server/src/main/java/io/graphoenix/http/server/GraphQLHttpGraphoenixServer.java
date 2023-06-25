@@ -1,5 +1,6 @@
 package io.graphoenix.http.server;
 
+import io.graphoenix.core.context.RequestScopeInstanceFactory;
 import io.graphoenix.http.config.HttpServerConfig;
 import io.graphoenix.http.handler.*;
 import io.graphoenix.spi.handler.RunningServer;
@@ -12,7 +13,9 @@ import io.netty.handler.codec.http.cors.CorsHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import reactor.netty.ConnectionObserver;
 import reactor.netty.DisposableServer;
+import reactor.netty.http.HttpOperations;
 import reactor.netty.http.server.HttpServer;
 
 import static io.graphoenix.http.handler.SchemaRequestHandler.SCHEMA_PARAM_NAME;
@@ -52,6 +55,13 @@ public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
                                 .get(httpServerConfig.getSchemaContextPath().concat("/{").concat(SCHEMA_PARAM_NAME).concat("}"), schemaRequestHandler::handle)
                                 .get(httpServerConfig.getGraphqlContextPath(), getRequestHandler::handle)
                                 .post(httpServerConfig.getGraphqlContextPath(), postRequestHandler::handle)
+                )
+                .childObserve((connection, newState) -> {
+                            if (connection instanceof HttpOperations<?, ?> && newState.equals(ConnectionObserver.State.DISCONNECTING)) {
+                                String requestId = ((HttpOperations<?, ?>) connection).requestId();
+                                RequestScopeInstanceFactory.invalidate(requestId);
+                            }
+                        }
                 )
                 .port(httpServerConfig.getPort())
                 .bindNow();

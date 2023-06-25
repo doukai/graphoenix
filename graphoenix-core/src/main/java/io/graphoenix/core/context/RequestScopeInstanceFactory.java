@@ -99,4 +99,8 @@ public class RequestScopeInstanceFactory {
     public static <T, E extends T> Mono<T> putIfAbsent(Class<T> beanClass, String name, E instance) {
         return getScopeInstances().mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instance));
     }
+
+    public static void invalidate(String id) {
+        REQUEST_CACHE.synchronous().invalidate(id);
+    }
 }
