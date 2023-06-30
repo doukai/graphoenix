@@ -72,17 +72,17 @@ public class DocumentBuilder {
 
     public Document buildDocument() {
         io.vavr.collection.Stream.ofAll(
-                manager.getObjects()
-                        .filter(packageManager::isOwnPackage)
-                        .filter(manager::isNotOperationType)
-                        .filter(manager::isNotContainerType)
-                        .flatMap(objectTypeDefinitionContext ->
-                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                        )
-                        .filter(tuple -> manager.getFetchAnchor(tuple._2()))
-                        .filter(tuple -> manager.hasFetchWith(tuple._2()))
-        )
+                        manager.getObjects()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isNotOperationType)
+                                .filter(manager::isNotContainerType)
+                                .flatMap(objectTypeDefinitionContext ->
+                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                                )
+                                .filter(tuple -> manager.getFetchAnchor(tuple._2()))
+                                .filter(tuple -> manager.hasFetchWith(tuple._2()))
+                )
                 .distinctBy(tuple -> manager.getFetchWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildFetchWithObject(tuple._1(), tuple._2()).stream())
@@ -90,16 +90,16 @@ public class DocumentBuilder {
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
         io.vavr.collection.Stream.ofAll(
-                manager.getObjects()
-                        .filter(packageManager::isOwnPackage)
-                        .filter(manager::isNotOperationType)
-                        .filter(manager::isNotContainerType)
-                        .flatMap(objectTypeDefinitionContext ->
-                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                        )
-                        .filter(tuple -> manager.hasMapWith(tuple._2()))
-        )
+                        manager.getObjects()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isNotOperationType)
+                                .filter(manager::isNotContainerType)
+                                .flatMap(objectTypeDefinitionContext ->
+                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                                )
+                                .filter(tuple -> manager.hasMapWith(tuple._2()))
+                )
                 .distinctBy(tuple -> manager.getMapWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildMapWithObject(tuple._1(), tuple._2()).stream())
@@ -1242,7 +1242,7 @@ public class DocumentBuilder {
                             new io.graphoenix.core.operation.Directive()
                                     .setName(FUNC_DIRECTIVE_NAME)
                                     .addArgument("name", new EnumValue(this.name()))
-                                    .addArgument("name", fieldName)
+                                    .addArgument("field", fieldName)
                     );
 
             if (isList) {
