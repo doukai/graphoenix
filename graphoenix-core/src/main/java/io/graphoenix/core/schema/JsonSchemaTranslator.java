@@ -116,12 +116,12 @@ public class JsonSchemaTranslator {
                         .flatMap(arrayDirectiveContext -> VALIDATION_UTIL.getValidationObjectArgument(arrayDirectiveContext, "items"))
                         .orElse(null);
                 propertyBuilder.add("items", fieldToProperty(typeContext.nonNullType().listType().type(), objectValueWithVariableContext));
-                return buildNullableType(propertyBuilder);
+                return propertyBuilder;
             } else {
-                return buildNullableType(buildType(typeContext.nonNullType().typeName(), propertyBuilder));
+                return buildType(typeContext.nonNullType().typeName(), propertyBuilder);
             }
         } else {
-            return buildType(typeContext.typeName(), propertyBuilder);
+            return buildNullableType(buildType(typeContext.typeName(), propertyBuilder));
         }
     }
 
@@ -143,12 +143,12 @@ public class JsonSchemaTranslator {
                         .flatMap(arrayObjectValueWithVariableContext -> VALIDATION_UTIL.getValidationObjectArgument(arrayObjectValueWithVariableContext, "items"))
                         .orElse(null);
                 propertyBuilder.add("items", fieldToProperty(typeContext.nonNullType().listType().type(), subObjectValueWithVariableContext));
-                return buildNullableType(propertyBuilder);
+                return propertyBuilder;
             } else {
-                return buildNullableType(buildType(typeContext.nonNullType().typeName(), propertyBuilder));
+                return buildType(typeContext.nonNullType().typeName(), propertyBuilder);
             }
         } else {
-            return buildType(typeContext.typeName(), propertyBuilder);
+            return buildNullableType(buildType(typeContext.typeName(), propertyBuilder));
         }
     }
 
