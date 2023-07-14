@@ -211,7 +211,7 @@ public class GraphQLVariablesProcessor {
     private void replaceVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables, boolean skipNullArguments) {
         if (valueWithVariableContext.variable() != null) {
             GraphqlParser.ValueWithVariableContext valueContext = getValueByVariable(valueWithVariableContext.variable(), operationDefinitionContext, variables);
-            if (skipNullArguments && valueContext.NullValue() != null) {
+            if (skipNullArguments && valueContext.NullValue() != null && variables.get(valueWithVariableContext.variable().name().getText()) == null) {
                 valueWithVariableContext.getParent().removeLastChild();
                 valueWithVariableContext.getParent().removeLastChild();
                 valueWithVariableContext.getParent().removeLastChild();
