@@ -55,7 +55,6 @@ public class GraphQLVariablesProcessor {
         } else {
             throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
         }
-
         processFragment(objectTypeDefinitionContext.name().getText(), operationDefinitionContext.selectionSet());
 
         if (operationDefinitionContext.variableDefinitions() != null) {
@@ -95,7 +94,6 @@ public class GraphQLVariablesProcessor {
                 }
                 selectionSetContext.addChild((TerminalNode) right);
             }
-
             selectionSetContext.selection()
                     .forEach(selectionContext -> {
                                 GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, selectionContext.field().name().getText())
@@ -146,6 +144,18 @@ public class GraphQLVariablesProcessor {
         if (directiveContext.arguments() != null) {
             directiveContext.arguments().argument()
                     .forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables));
+
+            List<GraphqlParser.ArgumentContext> argumentContextList = directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.getChildCount() > 0).collect(Collectors.toList());
+            ParseTree left = directiveContext.arguments().getChild(0);
+            ParseTree right = directiveContext.arguments().getChild(directiveContext.arguments().getChildCount() - 1);
+            IntStream.range(0, directiveContext.arguments().getChildCount()).forEach(index -> directiveContext.arguments().removeLastChild());
+            if (argumentContextList.size() > 0) {
+                directiveContext.arguments().addChild((TerminalNode) left);
+                for (GraphqlParser.ArgumentContext argumentContext : argumentContextList) {
+                    directiveContext.arguments().addChild(argumentContext);
+                }
+                directiveContext.arguments().addChild((TerminalNode) right);
+            }
         }
     }
 
@@ -155,20 +165,18 @@ public class GraphQLVariablesProcessor {
                 boolean skipNullArguments = skipNullArguments(selectionContext.field(), variables);
                 selectionContext.field().arguments().argument()
                         .forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables, skipNullArguments));
-                if (skipNullArguments) {
-                    List<GraphqlParser.ArgumentContext> argumentContextList = selectionContext.field().arguments().argument().stream().filter(argumentContext -> argumentContext.getChildCount() > 0).collect(Collectors.toList());
-                    ParseTree left = selectionContext.field().arguments().getChild(0);
-                    ParseTree right = selectionContext.field().arguments().getChild(selectionContext.field().arguments().getChildCount() - 1);
-                    IntStream.range(0, selectionContext.field().arguments().getChildCount()).forEach(index -> selectionContext.field().arguments().removeLastChild());
-                    if (argumentContextList.size() > 0) {
-                        selectionContext.field().arguments().addChild((TerminalNode) left);
-                        for (GraphqlParser.ArgumentContext argumentContext : argumentContextList) {
-                            selectionContext.field().arguments().addChild(argumentContext);
-                        }
-                        selectionContext.field().arguments().addChild((TerminalNode) right);
-                    }
-                }
 
+                List<GraphqlParser.ArgumentContext> argumentContextList = selectionContext.field().arguments().argument().stream().filter(argumentContext -> argumentContext.getChildCount() > 0).collect(Collectors.toList());
+                ParseTree left = selectionContext.field().arguments().getChild(0);
+                ParseTree right = selectionContext.field().arguments().getChild(selectionContext.field().arguments().getChildCount() - 1);
+                IntStream.range(0, selectionContext.field().arguments().getChildCount()).forEach(index -> selectionContext.field().arguments().removeLastChild());
+                if (argumentContextList.size() > 0) {
+                    selectionContext.field().arguments().addChild((TerminalNode) left);
+                    for (GraphqlParser.ArgumentContext argumentContext : argumentContextList) {
+                        selectionContext.field().arguments().addChild(argumentContext);
+                    }
+                    selectionContext.field().arguments().addChild((TerminalNode) right);
+                }
                 selectionContext.field().arguments().argument()
                         .forEach(argumentContext -> replaceEnumValue(getArgumentType(fieldDefinitionContext, argumentContext), argumentContext.valueWithVariable()));
             }
@@ -211,7 +219,7 @@ public class GraphQLVariablesProcessor {
     private void replaceVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables, boolean skipNullArguments) {
         if (valueWithVariableContext.variable() != null) {
             Optional<GraphqlParser.ValueWithVariableContext> valueContext = getValueByVariable(valueWithVariableContext.variable(), operationDefinitionContext, variables);
-            if (valueContext.isEmpty() || (valueContext.get().NullValue() != null && skipNullArguments)) {
+            if (valueContext.isEmpty() || (skipNullArguments && valueContext.get().NullValue() != null)) {
                 valueWithVariableContext.getParent().removeLastChild();
                 valueWithVariableContext.getParent().removeLastChild();
                 valueWithVariableContext.getParent().removeLastChild();
