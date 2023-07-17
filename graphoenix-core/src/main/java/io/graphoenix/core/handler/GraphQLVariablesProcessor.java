@@ -210,39 +210,39 @@ public class GraphQLVariablesProcessor {
 
     private void replaceVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables, boolean skipNullArguments) {
         if (valueWithVariableContext.variable() != null) {
-            GraphqlParser.ValueWithVariableContext valueContext = getValueByVariable(valueWithVariableContext.variable(), operationDefinitionContext, variables);
-            if (skipNullArguments && valueContext.NullValue() != null && variables.get(valueWithVariableContext.variable().name().getText()) == null) {
+            Optional<GraphqlParser.ValueWithVariableContext> valueContext = getValueByVariable(valueWithVariableContext.variable(), operationDefinitionContext, variables);
+            if (valueContext.isEmpty() || (valueContext.get().NullValue() != null && skipNullArguments)) {
                 valueWithVariableContext.getParent().removeLastChild();
                 valueWithVariableContext.getParent().removeLastChild();
                 valueWithVariableContext.getParent().removeLastChild();
                 return;
             }
-            Logger.debug("replace variable {} to {}", valueWithVariableContext.getChild(valueWithVariableContext.getChildCount() - 1).getText(), valueContext.getText());
+            Logger.debug("replace variable {} to {}", valueWithVariableContext.getChild(valueWithVariableContext.getChildCount() - 1).getText(), valueContext.get().getText());
             valueWithVariableContext.removeLastChild();
-            if (valueContext.BooleanValue() != null) {
-                valueContext.BooleanValue().setParent(valueWithVariableContext);
-                valueWithVariableContext.addChild(valueContext.BooleanValue());
-            } else if (valueContext.IntValue() != null) {
-                valueContext.IntValue().setParent(valueWithVariableContext);
-                valueWithVariableContext.addChild(valueContext.IntValue());
-            } else if (valueContext.FloatValue() != null) {
-                valueContext.FloatValue().setParent(valueWithVariableContext);
-                valueWithVariableContext.addChild(valueContext.FloatValue());
-            } else if (valueContext.StringValue() != null) {
-                valueContext.StringValue().setParent(valueWithVariableContext);
-                valueWithVariableContext.addChild(valueContext.StringValue());
-            } else if (valueContext.NullValue() != null) {
-                valueContext.NullValue().setParent(valueWithVariableContext);
-                valueWithVariableContext.addChild(valueContext.NullValue());
-            } else if (valueContext.enumValue() != null) {
-                valueContext.enumValue().setParent(valueWithVariableContext);
-                valueWithVariableContext.addChild(valueContext.enumValue());
-            } else if (valueContext.objectValueWithVariable() != null) {
-                valueContext.objectValueWithVariable().setParent(valueWithVariableContext);
-                valueWithVariableContext.addChild(valueContext.objectValueWithVariable());
-            } else if (valueContext.arrayValueWithVariable() != null) {
-                valueContext.arrayValueWithVariable().setParent(valueWithVariableContext);
-                valueWithVariableContext.addChild(valueContext.arrayValueWithVariable());
+            if (valueContext.get().BooleanValue() != null) {
+                valueContext.get().BooleanValue().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.get().BooleanValue());
+            } else if (valueContext.get().IntValue() != null) {
+                valueContext.get().IntValue().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.get().IntValue());
+            } else if (valueContext.get().FloatValue() != null) {
+                valueContext.get().FloatValue().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.get().FloatValue());
+            } else if (valueContext.get().StringValue() != null) {
+                valueContext.get().StringValue().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.get().StringValue());
+            } else if (valueContext.get().NullValue() != null) {
+                valueContext.get().NullValue().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.get().NullValue());
+            } else if (valueContext.get().enumValue() != null) {
+                valueContext.get().enumValue().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.get().enumValue());
+            } else if (valueContext.get().objectValueWithVariable() != null) {
+                valueContext.get().objectValueWithVariable().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.get().objectValueWithVariable());
+            } else if (valueContext.get().arrayValueWithVariable() != null) {
+                valueContext.get().arrayValueWithVariable().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.get().arrayValueWithVariable());
             }
         } else if (valueWithVariableContext.objectValueWithVariable() != null) {
             valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable()
@@ -275,20 +275,19 @@ public class GraphQLVariablesProcessor {
         }
     }
 
-    private GraphqlParser.ValueWithVariableContext getValueByVariable(GraphqlParser.VariableContext variableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
+    private Optional<GraphqlParser.ValueWithVariableContext> getValueByVariable(GraphqlParser.VariableContext variableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
         return operationDefinitionContext.variableDefinitions().variableDefinition().stream()
                 .filter(variableDefinitionContext -> variableDefinitionContext.variable().name().getText().equals(variableContext.name().getText()))
-                .map(variableDefinitionContext -> variableToValue(variableDefinitionContext, variables.get(variableDefinitionContext.variable().name().getText())))
-                .findFirst()
-                .orElseThrow(() -> new GraphQLErrors(OPERATION_VARIABLE_NOT_EXIST.bind(variableContext.name().getText(), operationDefinitionContext.name().getText())));
+                .flatMap(variableDefinitionContext -> variableToValue(variableDefinitionContext, variables.get(variableDefinitionContext.variable().name().getText())).stream())
+                .findFirst();
     }
 
-    private GraphqlParser.ValueWithVariableContext variableToValue(GraphqlParser.VariableDefinitionContext variableDefinitionContext, JsonValue variable) {
+    private Optional<GraphqlParser.ValueWithVariableContext> variableToValue(GraphqlParser.VariableDefinitionContext variableDefinitionContext, JsonValue variable) {
         if (variable == null) {
             if (variableDefinitionContext.type().nonNullType() != null) {
                 throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(variableDefinitionContext.variable().name().getText()));
             } else {
-                variable = JsonValue.NULL;
+                return Optional.empty();
             }
         } else {
             if (variable.getValueType().equals(NULL)) {
@@ -297,7 +296,7 @@ public class GraphQLVariablesProcessor {
                 }
             }
         }
-        return DOCUMENT_UTIL.getGraphqlParser(jsonElementToVariableString(variable)).valueWithVariable();
+        return Optional.of(DOCUMENT_UTIL.getGraphqlParser(jsonElementToVariableString(variable)).valueWithVariable());
     }
 
     public String jsonElementToVariableString(JsonValue element) {
