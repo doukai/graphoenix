@@ -26,7 +26,6 @@ import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static jakarta.json.JsonValue.ValueType.ARRAY;
 import static jakarta.json.JsonValue.ValueType.NULL;
 import static jakarta.json.JsonValue.ValueType.OBJECT;
-import static jakarta.json.JsonValue.ValueType.TRUE;
 
 @ApplicationScoped
 public class GraphQLVariablesProcessor {
@@ -162,9 +161,8 @@ public class GraphQLVariablesProcessor {
     private void processSelection(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
         if (selectionContext.field() != null) {
             if (selectionContext.field().arguments() != null) {
-                boolean skipNullArguments = skipNullArguments(selectionContext.field(), variables);
                 selectionContext.field().arguments().argument()
-                        .forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables, skipNullArguments));
+                        .forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables));
 
                 List<GraphqlParser.ArgumentContext> argumentContextList = selectionContext.field().arguments().argument().stream().filter(argumentContext -> argumentContext.getChildCount() > 0).collect(Collectors.toList());
                 ParseTree left = selectionContext.field().arguments().getChild(0);
@@ -213,13 +211,9 @@ public class GraphQLVariablesProcessor {
     }
 
     private void replaceVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
-        replaceVariable(valueWithVariableContext, operationDefinitionContext, variables, false);
-    }
-
-    private void replaceVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables, boolean skipNullArguments) {
         if (valueWithVariableContext.variable() != null) {
             Optional<GraphqlParser.ValueWithVariableContext> valueContext = getValueByVariable(valueWithVariableContext.variable(), operationDefinitionContext, variables);
-            if (valueContext.isEmpty() || (skipNullArguments && valueContext.get().NullValue() != null)) {
+            if (valueContext.isEmpty()) {
                 valueWithVariableContext.getParent().removeLastChild();
                 valueWithVariableContext.getParent().removeLastChild();
                 valueWithVariableContext.getParent().removeLastChild();
@@ -254,10 +248,10 @@ public class GraphQLVariablesProcessor {
             }
         } else if (valueWithVariableContext.objectValueWithVariable() != null) {
             valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable()
-                    .forEach(objectFieldWithVariableContext -> replaceVariable(objectFieldWithVariableContext.valueWithVariable(), operationDefinitionContext, variables, skipNullArguments));
+                    .forEach(objectFieldWithVariableContext -> replaceVariable(objectFieldWithVariableContext.valueWithVariable(), operationDefinitionContext, variables));
         } else if (valueWithVariableContext.arrayValueWithVariable() != null) {
             valueWithVariableContext.arrayValueWithVariable().valueWithVariable()
-                    .forEach(subValueWithVariableContext -> replaceVariable(subValueWithVariableContext, operationDefinitionContext, variables, skipNullArguments));
+                    .forEach(subValueWithVariableContext -> replaceVariable(subValueWithVariableContext, operationDefinitionContext, variables));
         }
     }
 
@@ -325,33 +319,6 @@ public class GraphQLVariablesProcessor {
         } else {
             return element.toString();
         }
-    }
-
-    private Optional<GraphqlParser.DirectiveContext> getSkipNullArguments(GraphqlParser.FieldContext fieldContext) {
-        return Stream.ofNullable(fieldContext.directives())
-                .flatMap(directivesContext -> directivesContext.directive().stream())
-                .filter(directiveContext -> directiveContext.name().getText().equals("skipNullArguments"))
-                .findFirst();
-    }
-
-    private boolean skipNullArguments(GraphqlParser.FieldContext fieldContext, Map<String, JsonValue> variables) {
-        return getSkipNullArguments(fieldContext).stream()
-                .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
-                .flatMap(argumentsContext -> argumentsContext.argument().stream())
-                .filter(argumentContext -> argumentContext.name().getText().equals("if"))
-                .findFirst()
-                .map(argumentContext -> {
-                            if (argumentContext.valueWithVariable().variable() != null) {
-                                JsonValue jsonValue = variables.get(argumentContext.valueWithVariable().variable().name().getText());
-                                return jsonValue != null && jsonValue.getValueType().equals(TRUE);
-                            } else if (argumentContext.valueWithVariable().BooleanValue() != null) {
-                                return Boolean.valueOf(argumentContext.valueWithVariable().BooleanValue().getText());
-                            } else {
-                                return false;
-                            }
-                        }
-                )
-                .orElse(false);
     }
 
     private GraphqlParser.TypeContext getArgumentType(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {

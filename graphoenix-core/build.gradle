@@ -1,20 +1,20 @@
-//buildscript {
-//    repositories {
-//        mavenLocal()
-//        jcenter()
-//        gradlePluginPortal()
-//    }
-//    dependencies {
-//        classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
-//    }
-//}
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
+    }
+}
 
 plugins {
     id 'java'
     id 'com.google.protobuf' version '0.9.1'
 }
 apply plugin: 'maven'
-//apply plugin: 'io.graphoenix'
+apply plugin: 'io.graphoenix'
 
 protobuf {
     protoc {
