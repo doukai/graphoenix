@@ -1769,13 +1769,13 @@ public class GraphQLMutationToStatements {
 
         Optional<Expression> whereExpression = graphQLArgumentsToWhere.objectValueWithVariableToWhereExpression(fieldDefinitionContext, argumentsContext);
 
-        Statement statement;
+        Optional<Statement> statement;
         switch (mutationType) {
             case UPDATE:
                 statement = argumentsToUpdate(dbNameUtil.typeToTable(manager.getFieldTypeName(fieldDefinitionContext.type()), 1), fieldDefinitionContext.type(), fieldList, argumentsContext, whereExpression.orElse(null));
                 break;
             case DELETE:
-                statement = argumentsToDelete(dbNameUtil.typeToTable(manager.getFieldTypeName(fieldDefinitionContext.type()), 1), fieldDefinitionContext.type(), argumentsContext, whereExpression.orElse(null));
+                statement = Optional.of(argumentsToDelete(dbNameUtil.typeToTable(manager.getFieldTypeName(fieldDefinitionContext.type()), 1), fieldDefinitionContext.type(), argumentsContext, whereExpression.orElse(null)));
                 break;
             default:
                 statement = argumentsToInsert(table, fieldDefinitionContext.type(), fieldList, argumentsContext);
@@ -1783,9 +1783,9 @@ public class GraphQLMutationToStatements {
         Optional<String> idFieldName = manager.getObjectTypeIDFieldName(typeName);
         Optional<GraphqlParser.ArgumentContext> idArgumentContext = manager.getIDArgument(fieldDefinitionContext.type(), argumentsContext);
         if ((idArgumentContext.isEmpty() || idArgumentContext.get().valueWithVariable().NullValue() != null) && idFieldName.isPresent()) {
-            return Stream.of(statement, dbValueUtil.createInsertIdSetStatement(typeName, idFieldName.get(), 0, 0));
+            return Stream.concat(statement.stream(), Stream.of(dbValueUtil.createInsertIdSetStatement(typeName, idFieldName.get(), 0, 0)));
         }
-        return Stream.of(statement);
+        return statement.stream();
     }
 
     protected Stream<Statement> objectValueWithVariableToInsertStatementStream(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
@@ -1832,10 +1832,10 @@ public class GraphQLMutationToStatements {
         return Stream.of(insert);
     }
 
-    protected Insert argumentsToInsert(Table table,
-                                       GraphqlParser.TypeContext typeContext,
-                                       List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
-                                       GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Optional<Statement> argumentsToInsert(Table table,
+                                                    GraphqlParser.TypeContext typeContext,
+                                                    List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
+                                                    GraphqlParser.ArgumentsContext argumentsContext) {
 
         List<Column> columnList = inputValueDefinitionContextList.stream()
                 .map(inputValueDefinitionContext ->
@@ -1864,14 +1864,17 @@ public class GraphQLMutationToStatements {
                         .flatMap(Optional::stream)
                         .collect(Collectors.toList())
         );
-        return insertExpression(table, columnList, expressionList, true);
+        if (columnList.size() == 0) {
+            return Optional.empty();
+        }
+        return Optional.of(insertExpression(table, columnList, expressionList, true));
     }
 
-    protected Update argumentsToUpdate(Table table,
-                                       GraphqlParser.TypeContext typeContext,
-                                       List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
-                                       GraphqlParser.ArgumentsContext argumentsContext,
-                                       Expression where) {
+    protected Optional<Statement> argumentsToUpdate(Table table,
+                                                    GraphqlParser.TypeContext typeContext,
+                                                    List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
+                                                    GraphqlParser.ArgumentsContext argumentsContext,
+                                                    Expression where) {
         String fieldTypeName = manager.getFieldTypeName(typeContext);
         if (where == null) {
             GraphqlParser.ArgumentContext idArgument = manager.getIDArgument(typeContext, argumentsContext)
@@ -1905,7 +1908,10 @@ public class GraphQLMutationToStatements {
                             )
                     )
                     .collect(Collectors.toList());
-            return updateExpression(table, updateSetList, idColumn, idValue);
+            if (updateSetList.size() == 0) {
+                return Optional.empty();
+            }
+            return Optional.of(updateExpression(table, updateSetList, idColumn, idValue));
         }
 
         List<UpdateSet> updateSetList = inputValueDefinitionContextList.stream()
@@ -1930,13 +1936,16 @@ public class GraphQLMutationToStatements {
                 )
                 .collect(Collectors.toList());
 
-        return updateExpression(table, updateSetList, where);
+        if (updateSetList.size() == 0) {
+            return Optional.empty();
+        }
+        return Optional.of(updateExpression(table, updateSetList, where));
     }
 
-    protected Delete argumentsToDelete(Table table,
-                                       GraphqlParser.TypeContext typeContext,
-                                       GraphqlParser.ArgumentsContext argumentsContext,
-                                       Expression where) {
+    protected Statement argumentsToDelete(Table table,
+                                          GraphqlParser.TypeContext typeContext,
+                                          GraphqlParser.ArgumentsContext argumentsContext,
+                                          Expression where) {
         String fieldTypeName = manager.getFieldTypeName(typeContext);
         if (where == null) {
             GraphqlParser.ArgumentContext idArgument = manager.getIDArgument(typeContext, argumentsContext)
