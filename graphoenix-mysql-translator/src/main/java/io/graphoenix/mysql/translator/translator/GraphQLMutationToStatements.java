@@ -209,18 +209,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                        objectDefaultValueToStatementStream(
-                                                                                fieldDefinitionContext,
-                                                                                idValueExpression,
-                                                                                subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
-                                                                                inputValueDefinitionContext,
-                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                                0,
-                                                                                0
-                                                                        )
+                                                                objectDefaultValueToStatementStream(
+                                                                        fieldDefinitionContext,
+                                                                        idValueExpression,
+                                                                        subFieldDefinitionContext,
+                                                                        inputObjectTypeDefinitionContext,
+                                                                        inputValueDefinitionContext,
+                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                        0,
+                                                                        0
                                                                 )
+                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -938,19 +938,38 @@ public class GraphQLMutationToStatements {
                                                                                   Expression fromValueExpression,
                                                                                   int level) {
 
-        List<GraphqlParser.ValueWithVariableContext> mergeValueWithVariableList = Stream.ofNullable(arrayValueWithVariableContext.valueWithVariable()).flatMap(Collection::stream)
+        List<GraphqlParser.ValueWithVariableContext> idValueWithVariableList = Stream.ofNullable(arrayValueWithVariableContext.valueWithVariable())
+                .flatMap(Collection::stream)
+                .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
+                .flatMap(valueWithVariableContext -> manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable()).stream())
+                .map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable)
+                .collect(Collectors.toList());
+
+        List<GraphqlParser.ValueWithVariableContext> mergeValueWithVariableList = Stream.ofNullable(arrayValueWithVariableContext.valueWithVariable())
+                .flatMap(Collection::stream)
                 .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
                 .filter((valueWithVariableContext -> manager.getIsDeprecatedObjectFieldWithVariable(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable()).isEmpty()))
                 .collect(Collectors.toList());
 
-        List<GraphqlParser.ValueWithVariableContext> removeValueWithVariableList = Stream.ofNullable(arrayValueWithVariableContext.valueWithVariable()).flatMap(Collection::stream)
+        List<GraphqlParser.ValueWithVariableContext> removeValueWithVariableList = Stream.ofNullable(arrayValueWithVariableContext.valueWithVariable())
+                .flatMap(Collection::stream)
                 .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
                 .filter((valueWithVariableContext -> manager.getIsDeprecatedObjectFieldWithVariable(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable()).isPresent()))
                 .collect(Collectors.toList());
 
-        Stream<Statement> listObjectValueInsertStatementStream = Stream.empty();
         Stream<Statement> objectWithTypeRemoveStream = Stream.empty();
+        Stream<Statement> listObjectValueInsertStatementStream = Stream.empty();
         Stream<Statement> objectTypeFieldRelationRemoveStream = Stream.empty();
+
+        if (!idValueWithVariableList.isEmpty()) {
+            objectWithTypeRemoveStream = objectWithTypeRemoveStream(
+                    parentFieldDefinitionContext,
+                    parentIdValueExpression,
+                    fieldDefinitionContext,
+                    fromValueExpression,
+                    idValueWithVariableList
+            );
+        }
 
         if (!mergeValueWithVariableList.isEmpty()) {
             listObjectValueInsertStatementStream = IntStream.range(0, mergeValueWithVariableList.size())
@@ -963,7 +982,8 @@ public class GraphQLMutationToStatements {
                                     mergeValueWithVariableList.get(index).objectValueWithVariable(),
                                     fromValueExpression,
                                     mapper.getMapToValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, mergeValueWithVariableList.get(index).objectValueWithVariable())
-                                            .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                            .map(dbValueUtil::scalarValueWithVariableToDBValue)
+                                            .orElse(null),
                                     level,
                                     index
                             )
@@ -980,13 +1000,6 @@ public class GraphQLMutationToStatements {
                     .map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable)
                     .collect(Collectors.toList());
 
-            objectWithTypeRemoveStream = objectWithTypeRemoveStream(
-                    parentFieldDefinitionContext,
-                    parentIdValueExpression,
-                    fieldDefinitionContext,
-                    fromValueExpression,
-                    removeIDValueWithVariableList
-            );
             objectTypeFieldRelationRemoveStream = objectTypeFieldRelationRemoveStream(
                     parentFieldDefinitionContext,
                     parentIdValueExpression,
@@ -995,8 +1008,7 @@ public class GraphQLMutationToStatements {
                     removeIDValueWithVariableList
             );
         }
-
-        return Stream.concat(listObjectValueInsertStatementStream, Stream.concat(objectWithTypeRemoveStream, objectTypeFieldRelationRemoveStream));
+        return Stream.concat(objectWithTypeRemoveStream, Stream.concat(listObjectValueInsertStatementStream, objectTypeFieldRelationRemoveStream));
     }
 
     protected Stream<Statement> listObjectValueToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
