@@ -54,7 +54,7 @@ public class JsonSchemaTranslator {
                 .orElseGet(jsonProvider::createObjectBuilder);
         JsonObjectBuilder builder = jsonSchemaBuilder.add("$id", jsonProvider.createValue("#".concat(objectTypeDefinitionContext.name().getText().concat(isUpdate ? "Update" : ""))))
                 .add("type", jsonProvider.createValue("object"))
-                .add("properties", objectToProperties(objectTypeDefinitionContext))
+                .add("properties", objectToProperties(objectTypeDefinitionContext, isUpdate))
                 .add("additionalProperties", TRUE);
         if (!isUpdate) {
             builder.add("required", buildRequired(objectTypeDefinitionContext));
@@ -88,17 +88,25 @@ public class JsonSchemaTranslator {
         return requiredBuilder;
     }
 
-    protected JsonObjectBuilder objectToProperties(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    protected JsonObjectBuilder objectToProperties(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean isUpdate) {
+        Optional<String> objectTypeIDFieldName = manager.getObjectTypeIDFieldName(objectTypeDefinitionContext.name().getText());
         JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                 .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
-                .forEach(fieldDefinitionContext -> propertiesBuilder.add(fieldDefinitionContext.name().getText(), fieldToProperty(fieldDefinitionContext.type(), VALIDATION_UTIL.getValidationDirectiveContext(fieldDefinitionContext.directives()).orElse(null))));
+                .forEach(fieldDefinitionContext -> {
+                            if (isUpdate && objectTypeIDFieldName.isPresent() && objectTypeIDFieldName.get().equals(fieldDefinitionContext.name().getText())) {
+                                propertiesBuilder.add(fieldDefinitionContext.name().getText(), jsonProvider.createObjectBuilder().add("type", "string"));
+                            } else {
+                                propertiesBuilder.add(fieldDefinitionContext.name().getText(), fieldToProperty(fieldDefinitionContext.type(), VALIDATION_UTIL.getValidationDirectiveContext(fieldDefinitionContext.directives()).orElse(null), isUpdate));
+                            }
+                        }
+                );
         return propertiesBuilder;
     }
 
-    protected JsonObjectBuilder fieldToProperty(GraphqlParser.TypeContext typeContext, GraphqlParser.DirectiveContext directiveContext) {
+    protected JsonObjectBuilder fieldToProperty(GraphqlParser.TypeContext typeContext, GraphqlParser.DirectiveContext directiveContext, boolean isUpdate) {
         JsonObjectBuilder propertyBuilder = Optional.ofNullable(directiveContext)
                 .map(this::buildValidation)
                 .orElseGet(jsonProvider::createObjectBuilder);
@@ -107,7 +115,7 @@ public class JsonSchemaTranslator {
             GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext = Optional.ofNullable(directiveContext)
                     .flatMap(arrayDirectiveContext -> VALIDATION_UTIL.getValidationObjectArgument(arrayDirectiveContext, "items"))
                     .orElse(null);
-            propertyBuilder.add("items", fieldToProperty(typeContext.listType().type(), objectValueWithVariableContext));
+            propertyBuilder.add("items", fieldToProperty(typeContext.listType().type(), objectValueWithVariableContext, isUpdate));
             return propertyBuilder;
         } else if (typeContext.nonNullType() != null) {
             if (typeContext.nonNullType().listType() != null) {
@@ -115,17 +123,17 @@ public class JsonSchemaTranslator {
                 GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext = Optional.ofNullable(directiveContext)
                         .flatMap(arrayDirectiveContext -> VALIDATION_UTIL.getValidationObjectArgument(arrayDirectiveContext, "items"))
                         .orElse(null);
-                propertyBuilder.add("items", fieldToProperty(typeContext.nonNullType().listType().type(), objectValueWithVariableContext));
+                propertyBuilder.add("items", fieldToProperty(typeContext.nonNullType().listType().type(), objectValueWithVariableContext, isUpdate));
                 return propertyBuilder;
             } else {
-                return buildType(typeContext.nonNullType().typeName(), propertyBuilder);
+                return buildType(typeContext.nonNullType().typeName(), propertyBuilder, isUpdate);
             }
         } else {
-            return buildNullableType(buildType(typeContext.typeName(), propertyBuilder));
+            return buildNullableType(buildType(typeContext.typeName(), propertyBuilder, isUpdate));
         }
     }
 
-    protected JsonObjectBuilder fieldToProperty(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+    protected JsonObjectBuilder fieldToProperty(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext, boolean isUpdate) {
         JsonObjectBuilder propertyBuilder = Optional.ofNullable(objectValueWithVariableContext)
                 .map(this::buildValidation)
                 .orElseGet(jsonProvider::createObjectBuilder);
@@ -134,7 +142,7 @@ public class JsonSchemaTranslator {
             GraphqlParser.ObjectValueWithVariableContext subObjectValueWithVariableContext = Optional.ofNullable(objectValueWithVariableContext)
                     .flatMap(arrayObjectValueWithVariableContext -> VALIDATION_UTIL.getValidationObjectArgument(arrayObjectValueWithVariableContext, "items"))
                     .orElse(null);
-            propertyBuilder.add("items", fieldToProperty(typeContext.listType().type(), subObjectValueWithVariableContext));
+            propertyBuilder.add("items", fieldToProperty(typeContext.listType().type(), subObjectValueWithVariableContext, isUpdate));
             return propertyBuilder;
         } else if (typeContext.nonNullType() != null) {
             if (typeContext.nonNullType().listType() != null) {
@@ -142,17 +150,17 @@ public class JsonSchemaTranslator {
                 GraphqlParser.ObjectValueWithVariableContext subObjectValueWithVariableContext = Optional.ofNullable(objectValueWithVariableContext)
                         .flatMap(arrayObjectValueWithVariableContext -> VALIDATION_UTIL.getValidationObjectArgument(arrayObjectValueWithVariableContext, "items"))
                         .orElse(null);
-                propertyBuilder.add("items", fieldToProperty(typeContext.nonNullType().listType().type(), subObjectValueWithVariableContext));
+                propertyBuilder.add("items", fieldToProperty(typeContext.nonNullType().listType().type(), subObjectValueWithVariableContext, isUpdate));
                 return propertyBuilder;
             } else {
-                return buildType(typeContext.nonNullType().typeName(), propertyBuilder);
+                return buildType(typeContext.nonNullType().typeName(), propertyBuilder, isUpdate);
             }
         } else {
-            return buildNullableType(buildType(typeContext.typeName(), propertyBuilder));
+            return buildNullableType(buildType(typeContext.typeName(), propertyBuilder, isUpdate));
         }
     }
 
-    protected JsonObjectBuilder buildType(GraphqlParser.TypeNameContext typeNameContext, JsonObjectBuilder jsonObjectBuilder) {
+    protected JsonObjectBuilder buildType(GraphqlParser.TypeNameContext typeNameContext, JsonObjectBuilder jsonObjectBuilder, boolean isUpdate) {
         String fieldTypeName = typeNameContext.getText();
         if (manager.isScalar(fieldTypeName)) {
             switch (fieldTypeName) {
@@ -186,17 +194,26 @@ public class JsonSchemaTranslator {
                             }
                     );
         } else if (manager.isObject(fieldTypeName)) {
-            jsonObjectBuilder.add("$ref", jsonProvider.createValue(fieldTypeName));
+            if (isUpdate) {
+                jsonObjectBuilder.add("anyOf",
+                        jsonProvider.createArrayBuilder()
+                                .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue(fieldTypeName)))
+                                .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue(fieldTypeName + "Update")))
+                );
+            } else {
+                jsonObjectBuilder.add("$ref", jsonProvider.createValue(fieldTypeName));
+            }
         }
         return jsonObjectBuilder;
     }
 
     protected JsonObjectBuilder buildNullableType(JsonObjectBuilder typeBuilder) {
-        return jsonProvider.createObjectBuilder().add("anyOf",
-                jsonProvider.createArrayBuilder()
-                        .add(typeBuilder)
-                        .add(jsonProvider.createObjectBuilder().add("type", jsonProvider.createValue("null")))
-        );
+        return jsonProvider.createObjectBuilder()
+                .add("anyOf",
+                        jsonProvider.createArrayBuilder()
+                                .add(typeBuilder)
+                                .add(jsonProvider.createObjectBuilder().add("type", jsonProvider.createValue("null")))
+                );
     }
 
     protected JsonObjectBuilder buildValidation(GraphqlParser.DirectiveContext directiveContext) {
