@@ -110,6 +110,10 @@ public class ApplicationProcessor extends BaseProcessor {
                 writer = schema.openWriter();
                 writer.write(jsonSchemaTranslator.objectListToJsonSchemaString(objectTypeDefinitionContext, true));
                 writer.close();
+                schema = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/".concat(objectTypeDefinitionContext.name().getText().concat("Remove")));
+                writer = schema.openWriter();
+                writer.write(jsonSchemaTranslator.objectToJsonRemoveSchemaString(objectTypeDefinitionContext));
+                writer.close();
             }
             invokeHandlerBuilder.writeToFiler(filer);
             connectionHandlerBuilder.writeToFiler(filer);

@@ -13,8 +13,10 @@ import java.util.Optional;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.utils.ValidationUtil.VALIDATION_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
 import static jakarta.json.JsonValue.TRUE;
+import static java.lang.Boolean.FALSE;
 
 @ApplicationScoped
 public class JsonSchemaTranslator {
@@ -48,6 +50,12 @@ public class JsonSchemaTranslator {
         return stringWriter.toString();
     }
 
+    public String objectToJsonRemoveSchemaString(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        StringWriter stringWriter = new StringWriter();
+        jsonProvider.createWriter(stringWriter).write(objectToJsonRemoveSchema(objectTypeDefinitionContext));
+        return stringWriter.toString();
+    }
+
     public JsonValue objectToJsonSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean isUpdate) {
         JsonObjectBuilder jsonSchemaBuilder = VALIDATION_UTIL.getValidationDirectiveContext(objectTypeDefinitionContext.directives())
                 .map(this::buildValidation)
@@ -78,6 +86,25 @@ public class JsonSchemaTranslator {
                                 )
                 )
                 .build();
+    }
+
+    public JsonValue objectToJsonRemoveSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        JsonObjectBuilder jsonSchemaBuilder = VALIDATION_UTIL.getValidationDirectiveContext(objectTypeDefinitionContext.directives())
+                .map(this::buildValidation)
+                .orElseGet(jsonProvider::createObjectBuilder);
+        JsonObjectBuilder builder = jsonSchemaBuilder.add("$id", jsonProvider.createValue("#".concat(objectTypeDefinitionContext.name().getText().concat("Remove"))))
+                .add("type", jsonProvider.createValue("object"))
+                .add("additionalProperties", FALSE);
+        Optional<String> objectTypeIDFieldName = manager.getObjectTypeIDFieldName(objectTypeDefinitionContext.name().getText());
+        objectTypeIDFieldName.ifPresent(name ->
+                jsonSchemaBuilder
+                        .add("properties",
+                                jsonProvider.createObjectBuilder()
+                                        .add(name, jsonProvider.createObjectBuilder().add("type", "string"))
+                                        .add(DEPRECATED_FIELD_NAME, jsonProvider.createObjectBuilder().add("const", TRUE))
+                        )
+        );
+        return builder.build();
     }
 
     protected JsonArrayBuilder buildRequired(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -198,7 +225,7 @@ public class JsonSchemaTranslator {
                 jsonObjectBuilder.add("anyOf",
                         jsonProvider.createArrayBuilder()
                                 .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue(fieldTypeName)))
-                                .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue(fieldTypeName + "Update")))
+                                .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue(fieldTypeName + "Remove")))
                 );
             } else {
                 jsonObjectBuilder.add("$ref", jsonProvider.createValue(fieldTypeName));
