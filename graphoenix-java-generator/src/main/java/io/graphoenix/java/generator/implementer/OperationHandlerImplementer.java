@@ -631,6 +631,9 @@ public class OperationHandlerImplementer {
                                 fieldTypeParameterName,
                                 typeManager.typeContextToTypeName(fieldDefinitionContext.type())
                         )
+                                .beginControlFlow("if($L == null)", fieldTypeParameterName)
+                                .addStatement("return $T.just($T.NULL)", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
+                                .endControlFlow()
                                 .addStatement(
                                         CodeBlock.of("return invokeHandler.get().$L($L, selectionContext.field().selectionSet()).map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
                                                 fieldTypeParameterName,

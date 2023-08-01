@@ -98,12 +98,12 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
                                                 .map(subscriptionDataListener -> subscriptionDataListener.indexFilter(operationDefinitionContext))
                                                 .flatMapMany(subscriptionDataListener ->
                                                         Flux.concat(
-                                                                subscriptionHandler.subscription(operationHandler, operationDefinitionContext),
-                                                                receiver.consumeAutoAck(requestId)
-                                                                        .map(this::toJsonValue)
-                                                                        .filter(subscriptionDataListener::merged)
-                                                                        .flatMap(jsonValue -> subscriptionHandler.subscription(operationHandler, operationDefinitionContext))
-                                                        )
+                                                                        subscriptionHandler.subscription(operationHandler, operationDefinitionContext),
+                                                                        receiver.consumeAutoAck(requestId)
+                                                                                .map(this::toJsonValue)
+                                                                                .filter(subscriptionDataListener::merged)
+                                                                                .flatMap(jsonValue -> subscriptionHandler.subscription(operationHandler, operationDefinitionContext))
+                                                                )
                                                                 .doOnNext(jsonValue -> subscriptionDataListener.indexData(operationDefinitionContext, jsonValue))
                                                                 .flatMap(jsonValue -> subscriptionHandler.invoke(operationDefinitionContext, jsonValue))
                                                 )
@@ -115,6 +115,9 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
     @Override
     public Mono<JsonValue> sendMutation(GraphqlParser.OperationDefinitionContext operationDefinitionContext, Operation operation, JsonValue jsonValue) {
         Flux<OutboundMessage> messageFlux = Flux.fromIterable(operationDefinitionContext.selectionSet().selection())
+                .filter(selectionContext ->
+                        !jsonValue.asJsonObject().get(selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()).getValueType().equals(JsonValue.ValueType.NULL)
+                )
                 .map(selectionContext -> {
                             GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getMutationOperationTypeName()
                                     .map(name ->
@@ -126,7 +129,7 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
                             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                             JsonObjectBuilder mutation = jsonProvider.createObjectBuilder().add("type", fieldTypeName);
                             JsonObject arguments = operation.getField(selectionContext.field().name().getText()).getArguments();
-                            String selectionName = Optional.ofNullable(selectionContext.field().alias()).map(aliasContext -> aliasContext.name().getText()).orElse(selectionContext.field().name().getText());
+                            String selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText();
                             JsonValue selectionJsonValue = jsonValue.asJsonObject().get(selectionName);
                             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                                 mutation.add("arguments", jsonProvider.createArrayBuilder(arguments.get(LIST_INPUT_NAME).asJsonArray()))
