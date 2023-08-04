@@ -189,7 +189,7 @@ public class IntrospectionMutationBuilder {
             }
             type.setFields(
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                            .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
+//                            .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
                             .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
                             .map(fieldDefinitionContext -> buildField(fieldDefinitionContext, level + 1))
                             .collect(Collectors.toCollection(LinkedHashSet::new))
@@ -215,7 +215,7 @@ public class IntrospectionMutationBuilder {
             }
             type.setFields(
                     interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                            .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
+//                            .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
                             .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
                             .map(fieldDefinitionContext -> buildField(fieldDefinitionContext, level + 1))
                             .collect(Collectors.toCollection(LinkedHashSet::new))
