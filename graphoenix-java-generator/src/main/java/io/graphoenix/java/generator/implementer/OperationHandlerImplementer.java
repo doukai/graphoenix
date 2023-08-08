@@ -41,7 +41,6 @@ import java.lang.reflect.Type;
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -128,14 +127,6 @@ public class OperationHandlerImplementer {
                         FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)),
                                 "manager",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
-                .addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLVariablesProcessor.class)),
-                                "variablesProcessor",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
                         ).build()
@@ -383,10 +374,6 @@ public class OperationHandlerImplementer {
         switch (type) {
             case QUERY:
             case MUTATION:
-                builder.addParameter(ParameterSpec.builder(ClassName.get(String.class), "graphQL").build())
-                        .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, JsonValue.class), "variables").build())
-                        .addStatement("return $L(defaultOperationHandler.get(), graphQL, variables)", operationName);
-                break;
             case SUBSCRIPTION:
                 builder.addParameter(ParameterSpec.builder(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinitionContext").build())
                         .addStatement("return $L(defaultOperationHandler.get(), operationDefinitionContext)", operationName);
@@ -444,10 +431,7 @@ public class OperationHandlerImplementer {
 
         switch (type) {
             case QUERY:
-                builder.addParameter(ParameterSpec.builder(ClassName.get(String.class), "graphQL").build())
-                        .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, JsonValue.class), "variables").build())
-                        .addStatement("manager.get().registerFragment(graphQL)")
-                        .addStatement("$T operationDefinitionContext = variablesProcessor.get().buildVariables(graphQL, variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
+                builder.addParameter(ParameterSpec.builder(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinitionContext").build())
                         .addStatement("$T operationWithFetchFieldDefinitionContext = fetchFieldProcessor.get().buildFetchFields(operationDefinitionContext)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
                         .addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
                         .addStatement(
@@ -467,10 +451,7 @@ public class OperationHandlerImplementer {
                 break;
             case MUTATION:
                 builder.addAnnotation(Transactional.class)
-                        .addParameter(ParameterSpec.builder(ClassName.get(String.class), "graphQL").build())
-                        .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, JsonValue.class), "variables").build())
-                        .addStatement("manager.get().registerFragment(graphQL)")
-                        .addStatement("$T operationDefinitionContext = variablesProcessor.get().buildVariables(graphQL, variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
+                        .addParameter(ParameterSpec.builder(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinitionContext").build())
                         .addStatement("validator.get().validateOperation(operationDefinitionContext)")
                         .addStatement("$T mutationLoader = mutationDataLoader.get()", ClassName.get(MutationDataLoader.class))
                         .addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
@@ -602,11 +583,11 @@ public class OperationHandlerImplementer {
                 if (manager.isObject(fieldTypeName)) {
                     if (fieldTypeIsList) {
                         builder.addStatement(
-                                "$T type = new $T<$T>() {}.getType()",
-                                ClassName.get(Type.class),
-                                ClassName.get(TypeToken.class),
-                                typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                        )
+                                        "$T type = new $T<$T>() {}.getType()",
+                                        ClassName.get(Type.class),
+                                        ClassName.get(TypeToken.class),
+                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                                )
                                 .addStatement(
                                         "$T $L = jsonb.get().fromJson(jsonValue.toString(), type)",
                                         typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
@@ -626,11 +607,11 @@ public class OperationHandlerImplementer {
                                 );
                     } else {
                         builder.addStatement(
-                                "$T $L = jsonb.get().fromJson(jsonValue.toString(), $T.class)",
-                                typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                                fieldTypeParameterName,
-                                typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                        )
+                                        "$T $L = jsonb.get().fromJson(jsonValue.toString(), $T.class)",
+                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
+                                        fieldTypeParameterName,
+                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                                )
                                 .beginControlFlow("if($L == null)", fieldTypeParameterName)
                                 .addStatement("return $T.just($T.NULL)", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
                                 .endControlFlow()
@@ -658,7 +639,6 @@ public class OperationHandlerImplementer {
                 .addAnnotation(Inject.class)
                 .addParameter(ClassName.get(GraphQLConfig.class), "graphQLConfig")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLVariablesProcessor.class)), "variablesProcessor")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLFetchFieldProcessor.class)), "fetchFieldProcessor")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")), "invokeHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "ConnectionHandler")), "connectionHandler")
@@ -670,7 +650,6 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "QueryAfterHandler")), "queryHandler")
                 .addStatement("this.graphQLConfig = graphQLConfig")
                 .addStatement("this.manager = manager")
-                .addStatement("this.variablesProcessor = variablesProcessor")
                 .addStatement("this.fetchFieldProcessor = fetchFieldProcessor")
                 .addStatement("this.defaultOperationHandler = $T.ofNullable(graphQLConfig.getDefaultOperationHandlerName()).map(name -> $T.getProvider($T.class, name)).orElseGet(() -> $T.getProvider($T.class))",
                         ClassName.get(Optional.class),

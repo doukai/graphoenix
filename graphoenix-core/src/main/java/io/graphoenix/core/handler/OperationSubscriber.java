@@ -115,7 +115,7 @@ public abstract class OperationSubscriber {
                 .collect(Collectors.toList());
     }
 
-    public abstract Flux<JsonValue> subscriptionOperation(OperationHandler operationHandler, String graphQL, Map<String, JsonValue> variables, String token, String operationId);
+    public abstract Flux<JsonValue> subscriptionOperation(OperationHandler operationHandler, GraphqlParser.OperationDefinitionContext operationDefinitionContext, String token, String operationId);
 
     public abstract Mono<JsonValue> sendMutation(GraphqlParser.OperationDefinitionContext operationDefinitionContext, Operation operation, JsonValue jsonValue);
 }

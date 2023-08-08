@@ -3,6 +3,7 @@ package io.graphoenix.http.handler;
 import io.graphoenix.core.dto.GraphQLRequest;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.core.handler.GraphQLSubscriptionHandler;
+import io.graphoenix.core.handler.OperationPreprocessor;
 import io.graphoenix.http.codec.MimeType;
 import io.graphoenix.spi.handler.ScopeEventResolver;
 import io.netty.buffer.ByteBufAllocator;
@@ -27,7 +28,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.GRAPHQL_REQUEST;
+import static io.graphoenix.spi.constant.Hammurabi.OPERATION_DEFINITION;
 import static io.graphoenix.spi.constant.Hammurabi.REQUEST;
 import static io.graphoenix.spi.constant.Hammurabi.REQUEST_ID;
 import static io.graphoenix.spi.constant.Hammurabi.RESPONSE;
@@ -37,12 +38,14 @@ import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 @ApplicationScoped
 public class PostRequestHandler extends BaseHandler {
 
+    private final OperationPreprocessor operationPreprocessor;
     private final GraphQLRequestHandler graphQLRequestHandler;
     private final GraphQLSubscriptionHandler graphQLSubscriptionHandler;
     private final JsonProvider jsonProvider;
 
     @Inject
-    public PostRequestHandler(GraphQLRequestHandler graphQLRequestHandler, GraphQLSubscriptionHandler graphQLSubscriptionHandler, JsonProvider jsonProvider) {
+    public PostRequestHandler(OperationPreprocessor operationPreprocessor, GraphQLRequestHandler graphQLRequestHandler, GraphQLSubscriptionHandler graphQLSubscriptionHandler, JsonProvider jsonProvider) {
+        this.operationPreprocessor = operationPreprocessor;
         this.graphQLRequestHandler = graphQLRequestHandler;
         this.graphQLSubscriptionHandler = graphQLSubscriptionHandler;
         this.jsonProvider = jsonProvider;
@@ -70,11 +73,12 @@ public class PostRequestHandler extends BaseHandler {
                     .sendString(
                             request.receive().aggregate().asString()
                                     .map(content -> GraphQLRequest.fromJson(jsonProvider.createReader(new StringReader(content)).readObject()))
-                                    .doOnNext(graphQLRequest -> context.put(GRAPHQL_REQUEST, graphQLRequest))
-                                    .flatMap(graphQLRequest ->
+                                    .map(graphQLRequest -> operationPreprocessor.preprocess(graphQLRequest.getQuery(), graphQLRequest.getVariables()))
+                                    .doOnNext(operationDefinitionContext -> context.put(OPERATION_DEFINITION, operationDefinitionContext))
+                                    .flatMap(operationDefinitionContext ->
                                             ScopeEventResolver.initialized(context, RequestScoped.class)
                                                     .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
-                                                    .then(graphQLRequestHandler.handle(graphQLRequest))
+                                                    .then(graphQLRequestHandler.handle(operationDefinitionContext))
                                     )
                                     .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
                                     .onErrorResume(throwable -> this.errorHandler(throwable, response))
@@ -86,11 +90,12 @@ public class PostRequestHandler extends BaseHandler {
                     .sendString(
                             request.receive().aggregate().asString()
                                     .map(GraphQLRequest::new)
-                                    .doOnNext(graphQLRequest -> context.put(GRAPHQL_REQUEST, graphQLRequest))
-                                    .flatMap(graphQLRequest ->
+                                    .map(graphQLRequest -> operationPreprocessor.preprocess(graphQLRequest.getQuery(), graphQLRequest.getVariables()))
+                                    .doOnNext(operationDefinitionContext -> context.put(OPERATION_DEFINITION, operationDefinitionContext))
+                                    .flatMap(operationDefinitionContext ->
                                             ScopeEventResolver.initialized(context, RequestScoped.class)
                                                     .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
-                                                    .then(graphQLRequestHandler.handle(graphQLRequest))
+                                                    .then(graphQLRequestHandler.handle(operationDefinitionContext))
                                     )
                                     .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
                                     .onErrorResume(throwable -> this.errorHandler(throwable, response))
@@ -106,11 +111,12 @@ public class PostRequestHandler extends BaseHandler {
                     .send(
                             request.receive().aggregate().asString()
                                     .map(content -> GraphQLRequest.fromJson(jsonProvider.createReader(new StringReader(content)).readObject()))
-                                    .doOnNext(graphQLRequest -> context.put(GRAPHQL_REQUEST, graphQLRequest))
-                                    .flatMapMany(graphQLRequest ->
+                                    .map(graphQLRequest -> operationPreprocessor.preprocess(graphQLRequest.getQuery(), graphQLRequest.getVariables()))
+                                    .doOnNext(operationDefinitionContext -> context.put(OPERATION_DEFINITION, operationDefinitionContext))
+                                    .flatMapMany(operationDefinitionContext ->
                                             ScopeEventResolver.initialized(context, RequestScoped.class)
                                                     .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
-                                                    .thenMany(graphQLSubscriptionHandler.handle(graphQLRequest, token, operationId))
+                                                    .thenMany(graphQLSubscriptionHandler.handle(operationDefinitionContext, token, operationId))
                                     )
                                     .onErrorResume(throwable -> this.errorSSEHandler(throwable, response, operationId))
                                     .map(eventString -> ByteBufAllocator.DEFAULT.buffer().writeBytes(eventString.getBytes(StandardCharsets.UTF_8)))

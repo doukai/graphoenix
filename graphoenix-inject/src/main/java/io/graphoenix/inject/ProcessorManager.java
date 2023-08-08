@@ -12,12 +12,18 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.resolution.Context;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration;
+import com.github.javaparser.resolution.model.SymbolReference;
+import com.github.javaparser.resolution.model.typesystem.ReferenceTypeImpl;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
+import com.github.javaparser.resolution.types.ResolvedTypeVariable;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFactory;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
@@ -45,6 +51,7 @@ import java.lang.annotation.Annotation;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -65,6 +72,7 @@ public class ProcessorManager {
     private final Elements elements;
     private final JavaParser javaParser;
     private final JavaSymbolSolver javaSymbolSolver;
+    private final CombinedTypeSolver combinedTypeSolver;
     private RoundEnvironment roundEnv;
     private final ClassFileToJavaSourceDecompiler decompiler;
     private final DecompilerLoader decompilerLoader;
@@ -75,7 +83,7 @@ public class ProcessorManager {
         this.filer = processingEnv.getFiler();
         this.elements = processingEnv.getElementUtils();
         this.trees = Trees.instance(processingEnv);
-        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+        combinedTypeSolver = new CombinedTypeSolver();
         Path generatedSourcePath = getGeneratedSourcePath();
         assert generatedSourcePath != null;
         JavaParserTypeSolver javaParserTypeSolver = new JavaParserTypeSolver(getSourcePath(generatedSourcePath));
@@ -296,8 +304,34 @@ public class ProcessorManager {
     }
 
     public String getQualifiedNameByType(ClassOrInterfaceType type) {
-        ResolvedReferenceType resolvedReferenceType = javaSymbolSolver.toResolvedType(type, ResolvedReferenceType.class);
+        ResolvedReferenceType resolvedReferenceType = getResolvedType(type).asReferenceType();
         return resolvedReferenceType.getQualifiedName();
+    }
+
+    public ResolvedReferenceType getResolvedType(Type type) {
+        try {
+            return javaSymbolSolver.toResolvedType(type, ResolvedReferenceType.class);
+        } catch (UnsolvedSymbolException e) {
+            if (type.isClassOrInterfaceType() && type.asClassOrInterfaceType().getScope().isPresent()) {
+                ClassOrInterfaceType classOrInterfaceType = type.asClassOrInterfaceType();
+                Context context = JavaParserFactory.getContext(type, combinedTypeSolver);
+                String name = classOrInterfaceType.getNameAsString();
+                SymbolReference<ResolvedTypeDeclaration> ref = context.solveType(name);
+                if (!ref.isSolved()) {
+                    throw new UnsolvedSymbolException(name);
+                }
+                ResolvedTypeDeclaration typeDeclaration = ref.getCorrespondingDeclaration();
+                List<ResolvedType> typeParameters = Collections.emptyList();
+                if (classOrInterfaceType.getTypeArguments().isPresent()) {
+                    typeParameters = classOrInterfaceType.getTypeArguments().get().stream().map(this::getResolvedType).collect(Collectors.toList());
+                }
+                if (typeDeclaration.isTypeParameter()) {
+                    return new ResolvedTypeVariable(typeDeclaration.asTypeParameter()).asReferenceType();
+                }
+                return new ReferenceTypeImpl((ResolvedReferenceTypeDeclaration) typeDeclaration, typeParameters);
+            }
+            throw e;
+        }
     }
 
     private TypeElement getElementByType(Type type) {
@@ -373,7 +407,13 @@ public class ProcessorManager {
                 .filter(this::resolvedReferenceType)
                 .findFirst()
                 .ifPresentOrElse(
-                        sourceClassOrInterfaceType -> classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(getQualifiedNameByType(sourceClassOrInterfaceType))),
+                        sourceClassOrInterfaceType -> classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> {
+                                    String qualifiedNameByType = getQualifiedNameByType(sourceClassOrInterfaceType);
+                                    if (!sourceClassOrInterfaceType.getNameWithScope().equals(qualifiedNameByType)) {
+                                        compilationUnit.addImport(getQualifiedNameByType(getRootScope(sourceClassOrInterfaceType)));
+                                    }
+                                }
+                        ),
                         () -> importImportDeclaration(classOrInterfaceDeclaration, sourceClassOrInterfaceDeclaration, classOrInterfaceType)
                 );
 
@@ -385,6 +425,13 @@ public class ProcessorManager {
                                         importClassOrInterfaceType(classOrInterfaceDeclaration, sourceClassOrInterfaceDeclaration, argumentClassOrInterfaceType.asClassOrInterfaceType())
                                 )
                 );
+    }
+
+    private ClassOrInterfaceType getRootScope(ClassOrInterfaceType classOrInterfaceType) {
+        if (classOrInterfaceType.getScope().isPresent() && classOrInterfaceType.getScope().get().isClassOrInterfaceType()) {
+            return getRootScope(classOrInterfaceType.getScope().get().asClassOrInterfaceType());
+        }
+        return classOrInterfaceType;
     }
 
     private void importImportDeclaration(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, ClassOrInterfaceDeclaration sourceClassOrInterfaceDeclaration, ClassOrInterfaceType classOrInterfaceType) {
@@ -406,7 +453,7 @@ public class ProcessorManager {
 
     public boolean resolvedReferenceType(ClassOrInterfaceType type) {
         try {
-            javaSymbolSolver.toResolvedType(type, ResolvedReferenceType.class);
+            getResolvedType(type);
             return true;
         } catch (UnsolvedSymbolException e) {
             return false;

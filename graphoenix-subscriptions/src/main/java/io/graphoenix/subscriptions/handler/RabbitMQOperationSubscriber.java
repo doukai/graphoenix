@@ -6,7 +6,6 @@ import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.PublisherBeanContext;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.core.handler.GraphQLVariablesProcessor;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.OperationHandler;
@@ -27,8 +26,6 @@ import reactor.rabbitmq.Receiver;
 import reactor.rabbitmq.Sender;
 
 import java.io.StringReader;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
@@ -45,8 +42,6 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
 
     private final IGraphQLDocumentManager manager;
 
-    private final GraphQLVariablesProcessor variablesProcessor;
-
     private final SubscriptionHandler subscriptionHandler;
 
     private final JsonProvider jsonProvider;
@@ -58,10 +53,9 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
     private final Receiver receiver;
 
     @Inject
-    public RabbitMQOperationSubscriber(GraphQLConfig graphQLConfig, IGraphQLDocumentManager manager, GraphQLVariablesProcessor variablesProcessor, SubscriptionHandler subscriptionHandler, JsonProvider jsonProvider, Provider<SubscriptionDataListener> subscriptionDataListenerProvider, Sender sender, Receiver receiver) {
+    public RabbitMQOperationSubscriber(GraphQLConfig graphQLConfig, IGraphQLDocumentManager manager, SubscriptionHandler subscriptionHandler, JsonProvider jsonProvider, Provider<SubscriptionDataListener> subscriptionDataListenerProvider, Sender sender, Receiver receiver) {
         this.graphQLConfig = graphQLConfig;
         this.manager = manager;
-        this.variablesProcessor = variablesProcessor;
         this.subscriptionHandler = subscriptionHandler;
         this.jsonProvider = jsonProvider;
         this.subscriptionDataListenerProvider = subscriptionDataListenerProvider;
@@ -70,10 +64,7 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
     }
 
     @Override
-    public Flux<JsonValue> subscriptionOperation(OperationHandler operationHandler, String graphQL, Map<String, JsonValue> variables, String token, String operationId) {
-        manager.registerFragment(graphQL);
-        GraphqlParser.OperationDefinitionContext operationDefinitionContext = variablesProcessor.buildVariables(graphQL, variables);
-
+    public Flux<JsonValue> subscriptionOperation(OperationHandler operationHandler, GraphqlParser.OperationDefinitionContext operationDefinitionContext, String token, String operationId) {
         registerSelection(operationDefinitionContext);
 
         Stream<String> typeNameStream = operationDefinitionContext.selectionSet().selection().stream()
