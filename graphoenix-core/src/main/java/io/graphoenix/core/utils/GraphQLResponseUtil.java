@@ -101,7 +101,7 @@ public enum GraphQLResponseUtil {
             responseBuilder.add("data", jsonProvider.createReader(new StringReader(jsonb.toJson(graphQLException.getPartialResults()))).read());
         }
         JsonArrayBuilder errorsBuilder = jsonProvider.createArrayBuilder();
-        errorsBuilder.add(graphQLException.getMessage());
+        errorsBuilder.add(jsonProvider.createObjectBuilder().add("message", graphQLException.getMessage()));
         responseBuilder.add("errors", errorsBuilder);
         StringWriter stringWriter = new StringWriter();
         if (id != null) {
@@ -126,7 +126,7 @@ public enum GraphQLResponseUtil {
         } else {
             JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
             JsonArrayBuilder errorsBuilder = jsonProvider.createArrayBuilder();
-            errorsBuilder.add(throwable.getMessage() != null ? throwable.getMessage() : throwable.toString());
+            errorsBuilder.add(jsonProvider.createObjectBuilder().add("message", throwable.getMessage() != null ? throwable.getMessage() : throwable.toString()));
             responseBuilder.add("errors", errorsBuilder);
             StringWriter stringWriter = new StringWriter();
             if (id != null) {
