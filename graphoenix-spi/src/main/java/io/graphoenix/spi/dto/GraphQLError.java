@@ -1,7 +1,12 @@
 package io.graphoenix.spi.dto;
 
+import org.eclipse.microprofile.graphql.GraphQLException;
+
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static io.graphoenix.spi.error.ErrorInfoUtil.ERROR_CODE_UTIL;
 
 public class GraphQLError {
 
@@ -9,11 +14,26 @@ public class GraphQLError {
 
     private List<GraphQLLocation> locations;
 
-    private String path;
+    private List<String> path;
 
-    private String schemaPath;
+    private GraphQLErrorExtensions extensions;
 
     public GraphQLError() {
+    }
+
+    public GraphQLError(GraphQLException graphQLException) {
+        this.message = graphQLException.getMessage();
+        this.extensions = new GraphQLErrorExtensions(ERROR_CODE_UTIL.getCode(graphQLException.getClass()));
+    }
+
+    public GraphQLError(Throwable throwable) {
+        this.message = ERROR_CODE_UTIL.getMessage(throwable.getClass());
+        this.extensions = new GraphQLErrorExtensions(ERROR_CODE_UTIL.getCode(throwable.getClass()));
+    }
+
+    public GraphQLError(Integer code, String message) {
+        this.message = message;
+        this.extensions = new GraphQLErrorExtensions(code);
     }
 
     public GraphQLError(String message) {
@@ -30,12 +50,7 @@ public class GraphQLError {
         this.locations = Collections.singletonList(new GraphQLLocation(line, column));
     }
 
-    public GraphQLError(String message, String path) {
-        this.message = message;
-        this.path = path;
-    }
-
-    public GraphQLError(String message, List<GraphQLLocation> locations, String path) {
+    public GraphQLError(String message, List<GraphQLLocation> locations, List<String> path) {
         this.message = message;
         this.locations = locations;
         this.path = path;
@@ -59,21 +74,26 @@ public class GraphQLError {
         return this;
     }
 
-    public String getPath() {
+    public List<String> getPath() {
         return path;
     }
 
-    public GraphQLError setPath(String path) {
+    public GraphQLError setPath(List<String> path) {
         this.path = path;
         return this;
     }
 
-    public String getSchemaPath() {
-        return schemaPath;
+    public GraphQLError setSchemaPath(String schemaPath) {
+        this.path = Arrays.asList(schemaPath.replaceFirst("#/properties/", "").split("/"));
+        return this;
     }
 
-    public GraphQLError setSchemaPath(String schemaPath) {
-        this.schemaPath = schemaPath;
+    public GraphQLErrorExtensions getExtensions() {
+        return extensions;
+    }
+
+    public GraphQLError setExtensions(GraphQLErrorExtensions extensions) {
+        this.extensions = extensions;
         return this;
     }
 
@@ -82,8 +102,8 @@ public class GraphQLError {
         return "GraphQLError{" +
                 "message='" + message + '\'' +
                 ", locations=" + locations +
-                ", path='" + path + '\'' +
-                ", schemaPath='" + schemaPath + '\'' +
+                ", path=" + path +
+                ", extensions=" + extensions +
                 '}';
     }
 }

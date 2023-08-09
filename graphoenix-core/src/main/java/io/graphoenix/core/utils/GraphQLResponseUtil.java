@@ -2,7 +2,6 @@ package io.graphoenix.core.utils;
 
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
-import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import jakarta.json.bind.Jsonb;
@@ -96,20 +95,7 @@ public enum GraphQLResponseUtil {
     }
 
     public String error(GraphQLException graphQLException, String id) {
-        JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
-        if (graphQLException.getPartialResults() != null) {
-            responseBuilder.add("data", jsonProvider.createReader(new StringReader(jsonb.toJson(graphQLException.getPartialResults()))).read());
-        }
-        JsonArrayBuilder errorsBuilder = jsonProvider.createArrayBuilder();
-        errorsBuilder.add(jsonProvider.createObjectBuilder().add("message", graphQLException.getMessage()));
-        responseBuilder.add("errors", errorsBuilder);
-        StringWriter stringWriter = new StringWriter();
-        if (id != null) {
-            jsonProvider.createWriter(stringWriter).write(jsonProvider.createObjectBuilder().add("id", id).add("payload", responseBuilder).build());
-            return stringWriter.toString();
-        }
-        jsonProvider.createWriter(stringWriter).write(responseBuilder.build());
-        return stringWriter.toString();
+        return error(new GraphQLErrors(graphQLException), id);
     }
 
     public String error(Throwable throwable) {
@@ -117,25 +103,7 @@ public enum GraphQLResponseUtil {
     }
 
     public String error(Throwable throwable, String id) {
-        if (throwable instanceof GraphQLErrors) {
-            return error((GraphQLErrors) throwable, id);
-        } else if (throwable instanceof GraphQLException) {
-            return error((GraphQLException) throwable, id);
-        } else if (throwable.getCause() != null) {
-            return error(throwable.getCause(), id);
-        } else {
-            JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
-            JsonArrayBuilder errorsBuilder = jsonProvider.createArrayBuilder();
-            errorsBuilder.add(jsonProvider.createObjectBuilder().add("message", throwable.getMessage() != null ? throwable.getMessage() : throwable.toString()));
-            responseBuilder.add("errors", errorsBuilder);
-            StringWriter stringWriter = new StringWriter();
-            if (id != null) {
-                jsonProvider.createWriter(stringWriter).write(jsonProvider.createObjectBuilder().add("id", id).add("payload", responseBuilder).build());
-                return stringWriter.toString();
-            }
-            jsonProvider.createWriter(stringWriter).write(responseBuilder.build());
-            return stringWriter.toString();
-        }
+        return error(new GraphQLErrors(throwable), id);
     }
 
     public String next(JsonValue jsonValue) {

@@ -69,7 +69,6 @@ public class JsonSchemaValidator {
             messageSet.forEach(validationMessage ->
                     graphQLErrors.add(
                             new GraphQLError(validationMessage.getMessage())
-                                    .setPath(validationMessage.getPath())
                                     .setSchemaPath(validationMessage.getSchemaPath())
                     )
             );

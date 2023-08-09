@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class GraphQLErrors extends RuntimeException {
 
-    private Object data = null;
+    private Object data;
 
     private List<GraphQLError> errors = new ArrayList<>();
 
@@ -49,6 +49,10 @@ public class GraphQLErrors extends RuntimeException {
         addThrowable(throwable);
     }
 
+    public GraphQLErrors(Integer code, String message) {
+        this.errors.add(new GraphQLError(code, message));
+    }
+
     public GraphQLErrors(String message) {
         this.errors.add(new GraphQLError(message));
     }
@@ -61,9 +65,9 @@ public class GraphQLErrors extends RuntimeException {
             this.errors = ((GraphQLErrors) throwable).getErrors();
         } else if (throwable instanceof GraphQLException) {
             this.data = ((GraphQLException) throwable).getPartialResults();
-            this.errors.add(new GraphQLError(throwable.getMessage()));
+            this.errors.add(new GraphQLError(throwable));
         } else {
-            this.errors.add(new GraphQLError(throwable.getMessage()));
+            this.errors.add(new GraphQLError(throwable));
         }
     }
 
@@ -72,7 +76,7 @@ public class GraphQLErrors extends RuntimeException {
         return this;
     }
 
-    public GraphQLErrors add(GraphQLErrorType graphQLErrorType, List<GraphQLLocation> locations, String path) {
+    public GraphQLErrors add(GraphQLErrorType graphQLErrorType, List<GraphQLLocation> locations, List<String> path) {
         this.errors.add(new GraphQLError(graphQLErrorType.toString(), locations, path));
         return this;
     }
@@ -84,11 +88,6 @@ public class GraphQLErrors extends RuntimeException {
 
     public GraphQLErrors add(GraphQLErrorType graphQLErrorType, int line, int column) {
         this.errors.add(new GraphQLError(graphQLErrorType.toString(), line, column));
-        return this;
-    }
-
-    public GraphQLErrors add(GraphQLErrorType graphQLErrorType, String path) {
-        this.errors.add(new GraphQLError(graphQLErrorType.toString(), path));
         return this;
     }
 
