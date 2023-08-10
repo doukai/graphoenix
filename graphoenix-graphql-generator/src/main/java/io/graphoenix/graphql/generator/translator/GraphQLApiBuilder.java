@@ -20,26 +20,25 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.ElementProcessErrorType.SOURCE_ANNOTATION_NOT_EXIST;
+import static io.graphoenix.core.utils.ElementUtil.ELEMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class GraphQLApiBuilder {
 
     private final GraphQLConfig graphQLConfig;
-    private final ElementManager elementManager;
 
     @Inject
-    public GraphQLApiBuilder(GraphQLConfig graphQLConfig, ElementManager elementManager) {
+    public GraphQLApiBuilder(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.elementManager = elementManager;
     }
 
     public Field variableElementToField(ExecutableElement executableElement, Types typeUtils) {
         Field field = new Field()
-                .setName(elementManager.getNameFromElement(executableElement))
-                .setDescription(elementManager.getDescriptionFromElement(executableElement))
-                .setType(elementManager.executableElementToTypeName(executableElement, typeUtils))
-                .setArguments(elementManager.executableElementParametersToInputValues(executableElement, typeUtils))
+                .setName(ELEMENT_UTIL.getNameFromElement(executableElement))
+                .setDescription(ELEMENT_UTIL.getDescriptionFromElement(executableElement))
+                .setType(ELEMENT_UTIL.executableElementToTypeName(executableElement, typeUtils))
+                .setArguments(ELEMENT_UTIL.executableElementParametersToInputValues(executableElement, typeUtils))
                 .addDirective(
                         new Directive()
                                 .setName(INVOKE_DIRECTIVE_NAME)
@@ -77,7 +76,7 @@ public class GraphQLApiBuilder {
 
     public Tuple2<String, Field> variableElementToObjectField(ExecutableElement executableElement, Types typeUtils) {
         return Tuple.of(
-                elementManager.variableElementToTypeName(
+                ELEMENT_UTIL.variableElementToTypeName(
                         executableElement.getParameters().stream()
                                 .filter(variableElement -> variableElement.getAnnotation(Source.class) != null)
                                 .findFirst()
@@ -85,10 +84,10 @@ public class GraphQLApiBuilder {
                         typeUtils
                 ),
                 new Field()
-                        .setName(elementManager.getSourceNameFromExecutableElement(executableElement).orElseGet(() -> elementManager.getNameFromElement(executableElement)))
-                        .setDescription(elementManager.getDescriptionFromElement(executableElement))
-                        .setType(elementManager.executableElementToTypeName(executableElement, typeUtils))
-                        .setArguments(elementManager.executableElementParametersToInputValues(executableElement, typeUtils))
+                        .setName(ELEMENT_UTIL.getSourceNameFromExecutableElement(executableElement).orElseGet(() -> ELEMENT_UTIL.getNameFromElement(executableElement)))
+                        .setDescription(ELEMENT_UTIL.getDescriptionFromElement(executableElement))
+                        .setType(ELEMENT_UTIL.executableElementToTypeName(executableElement, typeUtils))
+                        .setArguments(ELEMENT_UTIL.executableElementParametersToInputValues(executableElement, typeUtils))
                         .addDirective(
                                 new Directive()
                                         .setName(INVOKE_DIRECTIVE_NAME)

@@ -18,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
+import static io.graphoenix.core.utils.ElementUtil.ELEMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME;
 
@@ -25,27 +26,25 @@ import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME
 public class JavaElementToInterface {
 
     private final GraphQLConfig graphQLConfig;
-    private final ElementManager elementManager;
 
     @Inject
-    public JavaElementToInterface(GraphQLConfig graphQLConfig, ElementManager elementManager) {
+    public JavaElementToInterface(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.elementManager = elementManager;
     }
 
     public InterfaceType buildInterface(TypeElement typeElement, Types typeUtils) {
         return new InterfaceType()
-                .setName(elementManager.getNameFromElement(typeElement))
-                .setDescription(elementManager.getDescriptionFromElement(typeElement))
+                .setName(ELEMENT_UTIL.getNameFromElement(typeElement))
+                .setDescription(ELEMENT_UTIL.getDescriptionFromElement(typeElement))
                 .setFields(
                         typeElement.getEnclosedElements().stream()
                                 .filter(element -> element.getKind().equals(ElementKind.FIELD))
                                 .filter(element -> element.getAnnotation(Ignore.class) == null)
                                 .map(element -> {
                                             Field field = new Field()
-                                                    .setName(elementManager.getNameFromElement(element))
-                                                    .setType(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
-                                                    .setDescription(elementManager.getDescriptionFromElement(element));
+                                                    .setName(ELEMENT_UTIL.getNameFromElement(element))
+                                                    .setType(ELEMENT_UTIL.variableElementToTypeName((VariableElement) element, typeUtils))
+                                                    .setDescription(ELEMENT_UTIL.getDescriptionFromElement(element));
                                             NumberFormat numberFormat = element.getAnnotation(NumberFormat.class);
                                             if (numberFormat != null) {
                                                 field.addDirective(

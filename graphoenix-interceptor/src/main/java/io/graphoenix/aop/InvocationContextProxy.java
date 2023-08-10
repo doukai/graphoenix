@@ -169,7 +169,7 @@ public class InvocationContextProxy implements InvocationContext {
                     .filter(method -> method.getParameterCount() == this.parameterCount)
                     .filter(method ->
                             IntStream.range(0, method.getParameterCount())
-                                    .allMatch(index -> method.getParameters()[index].getType().getName().equals(this.parameterTypeNames[index]))
+                                    .allMatch(index -> method.getParameters()[index].getType().getCanonicalName().equals(this.parameterTypeNames[index]))
                     )
                     .findFirst()
                     .orElseThrow(NoSuchMethodError::new);
@@ -184,7 +184,7 @@ public class InvocationContextProxy implements InvocationContext {
                     .filter(constructor -> constructor.getParameterCount() == this.parameterCount)
                     .filter(constructor ->
                             IntStream.range(0, constructor.getParameterCount())
-                                    .allMatch(index -> constructor.getParameters()[index].getType().getName().equals(this.parameterTypeNames[index]))
+                                    .allMatch(index -> constructor.getParameters()[index].getType().getCanonicalName().equals(this.parameterTypeNames[index]))
                     )
                     .findFirst()
                     .orElseThrow(NoSuchMethodError::new);

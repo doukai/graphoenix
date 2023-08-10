@@ -71,6 +71,10 @@ public class DocumentBuilder {
     }
 
     public Document buildDocument() {
+        return buildDocument(false);
+    }
+
+    public Document buildDocument(boolean isPackage) {
         io.vavr.collection.Stream.ofAll(
                         manager.getObjects()
                                 .filter(packageManager::isOwnPackage)
@@ -110,7 +114,7 @@ public class DocumentBuilder {
                 .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
                 .filter(manager::isNotContainerType)
-                .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, true, true))
+                .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, !isPackage, !isPackage, !isPackage))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
         if (manager.getObjects().anyMatch(manager::isNotContainerType)) {

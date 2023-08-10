@@ -1,10 +1,17 @@
 package io.graphoenix.core.operation;
 
+import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
+
+import javax.lang.model.element.AnnotationMirror;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static io.graphoenix.core.utils.ElementUtil.ELEMENT_UTIL;
 
 public class Directive {
 
@@ -22,6 +29,14 @@ public class Directive {
         this.name = directiveContext.name().getText();
         if (directiveContext.arguments() != null) {
             this.arguments = new Arguments(directiveContext.arguments());
+        }
+    }
+
+    public Directive(AnnotationMirror annotationMirror) {
+        this.name = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, annotationMirror.getAnnotationType().asElement().getSimpleName().toString());
+        if (annotationMirror.getElementValues() != null) {
+            Map<String, ValueWithVariable> arguments = annotationMirror.getElementValues().entrySet().stream().collect(Collectors.toMap(entry -> ELEMENT_UTIL.getNameFromElement(entry.getKey()), entry -> ValueWithVariable.of(entry.getValue())));
+            this.arguments = new Arguments(arguments);
         }
     }
 

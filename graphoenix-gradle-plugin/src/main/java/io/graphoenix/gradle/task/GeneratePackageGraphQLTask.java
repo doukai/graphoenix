@@ -33,7 +33,7 @@ public class GeneratePackageGraphQLTask extends BaseTask {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
             configRegister.registerPackage(createClassLoader());
             if (graphQLConfig.getBuild()) {
-                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+                manager.registerGraphQL(documentBuilder.buildDocument(true).toString());
             } else {
                 mapper.registerFieldMaps();
             }

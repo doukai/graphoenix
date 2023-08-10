@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
+import static io.graphoenix.core.utils.ElementUtil.ELEMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
@@ -43,10 +44,10 @@ public class MethodToOperation {
     }
 
     public String executableElementToOperation(ExecutableElement executableElement, int index, Types typeUtils) {
-        OperationType operationType = elementManager.getOperationTypeFromExecutableElement(executableElement);
-        String selectionSet = elementManager.getSelectionSetFromExecutableElement(executableElement);
-        int layers = elementManager.getLayersFromExecutableElement(executableElement);
-        String fieldName = elementManager.getOperationFieldNameFromExecutableElement(executableElement);
+        OperationType operationType = ELEMENT_UTIL.getOperationTypeFromExecutableElement(executableElement);
+        String selectionSet = ELEMENT_UTIL.getSelectionSetFromExecutableElement(executableElement);
+        int layers = ELEMENT_UTIL.getLayersFromExecutableElement(executableElement);
+        String fieldName = ELEMENT_UTIL.getOperationFieldNameFromExecutableElement(executableElement);
         String operationTypeNameName;
         String typeName;
         String typeInputName;
@@ -66,7 +67,7 @@ public class MethodToOperation {
         }
 
         Operation operation = new Operation()
-                .setName(elementManager.getOperationNameFromExecutableElement(executableElement, index))
+                .setName(ELEMENT_UTIL.getOperationNameFromExecutableElement(executableElement, index))
                 .setOperationType(operationTypeNameName)
                 .addDirective(
                         new Directive()
@@ -98,7 +99,7 @@ public class MethodToOperation {
                         .map(parameter ->
                                 new Variable()
                                         .setVariable(parameter.getSimpleName().toString())
-                                        .setTypeName(elementManager.variableElementToInputTypeName(parameter, typeUtils))
+                                        .setTypeName(ELEMENT_UTIL.variableElementToInputTypeName(parameter, typeUtils))
                         )
         );
 
@@ -158,7 +159,7 @@ public class MethodToOperation {
             if (value instanceof AnnotationMirror) {
                 return rebuildAnnotationMirror(executableElement, (AnnotationMirror) value);
             } else {
-                return elementManager.getParameterFromExecutableElement(executableElement, value.toString());
+                return ELEMENT_UTIL.getParameterFromExecutableElement(executableElement, value.toString());
             }
         }
     }

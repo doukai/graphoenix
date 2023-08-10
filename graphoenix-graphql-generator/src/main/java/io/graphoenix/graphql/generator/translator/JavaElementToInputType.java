@@ -16,6 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
+import static io.graphoenix.core.utils.ElementUtil.ELEMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME;
 
@@ -23,28 +24,26 @@ import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME
 public class JavaElementToInputType {
 
     private final GraphQLConfig graphQLConfig;
-    private final ElementManager elementManager;
 
     @Inject
-    public JavaElementToInputType(GraphQLConfig graphQLConfig, ElementManager elementManager) {
+    public JavaElementToInputType(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.elementManager = elementManager;
     }
 
     public InputObjectType buildInputType(TypeElement typeElement, Types typeUtils) {
         return new InputObjectType()
-                .setName(elementManager.getNameFromElement(typeElement))
-                .setDescription(elementManager.getDescriptionFromElement(typeElement))
+                .setName(ELEMENT_UTIL.getNameFromElement(typeElement))
+                .setDescription(ELEMENT_UTIL.getDescriptionFromElement(typeElement))
                 .setInputValues(
                         typeElement.getEnclosedElements().stream()
                                 .filter(element -> element.getKind().equals(ElementKind.FIELD))
                                 .filter(element -> element.getAnnotation(Ignore.class) == null)
                                 .map(element ->
                                         new InputValue()
-                                                .setName(elementManager.getNameFromElement(element))
-                                                .setDescription(elementManager.getDescriptionFromElement(element))
-                                                .setDefaultValue(elementManager.getDefaultValueFromElement(element))
-                                                .setType(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
+                                                .setName(ELEMENT_UTIL.getNameFromElement(element))
+                                                .setDescription(ELEMENT_UTIL.getDescriptionFromElement(element))
+                                                .setDefaultValue(ELEMENT_UTIL.getDefaultValueFromElement(element))
+                                                .setType(ELEMENT_UTIL.variableElementToTypeName((VariableElement) element, typeUtils))
                                 )
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 )

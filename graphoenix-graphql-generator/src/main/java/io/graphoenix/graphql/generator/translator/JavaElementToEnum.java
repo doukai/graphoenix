@@ -14,6 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
+import static io.graphoenix.core.utils.ElementUtil.ELEMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME;
 
@@ -21,26 +22,24 @@ import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME
 public class JavaElementToEnum {
 
     private final GraphQLConfig graphQLConfig;
-    private final ElementManager elementManager;
 
     @Inject
-    public JavaElementToEnum(GraphQLConfig graphQLConfig, ElementManager elementManager) {
+    public JavaElementToEnum(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.elementManager = elementManager;
     }
 
     public EnumType buildEnum(TypeElement typeElement) {
         return new EnumType()
-                .setName(elementManager.getNameFromElement(typeElement))
-                .setDescription(elementManager.getDescriptionFromElement(typeElement))
+                .setName(ELEMENT_UTIL.getNameFromElement(typeElement))
+                .setDescription(ELEMENT_UTIL.getDescriptionFromElement(typeElement))
                 .setEnumValues(
                         typeElement.getEnclosedElements().stream()
                                 .filter(element -> element.getKind().equals(ElementKind.ENUM_CONSTANT))
                                 .filter(element -> element.getAnnotation(Ignore.class) == null)
                                 .map(element ->
                                         new EnumValue()
-                                                .setName(elementManager.getNameFromElement(element))
-                                                .setDescription(elementManager.getDescriptionFromElement(element))
+                                                .setName(ELEMENT_UTIL.getNameFromElement(element))
+                                                .setDescription(ELEMENT_UTIL.getDescriptionFromElement(element))
                                 )
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 )

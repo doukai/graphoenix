@@ -53,7 +53,7 @@ public class PackageProcessor extends BaseProcessor {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
             configRegister.registerPackage(PackageProcessor.class.getClassLoader());
             if (graphQLConfig.getBuild()) {
-                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+                manager.registerGraphQL(documentBuilder.buildDocument(true).toString());
             } else {
                 mapper.registerFieldMaps();
             }

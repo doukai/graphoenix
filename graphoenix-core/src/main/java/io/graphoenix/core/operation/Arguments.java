@@ -17,6 +17,10 @@ public class Arguments extends AbstractMap<String, JsonValue> implements ValueWi
         this.arguments = new LinkedHashMap<>();
     }
 
+    public Arguments(Map<String, ValueWithVariable> arguments) {
+        this.arguments = arguments;
+    }
+
     public Arguments(GraphqlParser.ArgumentsContext argumentsContext) {
         this.arguments = argumentsContext.argument().stream()
                 .map(argumentContext -> new SimpleEntry<>(argumentContext.name().getText(), ValueWithVariable.of(argumentContext.valueWithVariable())))
