@@ -246,11 +246,11 @@ public class BaseTask extends DefaultTask {
                                                                                                     "parameters",
                                                                                                     new ArrayValueWithVariable(
                                                                                                             methodDeclaration.getParameters().stream()
-                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", parameter.getTypeAsString()))
+                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", getTypeName(parameter.getType())))
                                                                                                                     .collect(Collectors.toList())
                                                                                                     )
                                                                                             )
-                                                                                            .addArgument("returnClassName", methodDeclaration.getTypeAsString())
+                                                                                            .addArgument("returnClassName", getTypeName(methodDeclaration.getType()))
                                                                             )
                                                                             .addDirective(
                                                                                     new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
@@ -302,11 +302,11 @@ public class BaseTask extends DefaultTask {
                                                                                                     "parameters",
                                                                                                     new ArrayValueWithVariable(
                                                                                                             methodDeclaration.getParameters().stream()
-                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", parameter.getTypeAsString()))
+                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", getTypeName(parameter.getType())))
                                                                                                                     .collect(Collectors.toList())
                                                                                                     )
                                                                                             )
-                                                                                            .addArgument("returnClassName", methodDeclaration.getTypeAsString())
+                                                                                            .addArgument("returnClassName", getTypeName(methodDeclaration.getType()))
                                                                             )
                                                                             .addDirective(
                                                                                     new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
@@ -358,11 +358,11 @@ public class BaseTask extends DefaultTask {
                                                                                                     "parameters",
                                                                                                     new ArrayValueWithVariable(
                                                                                                             methodDeclaration.getParameters().stream()
-                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", parameter.getTypeAsString()))
+                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", getTypeName(parameter.getType())))
                                                                                                                     .collect(Collectors.toList())
                                                                                                     )
                                                                                             )
-                                                                                            .addArgument("returnClassName", methodDeclaration.getTypeAsString())
+                                                                                            .addArgument("returnClassName", getTypeName(methodDeclaration.getType()))
                                                                             )
                                                                             .addDirective(
                                                                                     new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
@@ -422,6 +422,17 @@ public class BaseTask extends DefaultTask {
             }
         }
         return Optional.empty();
+    }
+
+    protected String getTypeName(Type type) {
+        if (type.isArrayType()) {
+            return getTypeName(type.asArrayType().getElementType()) + "[]";
+        } else if (type.isPrimitiveType()) {
+            return type.asPrimitiveType().resolve().name();
+        } else if (type.isClassOrInterfaceType()) {
+            return type.asClassOrInterfaceType().resolve().asReferenceType().getQualifiedName();
+        }
+        return type.asString();
     }
 
     protected Optional<ResolvedReferenceTypeDeclaration> resolve(ResolvedReferenceType resolvedReferenceType) {

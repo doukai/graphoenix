@@ -356,7 +356,7 @@ public enum ElementUtil {
 
     public String getTypeMirrorName(TypeMirror typeMirror, Types types) {
         if (typeMirror.getKind().isPrimitive()) {
-            return typeMirror.toString();
+            return typeMirror.getKind().toString().toLowerCase();
         }
         return ((TypeElement) types.asElement(typeMirror)).getQualifiedName().toString();
     }

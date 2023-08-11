@@ -5,6 +5,7 @@ import io.graphoenix.showcase.user.dao.UserOperationDAO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.GraphQLApi;
+import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Query;
 import reactor.core.publisher.Mono;
 
@@ -20,7 +21,7 @@ public class UserApi {
     }
 
     @Query
-    public Mono<String> login(String login, String password) {
+    public Mono<String> login(@NonNull String login, @NonNull String password) {
         return operationDAO.getUserByLogin(login)
                 .map(user -> {
                             if (user.getPassword().equals(password)) {
