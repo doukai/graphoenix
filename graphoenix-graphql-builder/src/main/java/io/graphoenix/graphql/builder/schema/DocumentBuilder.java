@@ -114,7 +114,7 @@ public class DocumentBuilder {
                 .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
                 .filter(manager::isNotContainerType)
-                .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, !isPackage, !isPackage, !isPackage))
+                .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, !isPackage, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
         if (manager.getObjects().anyMatch(manager::isNotContainerType)) {
@@ -903,8 +903,16 @@ public class DocumentBuilder {
                 return new InputValue().setName("__typename").setType("String").setDefaultValue(objectTypeDefinitionContext.name().getText());
             }
             boolean isList = manager.fieldTypeIsList(fieldDefinitionContext.type());
-            return new InputValue().setName(fieldDefinitionContext.name().getText())
+
+            InputValue inputValue = new InputValue().setName(fieldDefinitionContext.name().getText())
                     .setType((isList ? new ListType(new TypeName(manager.isObject(fieldTypeName) ? fieldTypeName + inputType : fieldTypeName)) : new TypeName(manager.isObject(fieldTypeName) ? fieldTypeName + inputType : fieldTypeName)));
+            Optional.ofNullable(fieldDefinitionContext.directives())
+                    .flatMap(directivesContext ->
+                            directivesContext.directive().stream()
+                                    .filter(directiveContext -> directiveContext.name().getText().equals(VALIDATION_DIRECTIVE_NAME)).findFirst()
+                    )
+                    .ifPresent(directiveContext -> inputValue.addDirective(new io.graphoenix.core.operation.Directive(directiveContext)));
+            return inputValue;
         } else if (inputType.equals(InputType.EXPRESSION)) {
             if (fieldDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME)) {
                 return new InputValue().setName(DEPRECATED_INPUT_NAME).setType("Boolean").setDefaultValue("false");
@@ -974,9 +982,18 @@ public class DocumentBuilder {
     }
 
     public InputObjectType objectToInput(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return new InputObjectType()
+        InputObjectType inputObjectType = new InputObjectType()
                 .setName(objectTypeDefinitionContext.name().getText() + InputType.INPUT)
                 .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.INPUT));
+
+        Optional.ofNullable(objectTypeDefinitionContext.directives())
+                .flatMap(directivesContext ->
+                        directivesContext.directive().stream()
+                                .filter(directiveContext -> directiveContext.name().getText().equals(VALIDATION_DIRECTIVE_NAME)).findFirst()
+                )
+                .ifPresent(directiveContext -> inputObjectType.addDirective(new io.graphoenix.core.operation.Directive(directiveContext)));
+
+        return inputObjectType;
     }
 
     public InputObjectType objectToOrderBy(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {

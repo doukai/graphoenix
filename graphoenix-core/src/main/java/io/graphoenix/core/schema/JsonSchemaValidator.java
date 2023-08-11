@@ -9,9 +9,9 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.manager.GraphQLDocumentManager;
 import io.graphoenix.spi.dto.GraphQLError;
-import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
@@ -19,10 +19,11 @@ import jakarta.json.stream.JsonCollectors;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.UPDATE;
 import static io.graphoenix.spi.constant.Hammurabi.SCHEMA_EXCLUDE_INPUT;
@@ -48,42 +49,45 @@ public class JsonSchemaValidator {
         this.factory = new JsonSchemaFactory.Builder().defaultMetaSchemaURI(jsonMetaSchema.getUri()).addMetaSchema(jsonMetaSchema).addUrnFactory(jsonSchemaResourceURNFactory).build();
     }
 
-    public Set<ValidationMessage> validate(String objectName, boolean isList, boolean isUpdate, String json) throws JsonProcessingException {
-        String schemaName = objectName;
-        if (isList && isUpdate) {
-            schemaName = schemaName.concat("ListUpdate");
-        } else if (isList) {
-            schemaName = schemaName.concat("List");
-        } else if (isUpdate) {
-            schemaName = schemaName.concat("Update");
-        }
-        return factory.getSchema(jsonSchemaManager.getJsonSchema(schemaName)).validate(mapper.readTree(json));
+    public Set<ValidationMessage> validate(String operationTypeName, String json) throws JsonProcessingException {
+        return factory.getSchema(jsonSchemaManager.getJsonSchema(operationTypeName)).validate(mapper.readTree(json));
     }
 
     public void validateOperation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        Set<ValidationMessage> messageSet = operationDefinitionContext.selectionSet().selection().stream()
-                .flatMap(selectionContext -> Try.of(() -> validateSelection(selectionContext)).get().stream())
-                .collect(Collectors.toSet());
-        if (messageSet.size() > 0) {
-            GraphQLErrors graphQLErrors = new GraphQLErrors();
-            messageSet.forEach(validationMessage ->
-                    graphQLErrors.add(
-                            new GraphQLError(validationMessage.getMessage())
-                                    .setSchemaPath(validationMessage.getSchemaPath())
-                    )
-            );
-            throw graphQLErrors;
+        String operationTypeName;
+        if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
+            operationTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
+        } else if (operationDefinitionContext.operationType().SUBSCRIPTION() != null) {
+            operationTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIBE_TYPE_NOT_EXIST));
+        } else if (operationDefinitionContext.operationType().MUTATION() != null) {
+            operationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
+        } else {
+            throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
+        }
+
+        JsonObject operationJsonElement = operationDefinitionContext.selectionSet().selection().stream()
+                .map(selectionContext -> new AbstractMap.SimpleEntry<>(selectionContext.field().name().getText(), selectionToJsonElement(selectionContext)))
+                .collect(JsonCollectors.toJsonObject());
+
+        try {
+            Set<ValidationMessage> messageSet = validate(operationTypeName, operationJsonElement.toString());
+            if (messageSet.size() > 0) {
+                GraphQLErrors graphQLErrors = new GraphQLErrors();
+                messageSet.forEach(validationMessage -> graphQLErrors.add(new GraphQLError(validationMessage.getMessage()).setSchemaPath(validationMessage.getSchemaPath())));
+                throw graphQLErrors;
+            }
+        } catch (JsonProcessingException e) {
+            throw new GraphQLErrors(e);
         }
     }
 
-    protected Set<ValidationMessage> validateSelection(GraphqlParser.SelectionContext selectionContext) throws JsonProcessingException {
-        String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
-        GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(mutationTypeName,
-                selectionContext.field().name().getText()).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(mutationTypeName, selectionContext.field().name().getText())));
-        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        boolean isList = manager.fieldTypeIsList(fieldDefinitionContext.type());
+    protected JsonValue selectionToJsonElement(GraphqlParser.SelectionContext selectionContext) {
         boolean isUpdate = manager.getMutationType(selectionContext).equals(UPDATE);
-        return validate(fieldTypeName, isList, isUpdate, argumentsToJsonElement(selectionContext.field().arguments()).toString());
+        JsonValue jsonValue = argumentsToJsonElement(selectionContext.field().arguments());
+        if (isUpdate) {
+            return jsonProvider.createObjectBuilder(jsonValue.asJsonObject()).add("update", true).build();
+        }
+        return jsonValue;
     }
 
     protected JsonValue argumentsToJsonElement(GraphqlParser.ArgumentsContext argumentsContext) {

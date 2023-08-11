@@ -60,4 +60,4 @@ directive @validation(
     then: ValidationInput
     else: ValidationInput
     dependentRequired: [Property]
-) on OBJECT | FIELD_DEFINITION
+) on OBJECT | FIELD_DEFINITION | INPUT_OBJECT | INPUT_FIELD_DEFINITION

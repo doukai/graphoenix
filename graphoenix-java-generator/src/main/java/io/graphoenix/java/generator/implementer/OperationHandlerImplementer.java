@@ -211,6 +211,14 @@ public class OperationHandlerImplementer {
                                 Modifier.FINAL
                         ).build()
                 )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)),
+                                "validator",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
                 .addMethod(buildDefaultOperationMethod(type))
                 .addMethod(buildOperationMethod(type))
                 .addMethod(buildConstructor(type))
@@ -247,14 +255,6 @@ public class OperationHandlerImplementer {
                                 ).build()
                         )
                         .addFields(buildMutationFields())
-                        .addField(
-                                FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)),
-                                        "validator",
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL
-                                ).build()
-                        )
                         .addField(
                                 FieldSpec.builder(
                                         ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationSubscriber.class)),
@@ -427,12 +427,13 @@ public class OperationHandlerImplementer {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
                 .addParameter(ParameterSpec.builder(ClassName.get(OperationHandler.class), "operationHandler").build())
-                .returns(ParameterizedTypeName.get(ClassName.get(publisherClass), ClassName.get(JsonValue.class)));
+                .addParameter(ParameterSpec.builder(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinitionContext").build())
+                .returns(ParameterizedTypeName.get(ClassName.get(publisherClass), ClassName.get(JsonValue.class)))
+                .addStatement("validator.get().validateOperation(operationDefinitionContext)");
 
         switch (type) {
             case QUERY:
-                builder.addParameter(ParameterSpec.builder(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinitionContext").build())
-                        .addStatement("$T operationWithFetchFieldDefinitionContext = fetchFieldProcessor.get().buildFetchFields(operationDefinitionContext)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
+                builder.addStatement("$T operationWithFetchFieldDefinitionContext = fetchFieldProcessor.get().buildFetchFields(operationDefinitionContext)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
                         .addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
                         .addStatement(
                                 CodeBlock.join(
@@ -451,8 +452,6 @@ public class OperationHandlerImplementer {
                 break;
             case MUTATION:
                 builder.addAnnotation(Transactional.class)
-                        .addParameter(ParameterSpec.builder(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinitionContext").build())
-                        .addStatement("validator.get().validateOperation(operationDefinitionContext)")
                         .addStatement("$T mutationLoader = mutationDataLoader.get()", ClassName.get(MutationDataLoader.class))
                         .addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
                         .addStatement(
@@ -487,8 +486,7 @@ public class OperationHandlerImplementer {
                         );
                 break;
             case SUBSCRIPTION:
-                builder.addParameter(ParameterSpec.builder(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinitionContext").build())
-                        .addStatement("$T operation = operationSubscriber.get().buildIDSelection(operationDefinitionContext)", ClassName.get(Operation.class))
+                builder.addStatement("$T operation = operationSubscriber.get().buildIDSelection(operationDefinitionContext)", ClassName.get(Operation.class))
                         .addStatement("$T operationWithFetchFieldDefinitionContext = fetchFieldProcessor.get().buildFetchFields(operation)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
                         .addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
                         .addStatement(
@@ -648,6 +646,7 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(ArgumentBuilder.class)), "argumentBuilder")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(QueryDataLoader.class)), "queryDataLoader")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "QueryAfterHandler")), "queryHandler")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)), "validator")
                 .addStatement("this.graphQLConfig = graphQLConfig")
                 .addStatement("this.manager = manager")
                 .addStatement("this.fetchFieldProcessor = fetchFieldProcessor")
@@ -665,7 +664,8 @@ public class OperationHandlerImplementer {
                 .addStatement("this.jsonb = jsonb")
                 .addStatement("this.argumentBuilder = argumentBuilder")
                 .addStatement("this.queryDataLoader = queryDataLoader")
-                .addStatement("this.queryHandler = queryHandler");
+                .addStatement("this.queryHandler = queryHandler")
+                .addStatement("this.validator = validator");
 
         switch (type) {
             case QUERY:
@@ -699,8 +699,6 @@ public class OperationHandlerImplementer {
                         .addStatement("this.mutationBeforeHandler = mutationBeforeHandler")
                         .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "MutationAfterHandler")), "mutationAfterHandler")
                         .addStatement("this.mutationAfterHandler = mutationAfterHandler")
-                        .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)), "validator")
-                        .addStatement("this.validator = validator")
                         .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationSubscriber.class)), "operationSubscriber")
                         .addStatement("this.operationSubscriber = operationSubscriber");
                 manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))

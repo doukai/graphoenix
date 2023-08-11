@@ -89,6 +89,14 @@ public class InputValue {
         return this;
     }
 
+    public InputValue addDirective(Directive directive) {
+        if (directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        this.directives.add(directive);
+        return this;
+    }
+
     public String getDescription() {
         return description;
     }
