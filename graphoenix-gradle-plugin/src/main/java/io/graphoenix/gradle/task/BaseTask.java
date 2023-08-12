@@ -619,7 +619,7 @@ public class BaseTask extends DefaultTask {
             } else if (type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.CHAR) ||
                     type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.BYTE)) {
                 return "String";
-            } else if (type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.DOUBLE)) {
+            } else if (type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.BOOLEAN)) {
                 return "Boolean";
             }
         } else if (type.isReferenceType()) {

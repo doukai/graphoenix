@@ -19,7 +19,7 @@ public enum TypeUtil {
         } else if (argumentTypeNames.length > 1) {
             return ParameterizedTypeName.get(TYPE_NAME_UTIL.toClassName(className), Arrays.stream(argumentTypeNames).map(this::getTypeName).toArray(TypeName[]::new));
         } else {
-            return TYPE_NAME_UTIL.toClassName(className);
+            return TYPE_NAME_UTIL.toTypeName(className);
         }
     }
 

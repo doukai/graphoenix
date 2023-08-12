@@ -81,7 +81,32 @@ public enum TypeNameUtil {
 
     public ClassName toClassName(String typeName) {
         int i = typeName.lastIndexOf(".");
-        return ClassName.get(typeName.substring(0, i), typeName.substring(i + 1));
+        if (i == -1) {
+            switch (typeName) {
+                case "void":
+                    return (ClassName) TypeName.VOID.box();
+                case "boolean":
+                    return (ClassName) TypeName.BOOLEAN.box();
+                case "byte":
+                    return (ClassName) TypeName.BYTE.box();
+                case "short":
+                    return (ClassName) TypeName.SHORT.box();
+                case "int":
+                    return (ClassName) TypeName.INT.box();
+                case "long":
+                    return (ClassName) TypeName.LONG.box();
+                case "char":
+                    return (ClassName) TypeName.CHAR.box();
+                case "float":
+                    return (ClassName) TypeName.FLOAT.box();
+                case "double":
+                    return (ClassName) TypeName.DOUBLE.box();
+                default:
+                    return ClassName.bestGuess(typeName);
+            }
+        } else {
+            return ClassName.get(typeName.substring(0, i), typeName.substring(i + 1));
+        }
     }
 
     public TypeName toTypeName(String typeName) {

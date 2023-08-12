@@ -536,7 +536,7 @@ public class OperationHandlerImplementer {
                                 .map(parameter ->
                                         CodeBlock.of("argumentBuilder.get().getArgument(selectionContext, $S, $T.class)",
                                                 parameter.getKey(),
-                                                TYPE_UTIL.getClassName(parameter.getValue())
+                                                TYPE_UTIL.getTypeName(parameter.getValue())
                                         )
                                 )
                                 .collect(Collectors.toList()), ", ")
