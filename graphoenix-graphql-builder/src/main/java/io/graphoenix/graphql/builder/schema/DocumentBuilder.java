@@ -76,17 +76,17 @@ public class DocumentBuilder {
 
     public Document buildDocument(boolean isPackage) {
         io.vavr.collection.Stream.ofAll(
-                        manager.getObjects()
-                                .filter(packageManager::isOwnPackage)
-                                .filter(manager::isNotOperationType)
-                                .filter(manager::isNotContainerType)
-                                .flatMap(objectTypeDefinitionContext ->
-                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                                )
-                                .filter(tuple -> manager.getFetchAnchor(tuple._2()))
-                                .filter(tuple -> manager.hasFetchWith(tuple._2()))
-                )
+                manager.getObjects()
+                        .filter(packageManager::isOwnPackage)
+                        .filter(manager::isNotOperationType)
+                        .filter(manager::isNotContainerType)
+                        .flatMap(objectTypeDefinitionContext ->
+                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                        )
+                        .filter(tuple -> manager.getFetchAnchor(tuple._2()))
+                        .filter(tuple -> manager.hasFetchWith(tuple._2()))
+        )
                 .distinctBy(tuple -> manager.getFetchWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildFetchWithObject(tuple._1(), tuple._2()).stream())
@@ -94,16 +94,16 @@ public class DocumentBuilder {
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
         io.vavr.collection.Stream.ofAll(
-                        manager.getObjects()
-                                .filter(packageManager::isOwnPackage)
-                                .filter(manager::isNotOperationType)
-                                .filter(manager::isNotContainerType)
-                                .flatMap(objectTypeDefinitionContext ->
-                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                                )
-                                .filter(tuple -> manager.hasMapWith(tuple._2()))
-                )
+                manager.getObjects()
+                        .filter(packageManager::isOwnPackage)
+                        .filter(manager::isNotOperationType)
+                        .filter(manager::isNotContainerType)
+                        .flatMap(objectTypeDefinitionContext ->
+                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                        )
+                        .filter(tuple -> manager.hasMapWith(tuple._2()))
+        )
                 .distinctBy(tuple -> manager.getMapWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildMapWithObject(tuple._1(), tuple._2()).stream())
@@ -751,8 +751,8 @@ public class DocumentBuilder {
                 .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
-                                buildSchemaTypeField(objectTypeDefinitionContext, InputType.INPUT),
-                                buildSchemaTypeFieldList(objectTypeDefinitionContext, InputType.INPUT)
+                                buildSchemaTypeField(objectTypeDefinitionContext, InputType.INPUT_ARGUMENTS),
+                                buildSchemaTypeFieldList(objectTypeDefinitionContext, InputType.INPUT_ARGUMENTS)
                         )
                 )
                 .collect(Collectors.toList());
@@ -770,9 +770,15 @@ public class DocumentBuilder {
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addArgument(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + inputType))));
-        } else if (inputType.equals(InputType.INPUT)) {
+        } else if (inputType.equals(InputType.INPUT_ARGUMENTS)) {
             field.addArgument(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
         }
+        Optional.ofNullable(objectTypeDefinitionContext.directives())
+                .flatMap(directivesContext ->
+                        directivesContext.directive().stream()
+                                .filter(directiveContext -> directiveContext.name().getText().equals(VALIDATION_DIRECTIVE_NAME)).findFirst()
+                )
+                .ifPresent(directiveContext -> field.addDirective(new io.graphoenix.core.operation.Directive(directiveContext)));
         buildSecurity(objectTypeDefinitionContext, field);
         return field;
     }
@@ -803,10 +809,16 @@ public class DocumentBuilder {
                             field.addArgument(new InputValue().setName(AFTER_INPUT_NAME).setType(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                                     .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setType(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                     );
-        } else if (inputType.equals(InputType.INPUT)) {
+        } else if (inputType.equals(InputType.INPUT_ARGUMENTS)) {
             field.addArgument(new InputValue().setName(LIST_INPUT_NAME).setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + inputType))))
                     .addArgument(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
         }
+        Optional.ofNullable(objectTypeDefinitionContext.directives())
+                .flatMap(directivesContext ->
+                        directivesContext.directive().stream()
+                                .filter(directiveContext -> directiveContext.name().getText().equals(VALIDATION_DIRECTIVE_NAME)).findFirst()
+                )
+                .ifPresent(directiveContext -> field.addDirective(new io.graphoenix.core.operation.Directive(directiveContext)));
         buildSecurity(objectTypeDefinitionContext, field);
         return field;
     }
@@ -898,14 +910,20 @@ public class DocumentBuilder {
 
     public InputValue fieldToArgument(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, InputType inputType) {
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        if (inputType.equals(InputType.INPUT)) {
+        if (inputType.equals(InputType.INPUT) || inputType.equals(InputType.INPUT_ARGUMENTS)) {
             if (fieldDefinitionContext.name().getText().equals("__typename")) {
                 return new InputValue().setName("__typename").setType("String").setDefaultValue(objectTypeDefinitionContext.name().getText());
             }
-            boolean isList = manager.fieldTypeIsList(fieldDefinitionContext.type());
-
-            InputValue inputValue = new InputValue().setName(fieldDefinitionContext.name().getText())
-                    .setType((isList ? new ListType(new TypeName(manager.isObject(fieldTypeName) ? fieldTypeName + inputType : fieldTypeName)) : new TypeName(manager.isObject(fieldTypeName) ? fieldTypeName + inputType : fieldTypeName)));
+            String inputTypeName;
+            if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
+                inputTypeName = fieldDefinitionContext.type().getText();
+            } else {
+                inputTypeName = fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName + inputType);
+            }
+            if (inputType.equals(InputType.INPUT_ARGUMENTS)) {
+                inputTypeName = inputTypeName.replace("!", "");
+            }
+            InputValue inputValue = new InputValue().setName(fieldDefinitionContext.name().getText()).setType(inputTypeName);
             Optional.ofNullable(fieldDefinitionContext.directives())
                     .flatMap(directivesContext ->
                             directivesContext.directive().stream()
@@ -1228,7 +1246,7 @@ public class DocumentBuilder {
     }
 
     private enum InputType {
-        EXPRESSION(EXPRESSION_SUFFIX), INPUT(INPUT_SUFFIX), ORDER_BY(ORDER_BY_SUFFIX), CONNECTION(CONNECTION_SUFFIX), EDGE(EDGE_SUFFIX);
+        EXPRESSION(EXPRESSION_SUFFIX), INPUT(INPUT_SUFFIX), INPUT_ARGUMENTS(INPUT_SUFFIX), ORDER_BY(ORDER_BY_SUFFIX), CONNECTION(CONNECTION_SUFFIX), EDGE(EDGE_SUFFIX);
 
         private final String suffix;
 

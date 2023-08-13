@@ -139,12 +139,6 @@ public class GrpcObjectHandlerBuilder {
                 } else {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
-                if (fieldDefinitionContext.type().nonNullType() != null) {
-                    builder.addStatement("assert $L.$L() != null && $L.$L().size() > 0", objectParameterName, fieldGetterName, objectParameterName, fieldGetterName)
-                            .addStatement(codeBlock);
-                } else {
-                    builder.addStatement(codeBlock);
-                }
             } else {
                 String grpcSetMethodName = grpcNameUtil.getGrpcSetMethodName(fieldDefinitionContext);
                 if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
@@ -187,13 +181,8 @@ public class GrpcObjectHandlerBuilder {
                 } else {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
-                if (fieldDefinitionContext.type().nonNullType() != null) {
-                    builder.addStatement("assert $L.$L() != null", objectParameterName, fieldGetterName)
-                            .addStatement(codeBlock);
-                } else {
-                    builder.addStatement(codeBlock);
-                }
             }
+            builder.addStatement(codeBlock);
         }
         builder.addStatement("return builder.build()");
         return builder.build();

@@ -258,7 +258,7 @@ public enum ElementUtil {
             typeName = getNameFromElement(types.asElement(typeMirror));
         }
 
-        if (element.getAnnotation(NonNull.class) != null) {
+        if (element.getAnnotation(NonNull.class) != null || typeMirror.getKind().isPrimitive()) {
             return typeName.concat("!");
         } else {
             return typeName;
@@ -330,7 +330,7 @@ public enum ElementUtil {
             }
         }
 
-        if (element.getAnnotation(NonNull.class) != null) {
+        if (element.getAnnotation(NonNull.class) != null || typeMirror.getKind().isPrimitive()) {
             return typeName.concat("!");
         } else {
             return typeName;
