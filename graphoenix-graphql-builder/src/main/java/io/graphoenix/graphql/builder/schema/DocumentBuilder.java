@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.*;
@@ -76,17 +78,17 @@ public class DocumentBuilder {
 
     public Document buildDocument(boolean isPackage) {
         io.vavr.collection.Stream.ofAll(
-                manager.getObjects()
-                        .filter(packageManager::isOwnPackage)
-                        .filter(manager::isNotOperationType)
-                        .filter(manager::isNotContainerType)
-                        .flatMap(objectTypeDefinitionContext ->
-                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                        )
-                        .filter(tuple -> manager.getFetchAnchor(tuple._2()))
-                        .filter(tuple -> manager.hasFetchWith(tuple._2()))
-        )
+                        manager.getObjects()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isNotOperationType)
+                                .filter(manager::isNotContainerType)
+                                .flatMap(objectTypeDefinitionContext ->
+                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                                )
+                                .filter(tuple -> manager.getFetchAnchor(tuple._2()))
+                                .filter(tuple -> manager.hasFetchWith(tuple._2()))
+                )
                 .distinctBy(tuple -> manager.getFetchWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildFetchWithObject(tuple._1(), tuple._2()).stream())
@@ -94,16 +96,16 @@ public class DocumentBuilder {
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
         io.vavr.collection.Stream.ofAll(
-                manager.getObjects()
-                        .filter(packageManager::isOwnPackage)
-                        .filter(manager::isNotOperationType)
-                        .filter(manager::isNotContainerType)
-                        .flatMap(objectTypeDefinitionContext ->
-                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                        .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
-                        )
-                        .filter(tuple -> manager.hasMapWith(tuple._2()))
-        )
+                        manager.getObjects()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isNotOperationType)
+                                .filter(manager::isNotContainerType)
+                                .flatMap(objectTypeDefinitionContext ->
+                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .map(fieldDefinitionContext -> Tuple.of(objectTypeDefinitionContext, fieldDefinitionContext))
+                                )
+                                .filter(tuple -> manager.hasMapWith(tuple._2()))
+                )
                 .distinctBy(tuple -> manager.getMapWithType(tuple._2()))
                 .toJavaStream()
                 .flatMap(tuple -> buildMapWithObject(tuple._1(), tuple._2()).stream())
@@ -116,6 +118,9 @@ public class DocumentBuilder {
                 .filter(manager::isNotContainerType)
                 .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, !isPackage, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
+
+        buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
+        buildContainerTypeObjects().forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
         if (manager.getObjects().anyMatch(manager::isNotContainerType)) {
             ObjectType queryType = manager.getObject(manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME))
@@ -149,10 +154,11 @@ public class DocumentBuilder {
                             .setSubscription(subscriptionType.getName())
                             .toString()
             );
-        }
 
-        buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
-        buildContainerTypeObjects().forEach(objectType -> manager.registerGraphQL(objectType.toString()));
+            buildQueryTypeFieldArguments().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
+            buildMutationTypeFieldsArguments().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
+            buildSubscriptionTypeFieldsArguments().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
+        }
 
         mapper.registerFieldMaps();
 
@@ -631,7 +637,8 @@ public class DocumentBuilder {
     }
 
     public Field buildListObjectAggregateField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        Field field = new Field().setName(fieldDefinitionContext.name().getText().concat(AGGREGATE_SUFFIX))
+        Field field = new Field()
+                .setName(fieldDefinitionContext.name().getText().concat(AGGREGATE_SUFFIX))
                 .setType(manager.getFieldTypeName(fieldDefinitionContext.type()))
                 .setDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(this::buildDirective).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
@@ -647,7 +654,8 @@ public class DocumentBuilder {
 
     public Field buildListObjectAggregateField(Field original) {
         String withTypeName = original.getType().getTypeName().getName();
-        Field field = new Field().setName(original.getName().concat(AGGREGATE_SUFFIX))
+        Field field = new Field()
+                .setName(original.getName().concat(AGGREGATE_SUFFIX))
                 .setType(withTypeName)
                 .setStringDirectives(original.getDirectives())
                 .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
@@ -662,7 +670,8 @@ public class DocumentBuilder {
     }
 
     public Field buildListObjectConnectionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        Field field = new Field().setName(fieldDefinitionContext.name().getText().concat(CONNECTION_SUFFIX))
+        Field field = new Field()
+                .setName(fieldDefinitionContext.name().getText().concat(CONNECTION_SUFFIX))
                 .setType(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(CONNECTION_SUFFIX))
                 .addDirective(new io.graphoenix.core.operation.Directive()
                         .setName(CONNECTION_DIRECTIVE_NAME)
@@ -682,7 +691,8 @@ public class DocumentBuilder {
 
     public Field buildListObjectConnectionField(Field original) {
         String withTypeName = original.getType().getTypeName().getName();
-        Field field = new Field().setName(original.getName().concat(CONNECTION_SUFFIX))
+        Field field = new Field()
+                .setName(original.getName().concat(CONNECTION_SUFFIX))
                 .setType(withTypeName.concat(CONNECTION_SUFFIX))
                 .addDirective(new io.graphoenix.core.operation.Directive()
                         .setName(CONNECTION_DIRECTIVE_NAME)
@@ -701,7 +711,8 @@ public class DocumentBuilder {
     }
 
     public Field buildTypeNameField(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return new Field().setName("__typename")
+        return new Field()
+                .setName("__typename")
                 .setType("String")
                 .setArguments(new LinkedHashSet<>())
                 .addDirective(
@@ -721,12 +732,26 @@ public class DocumentBuilder {
                 .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
-                                buildSchemaTypeField(objectTypeDefinitionContext, InputType.EXPRESSION),
-                                buildSchemaTypeFieldList(objectTypeDefinitionContext, InputType.EXPRESSION),
-                                buildSchemaTypeFieldConnection(objectTypeDefinitionContext, InputType.EXPRESSION)
+                                buildSchemaTypeField(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS),
+                                buildSchemaTypeFieldList(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS),
+                                buildSchemaTypeFieldConnection(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS)
                         )
                 )
                 .collect(Collectors.toList());
+    }
+
+    public Stream<InputObjectType> buildQueryTypeFieldArguments() {
+        return manager.getObjects()
+                .filter(packageManager::isOwnPackage)
+                .filter(manager::isNotOperationType)
+                .filter(manager::isNotContainerType)
+                .flatMap(objectTypeDefinitionContext ->
+                        Stream.of(
+                                buildSchemaTypeFieldArguments(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS),
+                                buildSchemaTypeFieldListArguments(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS),
+                                buildSchemaTypeFieldConnectionArguments(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS)
+                        )
+                );
     }
 
     public List<Field> buildSubscriptionTypeFields() {
@@ -736,12 +761,26 @@ public class DocumentBuilder {
                 .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
-                                buildSchemaTypeField(objectTypeDefinitionContext, InputType.EXPRESSION),
-                                buildSchemaTypeFieldList(objectTypeDefinitionContext, InputType.EXPRESSION),
-                                buildSchemaTypeFieldConnection(objectTypeDefinitionContext, InputType.EXPRESSION)
+                                buildSchemaTypeField(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS),
+                                buildSchemaTypeFieldList(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS),
+                                buildSchemaTypeFieldConnection(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS)
                         )
                 )
                 .collect(Collectors.toList());
+    }
+
+    public Stream<InputObjectType> buildSubscriptionTypeFieldsArguments() {
+        return manager.getObjects()
+                .filter(packageManager::isOwnPackage)
+                .filter(manager::isNotOperationType)
+                .filter(manager::isNotContainerType)
+                .flatMap(objectTypeDefinitionContext ->
+                        Stream.of(
+                                buildSchemaTypeFieldArguments(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS),
+                                buildSchemaTypeFieldListArguments(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS),
+                                buildSchemaTypeFieldConnectionArguments(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS)
+                        )
+                );
     }
 
     public List<Field> buildMutationTypeFields() {
@@ -751,15 +790,29 @@ public class DocumentBuilder {
                 .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
-                                buildSchemaTypeField(objectTypeDefinitionContext, InputType.INPUT_ARGUMENTS),
-                                buildSchemaTypeFieldList(objectTypeDefinitionContext, InputType.INPUT_ARGUMENTS)
+                                buildSchemaTypeField(objectTypeDefinitionContext, InputType.MUTATION_ARGUMENTS),
+                                buildSchemaTypeFieldList(objectTypeDefinitionContext, InputType.MUTATION_ARGUMENTS)
                         )
                 )
                 .collect(Collectors.toList());
     }
 
+    public Stream<InputObjectType> buildMutationTypeFieldsArguments() {
+        return manager.getObjects()
+                .filter(packageManager::isOwnPackage)
+                .filter(manager::isNotOperationType)
+                .filter(manager::isNotContainerType)
+                .flatMap(objectTypeDefinitionContext ->
+                        Stream.of(
+                                buildSchemaTypeFieldArguments(objectTypeDefinitionContext, InputType.MUTATION_ARGUMENTS),
+                                buildSchemaTypeFieldListArguments(objectTypeDefinitionContext, InputType.MUTATION_ARGUMENTS)
+                        )
+                );
+    }
+
     public Field buildSchemaTypeField(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
-        Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext))
+        Field field = new Field()
+                .setName(getSchemaFieldName(objectTypeDefinitionContext))
                 .setType(objectTypeDefinitionContext.name().getText())
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
                 .addDirective(
@@ -767,10 +820,10 @@ public class DocumentBuilder {
                                 .addArgument("packageName", graphQLConfig.getPackageName())
                                 .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
                 );
-        if (inputType.equals(InputType.EXPRESSION)) {
+        if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
             field.addArgument(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
-                    .addArgument(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + inputType))));
-        } else if (inputType.equals(InputType.INPUT_ARGUMENTS)) {
+                    .addArgument(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
+        } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
             field.addArgument(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
         }
         Optional.ofNullable(objectTypeDefinitionContext.directives())
@@ -783,6 +836,34 @@ public class DocumentBuilder {
         return field;
     }
 
+    public InputObjectType buildSchemaTypeFieldArguments(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
+        InputObjectType inputObjectType = new InputObjectType()
+                .setName(getSchemaFieldName(objectTypeDefinitionContext))
+                .addInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
+                .addDirective(
+                        new io.graphoenix.core.operation.Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                .addArgument("packageName", graphQLConfig.getPackageName())
+                                .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
+                );
+        if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
+            String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
+            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + queryTypeName + inputType)
+                    .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
+                    .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
+        } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
+            String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
+            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + mutationTypeName + inputType)
+                    .addInputValue(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
+        }
+        Optional.ofNullable(objectTypeDefinitionContext.directives())
+                .flatMap(directivesContext ->
+                        directivesContext.directive().stream()
+                                .filter(directiveContext -> directiveContext.name().getText().equals(VALIDATION_DIRECTIVE_NAME)).findFirst()
+                )
+                .ifPresent(directiveContext -> inputObjectType.addDirective(new io.graphoenix.core.operation.Directive(directiveContext)));
+        return inputObjectType;
+    }
+
     public Field buildSchemaTypeFieldList(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
         Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext).concat("List"))
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
@@ -793,11 +874,11 @@ public class DocumentBuilder {
                                 .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
                 );
 
-        if (inputType.equals(InputType.EXPRESSION)) {
+        if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
             field.addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.ORDER_BY))
                     .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
                     .addArgument(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
-                    .addArgument(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + inputType))))
+                    .addArgument(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
                     .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
                     .addArgument(new InputValue().setName(LAST_INPUT_NAME).setType("Int"))
                     .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setType("Int"));
@@ -809,8 +890,8 @@ public class DocumentBuilder {
                             field.addArgument(new InputValue().setName(AFTER_INPUT_NAME).setType(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                                     .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setType(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                     );
-        } else if (inputType.equals(InputType.INPUT_ARGUMENTS)) {
-            field.addArgument(new InputValue().setName(LIST_INPUT_NAME).setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + inputType))))
+        } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
+            field.addArgument(new InputValue().setName(LIST_INPUT_NAME).setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.INPUT))))
                     .addArgument(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
         }
         Optional.ofNullable(objectTypeDefinitionContext.directives())
@@ -821,6 +902,48 @@ public class DocumentBuilder {
                 .ifPresent(directiveContext -> field.addDirective(new io.graphoenix.core.operation.Directive(directiveContext)));
         buildSecurity(objectTypeDefinitionContext, field);
         return field;
+    }
+
+    public InputObjectType buildSchemaTypeFieldListArguments(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
+        InputObjectType inputObjectType = new InputObjectType()
+                .addInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
+                .addDirective(
+                        new io.graphoenix.core.operation.Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                .addArgument("packageName", graphQLConfig.getPackageName())
+                                .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
+                );
+
+        if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
+            String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
+            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + "List" + queryTypeName + inputType)
+                    .addInputValue(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.ORDER_BY))
+                    .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
+                    .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
+                    .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
+                    .addInputValue(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
+                    .addInputValue(new InputValue().setName(LAST_INPUT_NAME).setType("Int"))
+                    .addInputValue(new InputValue().setName(OFFSET_INPUT_NAME).setType("Int"));
+
+            manager.getFieldByDirective(objectTypeDefinitionContext.name().getText(), CURSOR_DIRECTIVE_NAME)
+                    .findFirst()
+                    .or(() -> manager.getObjectTypeIDFieldDefinition(objectTypeDefinitionContext.name().getText()))
+                    .ifPresent(cursorFieldDefinitionContext ->
+                            inputObjectType.addInputValue(new InputValue().setName(AFTER_INPUT_NAME).setType(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                                    .addInputValue(new InputValue().setName(BEFORE_INPUT_NAME).setType(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                    );
+        } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
+            String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
+            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + "List" + mutationTypeName + inputType)
+                    .addInputValue(new InputValue().setName(LIST_INPUT_NAME).setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.INPUT))))
+                    .addInputValue(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
+        }
+        Optional.ofNullable(objectTypeDefinitionContext.directives())
+                .flatMap(directivesContext ->
+                        directivesContext.directive().stream()
+                                .filter(directiveContext -> directiveContext.name().getText().equals(VALIDATION_DIRECTIVE_NAME)).findFirst()
+                )
+                .ifPresent(directiveContext -> inputObjectType.addDirective(new io.graphoenix.core.operation.Directive(directiveContext)));
+        return inputObjectType;
     }
 
     public Field buildSchemaTypeFieldConnection(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
@@ -840,9 +963,9 @@ public class DocumentBuilder {
                                 .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
                 );
 
-        if (inputType.equals(InputType.EXPRESSION)) {
+        if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
             field.addArgument(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
-                    .addArgument(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + inputType))))
+                    .addArgument(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
                     .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
                     .addArgument(new InputValue().setName(LAST_INPUT_NAME).setType("Int"))
                     .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setType("Int"));
@@ -857,6 +980,43 @@ public class DocumentBuilder {
         }
         buildSecurity(objectTypeDefinitionContext, field);
         return field;
+    }
+
+    public InputObjectType buildSchemaTypeFieldConnectionArguments(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
+        InputObjectType inputObjectType = new InputObjectType()
+                .addInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
+                .addInputValue(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.ORDER_BY))
+                .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
+                .addDirective(
+                        new io.graphoenix.core.operation.Directive()
+                                .setName(CONNECTION_DIRECTIVE_NAME)
+                                .addArgument("field", getSchemaFieldName(objectTypeDefinitionContext).concat("List"))
+                                .addArgument("agg", getSchemaFieldName(objectTypeDefinitionContext))
+                )
+                .addDirective(
+                        new io.graphoenix.core.operation.Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                .addArgument("packageName", graphQLConfig.getPackageName())
+                                .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
+                );
+
+        if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
+            String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
+            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + "Connection" + queryTypeName + inputType)
+                    .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
+                    .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
+                    .addInputValue(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
+                    .addInputValue(new InputValue().setName(LAST_INPUT_NAME).setType("Int"))
+                    .addInputValue(new InputValue().setName(OFFSET_INPUT_NAME).setType("Int"));
+
+            manager.getFieldByDirective(objectTypeDefinitionContext.name().getText(), CURSOR_DIRECTIVE_NAME)
+                    .findFirst()
+                    .or(() -> manager.getObjectTypeIDFieldDefinition(objectTypeDefinitionContext.name().getText()))
+                    .ifPresent(cursorFieldDefinitionContext ->
+                            inputObjectType.addInputValue(new InputValue().setName(AFTER_INPUT_NAME).setType(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                                    .addInputValue(new InputValue().setName(BEFORE_INPUT_NAME).setType(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                    );
+        }
+        return inputObjectType;
     }
 
     public void buildSecurity(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, Field field) {
@@ -910,7 +1070,7 @@ public class DocumentBuilder {
 
     public InputValue fieldToArgument(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, InputType inputType) {
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        if (inputType.equals(InputType.INPUT) || inputType.equals(InputType.INPUT_ARGUMENTS)) {
+        if (inputType.equals(InputType.INPUT) || inputType.equals(InputType.MUTATION_ARGUMENTS)) {
             if (fieldDefinitionContext.name().getText().equals("__typename")) {
                 return new InputValue().setName("__typename").setType("String").setDefaultValue(objectTypeDefinitionContext.name().getText());
             }
@@ -918,9 +1078,9 @@ public class DocumentBuilder {
             if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
                 inputTypeName = fieldDefinitionContext.type().getText();
             } else {
-                inputTypeName = fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName + inputType);
+                inputTypeName = fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName + InputType.INPUT);
             }
-            if (inputType.equals(InputType.INPUT_ARGUMENTS)) {
+            if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
                 inputTypeName = inputTypeName.replace("!", "");
             }
             InputValue inputValue = new InputValue().setName(fieldDefinitionContext.name().getText()).setType(inputTypeName);
@@ -931,14 +1091,14 @@ public class DocumentBuilder {
                     )
                     .ifPresent(directiveContext -> inputValue.addDirective(new io.graphoenix.core.operation.Directive(directiveContext)));
             return inputValue;
-        } else if (inputType.equals(InputType.EXPRESSION)) {
+        } else if (inputType.equals(InputType.EXPRESSION) || inputType.equals(InputType.QUERY_ARGUMENTS)) {
             if (fieldDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME)) {
                 return new InputValue().setName(DEPRECATED_INPUT_NAME).setType("Boolean").setDefaultValue("false");
             }
             String argumentTypeName;
             switch (fieldTypeName) {
                 case "Boolean":
-                    argumentTypeName = "Boolean" + inputType;
+                    argumentTypeName = "Boolean" + InputType.EXPRESSION;
                     break;
                 case "ID":
                 case "String":
@@ -946,18 +1106,18 @@ public class DocumentBuilder {
                 case "Time":
                 case "DateTime":
                 case "Timestamp":
-                    argumentTypeName = "String" + inputType;
+                    argumentTypeName = "String" + InputType.EXPRESSION;
                     break;
                 case "Int":
                 case "BigInteger":
-                    argumentTypeName = "Int" + inputType;
+                    argumentTypeName = "Int" + InputType.EXPRESSION;
                     break;
                 case "Float":
                 case "BigDecimal":
-                    argumentTypeName = "Float" + inputType;
+                    argumentTypeName = "Float" + InputType.EXPRESSION;
                     break;
                 default:
-                    argumentTypeName = fieldTypeName + inputType;
+                    argumentTypeName = fieldTypeName + InputType.EXPRESSION;
                     break;
             }
             return new InputValue().setName(fieldDefinitionContext.name().getText()).setType(argumentTypeName);
@@ -1021,7 +1181,8 @@ public class DocumentBuilder {
     }
 
     public ObjectType objectToConnection(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return new ObjectType().setName(objectTypeDefinitionContext.name().getText() + InputType.CONNECTION)
+        return new ObjectType()
+                .setName(objectTypeDefinitionContext.name().getText() + InputType.CONNECTION)
                 .addField(new Field().setName("totalCount").setType("Int"))
                 .addField(new Field().setName("pageInfo").setType("PageInfo"))
                 .addField(new Field().setName("edges").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EDGE))))
@@ -1034,7 +1195,8 @@ public class DocumentBuilder {
                 .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
                 .orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
 
-        return new ObjectType().setName(objectTypeDefinitionContext.name().getText() + InputType.EDGE)
+        return new ObjectType()
+                .setName(objectTypeDefinitionContext.name().getText() + InputType.EDGE)
                 .addField(new Field().setName("node").setType(objectTypeDefinitionContext.name().getText()))
                 .addField(new Field().setName("cursor").setType(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                 .addDirective(new io.graphoenix.core.operation.Directive(CONTAINER_TYPE_DIRECTIVE_NAME));
@@ -1246,7 +1408,7 @@ public class DocumentBuilder {
     }
 
     private enum InputType {
-        EXPRESSION(EXPRESSION_SUFFIX), INPUT(INPUT_SUFFIX), INPUT_ARGUMENTS(INPUT_SUFFIX), ORDER_BY(ORDER_BY_SUFFIX), CONNECTION(CONNECTION_SUFFIX), EDGE(EDGE_SUFFIX);
+        EXPRESSION(EXPRESSION_SUFFIX), INPUT(INPUT_SUFFIX), QUERY_ARGUMENTS(ARGUMENTS_SUFFIX), MUTATION_ARGUMENTS(ARGUMENTS_SUFFIX), ORDER_BY(ORDER_BY_SUFFIX), CONNECTION(CONNECTION_SUFFIX), EDGE(EDGE_SUFFIX);
 
         private final String suffix;
 

@@ -147,9 +147,18 @@ input MapWith {
     to: String
 }
 
-input InvokeParameter {
-    name: String
+input Invoke {
     className: String
+    methodName: String
+    parameters: [InvokeParameter]
+    returnClassName: String
+}
+
+input InvokeParameter {
+    className: String
+    methodName: String
+    parameters: [InvokeParameter]
+    returnClassName: String
 }
 
 directive @dataType(
@@ -180,7 +189,11 @@ directive @invoke(
     methodName: String
     parameters: [InvokeParameter]
     returnClassName: String
-) on FIELD_DEFINITION | QUERY | MUTATION | SUBSCRIPTION
+) on FIELD_DEFINITION | INPUT_OBJECT | QUERY | MUTATION | SUBSCRIPTION
+
+directive @invokes(
+    list: [Invoke]
+) on FIELD_DEFINITION | INPUT_OBJECT | QUERY | MUTATION | SUBSCRIPTION
 
 directive @cursor on FIELD_DEFINITION
 

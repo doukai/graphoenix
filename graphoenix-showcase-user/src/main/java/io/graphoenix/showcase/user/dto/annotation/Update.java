@@ -16,5 +16,5 @@ import org.eclipse.microprofile.graphql.Name;
 @Target({ElementType.FIELD})
 public @interface Update {
   @Name("if")
-  boolean _if();
+  boolean _if() default false;
 }

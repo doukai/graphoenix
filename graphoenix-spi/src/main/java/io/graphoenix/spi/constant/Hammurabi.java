@@ -23,6 +23,7 @@ public class Hammurabi {
     public static final String FUNC_DIRECTIVE_NAME = "func";
     public static final String CURSOR_DIRECTIVE_NAME = "cursor";
     public static final String INVOKE_DIRECTIVE_NAME = "invoke";
+    public static final String INVOKES_DIRECTIVE_NAME = "invokes";
     public static final String CONNECTION_DIRECTIVE_NAME = "connection";
     public static final String MAP_DIRECTIVE_NAME = "map";
     public static final String DATA_TYPE_DIRECTIVE_NAME = "dataType";
@@ -36,6 +37,7 @@ public class Hammurabi {
     public static final String MERGE_TO_LIST_DIRECTIVE_NAME = "mergeToList";
     public static final String INTROSPECTION_PREFIX = "__";
     public static final String INPUT_SUFFIX = "Input";
+    public static final String ARGUMENTS_SUFFIX = "Arguments";
     public static final String ORDER_BY_SUFFIX = "OrderBy";
     public static final String PAGE_INFO_NAME = "PageInfo";
     public static final String CONNECTION_SUFFIX = "Connection";

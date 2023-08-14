@@ -4,33 +4,59 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.document.Field;
+import io.graphoenix.core.document.InputObjectType;
 import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
+import io.graphoenix.core.operation.ArrayValueWithVariable;
+import io.graphoenix.core.operation.Directive;
+import io.graphoenix.core.operation.ObjectValueWithVariable;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
-import io.graphoenix.graphql.generator.translator.*;
+import io.graphoenix.graphql.generator.translator.GraphQLApiBuilder;
+import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
+import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
+import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
+import io.graphoenix.graphql.generator.translator.JavaElementToObject;
+import io.graphoenix.graphql.generator.translator.JavaElementToOperation;
 import io.graphoenix.spi.annotation.GraphQLOperation;
 import io.graphoenix.spi.annotation.Ignore;
 import io.graphoenix.spi.annotation.Package;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple2;
+import jakarta.json.JsonValue;
 import org.eclipse.microprofile.graphql.Enum;
-import org.eclipse.microprofile.graphql.*;
+import org.eclipse.microprofile.graphql.GraphQLApi;
+import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.Interface;
+import org.eclipse.microprofile.graphql.Mutation;
+import org.eclipse.microprofile.graphql.Query;
+import org.eclipse.microprofile.graphql.Source;
+import org.eclipse.microprofile.graphql.Type;
 import org.tinylog.Logger;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
+import static io.graphoenix.core.utils.ElementUtil.ELEMENT_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.INVOKES_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
 
@@ -150,11 +176,62 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                         .orElseGet(() -> new ObjectType(MUTATION_TYPE_NAME));
                                 objectType.addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
                                 manager.mergeDocument(objectType.toString());
-                            } else if (subElement.getKind().equals(ElementKind.METHOD) && ((ExecutableElement) subElement).getParameters().stream().anyMatch(variableElement -> variableElement.getAnnotation(Source.class) != null)) {
+                            } else if (subElement.getKind().equals(ElementKind.METHOD) &&
+                                    ((ExecutableElement) subElement).getParameters().stream()
+                                            .anyMatch(variableElement ->
+                                                    variableElement.getAnnotation(Source.class) != null &&
+                                                            typeUtils.asElement(variableElement.asType()).getAnnotation(Type.class) != null
+                                            )
+                            ) {
                                 Tuple2<String, Field> objectField = graphQLApiBuilder.variableElementToObjectField((ExecutableElement) subElement, typeUtils);
                                 GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectField._1()).orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.TYPE_NOT_EXIST.bind(objectField._1())));
                                 ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(objectField._2());
                                 manager.mergeDocument(objectType.toString());
+                            } else if (subElement.getKind().equals(ElementKind.METHOD) &&
+                                    ((ExecutableElement) subElement).getParameters().stream()
+                                            .anyMatch(variableElement ->
+                                                    variableElement.getAnnotation(Source.class) != null &&
+                                                            typeUtils.asElement(variableElement.asType()).getAnnotation(Input.class) != null
+                                            )
+                            ) {
+                                ExecutableElement executableElement = (ExecutableElement) subElement;
+                                executableElement.getParameters().stream()
+                                        .filter(variableElement ->
+                                                variableElement.getAnnotation(Source.class) != null &&
+                                                        typeUtils.asElement(variableElement.asType()).getAnnotation(Input.class) != null
+                                        )
+                                        .flatMap(variableElement -> manager.getInputObject(typeUtils.asElement(variableElement.asType()).getSimpleName().toString()).stream())
+                                        .findFirst()
+                                        .ifPresent(inputObjectTypeDefinitionContext -> {
+                                                    Map<String, Object> invoke = Map.of(
+                                                            "className", executableElement.getEnclosingElement().toString(),
+                                                            "methodName", executableElement.getSimpleName().toString(),
+                                                            "parameters",
+                                                            new ArrayValueWithVariable(
+                                                                    executableElement.getParameters().stream()
+                                                                            .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", ELEMENT_UTIL.getTypeMirrorName(parameter.asType(), typeUtils)))
+                                                                            .collect(Collectors.toList())
+                                                            ),
+                                                            "returnClassName", executableElement.getReturnType().toString()
+                                                    );
+                                                    InputObjectType inputObjectType = documentBuilder.buildInputObjectType(inputObjectTypeDefinitionContext);
+                                                    Optional<Directive> invokes = inputObjectType.getDirectives().stream().filter(directive -> directive.getName().equals(INVOKES_DIRECTIVE_NAME)).findFirst();
+                                                    if (invokes.isPresent() && invokes.get().getArguments().get("list") != null && invokes.get().getArguments().get("list").getValueType().equals(JsonValue.ValueType.ARRAY)) {
+                                                        invokes.get().getArguments().get("list").asJsonArray().add(new ObjectValueWithVariable(invoke));
+                                                    } else {
+                                                        inputObjectType.addDirective(
+                                                                new Directive()
+                                                                        .setName(INVOKES_DIRECTIVE_NAME)
+                                                                        .addArgument("list",
+                                                                                new ArrayValueWithVariable(
+                                                                                        Collections.singleton(invoke)
+                                                                                )
+                                                                        )
+                                                        );
+                                                    }
+                                                    manager.mergeDocument(inputObjectType.toString());
+                                                }
+                                        );
                             }
                         }
                 );

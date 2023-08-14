@@ -131,6 +131,12 @@ input MapWith @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageNa
   from: String
   to: String
 }
+input Invoke @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.InvokeParameter", annotationName: "io.graphoenix.core.dto.annotation.InvokeParameter", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.InvokeParameter") {
+  className: String
+  methodName: String
+  parameters: [InvokeParameter]
+  returnClassName: String
+}
 input InvokeParameter @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.InvokeParameter", annotationName: "io.graphoenix.core.dto.annotation.InvokeParameter", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.InvokeParameter") {
   name: String
   className: String
@@ -206,7 +212,8 @@ input __DirectiveLocationExpression @packageInfo(packageName: "io.graphoenix.cor
 directive @dataType(type: String default: String length: Int decimals: Int autoIncrement: Boolean) on FIELD_DEFINITION
 directive @map(from: String! with: MapWith to: String anchor: Boolean) on FIELD_DEFINITION
 directive @fetch(protocol: Protocol from: String! with: MapWith to: String anchor: Boolean) on FIELD_DEFINITION
-directive @invoke(className: String methodName: String parameters: [InvokeParameter] returnClassName: String) on FIELD_DEFINITION | QUERY | MUTATION | SUBSCRIPTION
+directive @invoke(className: String methodName: String parameters: [InvokeParameter] returnClassName: String) on FIELD_DEFINITION | INPUT_OBJECT | QUERY | MUTATION | SUBSCRIPTION
+directive @invokes(list: [Invoke]) on FIELD_DEFINITION | INPUT_OBJECT | QUERY | MUTATION | SUBSCRIPTION
 directive @cursor on FIELD_DEFINITION
 directive @func(name: Function field: String) on FIELD_DEFINITION
 directive @containerType on OBJECT

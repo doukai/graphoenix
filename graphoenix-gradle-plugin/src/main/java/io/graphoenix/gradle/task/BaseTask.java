@@ -215,10 +215,19 @@ public class BaseTask extends DefaultTask {
                                 typeDeclaration.getMethods().stream()
                                         .filter(methodDeclaration -> !methodDeclaration.isAnnotationPresent(Query.class))
                                         .filter(methodDeclaration -> !methodDeclaration.isAnnotationPresent(Mutation.class))
-                                        .filter(methodDeclaration -> methodDeclaration.getParameters().stream().anyMatch(parameter -> parameter.isAnnotationPresent(Source.class)))
+                                        .filter(methodDeclaration ->
+                                                methodDeclaration.getParameters().stream()
+                                                        .anyMatch(parameter ->
+                                                                parameter.isAnnotationPresent(Source.class) &&
+                                                                        parameter.getType().isClassOrInterfaceType() &&
+                                                                        parameter.getType().asClassOrInterfaceType().isAnnotationPresent(org.eclipse.microprofile.graphql.Type.class)
+                                                        )
+                                        )
                                         .forEach(methodDeclaration -> {
                                                     String objectName = methodDeclaration.getParameters().stream()
                                                             .filter(parameter -> parameter.isAnnotationPresent(Source.class))
+                                                            .filter(parameter -> parameter.getType().isClassOrInterfaceType())
+                                                            .filter(parameter -> parameter.getType().asClassOrInterfaceType().isAnnotationPresent(org.eclipse.microprofile.graphql.Type.class))
                                                             .findFirst()
                                                             .orElseThrow(() -> new RuntimeException("@Source annotation parameter not exist in " + methodDeclaration.getNameAsString()))
                                                             .getType()
