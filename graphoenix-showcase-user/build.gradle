@@ -1,42 +1,42 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        jcenter()
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
-    }
-}
+//buildscript {
+//    repositories {
+//        mavenLocal()
+//        jcenter()
+//        gradlePluginPortal()
+//    }
+//    dependencies {
+//        classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
+//    }
+//}
 
 plugins {
     id 'java'
-    id 'com.google.protobuf' version '0.9.1'
+//    id 'com.google.protobuf' version '0.9.1'
 }
 
 compileJava.options.sourcepath = files('src/main/resources')
 
-apply plugin: 'io.graphoenix'
+//apply plugin: 'io.graphoenix'
 
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:3.21.7"
-    }
-    plugins {
-        grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.52.1'
-        }
-        reactor {
-            artifact = "com.salesforce.servicelibs:reactor-grpc:1.2.3"
-        }
-    }
-    generateProtoTasks {
-        all()*.plugins {
-            grpc {}
-            reactor {}
-        }
-    }
-}
+//protobuf {
+//    protoc {
+//        artifact = "com.google.protobuf:protoc:3.21.7"
+//    }
+//    plugins {
+//        grpc {
+//            artifact = 'io.grpc:protoc-gen-grpc-java:1.52.1'
+//        }
+//        reactor {
+//            artifact = "com.salesforce.servicelibs:reactor-grpc:1.2.3"
+//        }
+//    }
+//    generateProtoTasks {
+//        all()*.plugins {
+//            grpc {}
+//            reactor {}
+//        }
+//    }
+//}
 
 sourceSets {
     main {
@@ -60,12 +60,12 @@ dependencies {
     implementation project(':graphoenix-core')
     implementation project(':graphoenix-json')
 
-    runtimeOnly 'io.grpc:grpc-netty-shaded:1.52.1'
-    implementation 'io.grpc:grpc-protobuf:1.52.1'
-    implementation 'io.grpc:grpc-stub:1.52.1'
-    implementation 'com.salesforce.servicelibs:reactor-grpc-stub:1.2.3'
-
-    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
+//    runtimeOnly 'io.grpc:grpc-netty-shaded:1.52.1'
+//    implementation 'io.grpc:grpc-protobuf:1.52.1'
+//    implementation 'io.grpc:grpc-stub:1.52.1'
+//    implementation 'com.salesforce.servicelibs:reactor-grpc-stub:1.2.3'
+//
+//    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
 
     annotationProcessor project(':graphoenix-annotation-processor')
     annotationProcessor project(':graphoenix-inject')
@@ -73,7 +73,7 @@ dependencies {
     annotationProcessor project(':graphoenix-config')
     annotationProcessor project(':graphoenix-json')
 
-    protobuf project(':graphoenix-core')
+//    protobuf project(':graphoenix-core')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'

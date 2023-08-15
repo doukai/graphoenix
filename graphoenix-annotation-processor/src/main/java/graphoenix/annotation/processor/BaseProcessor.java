@@ -48,15 +48,16 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static io.graphoenix.core.utils.ElementUtil.ELEMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.INVOKES_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
 
@@ -200,9 +201,15 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                 variableElement.getAnnotation(Source.class) != null &&
                                                         typeUtils.asElement(variableElement.asType()).getAnnotation(Input.class) != null
                                         )
-                                        .flatMap(variableElement -> manager.getInputObject(typeUtils.asElement(variableElement.asType()).getSimpleName().toString()).stream())
+                                        .map(variableElement -> typeUtils.asElement(variableElement.asType()).getSimpleName().toString())
+                                        .map(inputName ->
+                                                manager.getInputObject(inputName)
+                                                        .map(inputObjectTypeDefinitionContext ->
+                                                                documentBuilder.buildInputObjectType(inputObjectTypeDefinitionContext))
+                                                        .orElseGet(() -> new InputObjectType(inputName))
+                                        )
                                         .findFirst()
-                                        .ifPresent(inputObjectTypeDefinitionContext -> {
+                                        .ifPresent(inputObjectType -> {
                                                     Map<String, Object> invoke = Map.of(
                                                             "className", executableElement.getEnclosingElement().toString(),
                                                             "methodName", executableElement.getSimpleName().toString(),
@@ -214,8 +221,10 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                             ),
                                                             "returnClassName", executableElement.getReturnType().toString()
                                                     );
-                                                    InputObjectType inputObjectType = documentBuilder.buildInputObjectType(inputObjectTypeDefinitionContext);
-                                                    Optional<Directive> invokes = inputObjectType.getDirectives().stream().filter(directive -> directive.getName().equals(INVOKES_DIRECTIVE_NAME)).findFirst();
+                                                    Optional<Directive> invokes = Stream.ofNullable(inputObjectType.getDirectives())
+                                                            .flatMap(Collection::stream)
+                                                            .filter(directive -> directive.getName().equals(INVOKES_DIRECTIVE_NAME))
+                                                            .findFirst();
                                                     if (invokes.isPresent() && invokes.get().getArguments().get("list") != null && invokes.get().getArguments().get("list").getValueType().equals(JsonValue.ValueType.ARRAY)) {
                                                         invokes.get().getArguments().get("list").asJsonArray().add(new ObjectValueWithVariable(invoke));
                                                     } else {

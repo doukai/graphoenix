@@ -2,11 +2,13 @@ package io.graphoenix.showcase.user.api;
 
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.showcase.user.dao.UserOperationDAO;
+import io.graphoenix.showcase.user.dto.inputObjectType.UserListQueryTypeArguments;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Query;
+import org.eclipse.microprofile.graphql.Source;
 import reactor.core.publisher.Mono;
 
 @GraphQLApi
@@ -30,5 +32,10 @@ public class UserApi {
                             throw new GraphQLErrors("authentication failed");
                         }
                 );
+    }
+
+
+    public Mono<UserListQueryTypeArguments> login(@Source UserListQueryTypeArguments userListQueryTypeArguments) {
+        return Mono.empty();
     }
 }

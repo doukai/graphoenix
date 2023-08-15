@@ -22,6 +22,10 @@ public class InputObjectType {
     public InputObjectType() {
     }
 
+    public InputObjectType(String name) {
+        this.name = name;
+    }
+
     public InputObjectType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         this.name = inputObjectTypeDefinitionContext.name().getText();
         if (inputObjectTypeDefinitionContext.description() != null) {

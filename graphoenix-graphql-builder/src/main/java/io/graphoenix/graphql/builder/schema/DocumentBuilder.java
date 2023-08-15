@@ -119,8 +119,8 @@ public class DocumentBuilder {
                 .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, !isPackage, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
-        buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
-        buildContainerTypeObjects().forEach(objectType -> manager.registerGraphQL(objectType.toString()));
+        buildArgumentInputObjects().forEach(inputObjectType -> manager.mergeDocument(inputObjectType.toString()));
+        buildContainerTypeObjects().forEach(objectType -> manager.mergeDocument(objectType.toString()));
 
         if (manager.getObjects().anyMatch(manager::isNotContainerType)) {
             ObjectType queryType = manager.getObject(manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME))
@@ -155,9 +155,9 @@ public class DocumentBuilder {
                             .toString()
             );
 
-            buildQueryTypeFieldArguments().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
-            buildMutationTypeFieldsArguments().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
-            buildSubscriptionTypeFieldsArguments().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
+            buildQueryTypeFieldArguments().forEach(inputObjectType -> manager.mergeDocument(inputObjectType.toString()));
+            buildMutationTypeFieldsArguments().forEach(inputObjectType -> manager.mergeDocument(inputObjectType.toString()));
+            buildSubscriptionTypeFieldsArguments().forEach(inputObjectType -> manager.mergeDocument(inputObjectType.toString()));
         }
 
         mapper.registerFieldMaps();

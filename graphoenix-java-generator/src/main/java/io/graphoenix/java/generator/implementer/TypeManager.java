@@ -11,6 +11,7 @@ import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import io.vavr.Tuple3;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -97,6 +98,48 @@ public class TypeManager {
                                         .orElseThrow(() -> new GraphQLErrors(METHOD_NAME_ARGUMENT_NOT_EXIST))
                         )
                 ).findFirst();
+    }
+
+    public boolean hasInputInvokes(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Stream.ofNullable(inputObjectTypeDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals(INVOKES_DIRECTIVE_NAME));
+    }
+
+    public Stream<Tuple3<String, String, String>> getInputInvokes(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Stream.ofNullable(inputObjectTypeDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(INVOKES_DIRECTIVE_NAME))
+                .flatMap(directiveContext ->
+                        directiveContext.arguments().argument().stream()
+                                .filter(argumentContext -> argumentContext.name().getText().equals("list"))
+                                .filter(argumentContext -> argumentContext.valueWithVariable().arrayValueWithVariable() != null)
+                                .map(argumentContext -> argumentContext.valueWithVariable().arrayValueWithVariable())
+                                .filter(arrayValueWithVariableContext -> arrayValueWithVariableContext.valueWithVariable() != null)
+                                .flatMap(arrayValueWithVariableContext -> arrayValueWithVariableContext.valueWithVariable().stream())
+                                .map(GraphqlParser.ValueWithVariableContext::objectValueWithVariable)
+                                .filter(Objects::nonNull)
+                                .filter(objectValueWithVariableContext -> objectValueWithVariableContext.objectFieldWithVariable() != null)
+                                .map(objectValueWithVariableContext ->
+                                        Tuple.of(
+                                                objectValueWithVariableContext.objectFieldWithVariable().stream()
+                                                        .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("className"))
+                                                        .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
+                                                        .findFirst()
+                                                        .orElseThrow(),
+                                                objectValueWithVariableContext.objectFieldWithVariable().stream()
+                                                        .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("methodName"))
+                                                        .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
+                                                        .findFirst()
+                                                        .orElseThrow(),
+                                                objectValueWithVariableContext.objectFieldWithVariable().stream()
+                                                        .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("returnClassName"))
+                                                        .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
+                                                        .findFirst()
+                                                        .orElseThrow()
+                                        )
+                                )
+                );
     }
 
     public TypeName typeContextToTypeName(GraphqlParser.TypeContext typeContext) {
