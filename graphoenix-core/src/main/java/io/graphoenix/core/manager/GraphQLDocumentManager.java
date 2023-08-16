@@ -655,6 +655,11 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public Stream<GraphqlParser.InputValueDefinitionContext> getInputValues(String inputObjectName) {
+        return graphQLInputValueManager.getInputValueDefinitions(inputObjectName);
+    }
+
+    @Override
     public Optional<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinition(String name) {
         return graphQLOperationTypeManager.getOperationTypeDefinition(name);
     }

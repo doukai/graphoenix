@@ -144,6 +144,8 @@ public interface IGraphQLDocumentManager {
 
     Stream<GraphqlParser.InputObjectTypeDefinitionContext> getInputObjects();
 
+    Stream<GraphqlParser.InputValueDefinitionContext> getInputValues(String inputObjectName);
+
     Optional<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinition(String name);
 
     Optional<GraphqlParser.OperationDefinitionContext> getOperationDefinition(String name);

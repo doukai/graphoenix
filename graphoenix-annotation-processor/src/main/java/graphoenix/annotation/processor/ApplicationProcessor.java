@@ -62,6 +62,8 @@ public class ApplicationProcessor extends BaseProcessor {
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
         JsonSchemaTranslator jsonSchemaTranslator = BeanContext.get(JsonSchemaTranslator.class);
         InvokeHandlerBuilder invokeHandlerBuilder = BeanContext.get(InvokeHandlerBuilder.class);
+        InputInvokeHandlerBuilder inputInvokeHandlerBuilder = BeanContext.get(InputInvokeHandlerBuilder.class);
+        ArgumentsInvokeHandlerBuilder argumentsInvokeHandlerBuilder = BeanContext.get(ArgumentsInvokeHandlerBuilder.class);
         ConnectionHandlerBuilder connectionHandlerBuilder = BeanContext.get(ConnectionHandlerBuilder.class);
         SelectionFilterBuilder selectionFilterBuilder = BeanContext.get(SelectionFilterBuilder.class);
         OperationHandlerImplementer operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
@@ -181,6 +183,8 @@ public class ApplicationProcessor extends BaseProcessor {
             }
 
             invokeHandlerBuilder.writeToFiler(filer);
+            inputInvokeHandlerBuilder.writeToFiler(filer);
+            argumentsInvokeHandlerBuilder.writeToFiler(filer);
             connectionHandlerBuilder.writeToFiler(filer);
             operationHandlerImplementer.writeToFiler(filer);
             selectionFilterBuilder.writeToFiler(filer);

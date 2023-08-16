@@ -15,6 +15,7 @@ import io.vavr.Tuple3;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import javax.lang.model.SourceVersion;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -59,7 +60,23 @@ public class TypeManager {
         return getFieldGetterMethodName(fieldDefinitionContext.name().getText());
     }
 
+    public String getFieldSetterMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return getFieldSetterMethodName(fieldDefinitionContext.name().getText());
+    }
+
+    public String getInputValueGetterMethodName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return getFieldGetterMethodName(inputValueDefinitionContext.name().getText());
+    }
+
+    public String getInputValueSetterMethodName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return getFieldSetterMethodName(inputValueDefinitionContext.name().getText());
+    }
+
     public String getFieldGetterMethodName(String fieldName) {
+        boolean isKeyword = SourceVersion.isKeyword(fieldName);
+        if (isKeyword) {
+            fieldName = "_" + fieldName;
+        }
         if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
             return "get".concat(fieldName);
         } else {
@@ -67,16 +84,24 @@ public class TypeManager {
         }
     }
 
-    public String getFieldSetterMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return getFieldSetterMethodName(fieldDefinitionContext.name().getText());
-    }
-
     public String getFieldSetterMethodName(String fieldName) {
+        boolean isKeyword = SourceVersion.isKeyword(fieldName);
+        if (isKeyword) {
+            fieldName = "_" + fieldName;
+        }
         if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
             return "set".concat(fieldName);
         } else {
             return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName));
         }
+    }
+
+    public String getFieldName(String fieldName) {
+        boolean isKeyword = SourceVersion.isKeyword(fieldName);
+        if (isKeyword) {
+            fieldName = "_" + fieldName;
+        }
+        return fieldName;
     }
 
     public Optional<Tuple2<String, String>> getInvokeDirective(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {

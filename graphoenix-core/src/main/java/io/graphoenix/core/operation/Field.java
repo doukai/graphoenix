@@ -157,6 +157,10 @@ public class Field {
         return fields;
     }
 
+    public Field getField(String name) {
+        return this.fields.stream().filter(field -> field.getAlias() != null && field.getAlias().equals(name) || field.getName().equals(name)).findFirst().orElse(null);
+    }
+
     public Field setFields(Collection<Field> fields) {
         this.fields = fields;
         return this;
