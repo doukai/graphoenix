@@ -131,7 +131,7 @@ input MapWith @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageNa
   from: String
   to: String
 }
-input Invoke @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.InvokeParameter", annotationName: "io.graphoenix.core.dto.annotation.InvokeParameter", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.InvokeParameter") {
+input Invoke @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.Invoke", annotationName: "io.graphoenix.core.dto.annotation.Invoke", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.Invoke") {
   className: String
   methodName: String
   parameters: [InvokeParameter]

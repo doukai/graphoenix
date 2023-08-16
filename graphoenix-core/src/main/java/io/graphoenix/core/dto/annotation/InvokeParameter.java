@@ -15,7 +15,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface InvokeParameter {
-  String name();
-
   String className();
+
+  String methodName();
+
+  String returnClassName();
+
+  String name();
 }

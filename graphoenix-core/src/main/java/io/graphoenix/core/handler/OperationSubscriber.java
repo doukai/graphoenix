@@ -29,12 +29,16 @@ public abstract class OperationSubscriber {
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
     }
 
-    public Operation buildIDSelection(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        Operation operation = new Operation(operationDefinitionContext);
+    public Operation buildIDSelection(Operation operation) {
         String subscriptionTypeName = manager.getSubscriptionOperationTypeName()
                 .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST));
         buildIDSelection(subscriptionTypeName, operation.getFields());
         return operation;
+    }
+
+    public Operation buildIDSelection(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        Operation operation = new Operation(operationDefinitionContext);
+        return buildIDSelection(operation);
     }
 
     private void buildIDSelection(String typeName, Collection<Field> fields) {

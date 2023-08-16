@@ -1,26 +1,20 @@
 package io.graphoenix.java.generator.implementer;
 
 import com.google.common.reflect.TypeToken;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.*;
-import io.graphoenix.core.operation.Operation;
 import io.graphoenix.core.schema.JsonSchemaValidator;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.OperationType;
-import io.graphoenix.spi.handler.*;
+import io.graphoenix.spi.handler.MutationHandler;
+import io.graphoenix.spi.handler.OperationHandler;
+import io.graphoenix.spi.handler.QueryHandler;
+import io.graphoenix.spi.handler.SubscriptionHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
@@ -38,11 +32,7 @@ import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Type;
-import java.util.AbstractMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.GraphQLErrorType.*;
@@ -151,6 +141,14 @@ public class OperationHandlerImplementer {
                         FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")),
                                 "invokeHandler",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "ArgumentsInvokeHandler")),
+                                "argumentsInvokeHandlerProvider",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
                         ).build()
@@ -433,16 +431,21 @@ public class OperationHandlerImplementer {
 
         switch (type) {
             case QUERY:
-                builder.addStatement("$T operationWithFetchFieldDefinitionContext = fetchFieldProcessor.get().buildFetchFields(operationDefinitionContext)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
-                        .addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
+                builder.addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
                         .addStatement(
                                 CodeBlock.join(
                                         List.of(
-                                                CodeBlock.of("return operationHandler.$L(operationWithFetchFieldDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
-                                                        operationMethodName,
-                                                        ClassName.get(StringReader.class)
-                                                ),
-                                                CodeBlock.of(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationWithFetchFieldDefinitionContext, queryLoader))"),
+                                                CodeBlock.of("return argumentsInvokeHandlerProvider.get().$L(operationDefinitionContext)", operationName),
+                                                CodeBlock.of(".map(operation -> fetchFieldProcessor.get().buildFetchFields(operation))"),
+                                                CodeBlock.builder()
+                                                        .add(".flatMap(operationWithFetchFieldDefinitionContext ->\n")
+                                                        .indent()
+                                                        .add("operationHandler.$L(operationWithFetchFieldDefinitionContext)\n", operationMethodName)
+                                                        .add(".map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())\n", ClassName.get(StringReader.class))
+                                                        .add(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationWithFetchFieldDefinitionContext, queryLoader))\n")
+                                                        .unindent()
+                                                        .add(")")
+                                                        .build(),
                                                 CodeBlock.of(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName)),
                                                 CodeBlock.of(".flatMap(jsonValue -> invoke(jsonValue, operationDefinitionContext))")
                                         ),
@@ -457,7 +460,8 @@ public class OperationHandlerImplementer {
                         .addStatement(
                                 CodeBlock.join(
                                         List.of(
-                                                CodeBlock.of("return mutationBeforeHandler.get().handle(operationDefinitionContext, mutationLoader)"),
+                                                CodeBlock.of("return argumentsInvokeHandlerProvider.get().$L(operationDefinitionContext)", operationName),
+                                                CodeBlock.of(".flatMap(operation -> mutationBeforeHandler.get().handle(operationDefinitionContext, operation, mutationLoader))"),
                                                 CodeBlock.builder()
                                                         .add(".map(operation -> operationSubscriber.get().buildSubscriptionFilterSelection(operation))\n")
                                                         .add(".flatMap(operation ->\n")
@@ -486,17 +490,22 @@ public class OperationHandlerImplementer {
                         );
                 break;
             case SUBSCRIPTION:
-                builder.addStatement("$T operation = operationSubscriber.get().buildIDSelection(operationDefinitionContext)", ClassName.get(Operation.class))
-                        .addStatement("$T operationWithFetchFieldDefinitionContext = fetchFieldProcessor.get().buildFetchFields(operation)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
-                        .addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
+                builder.addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
                         .addStatement(
                                 CodeBlock.join(
                                         List.of(
-                                                CodeBlock.of("return operationHandler.$L(operationWithFetchFieldDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
-                                                        operationMethodName,
-                                                        ClassName.get(StringReader.class)
-                                                ),
-                                                CodeBlock.of(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationWithFetchFieldDefinitionContext, queryLoader))"),
+                                                CodeBlock.of("return argumentsInvokeHandlerProvider.get().$L(operationDefinitionContext)", operationName),
+                                                CodeBlock.of(".map(operation -> operationSubscriber.get().buildIDSelection(operation))"),
+                                                CodeBlock.of(".map(operation -> fetchFieldProcessor.get().buildFetchFields(operation))"),
+                                                CodeBlock.builder()
+                                                        .add(".flatMap(operationWithFetchFieldDefinitionContext ->\n")
+                                                        .indent()
+                                                        .add("operationHandler.$L(operationWithFetchFieldDefinitionContext)\n", operationMethodName)
+                                                        .add(".map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())\n", ClassName.get(StringReader.class))
+                                                        .add(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationWithFetchFieldDefinitionContext, queryLoader))\n")
+                                                        .unindent()
+                                                        .add(")")
+                                                        .build(),
                                                 CodeBlock.of(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName))
                                         ),
                                         System.lineSeparator()
@@ -581,11 +590,11 @@ public class OperationHandlerImplementer {
                 if (manager.isObject(fieldTypeName)) {
                     if (fieldTypeIsList) {
                         builder.addStatement(
-                                        "$T type = new $T<$T>() {}.getType()",
-                                        ClassName.get(Type.class),
-                                        ClassName.get(TypeToken.class),
-                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                                )
+                                "$T type = new $T<$T>() {}.getType()",
+                                ClassName.get(Type.class),
+                                ClassName.get(TypeToken.class),
+                                typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                        )
                                 .addStatement(
                                         "$T $L = jsonb.get().fromJson(jsonValue.toString(), type)",
                                         typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
@@ -605,11 +614,11 @@ public class OperationHandlerImplementer {
                                 );
                     } else {
                         builder.addStatement(
-                                        "$T $L = jsonb.get().fromJson(jsonValue.toString(), $T.class)",
-                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                                        fieldTypeParameterName,
-                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                                )
+                                "$T $L = jsonb.get().fromJson(jsonValue.toString(), $T.class)",
+                                typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
+                                fieldTypeParameterName,
+                                typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                        )
                                 .beginControlFlow("if($L == null)", fieldTypeParameterName)
                                 .addStatement("return $T.just($T.NULL)", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
                                 .endControlFlow()
@@ -639,6 +648,7 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLFetchFieldProcessor.class)), "fetchFieldProcessor")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")), "invokeHandler")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "ArgumentsInvokeHandler")), "argumentsInvokeHandlerProvider")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "ConnectionHandler")), "connectionHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "SelectionFilter")), "selectionFilter")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
@@ -658,6 +668,7 @@ public class OperationHandlerImplementer {
                         ClassName.get(OperationHandler.class)
                 )
                 .addStatement("this.invokeHandler = invokeHandler")
+                .addStatement("this.argumentsInvokeHandlerProvider = argumentsInvokeHandlerProvider")
                 .addStatement("this.connectionHandler = connectionHandler")
                 .addStatement("this.selectionFilter = selectionFilter")
                 .addStatement("this.jsonProvider = jsonProvider")

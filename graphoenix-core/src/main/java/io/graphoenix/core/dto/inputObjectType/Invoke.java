@@ -11,7 +11,7 @@ import org.eclipse.microprofile.graphql.Input;
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class InvokeParameter {
+public class Invoke {
   private String className;
 
   private String methodName;
@@ -19,8 +19,6 @@ public class InvokeParameter {
   private Collection<InvokeParameter> parameters;
 
   private String returnClassName;
-
-  private String name;
 
   public String getClassName() {
     return this.className;
@@ -52,13 +50,5 @@ public class InvokeParameter {
 
   public void setReturnClassName(String returnClassName) {
     this.returnClassName = returnClassName;
-  }
-
-  public String getName() {
-    return this.name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 }

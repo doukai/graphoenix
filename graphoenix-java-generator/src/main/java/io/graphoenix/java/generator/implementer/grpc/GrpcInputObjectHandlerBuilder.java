@@ -123,6 +123,13 @@ public class GrpcInputObjectHandlerBuilder {
                 } else {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
+                if (inputValueDefinitionContext.type().nonNullType() != null) {
+                    builder.addStatement(codeBlock);
+                } else {
+                    builder.beginControlFlow("if ($L.$L() > 0)", inputObjectParameterName, grpcNameUtil.getGrpcGetCountMethodName(inputValueDefinitionContext))
+                            .addStatement(codeBlock)
+                            .endControlFlow();
+                }
             } else {
                 if (manager.isScalar(fieldTypeName)) {
                     codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L.$L())",
@@ -147,8 +154,14 @@ public class GrpcInputObjectHandlerBuilder {
                 } else {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
+                if (inputValueDefinitionContext.type().nonNullType() != null) {
+                    builder.addStatement(codeBlock);
+                } else {
+                    builder.beginControlFlow("if ($L.$L())", inputObjectParameterName, grpcNameUtil.getGrpcHasMethodName(inputValueDefinitionContext))
+                            .addStatement(codeBlock)
+                            .endControlFlow();
+                }
             }
-            builder.addStatement(codeBlock);
         }
         builder.addStatement("return objectValueWithVariable");
         return builder.build();

@@ -31,7 +31,7 @@ message OrderExpression {
 }
 message OrderInput {
     optional string id = 1;
-    optional string number = 2;
+    string number = 2;
     optional io.graphoenix.showcase.user.grpc.UserInput buyer = 3;
     repeated GoodInput goods = 4;
     optional bool is_deprecated = 5;
@@ -82,10 +82,10 @@ message GoodExpression {
 }
 message GoodInput {
     optional string id = 1;
-    optional int32 quantity = 2;
-    optional OrderInput order = 3;
-    optional ProductInput product = 4;
-    optional MerchantInput merchant = 5;
+    int32 quantity = 2;
+    OrderInput order = 3;
+    ProductInput product = 4;
+    MerchantInput merchant = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional string realm_id = 8;
@@ -133,8 +133,8 @@ message ProductExpression {
 }
 message ProductInput {
     optional string id = 1;
-    optional string name = 2;
-    optional float price = 3;
+    string name = 2;
+    float price = 3;
     optional bool is_deprecated = 4;
     optional int32 version = 5;
     optional string realm_id = 6;
@@ -183,11 +183,11 @@ message MerchantExpression {
 }
 message MerchantInput {
     optional string id = 1;
-    optional string name = 2;
+    string name = 2;
     optional io.graphoenix.showcase.user.grpc.OrganizationInput organization = 3;
     repeated io.graphoenix.showcase.user.grpc.UserInput customer_services = 4;
     repeated io.graphoenix.showcase.user.grpc.OrganizationInput partners = 5;
-    optional io.graphoenix.showcase.user.grpc.UserInput director = 6;
+    io.graphoenix.showcase.user.grpc.UserInput director = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;
     optional string realm_id = 9;

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -19,6 +20,7 @@ import org.eclipse.microprofile.graphql.Input;
 public class OrderInput {
   private String id;
 
+  @NonNull
   private String number;
 
   private UserInput buyer;

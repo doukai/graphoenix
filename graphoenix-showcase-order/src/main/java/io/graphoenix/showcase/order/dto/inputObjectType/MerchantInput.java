@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -20,6 +21,7 @@ import org.eclipse.microprofile.graphql.Input;
 public class MerchantInput {
   private String id;
 
+  @NonNull
   private String name;
 
   private OrganizationInput organization;
@@ -28,6 +30,7 @@ public class MerchantInput {
 
   private Collection<OrganizationInput> partners;
 
+  @NonNull
   private UserInput director;
 
   private Boolean isDeprecated;

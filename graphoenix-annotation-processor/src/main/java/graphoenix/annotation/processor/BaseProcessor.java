@@ -25,6 +25,7 @@ import io.graphoenix.spi.annotation.Package;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple2;
 import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
 import org.eclipse.microprofile.graphql.Enum;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Input;
@@ -72,6 +73,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
     private JavaElementToInterface javaElementToInterface;
     private JavaElementToInputType javaElementToInputType;
     private JavaElementToOperation javaElementToOperation;
+    private JsonProvider jsonProvider;
     private Types typeUtils;
 
     @Override
@@ -90,6 +92,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
         javaElementToInterface = BeanContext.get(JavaElementToInterface.class);
         javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
         javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
+        jsonProvider = BeanContext.get(JsonProvider.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
 
         try {
@@ -226,7 +229,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                             .filter(directive -> directive.getName().equals(INVOKES_DIRECTIVE_NAME))
                                                             .findFirst();
                                                     if (invokes.isPresent() && invokes.get().getArguments().get("list") != null && invokes.get().getArguments().get("list").getValueType().equals(JsonValue.ValueType.ARRAY)) {
-                                                        invokes.get().getArguments().get("list").asJsonArray().add(new ObjectValueWithVariable(invoke));
+                                                        invokes.get().getArguments().put("list", jsonProvider.createArrayBuilder(invokes.get().getArguments().get("list").asJsonArray()).add(new ObjectValueWithVariable(invoke)));
                                                     } else {
                                                         inputObjectType.addDirective(
                                                                 new Directive()

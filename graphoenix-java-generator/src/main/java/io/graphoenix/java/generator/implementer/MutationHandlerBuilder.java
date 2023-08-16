@@ -73,6 +73,9 @@ public class MutationHandlerBuilder {
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeMethods(before))
                 .addMethod(buildHandleMethod(before));
+        if (before) {
+            builder.addMethod(buildOperationHandleMethod());
+        }
         return builder.build();
     }
 
@@ -147,10 +150,10 @@ public class MutationHandlerBuilder {
                             String withTo = manager.getFetchWithTo(fieldDefinitionContext);
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
                             builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().build()).collect($T.toJsonArray()))",
-                                            fieldDefinitionContext.name().getText(),
-                                            withObjectField.name().getText(),
-                                            ClassName.get(JsonCollectors.class)
-                                    )
+                                    fieldDefinitionContext.name().getText(),
+                                    withObjectField.name().getText(),
+                                    ClassName.get(JsonCollectors.class)
+                            )
                                     .addStatement("loader.registerArray($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue(), false)",
                                             packageName,
                                             protocol,
@@ -206,9 +209,9 @@ public class MutationHandlerBuilder {
                             String withTo = manager.getFetchWithTo(fieldDefinitionContext);
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
                             builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, jsonProvider.createObjectBuilder().build())",
-                                            fieldDefinitionContext.name().getText(),
-                                            withObjectField.name().getText()
-                                    )
+                                    fieldDefinitionContext.name().getText(),
+                                    withObjectField.name().getText()
+                            )
                                     .addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue(), false)",
                                             packageName,
                                             protocol,
@@ -298,19 +301,30 @@ public class MutationHandlerBuilder {
         return builder.build();
     }
 
-    private MethodSpec buildHandleMethod(boolean before) {
-
-        MethodSpec.Builder builder = MethodSpec.methodBuilder("handle")
+    private MethodSpec buildOperationHandleMethod() {
+        return MethodSpec.methodBuilder("handle")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinition")
-                .addParameter(ClassName.get(MutationDataLoader.class), "loader");
+                .addParameter(ClassName.get(MutationDataLoader.class), "loader")
+                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(Operation.class)))
+                .addStatement("$T operation = new $T(operationDefinition)", ClassName.get(Operation.class), ClassName.get(Operation.class))
+                .addStatement("return handle(operationDefinition, operation, loader)")
+                .build();
+    }
+
+    private MethodSpec buildHandleMethod(boolean before) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("handle")
+                .addParameter(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinition")
+                .addModifiers(Modifier.PUBLIC);
 
         if (before) {
-            builder.addStatement("$T operation = new $T(operationDefinition)", ClassName.get(Operation.class), ClassName.get(Operation.class))
+            builder.addParameter(ClassName.get(Operation.class), "operation")
+                    .addParameter(ClassName.get(MutationDataLoader.class), "loader")
                     .addStatement("$T operationArguments = loader.buildOperationArguments(operation)", ClassName.get(JsonObject.class))
                     .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(Operation.class)));
         } else {
-            builder.addParameter(ClassName.get(Operation.class), "operation")
+            builder.addParameter(ClassName.get(MutationDataLoader.class), "loader")
+                    .addParameter(ClassName.get(Operation.class), "operation")
                     .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                     .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonObject.class)));
         }
