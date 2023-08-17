@@ -104,15 +104,19 @@ public class GraphQLMutationToStatements {
         if (operationDefinitionContext.operationType() != null && operationDefinitionContext.operationType().MUTATION() != null) {
             Optional<GraphqlParser.OperationTypeDefinitionContext> mutationOperationTypeDefinition = manager.getMutationOperationTypeDefinition();
             if (mutationOperationTypeDefinition.isPresent()) {
-                String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors().add(MUTATION_NOT_EXIST));
+                String mutationTypeName = mutationOperationTypeDefinition.get().typeName().name().getText();
+                List<GraphqlParser.SelectionContext> selectionContextList = operationDefinitionContext.selectionSet().selection().stream()
+                        .filter(selectionContext -> packageManager.isLocalPackage(mutationTypeName, selectionContext.field().name().getText()))
+                        .filter(selectionContext -> manager.isNotInvokeField(mutationTypeName, selectionContext.field().name().getText()))
+                        .filter(selectionContext -> manager.isNotFetchField(mutationTypeName, selectionContext.field().name().getText()))
+                        .filter(selectionContext -> manager.isNotFunctionField(mutationTypeName, selectionContext.field().name().getText()))
+                        .filter(selectionContext -> manager.isNotConnectionField(mutationTypeName, selectionContext.field().name().getText()))
+                        .collect(Collectors.toList());
+                if (selectionContextList.size() == 0) {
+                    return Stream.empty();
+                }
                 return Stream.concat(
-                        operationDefinitionContext.selectionSet().selection().stream()
-                                .filter(selectionContext -> packageManager.isLocalPackage(mutationTypeName, selectionContext.field().name().getText()))
-                                .filter(selectionContext -> manager.isNotInvokeField(mutationTypeName, selectionContext.field().name().getText()))
-                                .filter(selectionContext -> manager.isNotFetchField(mutationTypeName, selectionContext.field().name().getText()))
-                                .filter(selectionContext -> manager.isNotFunctionField(mutationTypeName, selectionContext.field().name().getText()))
-                                .filter(selectionContext -> manager.isNotConnectionField(mutationTypeName, selectionContext.field().name().getText()))
-                                .flatMap(this::selectionToStatementStream),
+                        selectionContextList.stream().flatMap(this::selectionToStatementStream),
                         Stream.of(graphQLQueryToSelect.objectSelectionToSelect(mutationOperationTypeDefinition.get().typeName().name().getText(), operationDefinitionContext.selectionSet().selection()))
                 );
             }
@@ -209,18 +213,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                        objectDefaultValueToStatementStream(
-                                                                                fieldDefinitionContext,
-                                                                                idValueExpression,
-                                                                                subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
-                                                                                inputValueDefinitionContext,
-                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                                0,
-                                                                                0
-                                                                        )
+                                                                objectDefaultValueToStatementStream(
+                                                                        fieldDefinitionContext,
+                                                                        idValueExpression,
+                                                                        subFieldDefinitionContext,
+                                                                        inputObjectTypeDefinitionContext,
+                                                                        inputValueDefinitionContext,
+                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                        0,
+                                                                        0
                                                                 )
+                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )

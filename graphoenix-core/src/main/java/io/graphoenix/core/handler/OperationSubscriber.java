@@ -56,8 +56,8 @@ public abstract class OperationSubscriber {
 
     public Operation buildSubscriptionFilterSelection(Operation operation) {
         for (Field field : operation.getFields()) {
-            String subscriptionOperationTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST));
-            manager.getField(subscriptionOperationTypeName, field.getName())
+            String mutationOperationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.MUTATION_TYPE_NOT_EXIST));
+            manager.getField(mutationOperationTypeName, field.getName())
                     .ifPresent(fieldDefinitionContext -> {
                                 String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                                 Field.mergeSelection(field.getFields(), filterSelectionList.get(fieldTypeName));

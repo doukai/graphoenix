@@ -447,6 +447,7 @@ public class OperationHandlerImplementer {
                                                         .add(")")
                                                         .build(),
                                                 CodeBlock.of(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName)),
+                                                CodeBlock.of(".switchIfEmpty($T.just($T.EMPTY_JSON_OBJECT))", ClassName.get(Mono.class), ClassName.get(JsonValue.class)),
                                                 CodeBlock.of(".flatMap(jsonValue -> invoke(jsonValue, operationDefinitionContext))")
                                         ),
                                         System.lineSeparator()
@@ -480,6 +481,7 @@ public class OperationHandlerImplementer {
                                                         .add(")")
                                                         .build(),
                                                 CodeBlock.of(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName)),
+                                                CodeBlock.of(".switchIfEmpty($T.just($T.EMPTY_JSON_OBJECT))", ClassName.get(Mono.class), ClassName.get(JsonValue.class)),
                                                 CodeBlock.of(".flatMap(jsonValue -> invoke(jsonValue, operationDefinitionContext))"),
                                                 graphQLConfig.getCompensating() ?
                                                         CodeBlock.of(".onErrorResume(throwable -> mutationLoader.compensating(throwable).then($T.error(new $T(throwable))))", ClassName.get(Mono.class), ClassName.get(GraphQLErrors.class)) :
@@ -506,7 +508,8 @@ public class OperationHandlerImplementer {
                                                         .unindent()
                                                         .add(")")
                                                         .build(),
-                                                CodeBlock.of(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName))
+                                                CodeBlock.of(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName)),
+                                                CodeBlock.of(".switchIfEmpty($T.just($T.EMPTY_JSON_OBJECT))", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
                                         ),
                                         System.lineSeparator()
                                 )
@@ -589,12 +592,13 @@ public class OperationHandlerImplementer {
             } else {
                 if (manager.isObject(fieldTypeName)) {
                     if (fieldTypeIsList) {
-                        builder.addStatement(
-                                "$T type = new $T<$T>() {}.getType()",
-                                ClassName.get(Type.class),
-                                ClassName.get(TypeToken.class),
-                                typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                        )
+                        builder
+                                .addStatement(
+                                        "$T type = new $T<$T>() {}.getType()",
+                                        ClassName.get(Type.class),
+                                        ClassName.get(TypeToken.class),
+                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                                )
                                 .addStatement(
                                         "$T $L = jsonb.get().fromJson(jsonValue.toString(), type)",
                                         typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
@@ -613,12 +617,13 @@ public class OperationHandlerImplementer {
 
                                 );
                     } else {
-                        builder.addStatement(
-                                "$T $L = jsonb.get().fromJson(jsonValue.toString(), $T.class)",
-                                typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                                fieldTypeParameterName,
-                                typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                        )
+                        builder
+                                .addStatement(
+                                        "$T $L = jsonb.get().fromJson(jsonValue.toString(), $T.class)",
+                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
+                                        fieldTypeParameterName,
+                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                                )
                                 .beginControlFlow("if($L == null)", fieldTypeParameterName)
                                 .addStatement("return $T.just($T.NULL)", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
                                 .endControlFlow()

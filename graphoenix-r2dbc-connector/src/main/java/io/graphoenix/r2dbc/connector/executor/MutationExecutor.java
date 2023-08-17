@@ -74,6 +74,9 @@ public class MutationExecutor {
                         Flux.fromStream(sqlStream)
                                 .collectList()
                                 .flatMap(sqlList -> {
+                                            if (sqlList.size() == 0) {
+                                                return Mono.empty();
+                                            }
                                             String mutation = String.join(";", sqlList.subList(0, sqlList.size() - 1));
                                             String query = sqlList.get(sqlList.size() - 1);
                                             Logger.info("execute mutation:\r\n{}", mutation);

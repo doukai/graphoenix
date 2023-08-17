@@ -7,6 +7,7 @@ import io.graphoenix.spi.handler.OperationHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.stream.Stream;
@@ -26,8 +27,8 @@ public class MysqlR2dbcHandler implements OperationHandler {
 
     @Override
     public Mono<String> query(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        String select = operationToSQLConvertHandler.queryToSelect(operationDefinitionContext);
-        return operationSQLExecuteHandler.query(select);
+        return Mono.justOrEmpty(operationToSQLConvertHandler.queryToSelect(operationDefinitionContext))
+                .flatMap(operationSQLExecuteHandler::query);
     }
 
     @Override

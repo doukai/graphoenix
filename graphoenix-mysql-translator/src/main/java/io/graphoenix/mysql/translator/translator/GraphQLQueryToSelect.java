@@ -3,7 +3,10 @@ package io.graphoenix.mysql.translator.translator;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.PackageManager;
-import io.graphoenix.core.operation.*;
+import io.graphoenix.core.operation.Arguments;
+import io.graphoenix.core.operation.Field;
+import io.graphoenix.core.operation.IntValue;
+import io.graphoenix.core.operation.ValueWithVariable;
 import io.graphoenix.mysql.translator.expression.JsonArrayAggregateFunction;
 import io.graphoenix.mysql.translator.utils.DBNameUtil;
 import io.graphoenix.mysql.translator.utils.DBValueUtil;
@@ -15,28 +18,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.json.JsonValue;
 import jakarta.json.stream.JsonCollectors;
-import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.HexValue;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.GroupByElement;
-import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.Limit;
-import net.sf.jsqlparser.statement.select.OrderByElement;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -47,19 +33,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.CONNECTION_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.CURSOR_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.FUNC_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.GROUP_BY_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.LAST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.OFFSET_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.ORDER_BY_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.SORT_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class GraphQLQueryToSelect {
@@ -81,15 +55,15 @@ public class GraphQLQueryToSelect {
         this.dbValueUtil = dbValueUtil;
     }
 
-    public String createSelectSQL(String graphQL) {
-        return operationDefinitionToSelect(DOCUMENT_UTIL.graphqlToOperation(graphQL)).toString();
+    public Optional<String> createSelectSQL(String graphQL) {
+        return operationDefinitionToSelect(DOCUMENT_UTIL.graphqlToOperation(graphQL)).map(Select::toString);
     }
 
     public Stream<Tuple2<String, String>> createSelectsSQL(String graphQL) {
         return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL)).map(result -> Tuple.of(result._1(), result._2().toString()));
     }
 
-    public Select createSelect(String graphQL) {
+    public Optional<Select> createSelect(String graphQL) {
         return operationDefinitionToSelect(DOCUMENT_UTIL.graphqlToOperation(graphQL));
     }
 
@@ -97,15 +71,15 @@ public class GraphQLQueryToSelect {
         return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL));
     }
 
-    public String createSelectSQL(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        return operationDefinitionToSelect(operationDefinitionContext).toString();
+    public Optional<String> createSelectSQL(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return operationDefinitionToSelect(operationDefinitionContext).map(Select::toString);
     }
 
     public Stream<Tuple2<String, String>> createSelectsSQL(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         return operationDefinitionToSelects(operationDefinitionContext).map(result -> Tuple.of(result._1(), result._2().toString()));
     }
 
-    public Select createSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+    public Optional<Select> createSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         return operationDefinitionToSelect(operationDefinitionContext);
     }
 
@@ -113,30 +87,41 @@ public class GraphQLQueryToSelect {
         return operationDefinitionToSelects(operationDefinitionContext);
     }
 
-    public Select operationDefinitionToSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+    public Optional<Select> operationDefinitionToSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
-            return manager.getQueryOperationTypeDefinition()
-                    .map(operationTypeDefinitionContext ->
-                            objectSelectionToSelect(
-                                    operationTypeDefinitionContext.typeName().name().getText(),
-                                    operationDefinitionContext.selectionSet().selection().stream()
-                                            .filter(selectionContext -> packageManager.isLocalPackage(operationTypeDefinitionContext.typeName().name().getText(), selectionContext.field().name().getText()))
-                                            .collect(Collectors.toList())
-                            )
+            GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext = manager.getQueryOperationTypeDefinition().orElseThrow(() -> new GraphQLErrors().add(QUERY_TYPE_NOT_EXIST));
+            String queryTypeName = operationTypeDefinitionContext.typeName().name().getText();
+            List<GraphqlParser.SelectionContext> selectionContextList = operationDefinitionContext.selectionSet().selection().stream()
+                    .filter(selectionContext -> packageManager.isLocalPackage(queryTypeName, selectionContext.field().name().getText()))
+                    .filter(selectionContext -> manager.isNotInvokeField(queryTypeName, selectionContext.field().name().getText()))
+                    .filter(selectionContext -> manager.isNotFetchField(queryTypeName, selectionContext.field().name().getText()))
+                    .collect(Collectors.toList());
+            if (selectionContextList.size() == 0) {
+                return Optional.empty();
+            }
+            return Optional.of(
+                    objectSelectionToSelect(
+                            operationTypeDefinitionContext.typeName().name().getText(),
+                            selectionContextList
                     )
-                    .orElseThrow(() -> new GraphQLErrors().add(QUERY_TYPE_NOT_EXIST));
-
+            );
         } else if (operationDefinitionContext.operationType().SUBSCRIPTION() != null) {
-            return manager.getSubscriptionOperationTypeDefinition()
-                    .map(operationTypeDefinitionContext ->
-                            objectSelectionToSelect(
-                                    operationTypeDefinitionContext.typeName().name().getText(),
-                                    operationDefinitionContext.selectionSet().selection().stream()
-                                            .filter(selectionContext -> packageManager.isLocalPackage(operationTypeDefinitionContext.typeName().name().getText(), selectionContext.field().name().getText()))
-                                            .collect(Collectors.toList())
-                            )
+            GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext = manager.getSubscriptionOperationTypeDefinition().orElseThrow(() -> new GraphQLErrors().add(SUBSCRIBE_TYPE_NOT_EXIST));
+            String subscriptionTypeName = operationTypeDefinitionContext.typeName().name().getText();
+            List<GraphqlParser.SelectionContext> selectionContextList = operationDefinitionContext.selectionSet().selection().stream()
+                    .filter(selectionContext -> packageManager.isLocalPackage(subscriptionTypeName, selectionContext.field().name().getText()))
+                    .filter(selectionContext -> manager.isNotInvokeField(subscriptionTypeName, selectionContext.field().name().getText()))
+                    .filter(selectionContext -> manager.isNotFetchField(subscriptionTypeName, selectionContext.field().name().getText()))
+                    .collect(Collectors.toList());
+            if (selectionContextList.size() == 0) {
+                return Optional.empty();
+            }
+            return Optional.of(
+                    objectSelectionToSelect(
+                            operationTypeDefinitionContext.typeName().name().getText(),
+                            selectionContextList
                     )
-                    .orElseThrow(() -> new GraphQLErrors().add(SUBSCRIBE_TYPE_NOT_EXIST));
+            );
         }
         throw new GraphQLErrors().add(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
     }

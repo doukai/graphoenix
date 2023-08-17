@@ -1,6 +1,7 @@
 package io.graphoenix.mysql.handler;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.mysql.translator.handler.OperationToSQLConvertHandler;
 import io.graphoenix.mysql.translator.handler.SQLFormatHandler;
 import io.graphoenix.spi.handler.GeneratorHandler;
@@ -25,7 +26,7 @@ public class MysqlGeneratorHandler implements GeneratorHandler {
 
     @Override
     public String query(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        String select = operationToSQLConvertHandler.queryToSelect(operationDefinitionContext);
+        String select = operationToSQLConvertHandler.queryToSelect(operationDefinitionContext).orElseThrow(() -> new GraphQLErrors("query field not exist"));
         return sqlFormatHandler.query(select);
     }
 
@@ -37,7 +38,7 @@ public class MysqlGeneratorHandler implements GeneratorHandler {
 
     @Override
     public String query(String graphQL) {
-        String select = operationToSQLConvertHandler.queryToSelect(graphQL);
+        String select = operationToSQLConvertHandler.queryToSelect(graphQL).orElseThrow(() -> new GraphQLErrors("query field not exist"));
         return sqlFormatHandler.query(select);
     }
 

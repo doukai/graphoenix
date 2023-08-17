@@ -124,41 +124,8 @@ public class ApplicationProcessor extends BaseProcessor {
                     .collect(Collectors.toList());
 
             for (Map.Entry<GraphqlParser.ObjectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext> entry : mutationTypeFieldDefinitionContextList) {
-                FileObject schema = filer.createResource(
-                        StandardLocation.CLASS_OUTPUT,
-                        "",
-                        "META-INF/schema/"
-                                .concat(entry.getKey().name().getText())
-                                .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
-                                .concat("UpdateById")
-                );
-                writer = schema.openWriter();
-                writer.write(jsonSchemaTranslator.operationObjectFieldUpdateByIdArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
-                writer.close();
-                schema = filer.createResource(
-                        StandardLocation.CLASS_OUTPUT,
-                        "",
-                        "META-INF/schema/"
-                                .concat(entry.getKey().name().getText())
-                                .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
-                                .concat("UpdateByWhere")
-                );
-                writer = schema.openWriter();
-                writer.write(jsonSchemaTranslator.operationObjectFieldUpdateByWhereArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
-                writer.close();
-                if (manager.fieldTypeIsList(entry.getValue().type())) {
-                    schema = filer.createResource(
-                            StandardLocation.CLASS_OUTPUT,
-                            "",
-                            "META-INF/schema/"
-                                    .concat(entry.getKey().name().getText())
-                                    .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
-                    );
-                    writer = schema.openWriter();
-                    writer.write(jsonSchemaTranslator.operationObjectFieldListArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
-                    writer.close();
-                } else {
-                    schema = filer.createResource(
+                if (manager.isInvokeField(entry.getValue())) {
+                    FileObject schema = filer.createResource(
                             StandardLocation.CLASS_OUTPUT,
                             "",
                             "META-INF/schema/"
@@ -168,6 +135,41 @@ public class ApplicationProcessor extends BaseProcessor {
                     writer = schema.openWriter();
                     writer.write(jsonSchemaTranslator.operationObjectFieldArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
                     writer.close();
+                } else {
+                    FileObject schema = filer.createResource(
+                            StandardLocation.CLASS_OUTPUT,
+                            "",
+                            "META-INF/schema/"
+                                    .concat(entry.getKey().name().getText())
+                                    .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
+                                    .concat("UpdateById")
+                    );
+                    writer = schema.openWriter();
+                    writer.write(jsonSchemaTranslator.operationObjectFieldUpdateByIdArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
+                    writer.close();
+                    schema = filer.createResource(
+                            StandardLocation.CLASS_OUTPUT,
+                            "",
+                            "META-INF/schema/"
+                                    .concat(entry.getKey().name().getText())
+                                    .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
+                                    .concat("UpdateByWhere")
+                    );
+                    writer = schema.openWriter();
+                    writer.write(jsonSchemaTranslator.operationObjectFieldUpdateByWhereArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
+                    writer.close();
+                    if (manager.fieldTypeIsList(entry.getValue().type())) {
+                        schema = filer.createResource(
+                                StandardLocation.CLASS_OUTPUT,
+                                "",
+                                "META-INF/schema/"
+                                        .concat(entry.getKey().name().getText())
+                                        .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
+                        );
+                        writer = schema.openWriter();
+                        writer.write(jsonSchemaTranslator.operationObjectFieldListArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
+                        writer.close();
+                    }
                 }
             }
 
@@ -181,29 +183,16 @@ public class ApplicationProcessor extends BaseProcessor {
                     .collect(Collectors.toList());
 
             for (Map.Entry<GraphqlParser.ObjectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext> entry : queryTypeFieldDefinitionContextList) {
-                if (manager.fieldTypeIsList(entry.getValue().type())) {
-                    FileObject schema = filer.createResource(
-                            StandardLocation.CLASS_OUTPUT,
-                            "",
-                            "META-INF/schema/"
-                                    .concat(entry.getKey().name().getText())
-                                    .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
-                    );
-                    writer = schema.openWriter();
-                    writer.write(jsonSchemaTranslator.operationObjectFieldListArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
-                    writer.close();
-                } else {
-                    FileObject schema = filer.createResource(
-                            StandardLocation.CLASS_OUTPUT,
-                            "",
-                            "META-INF/schema/"
-                                    .concat(entry.getKey().name().getText())
-                                    .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
-                    );
-                    writer = schema.openWriter();
-                    writer.write(jsonSchemaTranslator.operationObjectFieldArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
-                    writer.close();
-                }
+                FileObject schema = filer.createResource(
+                        StandardLocation.CLASS_OUTPUT,
+                        "",
+                        "META-INF/schema/"
+                                .concat(entry.getKey().name().getText())
+                                .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
+                );
+                writer = schema.openWriter();
+                writer.write(jsonSchemaTranslator.operationObjectFieldArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
+                writer.close();
             }
 
             invokeHandlerBuilder.writeToFiler(filer);
