@@ -56,14 +56,13 @@ public abstract class OperationSubscriber {
 
     public Operation buildSubscriptionFilterSelection(Operation operation) {
         for (Field field : operation.getFields()) {
-            GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getSubscriptionOperationTypeName()
-                    .map(name ->
-                            manager.getField(name, field.getName())
-                                    .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(name, field.getName())))
-                    )
-                    .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST));
-            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-            Field.mergeSelection(field.getFields(), filterSelectionList.get(fieldTypeName));
+            String subscriptionOperationTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST));
+            manager.getField(subscriptionOperationTypeName, field.getName())
+                    .ifPresent(fieldDefinitionContext -> {
+                                String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                                Field.mergeSelection(field.getFields(), filterSelectionList.get(fieldTypeName));
+                            }
+                    );
         }
         return operation;
     }

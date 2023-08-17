@@ -150,10 +150,10 @@ public class MutationHandlerBuilder {
                             String withTo = manager.getFetchWithTo(fieldDefinitionContext);
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
                             builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().build()).collect($T.toJsonArray()))",
-                                    fieldDefinitionContext.name().getText(),
-                                    withObjectField.name().getText(),
-                                    ClassName.get(JsonCollectors.class)
-                            )
+                                            fieldDefinitionContext.name().getText(),
+                                            withObjectField.name().getText(),
+                                            ClassName.get(JsonCollectors.class)
+                                    )
                                     .addStatement("loader.registerArray($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue(), false)",
                                             packageName,
                                             protocol,
@@ -209,9 +209,9 @@ public class MutationHandlerBuilder {
                             String withTo = manager.getFetchWithTo(fieldDefinitionContext);
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
                             builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, jsonProvider.createObjectBuilder().build())",
-                                    fieldDefinitionContext.name().getText(),
-                                    withObjectField.name().getText()
-                            )
+                                            fieldDefinitionContext.name().getText(),
+                                            withObjectField.name().getText()
+                                    )
                                     .addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue(), false)",
                                             packageName,
                                             protocol,
@@ -333,6 +333,7 @@ public class MutationHandlerBuilder {
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = manager.getMutationOperationTypeName().flatMap(manager::getObject).stream()
                 .flatMap(objectTypeDefinitionContext ->
                         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                .filter(manager::isNotInvokeField)
                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 )
                 .collect(Collectors.toList());

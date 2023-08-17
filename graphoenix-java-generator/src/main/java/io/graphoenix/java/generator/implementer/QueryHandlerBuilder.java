@@ -250,6 +250,7 @@ public class QueryHandlerBuilder {
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = manager.getQueryOperationTypeName().flatMap(manager::getObject).stream()
                 .flatMap(objectTypeDefinitionContext ->
                         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                .filter(manager::isNotInvokeField)
                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 )
                 .collect(Collectors.toList());
