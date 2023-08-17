@@ -229,7 +229,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                             .filter(directive -> directive.getName().equals(INVOKES_DIRECTIVE_NAME))
                                                             .findFirst();
                                                     if (invokes.isPresent() && invokes.get().getArguments().get("list") != null && invokes.get().getArguments().get("list").getValueType().equals(JsonValue.ValueType.ARRAY)) {
-                                                        invokes.get().getArguments().put("list", jsonProvider.createArrayBuilder(invokes.get().getArguments().get("list").asJsonArray()).add(new ObjectValueWithVariable(invoke)));
+                                                        invokes.get().getArguments().put("list", jsonProvider.createArrayBuilder(invokes.get().getArguments().get("list").asJsonArray()).add(new ObjectValueWithVariable(invoke)).build());
                                                     } else {
                                                         inputObjectType.addDirective(
                                                                 new Directive()
@@ -241,7 +241,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                                         )
                                                         );
                                                     }
-                                                    manager.mergeDocument(inputObjectType.toString());
+                                                    manager.registerGraphQL(inputObjectType.toString());
                                                 }
                                         );
                             }

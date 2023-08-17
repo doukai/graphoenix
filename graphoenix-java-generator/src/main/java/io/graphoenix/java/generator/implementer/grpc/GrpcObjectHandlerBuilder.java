@@ -182,7 +182,13 @@ public class GrpcObjectHandlerBuilder {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
             }
-            builder.addStatement(codeBlock);
+            if (fieldDefinitionContext.type().nonNullType() != null) {
+                builder.addStatement(codeBlock);
+            } else {
+                builder.beginControlFlow("if ($L.$L() != null)", objectParameterName, fieldGetterName)
+                        .addStatement(codeBlock)
+                        .endControlFlow();
+            }
         }
         builder.addStatement("return builder.build()");
         return builder.build();

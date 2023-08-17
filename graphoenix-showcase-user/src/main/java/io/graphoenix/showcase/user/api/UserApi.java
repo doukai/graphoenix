@@ -3,7 +3,6 @@ package io.graphoenix.showcase.user.api;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.showcase.user.dao.UserOperationDAO;
 import io.graphoenix.showcase.user.dto.inputObjectType.UserListQueryTypeArguments;
-import io.graphoenix.showcase.user.dto.objectType.User;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.GraphQLApi;
