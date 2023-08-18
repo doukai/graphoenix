@@ -25,11 +25,14 @@ public class __TypeInterfacesInput {
 
   private __TypeInput to;
 
+  @DefaultValue("\"__TypeInterfaces\"")
+  private String __typename;
+
   private Boolean isDeprecated;
 
   private Integer version;
 
-  private String realmId;
+  private Integer realmId;
 
   private String createUserId;
 
@@ -40,9 +43,6 @@ public class __TypeInterfacesInput {
   private LocalDateTime updateTime;
 
   private String createGroupId;
-
-  @DefaultValue("\"__TypeInterfaces\"")
-  private String __typename;
 
   public String getId() {
     return this.id;
@@ -84,6 +84,14 @@ public class __TypeInterfacesInput {
     this.to = to;
   }
 
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -100,11 +108,11 @@ public class __TypeInterfacesInput {
     this.version = version;
   }
 
-  public String getRealmId() {
+  public Integer getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(String realmId) {
+  public void setRealmId(Integer realmId) {
     this.realmId = realmId;
   }
 
@@ -146,13 +154,5 @@ public class __TypeInterfacesInput {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
   }
 }

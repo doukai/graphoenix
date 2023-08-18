@@ -83,7 +83,7 @@ enum __DirectiveLocation @packageInfo(grpcPackageName: "io.graphoenix.core.grpc"
 interface Meta @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.interfaceType.Meta", grpcClassName: "io.graphoenix.core.dto.interfaceType.grpc.Meta") {
   isDeprecated: Boolean
   version: Int
-  realmId: String
+  realmId: Int
   createUserId: String
   createTime: Timestamp
   updateUserId: String

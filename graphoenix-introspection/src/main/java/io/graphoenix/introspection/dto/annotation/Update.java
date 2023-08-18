@@ -1,5 +1,6 @@
 package io.graphoenix.introspection.dto.annotation;
 
+import io.graphoenix.spi.annotation.Directive;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.annotation.Documented;
@@ -13,6 +14,7 @@ import org.eclipse.microprofile.graphql.Name;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
+@Directive("update")
 @Target({ElementType.FIELD})
 public @interface Update {
   @Name("if")

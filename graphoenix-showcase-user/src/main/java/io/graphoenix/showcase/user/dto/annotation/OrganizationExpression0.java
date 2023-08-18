@@ -20,7 +20,7 @@ public @interface OrganizationExpression0 {
 
   IntExpression version() default @IntExpression;
 
-  StringExpression realmId() default @StringExpression;
+  IntExpression realmId() default @IntExpression;
 
   StringExpression createUserId() default @StringExpression;
 

@@ -107,6 +107,14 @@ public class InterfaceType {
         return this;
     }
 
+    public InterfaceType addDirectives(Collection<Directive> directives) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        this.directives.addAll(directives);
+        return this;
+    }
+
     public Collection<Field> getFields() {
         return fields;
     }

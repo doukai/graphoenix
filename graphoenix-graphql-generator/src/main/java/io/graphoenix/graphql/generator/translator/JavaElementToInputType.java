@@ -44,9 +44,11 @@ public class JavaElementToInputType {
                                                 .setDescription(ELEMENT_UTIL.getDescriptionFromElement(element))
                                                 .setDefaultValue(ELEMENT_UTIL.getDefaultValueFromElement(element))
                                                 .setType(ELEMENT_UTIL.variableElementToTypeName((VariableElement) element, typeUtils))
+                                                .addDirectives(ELEMENT_UTIL.getDirectivesFromElement(element))
                                 )
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 )
+                .addDirectives(ELEMENT_UTIL.getDirectivesFromElement(typeElement))
                 .addDirective(
                         new Directive(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", typeElement.getQualifiedName().toString())

@@ -1,5 +1,6 @@
 package io.graphoenix.core.dto.annotation;
 
+import io.graphoenix.spi.annotation.Directive;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.annotation.Documented;
@@ -12,6 +13,7 @@ import java.lang.annotation.Target;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
+@Directive("denyAll")
 @Target({ElementType.FIELD,ElementType.TYPE})
 public @interface DenyAll {
 }

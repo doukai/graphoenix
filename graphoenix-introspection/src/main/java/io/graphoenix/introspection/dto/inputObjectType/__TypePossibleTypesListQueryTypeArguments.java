@@ -28,23 +28,6 @@ public class __TypePossibleTypesListQueryTypeArguments {
 
   private __TypeExpression to;
 
-  @DefaultValue("false")
-  private Boolean includeDeprecated;
-
-  private IntExpression version;
-
-  private StringExpression realmId;
-
-  private StringExpression createUserId;
-
-  private StringExpression createTime;
-
-  private StringExpression updateUserId;
-
-  private StringExpression updateTime;
-
-  private StringExpression createGroupId;
-
   private StringExpression __typename;
 
   private __TypePossibleTypesOrderBy orderBy;
@@ -65,6 +48,23 @@ public class __TypePossibleTypesListQueryTypeArguments {
   private String after;
 
   private String before;
+
+  @DefaultValue("false")
+  private Boolean includeDeprecated;
+
+  private IntExpression version;
+
+  private IntExpression realmId;
+
+  private StringExpression createUserId;
+
+  private StringExpression createTime;
+
+  private StringExpression updateUserId;
+
+  private StringExpression updateTime;
+
+  private StringExpression createGroupId;
 
   public StringExpression getId() {
     return this.id;
@@ -104,70 +104,6 @@ public class __TypePossibleTypesListQueryTypeArguments {
 
   public void setTo(__TypeExpression to) {
     this.to = to;
-  }
-
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
-
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
-  }
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
-  }
-
-  public StringExpression getRealmId() {
-    return this.realmId;
-  }
-
-  public void setRealmId(StringExpression realmId) {
-    this.realmId = realmId;
-  }
-
-  public StringExpression getCreateUserId() {
-    return this.createUserId;
-  }
-
-  public void setCreateUserId(StringExpression createUserId) {
-    this.createUserId = createUserId;
-  }
-
-  public StringExpression getCreateTime() {
-    return this.createTime;
-  }
-
-  public void setCreateTime(StringExpression createTime) {
-    this.createTime = createTime;
-  }
-
-  public StringExpression getUpdateUserId() {
-    return this.updateUserId;
-  }
-
-  public void setUpdateUserId(StringExpression updateUserId) {
-    this.updateUserId = updateUserId;
-  }
-
-  public StringExpression getUpdateTime() {
-    return this.updateTime;
-  }
-
-  public void setUpdateTime(StringExpression updateTime) {
-    this.updateTime = updateTime;
-  }
-
-  public StringExpression getCreateGroupId() {
-    return this.createGroupId;
-  }
-
-  public void setCreateGroupId(StringExpression createGroupId) {
-    this.createGroupId = createGroupId;
   }
 
   public StringExpression get__typename() {
@@ -248,5 +184,69 @@ public class __TypePossibleTypesListQueryTypeArguments {
 
   public void setBefore(String before) {
     this.before = before;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public IntExpression getRealmId() {
+    return this.realmId;
+  }
+
+  public void setRealmId(IntExpression realmId) {
+    this.realmId = realmId;
+  }
+
+  public StringExpression getCreateUserId() {
+    return this.createUserId;
+  }
+
+  public void setCreateUserId(StringExpression createUserId) {
+    this.createUserId = createUserId;
+  }
+
+  public StringExpression getCreateTime() {
+    return this.createTime;
+  }
+
+  public void setCreateTime(StringExpression createTime) {
+    this.createTime = createTime;
+  }
+
+  public StringExpression getUpdateUserId() {
+    return this.updateUserId;
+  }
+
+  public void setUpdateUserId(StringExpression updateUserId) {
+    this.updateUserId = updateUserId;
+  }
+
+  public StringExpression getUpdateTime() {
+    return this.updateTime;
+  }
+
+  public void setUpdateTime(StringExpression updateTime) {
+    this.updateTime = updateTime;
+  }
+
+  public StringExpression getCreateGroupId() {
+    return this.createGroupId;
+  }
+
+  public void setCreateGroupId(StringExpression createGroupId) {
+    this.createGroupId = createGroupId;
   }
 }

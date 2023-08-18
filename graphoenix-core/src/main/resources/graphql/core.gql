@@ -91,7 +91,7 @@ enum __DirectiveLocation {
 interface Meta {
     isDeprecated: Boolean
     version: Int
-    realmId: String
+    realmId: Int
     createUserId: String
     createTime: Timestamp
     updateUserId: String

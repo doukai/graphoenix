@@ -26,12 +26,19 @@ public class __TypePossibleTypesExpression {
 
   private __TypeExpression to;
 
+  private StringExpression __typename;
+
+  @DefaultValue("AND")
+  private Conditional cond;
+
+  private Collection<__TypePossibleTypesExpression> exs;
+
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
   private IntExpression version;
 
-  private StringExpression realmId;
+  private IntExpression realmId;
 
   private StringExpression createUserId;
 
@@ -42,13 +49,6 @@ public class __TypePossibleTypesExpression {
   private StringExpression updateTime;
 
   private StringExpression createGroupId;
-
-  private StringExpression __typename;
-
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private Collection<__TypePossibleTypesExpression> exs;
 
   public StringExpression getId() {
     return this.id;
@@ -90,6 +90,30 @@ public class __TypePossibleTypesExpression {
     this.to = to;
   }
 
+  public StringExpression get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(StringExpression __typename) {
+    this.__typename = __typename;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Collection<__TypePossibleTypesExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__TypePossibleTypesExpression> exs) {
+    this.exs = exs;
+  }
+
   public Boolean getIncludeDeprecated() {
     return this.includeDeprecated;
   }
@@ -106,11 +130,11 @@ public class __TypePossibleTypesExpression {
     this.version = version;
   }
 
-  public StringExpression getRealmId() {
+  public IntExpression getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(StringExpression realmId) {
+  public void setRealmId(IntExpression realmId) {
     this.realmId = realmId;
   }
 
@@ -152,29 +176,5 @@ public class __TypePossibleTypesExpression {
 
   public void setCreateGroupId(StringExpression createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public StringExpression get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(StringExpression __typename) {
-    this.__typename = __typename;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public Collection<__TypePossibleTypesExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__TypePossibleTypesExpression> exs) {
-    this.exs = exs;
   }
 }

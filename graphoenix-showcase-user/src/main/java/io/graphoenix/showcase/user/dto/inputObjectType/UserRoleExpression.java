@@ -31,7 +31,7 @@ public class UserRoleExpression {
 
   private IntExpression version;
 
-  private StringExpression realmId;
+  private IntExpression realmId;
 
   private StringExpression createUserId;
 
@@ -106,11 +106,11 @@ public class UserRoleExpression {
     this.version = version;
   }
 
-  public StringExpression getRealmId() {
+  public IntExpression getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(StringExpression realmId) {
+  public void setRealmId(IntExpression realmId) {
     this.realmId = realmId;
   }
 

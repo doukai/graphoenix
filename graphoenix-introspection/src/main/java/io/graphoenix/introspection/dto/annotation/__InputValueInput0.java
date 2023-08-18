@@ -21,11 +21,17 @@ public @interface __InputValueInput0 {
 
   String defaultValue() default "";
 
+  String __typename() default "";
+
+  String ofTypeName() default "";
+
+  String typeName() default "";
+
   boolean isDeprecated() default false;
 
   int version() default 0;
 
-  String realmId() default "";
+  int realmId() default 0;
 
   String createUserId() default "";
 
@@ -36,12 +42,6 @@ public @interface __InputValueInput0 {
   String updateTime() default "";
 
   String createGroupId() default "";
-
-  String __typename() default "";
-
-  String ofTypeName() default "";
-
-  String typeName() default "";
 
   String $id() default "";
 
@@ -59,6 +59,12 @@ public @interface __InputValueInput0 {
 
   String $defaultValue() default "";
 
+  String $__typename() default "";
+
+  String $ofTypeName() default "";
+
+  String $typeName() default "";
+
   String $isDeprecated() default "";
 
   String $version() default "";
@@ -74,10 +80,4 @@ public @interface __InputValueInput0 {
   String $updateTime() default "";
 
   String $createGroupId() default "";
-
-  String $__typename() default "";
-
-  String $ofTypeName() default "";
-
-  String $typeName() default "";
 }

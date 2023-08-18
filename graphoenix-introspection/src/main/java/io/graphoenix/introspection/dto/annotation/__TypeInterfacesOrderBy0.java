@@ -15,6 +15,8 @@ public @interface __TypeInterfacesOrderBy0 {
 
   Sort interfaceName() default Sort.ASC;
 
+  Sort __typename() default Sort.ASC;
+
   Sort isDeprecated() default Sort.ASC;
 
   Sort version() default Sort.ASC;
@@ -30,6 +32,4 @@ public @interface __TypeInterfacesOrderBy0 {
   Sort updateTime() default Sort.ASC;
 
   Sort createGroupId() default Sort.ASC;
-
-  Sort __typename() default Sort.ASC;
 }

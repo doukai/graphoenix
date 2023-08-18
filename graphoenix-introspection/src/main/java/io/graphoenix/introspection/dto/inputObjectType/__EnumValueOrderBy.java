@@ -19,6 +19,10 @@ public class __EnumValueOrderBy {
 
   private Sort deprecationReason;
 
+  private Sort __typename;
+
+  private Sort ofTypeName;
+
   private Sort isDeprecated;
 
   private Sort version;
@@ -34,10 +38,6 @@ public class __EnumValueOrderBy {
   private Sort updateTime;
 
   private Sort createGroupId;
-
-  private Sort __typename;
-
-  private Sort ofTypeName;
 
   public Sort getId() {
     return this.id;
@@ -69,6 +69,22 @@ public class __EnumValueOrderBy {
 
   public void setDeprecationReason(Sort deprecationReason) {
     this.deprecationReason = deprecationReason;
+  }
+
+  public Sort get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(Sort __typename) {
+    this.__typename = __typename;
+  }
+
+  public Sort getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(Sort ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 
   public Sort getIsDeprecated() {
@@ -133,21 +149,5 @@ public class __EnumValueOrderBy {
 
   public void setCreateGroupId(Sort createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public Sort get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(Sort __typename) {
-    this.__typename = __typename;
-  }
-
-  public Sort getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(Sort ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 }

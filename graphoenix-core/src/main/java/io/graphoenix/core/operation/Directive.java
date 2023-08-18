@@ -33,7 +33,7 @@ public class Directive {
     }
 
     public Directive(AnnotationMirror annotationMirror) {
-        this.name = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, annotationMirror.getAnnotationType().asElement().getSimpleName().toString());
+        this.name = annotationMirror.getAnnotationType().getAnnotation(io.graphoenix.spi.annotation.Directive.class).value();
         if (annotationMirror.getElementValues() != null) {
             Map<String, ValueWithVariable> arguments = annotationMirror.getElementValues().entrySet().stream().collect(Collectors.toMap(entry -> ELEMENT_UTIL.getNameFromElement(entry.getKey()), entry -> ValueWithVariable.of(entry.getValue())));
             this.arguments = new Arguments(arguments);

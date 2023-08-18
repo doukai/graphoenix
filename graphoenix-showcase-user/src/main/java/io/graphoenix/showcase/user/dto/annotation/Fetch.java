@@ -2,6 +2,7 @@ package io.graphoenix.showcase.user.dto.annotation;
 
 import io.graphoenix.core.dto.annotation.MapWith;
 import io.graphoenix.core.dto.enumType.Protocol;
+import io.graphoenix.spi.annotation.Directive;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.String;
@@ -15,6 +16,7 @@ import java.lang.annotation.Target;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
+@Directive("fetch")
 @Target({ElementType.FIELD})
 public @interface Fetch {
   Protocol protocol();

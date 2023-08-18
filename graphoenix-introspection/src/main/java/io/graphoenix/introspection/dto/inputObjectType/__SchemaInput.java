@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -18,21 +19,33 @@ import org.eclipse.microprofile.graphql.Input;
 public class __SchemaInput {
   private String id;
 
+  @NonNull
   private Collection<__TypeInput> types;
 
+  @NonNull
   private __TypeInput queryType;
 
   private __TypeInput mutationType;
 
   private __TypeInput subscriptionType;
 
+  @NonNull
   private Collection<__DirectiveInput> directives;
+
+  @DefaultValue("\"__Schema\"")
+  private String __typename;
+
+  private String queryTypeName;
+
+  private String mutationTypeName;
+
+  private String subscriptionTypeName;
 
   private Boolean isDeprecated;
 
   private Integer version;
 
-  private String realmId;
+  private Integer realmId;
 
   private String createUserId;
 
@@ -43,15 +56,6 @@ public class __SchemaInput {
   private LocalDateTime updateTime;
 
   private String createGroupId;
-
-  @DefaultValue("\"__Schema\"")
-  private String __typename;
-
-  private String queryTypeName;
-
-  private String mutationTypeName;
-
-  private String subscriptionTypeName;
 
   public String getId() {
     return this.id;
@@ -101,6 +105,38 @@ public class __SchemaInput {
     this.directives = directives;
   }
 
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getQueryTypeName() {
+    return this.queryTypeName;
+  }
+
+  public void setQueryTypeName(String queryTypeName) {
+    this.queryTypeName = queryTypeName;
+  }
+
+  public String getMutationTypeName() {
+    return this.mutationTypeName;
+  }
+
+  public void setMutationTypeName(String mutationTypeName) {
+    this.mutationTypeName = mutationTypeName;
+  }
+
+  public String getSubscriptionTypeName() {
+    return this.subscriptionTypeName;
+  }
+
+  public void setSubscriptionTypeName(String subscriptionTypeName) {
+    this.subscriptionTypeName = subscriptionTypeName;
+  }
+
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -117,11 +153,11 @@ public class __SchemaInput {
     this.version = version;
   }
 
-  public String getRealmId() {
+  public Integer getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(String realmId) {
+  public void setRealmId(Integer realmId) {
     this.realmId = realmId;
   }
 
@@ -163,37 +199,5 @@ public class __SchemaInput {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getQueryTypeName() {
-    return this.queryTypeName;
-  }
-
-  public void setQueryTypeName(String queryTypeName) {
-    this.queryTypeName = queryTypeName;
-  }
-
-  public String getMutationTypeName() {
-    return this.mutationTypeName;
-  }
-
-  public void setMutationTypeName(String mutationTypeName) {
-    this.mutationTypeName = mutationTypeName;
-  }
-
-  public String getSubscriptionTypeName() {
-    return this.subscriptionTypeName;
-  }
-
-  public void setSubscriptionTypeName(String subscriptionTypeName) {
-    this.subscriptionTypeName = subscriptionTypeName;
   }
 }

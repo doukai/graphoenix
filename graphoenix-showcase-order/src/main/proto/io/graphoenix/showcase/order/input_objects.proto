@@ -18,7 +18,7 @@ message OrderExpression {
     optional GoodExpression goods = 4;
     optional bool include_deprecated = 5;
     optional io.graphoenix.core.grpc.IntExpression version = 6;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 7;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 7;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_time = 9;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 10;
@@ -36,7 +36,7 @@ message OrderInput {
     repeated GoodInput goods = 4;
     optional bool is_deprecated = 5;
     optional int32 version = 6;
-    optional string realm_id = 7;
+    optional int32 realm_id = 7;
     optional string create_user_id = 8;
     optional google.protobuf.Timestamp create_time = 9;
     optional string update_user_id = 10;
@@ -67,7 +67,7 @@ message GoodExpression {
     optional MerchantExpression merchant = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_time = 10;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
@@ -88,7 +88,7 @@ message GoodInput {
     MerchantInput merchant = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;
@@ -121,7 +121,7 @@ message ProductExpression {
     optional io.graphoenix.core.grpc.FloatExpression price = 3;
     optional bool include_deprecated = 4;
     optional io.graphoenix.core.grpc.IntExpression version = 5;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 6;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 6;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 7;
     optional io.graphoenix.core.grpc.StringExpression create_time = 8;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 9;
@@ -137,7 +137,7 @@ message ProductInput {
     float price = 3;
     optional bool is_deprecated = 4;
     optional int32 version = 5;
-    optional string realm_id = 6;
+    optional int32 realm_id = 6;
     optional string create_user_id = 7;
     optional google.protobuf.Timestamp create_time = 8;
     optional string update_user_id = 9;
@@ -168,7 +168,7 @@ message MerchantExpression {
     optional io.graphoenix.showcase.user.grpc.UserExpression director = 6;
     optional bool include_deprecated = 7;
     optional io.graphoenix.core.grpc.IntExpression version = 8;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 9;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 10;
     optional io.graphoenix.core.grpc.StringExpression create_time = 11;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 12;
@@ -190,7 +190,7 @@ message MerchantInput {
     io.graphoenix.showcase.user.grpc.UserInput director = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;
-    optional string realm_id = 9;
+    optional int32 realm_id = 9;
     optional string create_user_id = 10;
     optional google.protobuf.Timestamp create_time = 11;
     optional string update_user_id = 12;
@@ -223,7 +223,7 @@ message MerchantPartnersExpression {
     optional io.graphoenix.showcase.user.grpc.OrganizationExpression to = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_time = 10;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
@@ -241,7 +241,7 @@ message MerchantPartnersInput {
     optional io.graphoenix.showcase.user.grpc.OrganizationInput to = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;
@@ -271,7 +271,7 @@ message MerchantDirectorExpression {
     optional io.graphoenix.showcase.user.grpc.UserExpression to = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_time = 10;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
@@ -289,7 +289,7 @@ message MerchantDirectorInput {
     optional io.graphoenix.showcase.user.grpc.UserInput to = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;
@@ -318,7 +318,7 @@ message OrderQueryTypeArguments {
     optional GoodExpression goods = 4;
     optional bool include_deprecated = 5;
     optional io.graphoenix.core.grpc.IntExpression version = 6;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 7;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 7;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_time = 9;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 10;
@@ -336,7 +336,7 @@ message OrderListQueryTypeArguments {
     optional GoodExpression goods = 4;
     optional bool include_deprecated = 5;
     optional io.graphoenix.core.grpc.IntExpression version = 6;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 7;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 7;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_time = 9;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 10;
@@ -361,7 +361,7 @@ message OrderConnectionQueryTypeArguments {
     optional GoodExpression goods = 4;
     optional bool include_deprecated = 5;
     optional io.graphoenix.core.grpc.IntExpression version = 6;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 7;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 7;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_time = 9;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 10;
@@ -387,7 +387,7 @@ message GoodQueryTypeArguments {
     optional MerchantExpression merchant = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_time = 10;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
@@ -408,7 +408,7 @@ message GoodListQueryTypeArguments {
     optional MerchantExpression merchant = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_time = 10;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
@@ -436,7 +436,7 @@ message GoodConnectionQueryTypeArguments {
     optional MerchantExpression merchant = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_time = 10;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
@@ -462,7 +462,7 @@ message ProductQueryTypeArguments {
     optional io.graphoenix.core.grpc.FloatExpression price = 3;
     optional bool include_deprecated = 4;
     optional io.graphoenix.core.grpc.IntExpression version = 5;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 6;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 6;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 7;
     optional io.graphoenix.core.grpc.StringExpression create_time = 8;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 9;
@@ -478,7 +478,7 @@ message ProductListQueryTypeArguments {
     optional io.graphoenix.core.grpc.FloatExpression price = 3;
     optional bool include_deprecated = 4;
     optional io.graphoenix.core.grpc.IntExpression version = 5;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 6;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 6;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 7;
     optional io.graphoenix.core.grpc.StringExpression create_time = 8;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 9;
@@ -501,7 +501,7 @@ message ProductConnectionQueryTypeArguments {
     optional io.graphoenix.core.grpc.FloatExpression price = 3;
     optional bool include_deprecated = 4;
     optional io.graphoenix.core.grpc.IntExpression version = 5;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 6;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 6;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 7;
     optional io.graphoenix.core.grpc.StringExpression create_time = 8;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 9;
@@ -527,7 +527,7 @@ message MerchantQueryTypeArguments {
     optional io.graphoenix.showcase.user.grpc.UserExpression director = 6;
     optional bool include_deprecated = 7;
     optional io.graphoenix.core.grpc.IntExpression version = 8;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 9;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 10;
     optional io.graphoenix.core.grpc.StringExpression create_time = 11;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 12;
@@ -549,7 +549,7 @@ message MerchantListQueryTypeArguments {
     optional io.graphoenix.showcase.user.grpc.UserExpression director = 6;
     optional bool include_deprecated = 7;
     optional io.graphoenix.core.grpc.IntExpression version = 8;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 9;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 10;
     optional io.graphoenix.core.grpc.StringExpression create_time = 11;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 12;
@@ -578,7 +578,7 @@ message MerchantConnectionQueryTypeArguments {
     optional io.graphoenix.showcase.user.grpc.UserExpression director = 6;
     optional bool include_deprecated = 7;
     optional io.graphoenix.core.grpc.IntExpression version = 8;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 9;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 10;
     optional io.graphoenix.core.grpc.StringExpression create_time = 11;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 12;
@@ -606,7 +606,7 @@ message MerchantPartnersQueryTypeArguments {
     optional io.graphoenix.showcase.user.grpc.OrganizationExpression to = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_time = 10;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
@@ -624,7 +624,7 @@ message MerchantPartnersListQueryTypeArguments {
     optional io.graphoenix.showcase.user.grpc.OrganizationExpression to = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_time = 10;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
@@ -649,7 +649,7 @@ message MerchantPartnersConnectionQueryTypeArguments {
     optional io.graphoenix.showcase.user.grpc.OrganizationExpression to = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_time = 10;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
@@ -674,7 +674,7 @@ message MerchantDirectorQueryTypeArguments {
     optional io.graphoenix.showcase.user.grpc.UserExpression to = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_time = 10;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
@@ -692,7 +692,7 @@ message MerchantDirectorListQueryTypeArguments {
     optional io.graphoenix.showcase.user.grpc.UserExpression to = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_time = 10;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
@@ -717,7 +717,7 @@ message MerchantDirectorConnectionQueryTypeArguments {
     optional io.graphoenix.showcase.user.grpc.UserExpression to = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
-    optional io.graphoenix.core.grpc.StringExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
     optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
     optional io.graphoenix.core.grpc.StringExpression create_time = 10;
     optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
@@ -741,7 +741,7 @@ message OrderMutationTypeArguments {
     repeated GoodInput goods = 4;
     optional bool is_deprecated = 5;
     optional int32 version = 6;
-    optional string realm_id = 7;
+    optional int32 realm_id = 7;
     optional string create_user_id = 8;
     optional google.protobuf.Timestamp create_time = 9;
     optional string update_user_id = 10;
@@ -758,7 +758,7 @@ message OrderListMutationTypeArguments {
     repeated GoodInput goods = 4;
     optional bool is_deprecated = 5;
     optional int32 version = 6;
-    optional string realm_id = 7;
+    optional int32 realm_id = 7;
     optional string create_user_id = 8;
     optional google.protobuf.Timestamp create_time = 9;
     optional string update_user_id = 10;
@@ -777,7 +777,7 @@ message GoodMutationTypeArguments {
     optional MerchantInput merchant = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;
@@ -797,7 +797,7 @@ message GoodListMutationTypeArguments {
     optional MerchantInput merchant = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;
@@ -816,7 +816,7 @@ message ProductMutationTypeArguments {
     optional float price = 3;
     optional bool is_deprecated = 4;
     optional int32 version = 5;
-    optional string realm_id = 6;
+    optional int32 realm_id = 6;
     optional string create_user_id = 7;
     optional google.protobuf.Timestamp create_time = 8;
     optional string update_user_id = 9;
@@ -831,7 +831,7 @@ message ProductListMutationTypeArguments {
     optional float price = 3;
     optional bool is_deprecated = 4;
     optional int32 version = 5;
-    optional string realm_id = 6;
+    optional int32 realm_id = 6;
     optional string create_user_id = 7;
     optional google.protobuf.Timestamp create_time = 8;
     optional string update_user_id = 9;
@@ -850,7 +850,7 @@ message MerchantMutationTypeArguments {
     optional io.graphoenix.showcase.user.grpc.UserInput director = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;
-    optional string realm_id = 9;
+    optional int32 realm_id = 9;
     optional string create_user_id = 10;
     optional google.protobuf.Timestamp create_time = 11;
     optional string update_user_id = 12;
@@ -871,7 +871,7 @@ message MerchantListMutationTypeArguments {
     optional io.graphoenix.showcase.user.grpc.UserInput director = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;
-    optional string realm_id = 9;
+    optional int32 realm_id = 9;
     optional string create_user_id = 10;
     optional google.protobuf.Timestamp create_time = 11;
     optional string update_user_id = 12;
@@ -892,7 +892,7 @@ message MerchantPartnersMutationTypeArguments {
     optional io.graphoenix.showcase.user.grpc.OrganizationInput to = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;
@@ -909,7 +909,7 @@ message MerchantPartnersListMutationTypeArguments {
     optional io.graphoenix.showcase.user.grpc.OrganizationInput to = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;
@@ -927,7 +927,7 @@ message MerchantDirectorMutationTypeArguments {
     optional io.graphoenix.showcase.user.grpc.UserInput to = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;
@@ -944,7 +944,7 @@ message MerchantDirectorListMutationTypeArguments {
     optional io.graphoenix.showcase.user.grpc.UserInput to = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;

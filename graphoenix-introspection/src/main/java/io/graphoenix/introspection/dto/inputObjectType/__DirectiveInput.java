@@ -11,29 +11,41 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
 public class __DirectiveInput {
+  @NonNull
   private String name;
 
   private __SchemaInput ofSchema;
 
   private String description;
 
+  @NonNull
   private Collection<__DirectiveLocation> locations;
 
+  @NonNull
   private Collection<__InputValueInput> args;
 
+  @NonNull
   private Boolean isRepeatable;
+
+  @DefaultValue("\"__Directive\"")
+  private String __typename;
+
+  private Integer schemaId;
+
+  private Collection<__DirectiveLocationsInput> __directiveLocations;
 
   private Boolean isDeprecated;
 
   private Integer version;
 
-  private String realmId;
+  private Integer realmId;
 
   private String createUserId;
 
@@ -44,13 +56,6 @@ public class __DirectiveInput {
   private LocalDateTime updateTime;
 
   private String createGroupId;
-
-  @DefaultValue("\"__Directive\"")
-  private String __typename;
-
-  private Integer schemaId;
-
-  private Collection<__DirectiveLocationsInput> __directiveLocations;
 
   public String getName() {
     return this.name;
@@ -100,6 +105,30 @@ public class __DirectiveInput {
     this.isRepeatable = isRepeatable;
   }
 
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public Integer getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Integer schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public Collection<__DirectiveLocationsInput> get__directiveLocations() {
+    return this.__directiveLocations;
+  }
+
+  public void set__directiveLocations(Collection<__DirectiveLocationsInput> __directiveLocations) {
+    this.__directiveLocations = __directiveLocations;
+  }
+
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -116,11 +145,11 @@ public class __DirectiveInput {
     this.version = version;
   }
 
-  public String getRealmId() {
+  public Integer getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(String realmId) {
+  public void setRealmId(Integer realmId) {
     this.realmId = realmId;
   }
 
@@ -162,29 +191,5 @@ public class __DirectiveInput {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public Integer getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(Integer schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public Collection<__DirectiveLocationsInput> get__directiveLocations() {
-    return this.__directiveLocations;
-  }
-
-  public void set__directiveLocations(Collection<__DirectiveLocationsInput> __directiveLocations) {
-    this.__directiveLocations = __directiveLocations;
   }
 }

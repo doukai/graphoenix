@@ -17,6 +17,10 @@ public class __DirectiveOrderBy {
 
   private Sort isRepeatable;
 
+  private Sort __typename;
+
+  private Sort schemaId;
+
   private Sort isDeprecated;
 
   private Sort version;
@@ -32,10 +36,6 @@ public class __DirectiveOrderBy {
   private Sort updateTime;
 
   private Sort createGroupId;
-
-  private Sort __typename;
-
-  private Sort schemaId;
 
   public Sort getName() {
     return this.name;
@@ -59,6 +59,22 @@ public class __DirectiveOrderBy {
 
   public void setIsRepeatable(Sort isRepeatable) {
     this.isRepeatable = isRepeatable;
+  }
+
+  public Sort get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(Sort __typename) {
+    this.__typename = __typename;
+  }
+
+  public Sort getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Sort schemaId) {
+    this.schemaId = schemaId;
   }
 
   public Sort getIsDeprecated() {
@@ -123,21 +139,5 @@ public class __DirectiveOrderBy {
 
   public void setCreateGroupId(Sort createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public Sort get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(Sort __typename) {
-    this.__typename = __typename;
-  }
-
-  public Sort getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(Sort schemaId) {
-    this.schemaId = schemaId;
   }
 }

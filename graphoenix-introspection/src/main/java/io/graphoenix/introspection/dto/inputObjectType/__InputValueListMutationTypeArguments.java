@@ -32,22 +32,6 @@ public class __InputValueListMutationTypeArguments {
 
   private String defaultValue;
 
-  private Boolean isDeprecated;
-
-  private Integer version;
-
-  private String realmId;
-
-  private String createUserId;
-
-  private LocalDateTime createTime;
-
-  private String updateUserId;
-
-  private LocalDateTime updateTime;
-
-  private String createGroupId;
-
   @DefaultValue("\"__InputValue\"")
   private String __typename;
 
@@ -58,6 +42,22 @@ public class __InputValueListMutationTypeArguments {
   private Collection<__InputValueInput> list;
 
   private __InputValueExpression where;
+
+  private Boolean isDeprecated;
+
+  private Integer version;
+
+  private Integer realmId;
+
+  private String createUserId;
+
+  private LocalDateTime createTime;
+
+  private String updateUserId;
+
+  private LocalDateTime updateTime;
+
+  private String createGroupId;
 
   public String getId() {
     return this.id;
@@ -123,6 +123,46 @@ public class __InputValueListMutationTypeArguments {
     this.defaultValue = defaultValue;
   }
 
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
+
+  public Collection<__InputValueInput> getList() {
+    return this.list;
+  }
+
+  public void setList(Collection<__InputValueInput> list) {
+    this.list = list;
+  }
+
+  public __InputValueExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__InputValueExpression where) {
+    this.where = where;
+  }
+
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -139,11 +179,11 @@ public class __InputValueListMutationTypeArguments {
     this.version = version;
   }
 
-  public String getRealmId() {
+  public Integer getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(String realmId) {
+  public void setRealmId(Integer realmId) {
     this.realmId = realmId;
   }
 
@@ -185,45 +225,5 @@ public class __InputValueListMutationTypeArguments {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
-  }
-
-  public Collection<__InputValueInput> getList() {
-    return this.list;
-  }
-
-  public void setList(Collection<__InputValueInput> list) {
-    this.list = list;
-  }
-
-  public __InputValueExpression getWhere() {
-    return this.where;
-  }
-
-  public void setWhere(__InputValueExpression where) {
-    this.where = where;
   }
 }

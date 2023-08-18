@@ -19,11 +19,13 @@ public @interface __DirectiveLocationsExpression0 {
 
   __DirectiveLocationExpression directiveLocation() default @__DirectiveLocationExpression;
 
+  StringExpression __typename() default @StringExpression;
+
   BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 
-  StringExpression realmId() default @StringExpression;
+  IntExpression realmId() default @IntExpression;
 
   StringExpression createUserId() default @StringExpression;
 
@@ -34,8 +36,6 @@ public @interface __DirectiveLocationsExpression0 {
   StringExpression updateTime() default @StringExpression;
 
   StringExpression createGroupId() default @StringExpression;
-
-  StringExpression __typename() default @StringExpression;
 
   String[] groupBy() default {};
 

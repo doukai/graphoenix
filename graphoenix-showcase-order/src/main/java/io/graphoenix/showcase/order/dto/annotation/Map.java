@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.order.dto.annotation;
 
 import io.graphoenix.core.dto.annotation.MapWith;
+import io.graphoenix.spi.annotation.Directive;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.String;
@@ -14,6 +15,7 @@ import java.lang.annotation.Target;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
+@Directive("map")
 @Target({ElementType.FIELD})
 public @interface Map {
   String from();

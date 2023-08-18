@@ -17,6 +17,8 @@ public class __TypePossibleTypesOrderBy {
 
   private Sort possibleTypeName;
 
+  private Sort __typename;
+
   private Sort isDeprecated;
 
   private Sort version;
@@ -32,8 +34,6 @@ public class __TypePossibleTypesOrderBy {
   private Sort updateTime;
 
   private Sort createGroupId;
-
-  private Sort __typename;
 
   public Sort getId() {
     return this.id;
@@ -57,6 +57,14 @@ public class __TypePossibleTypesOrderBy {
 
   public void setPossibleTypeName(Sort possibleTypeName) {
     this.possibleTypeName = possibleTypeName;
+  }
+
+  public Sort get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(Sort __typename) {
+    this.__typename = __typename;
   }
 
   public Sort getIsDeprecated() {
@@ -121,13 +129,5 @@ public class __TypePossibleTypesOrderBy {
 
   public void setCreateGroupId(Sort createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public Sort get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(Sort __typename) {
-    this.__typename = __typename;
   }
 }

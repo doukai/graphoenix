@@ -87,6 +87,14 @@ public class InputObjectType {
         return this;
     }
 
+    public InputObjectType addDirectives(Collection<Directive> directives) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        this.directives.addAll(directives);
+        return this;
+    }
+
     public Collection<InputValue> getInputValues() {
         return inputValues;
     }

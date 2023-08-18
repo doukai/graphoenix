@@ -28,7 +28,7 @@ public class OrganizationMutationTypeArguments {
 
   private Integer version;
 
-  private String realmId;
+  private Integer realmId;
 
   private String createUserId;
 
@@ -95,11 +95,11 @@ public class OrganizationMutationTypeArguments {
     this.version = version;
   }
 
-  public String getRealmId() {
+  public Integer getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(String realmId) {
+  public void setRealmId(Integer realmId) {
     this.realmId = realmId;
   }
 

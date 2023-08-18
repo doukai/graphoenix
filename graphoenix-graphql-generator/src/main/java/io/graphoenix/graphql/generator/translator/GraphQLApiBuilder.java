@@ -39,6 +39,7 @@ public class GraphQLApiBuilder {
                 .setDescription(ELEMENT_UTIL.getDescriptionFromElement(executableElement))
                 .setType(ELEMENT_UTIL.executableElementToTypeName(executableElement, typeUtils))
                 .setArguments(ELEMENT_UTIL.executableElementParametersToInputValues(executableElement, typeUtils))
+                .addDirectives(ELEMENT_UTIL.getDirectivesFromElement(executableElement))
                 .addDirective(
                         new Directive()
                                 .setName(INVOKE_DIRECTIVE_NAME)

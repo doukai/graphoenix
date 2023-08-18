@@ -6,30 +6,18 @@ import io.graphoenix.core.document.InputValue;
 import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.operation.Directive;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
 import io.graphoenix.spi.dto.type.OperationType;
-import org.eclipse.microprofile.graphql.DefaultValue;
-import org.eclipse.microprofile.graphql.Description;
 import org.eclipse.microprofile.graphql.Enum;
-import org.eclipse.microprofile.graphql.Id;
-import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.Interface;
-import org.eclipse.microprofile.graphql.Mutation;
 import org.eclipse.microprofile.graphql.Name;
-import org.eclipse.microprofile.graphql.NonNull;
-import org.eclipse.microprofile.graphql.Query;
-import org.eclipse.microprofile.graphql.Source;
-import org.eclipse.microprofile.graphql.Type;
+import org.eclipse.microprofile.graphql.*;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
@@ -38,11 +26,7 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -167,6 +151,13 @@ public enum ElementUtil {
         } else {
             return null;
         }
+    }
+
+    public List<Directive> getDirectivesFromElement(Element element) {
+        return element.getAnnotationMirrors().stream()
+                .filter(annotationMirror -> annotationMirror.getAnnotationType().getAnnotation(io.graphoenix.spi.annotation.Directive.class) != null)
+                .map(Directive::new)
+                .collect(Collectors.toList());
     }
 
     public String getDefaultValueFromElement(Element element) {
@@ -347,6 +338,7 @@ public enum ElementUtil {
                                     .setDefaultValue(getDefaultValueFromElement(variableElement))
                                     .setType(variableElementToTypeName(variableElement, typeUtils))
                                     .setDescription(getDescriptionFromElement(variableElement))
+                                    .addDirectives(ELEMENT_UTIL.getDirectivesFromElement(variableElement))
                     )
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         } else {

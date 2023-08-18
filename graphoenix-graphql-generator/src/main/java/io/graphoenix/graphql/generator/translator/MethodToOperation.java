@@ -69,6 +69,7 @@ public class MethodToOperation {
         Operation operation = new Operation()
                 .setName(ELEMENT_UTIL.getOperationNameFromExecutableElement(executableElement, index))
                 .setOperationType(operationTypeNameName)
+                .addDirectives(ELEMENT_UTIL.getDirectivesFromElement(executableElement))
                 .addDirective(
                         new Directive()
                                 .setName(INVOKE_DIRECTIVE_NAME)
@@ -100,6 +101,7 @@ public class MethodToOperation {
                                 new Variable()
                                         .setVariable(parameter.getSimpleName().toString())
                                         .setTypeName(ELEMENT_UTIL.variableElementToInputTypeName(parameter, typeUtils))
+                                        .addDirectives(ELEMENT_UTIL.getDirectivesFromElement(parameter))
                         )
         );
 

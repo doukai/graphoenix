@@ -16,7 +16,7 @@ public interface Meta {
 
   Integer version = null;
 
-  String realmId = null;
+  Integer realmId = null;
 
   String createUserId = null;
 
@@ -36,9 +36,9 @@ public interface Meta {
 
   void setVersion(Integer version);
 
-  String getRealmId();
+  Integer getRealmId();
 
-  void setRealmId(String realmId);
+  void setRealmId(Integer realmId);
 
   String getCreateUserId();
 

@@ -24,11 +24,14 @@ public class __DirectiveLocationsInput {
 
   private __DirectiveLocation directiveLocation;
 
+  @DefaultValue("\"__DirectiveLocations\"")
+  private String __typename;
+
   private Boolean isDeprecated;
 
   private Integer version;
 
-  private String realmId;
+  private Integer realmId;
 
   private String createUserId;
 
@@ -39,9 +42,6 @@ public class __DirectiveLocationsInput {
   private LocalDateTime updateTime;
 
   private String createGroupId;
-
-  @DefaultValue("\"__DirectiveLocations\"")
-  private String __typename;
 
   public String getId() {
     return this.id;
@@ -75,6 +75,14 @@ public class __DirectiveLocationsInput {
     this.directiveLocation = directiveLocation;
   }
 
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -91,11 +99,11 @@ public class __DirectiveLocationsInput {
     this.version = version;
   }
 
-  public String getRealmId() {
+  public Integer getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(String realmId) {
+  public void setRealmId(Integer realmId) {
     this.realmId = realmId;
   }
 
@@ -137,13 +145,5 @@ public class __DirectiveLocationsInput {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
   }
 }

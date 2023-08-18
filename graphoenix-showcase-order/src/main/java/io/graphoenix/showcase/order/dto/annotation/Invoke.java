@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.order.dto.annotation;
 
 import io.graphoenix.core.dto.annotation.InvokeParameter;
+import io.graphoenix.spi.annotation.Directive;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.String;
@@ -14,7 +15,8 @@ import java.lang.annotation.Target;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.TYPE,ElementType.FIELD,ElementType.METHOD})
+@Directive("invoke")
+@Target({ElementType.TYPE,ElementType.METHOD,ElementType.FIELD})
 public @interface Invoke {
   String className();
 

@@ -30,7 +30,7 @@ public class ProductConnectionQueryTypeArguments {
 
   private IntExpression version;
 
-  private StringExpression realmId;
+  private IntExpression realmId;
 
   private StringExpression createUserId;
 
@@ -103,11 +103,11 @@ public class ProductConnectionQueryTypeArguments {
     this.version = version;
   }
 
-  public StringExpression getRealmId() {
+  public IntExpression getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(StringExpression realmId) {
+  public void setRealmId(IntExpression realmId) {
     this.realmId = realmId;
   }
 

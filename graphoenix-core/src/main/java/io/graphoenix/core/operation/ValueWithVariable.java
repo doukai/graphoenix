@@ -161,17 +161,21 @@ public interface ValueWithVariable extends JsonValue {
     }
 
     static JsonObject updateJsonObject(JsonObject original, JsonObject jsonObject) {
-        return original.entrySet().stream()
-                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), updateJsonValue(entry.getValue(), jsonObject.get(entry.getKey()))))
+        return jsonObject.entrySet().stream()
+                .filter(entry ->
+                        !entry.getValue().getValueType().equals(ValueType.NULL) ||
+                                entry.getValue().getValueType().equals(ValueType.NULL) && original != null && original.containsKey(entry.getKey())
+                )
+                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), updateJsonValue(original != null ? original.get(entry.getKey()) : null, entry.getValue())))
                 .collect(JsonCollectors.toJsonObject());
     }
 
     static JsonValue updateJsonValue(JsonValue original, JsonValue jsonValue) {
-        if (original.getValueType().equals(ValueType.OBJECT)) {
-            return updateJsonObject(original.asJsonObject(), jsonValue.asJsonObject());
-        } else if (original.getValueType().equals(ValueType.ARRAY)) {
-            return IntStream.range(0, original.asJsonArray().size())
-                    .mapToObj(index -> updateJsonValue(original.asJsonArray().get(index), jsonValue.asJsonArray().get(index)))
+        if (jsonValue.getValueType().equals(ValueType.OBJECT)) {
+            return updateJsonObject(original != null ? original.asJsonObject() : null, jsonValue.asJsonObject());
+        } else if (jsonValue.getValueType().equals(ValueType.ARRAY)) {
+            return IntStream.range(0, jsonValue.asJsonArray().size())
+                    .mapToObj(index -> updateJsonValue(original != null ? original.asJsonArray().get(index) : null, jsonValue.asJsonArray().get(index)))
                     .collect(JsonCollectors.toJsonArray());
         } else {
             return jsonValue;

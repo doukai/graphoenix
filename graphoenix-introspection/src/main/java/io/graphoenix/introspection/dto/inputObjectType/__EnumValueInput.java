@@ -25,11 +25,16 @@ public class __EnumValueInput {
 
   private String deprecationReason;
 
+  @DefaultValue("\"__EnumValue\"")
+  private String __typename;
+
+  private String ofTypeName;
+
   private Boolean isDeprecated;
 
   private Integer version;
 
-  private String realmId;
+  private Integer realmId;
 
   private String createUserId;
 
@@ -40,11 +45,6 @@ public class __EnumValueInput {
   private LocalDateTime updateTime;
 
   private String createGroupId;
-
-  @DefaultValue("\"__EnumValue\"")
-  private String __typename;
-
-  private String ofTypeName;
 
   public String getId() {
     return this.id;
@@ -86,6 +86,22 @@ public class __EnumValueInput {
     this.deprecationReason = deprecationReason;
   }
 
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -102,11 +118,11 @@ public class __EnumValueInput {
     this.version = version;
   }
 
-  public String getRealmId() {
+  public Integer getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(String realmId) {
+  public void setRealmId(Integer realmId) {
     this.realmId = realmId;
   }
 
@@ -148,21 +164,5 @@ public class __EnumValueInput {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 }

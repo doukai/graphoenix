@@ -54,6 +54,14 @@ public class EnumValue {
         return this;
     }
 
+    public EnumValue addDirectives(Collection<Directive> directives) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        this.directives.addAll(directives);
+        return this;
+    }
+
     public String getDescription() {
         return description;
     }

@@ -16,11 +16,17 @@ public @interface __TypeInput0 {
 
   String description() default "";
 
+  String __typename() default "";
+
+  int schemaId() default 0;
+
+  String ofTypeName() default "";
+
   boolean isDeprecated() default false;
 
   int version() default 0;
 
-  String realmId() default "";
+  int realmId() default 0;
 
   String createUserId() default "";
 
@@ -31,12 +37,6 @@ public @interface __TypeInput0 {
   String updateTime() default "";
 
   String createGroupId() default "";
-
-  String __typename() default "";
-
-  int schemaId() default 0;
-
-  String ofTypeName() default "";
 
   String $name() default "";
 
@@ -57,22 +57,6 @@ public @interface __TypeInput0 {
   String $inputFields() default "";
 
   String $ofType() default "";
-
-  String $isDeprecated() default "";
-
-  String $version() default "";
-
-  String $realmId() default "";
-
-  String $createUserId() default "";
-
-  String $createTime() default "";
-
-  String $updateUserId() default "";
-
-  String $updateTime() default "";
-
-  String $createGroupId() default "";
 
   String $__typename() default "";
 
@@ -111,4 +95,20 @@ public @interface __TypeInput0 {
   String $__typePossibleTypesAggregate() default "";
 
   String $__typePossibleTypesConnection() default "";
+
+  String $isDeprecated() default "";
+
+  String $version() default "";
+
+  String $realmId() default "";
+
+  String $createUserId() default "";
+
+  String $createTime() default "";
+
+  String $updateUserId() default "";
+
+  String $updateTime() default "";
+
+  String $createGroupId() default "";
 }

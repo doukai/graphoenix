@@ -29,22 +29,6 @@ public class __DirectiveListMutationTypeArguments {
 
   private Boolean isRepeatable;
 
-  private Boolean isDeprecated;
-
-  private Integer version;
-
-  private String realmId;
-
-  private String createUserId;
-
-  private LocalDateTime createTime;
-
-  private String updateUserId;
-
-  private LocalDateTime updateTime;
-
-  private String createGroupId;
-
   @DefaultValue("\"__Directive\"")
   private String __typename;
 
@@ -55,6 +39,22 @@ public class __DirectiveListMutationTypeArguments {
   private Collection<__DirectiveInput> list;
 
   private __DirectiveExpression where;
+
+  private Boolean isDeprecated;
+
+  private Integer version;
+
+  private Integer realmId;
+
+  private String createUserId;
+
+  private LocalDateTime createTime;
+
+  private String updateUserId;
+
+  private LocalDateTime updateTime;
+
+  private String createGroupId;
 
   public String getName() {
     return this.name;
@@ -104,6 +104,46 @@ public class __DirectiveListMutationTypeArguments {
     this.isRepeatable = isRepeatable;
   }
 
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public Integer getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Integer schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public Collection<__DirectiveLocationsInput> get__directiveLocations() {
+    return this.__directiveLocations;
+  }
+
+  public void set__directiveLocations(Collection<__DirectiveLocationsInput> __directiveLocations) {
+    this.__directiveLocations = __directiveLocations;
+  }
+
+  public Collection<__DirectiveInput> getList() {
+    return this.list;
+  }
+
+  public void setList(Collection<__DirectiveInput> list) {
+    this.list = list;
+  }
+
+  public __DirectiveExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__DirectiveExpression where) {
+    this.where = where;
+  }
+
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -120,11 +160,11 @@ public class __DirectiveListMutationTypeArguments {
     this.version = version;
   }
 
-  public String getRealmId() {
+  public Integer getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(String realmId) {
+  public void setRealmId(Integer realmId) {
     this.realmId = realmId;
   }
 
@@ -166,45 +206,5 @@ public class __DirectiveListMutationTypeArguments {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public Integer getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(Integer schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public Collection<__DirectiveLocationsInput> get__directiveLocations() {
-    return this.__directiveLocations;
-  }
-
-  public void set__directiveLocations(Collection<__DirectiveLocationsInput> __directiveLocations) {
-    this.__directiveLocations = __directiveLocations;
-  }
-
-  public Collection<__DirectiveInput> getList() {
-    return this.list;
-  }
-
-  public void setList(Collection<__DirectiveInput> list) {
-    this.list = list;
-  }
-
-  public __DirectiveExpression getWhere() {
-    return this.where;
-  }
-
-  public void setWhere(__DirectiveExpression where) {
-    this.where = where;
   }
 }

@@ -20,11 +20,17 @@ public @interface __FieldExpression0 {
 
   StringExpression deprecationReason() default @StringExpression;
 
+  StringExpression __typename() default @StringExpression;
+
+  StringExpression ofTypeName() default @StringExpression;
+
+  StringExpression typeName() default @StringExpression;
+
   BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 
-  StringExpression realmId() default @StringExpression;
+  IntExpression realmId() default @IntExpression;
 
   StringExpression createUserId() default @StringExpression;
 
@@ -35,12 +41,6 @@ public @interface __FieldExpression0 {
   StringExpression updateTime() default @StringExpression;
 
   StringExpression createGroupId() default @StringExpression;
-
-  StringExpression __typename() default @StringExpression;
-
-  StringExpression ofTypeName() default @StringExpression;
-
-  StringExpression typeName() default @StringExpression;
 
   String[] groupBy() default {};
 

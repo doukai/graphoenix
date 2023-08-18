@@ -30,22 +30,6 @@ public class __FieldListMutationTypeArguments {
 
   private String deprecationReason;
 
-  private Boolean isDeprecated;
-
-  private Integer version;
-
-  private String realmId;
-
-  private String createUserId;
-
-  private LocalDateTime createTime;
-
-  private String updateUserId;
-
-  private LocalDateTime updateTime;
-
-  private String createGroupId;
-
   @DefaultValue("\"__Field\"")
   private String __typename;
 
@@ -56,6 +40,22 @@ public class __FieldListMutationTypeArguments {
   private Collection<__FieldInput> list;
 
   private __FieldExpression where;
+
+  private Boolean isDeprecated;
+
+  private Integer version;
+
+  private Integer realmId;
+
+  private String createUserId;
+
+  private LocalDateTime createTime;
+
+  private String updateUserId;
+
+  private LocalDateTime updateTime;
+
+  private String createGroupId;
 
   public String getId() {
     return this.id;
@@ -113,6 +113,46 @@ public class __FieldListMutationTypeArguments {
     this.deprecationReason = deprecationReason;
   }
 
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
+
+  public Collection<__FieldInput> getList() {
+    return this.list;
+  }
+
+  public void setList(Collection<__FieldInput> list) {
+    this.list = list;
+  }
+
+  public __FieldExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__FieldExpression where) {
+    this.where = where;
+  }
+
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -129,11 +169,11 @@ public class __FieldListMutationTypeArguments {
     this.version = version;
   }
 
-  public String getRealmId() {
+  public Integer getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(String realmId) {
+  public void setRealmId(Integer realmId) {
     this.realmId = realmId;
   }
 
@@ -175,45 +215,5 @@ public class __FieldListMutationTypeArguments {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
-  }
-
-  public Collection<__FieldInput> getList() {
-    return this.list;
-  }
-
-  public void setList(Collection<__FieldInput> list) {
-    this.list = list;
-  }
-
-  public __FieldExpression getWhere() {
-    return this.where;
-  }
-
-  public void setWhere(__FieldExpression where) {
-    this.where = where;
   }
 }

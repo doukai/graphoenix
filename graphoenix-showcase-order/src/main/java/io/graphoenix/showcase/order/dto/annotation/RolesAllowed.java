@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.order.dto.annotation;
 
+import io.graphoenix.spi.annotation.Directive;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.String;
@@ -13,6 +14,7 @@ import java.lang.annotation.Target;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
+@Directive("rolesAllowed")
 @Target({ElementType.TYPE,ElementType.FIELD})
 public @interface RolesAllowed {
   String[] roles();

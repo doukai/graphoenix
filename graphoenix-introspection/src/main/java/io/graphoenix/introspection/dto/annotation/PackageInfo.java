@@ -1,5 +1,6 @@
 package io.graphoenix.introspection.dto.annotation;
 
+import io.graphoenix.spi.annotation.Directive;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.String;
@@ -13,6 +14,7 @@ import java.lang.annotation.Target;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
+@Directive("packageInfo")
 @Target({ElementType.FIELD,ElementType.METHOD,ElementType.TYPE})
 public @interface PackageInfo {
   String packageName();

@@ -17,7 +17,7 @@ message Order {
     repeated Good goods = 4;
     optional bool is_deprecated = 5;
     optional int32 version = 6;
-    optional string realm_id = 7;
+    optional int32 realm_id = 7;
     optional string create_user_id = 8;
     optional google.protobuf.Timestamp create_time = 9;
     optional string update_user_id = 10;
@@ -47,7 +47,7 @@ message Good {
     Merchant merchant = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;
@@ -87,7 +87,7 @@ message Product {
     float price = 3;
     optional bool is_deprecated = 4;
     optional int32 version = 5;
-    optional string realm_id = 6;
+    optional int32 realm_id = 6;
     optional string create_user_id = 7;
     optional google.protobuf.Timestamp create_time = 8;
     optional string update_user_id = 9;
@@ -115,7 +115,7 @@ message Merchant {
     io.graphoenix.showcase.user.grpc.User director = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;
-    optional string realm_id = 9;
+    optional int32 realm_id = 9;
     optional string create_user_id = 10;
     optional google.protobuf.Timestamp create_time = 11;
     optional string update_user_id = 12;
@@ -147,7 +147,7 @@ message MerchantPartners {
     optional io.graphoenix.showcase.user.grpc.Organization to = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;
@@ -176,7 +176,7 @@ message MerchantDirector {
     optional io.graphoenix.showcase.user.grpc.User to = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;

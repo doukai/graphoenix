@@ -54,7 +54,7 @@ message MutationOrderRequest {
     repeated GoodInput goods = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;
-    optional string realm_id = 9;
+    optional int32 realm_id = 9;
     optional string create_user_id = 10;
     optional google.protobuf.Timestamp create_time = 11;
     optional string update_user_id = 12;
@@ -73,7 +73,7 @@ message MutationOrderListRequest {
     repeated GoodInput goods = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;
-    optional string realm_id = 9;
+    optional int32 realm_id = 9;
     optional string create_user_id = 10;
     optional google.protobuf.Timestamp create_time = 11;
     optional string update_user_id = 12;
@@ -94,7 +94,7 @@ message MutationGoodRequest {
     optional MerchantInput merchant = 7;
     optional bool is_deprecated = 8;
     optional int32 version = 9;
-    optional string realm_id = 10;
+    optional int32 realm_id = 10;
     optional string create_user_id = 11;
     optional google.protobuf.Timestamp create_time = 12;
     optional string update_user_id = 13;
@@ -116,7 +116,7 @@ message MutationGoodListRequest {
     optional MerchantInput merchant = 7;
     optional bool is_deprecated = 8;
     optional int32 version = 9;
-    optional string realm_id = 10;
+    optional int32 realm_id = 10;
     optional string create_user_id = 11;
     optional google.protobuf.Timestamp create_time = 12;
     optional string update_user_id = 13;
@@ -137,7 +137,7 @@ message MutationProductRequest {
     optional float price = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;
@@ -154,7 +154,7 @@ message MutationProductListRequest {
     optional float price = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
-    optional string realm_id = 8;
+    optional int32 realm_id = 8;
     optional string create_user_id = 9;
     optional google.protobuf.Timestamp create_time = 10;
     optional string update_user_id = 11;
@@ -175,7 +175,7 @@ message MutationMerchantRequest {
     optional io.graphoenix.showcase.user.grpc.UserInput director = 8;
     optional bool is_deprecated = 9;
     optional int32 version = 10;
-    optional string realm_id = 11;
+    optional int32 realm_id = 11;
     optional string create_user_id = 12;
     optional google.protobuf.Timestamp create_time = 13;
     optional string update_user_id = 14;
@@ -198,7 +198,7 @@ message MutationMerchantListRequest {
     optional io.graphoenix.showcase.user.grpc.UserInput director = 8;
     optional bool is_deprecated = 9;
     optional int32 version = 10;
-    optional string realm_id = 11;
+    optional int32 realm_id = 11;
     optional string create_user_id = 12;
     optional google.protobuf.Timestamp create_time = 13;
     optional string update_user_id = 14;
@@ -221,7 +221,7 @@ message MutationMerchantPartnersRequest {
     optional io.graphoenix.showcase.user.grpc.OrganizationInput to = 7;
     optional bool is_deprecated = 8;
     optional int32 version = 9;
-    optional string realm_id = 10;
+    optional int32 realm_id = 10;
     optional string create_user_id = 11;
     optional google.protobuf.Timestamp create_time = 12;
     optional string update_user_id = 13;
@@ -240,7 +240,7 @@ message MutationMerchantPartnersListRequest {
     optional io.graphoenix.showcase.user.grpc.OrganizationInput to = 7;
     optional bool is_deprecated = 8;
     optional int32 version = 9;
-    optional string realm_id = 10;
+    optional int32 realm_id = 10;
     optional string create_user_id = 11;
     optional google.protobuf.Timestamp create_time = 12;
     optional string update_user_id = 13;
@@ -260,7 +260,7 @@ message MutationMerchantDirectorRequest {
     optional io.graphoenix.showcase.user.grpc.UserInput to = 7;
     optional bool is_deprecated = 8;
     optional int32 version = 9;
-    optional string realm_id = 10;
+    optional int32 realm_id = 10;
     optional string create_user_id = 11;
     optional google.protobuf.Timestamp create_time = 12;
     optional string update_user_id = 13;
@@ -279,7 +279,7 @@ message MutationMerchantDirectorListRequest {
     optional io.graphoenix.showcase.user.grpc.UserInput to = 7;
     optional bool is_deprecated = 8;
     optional int32 version = 9;
-    optional string realm_id = 10;
+    optional int32 realm_id = 10;
     optional string create_user_id = 11;
     optional google.protobuf.Timestamp create_time = 12;
     optional string update_user_id = 13;

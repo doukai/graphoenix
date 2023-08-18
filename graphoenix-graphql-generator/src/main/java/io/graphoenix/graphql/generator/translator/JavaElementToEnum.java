@@ -40,9 +40,11 @@ public class JavaElementToEnum {
                                         new EnumValue()
                                                 .setName(ELEMENT_UTIL.getNameFromElement(element))
                                                 .setDescription(ELEMENT_UTIL.getDescriptionFromElement(element))
+                                                .addDirectives(ELEMENT_UTIL.getDirectivesFromElement(element))
                                 )
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 )
+                .addDirectives(ELEMENT_UTIL.getDirectivesFromElement(typeElement))
                 .addDirective(
                         new Directive(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", typeElement.getQualifiedName().toString())

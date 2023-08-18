@@ -27,22 +27,6 @@ public class __DirectiveLocations implements Meta {
 
   private __DirectiveLocation directiveLocation;
 
-  private Boolean isDeprecated;
-
-  private Integer version;
-
-  private String realmId;
-
-  private String createUserId;
-
-  private LocalDateTime createTime;
-
-  private String updateUserId;
-
-  private LocalDateTime updateTime;
-
-  private String createGroupId;
-
   private String __typename;
 
   private Integer idCount;
@@ -56,6 +40,22 @@ public class __DirectiveLocations implements Meta {
   private String directiveNameMax;
 
   private String directiveNameMin;
+
+  private Boolean isDeprecated;
+
+  private Integer version;
+
+  private Integer realmId;
+
+  private String createUserId;
+
+  private LocalDateTime createTime;
+
+  private String updateUserId;
+
+  private LocalDateTime updateTime;
+
+  private String createGroupId;
 
   public String getId() {
     return this.id;
@@ -87,86 +87,6 @@ public class __DirectiveLocations implements Meta {
 
   public void setDirectiveLocation(__DirectiveLocation directiveLocation) {
     this.directiveLocation = directiveLocation;
-  }
-
-  @Override
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  @Override
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
-  }
-
-  @Override
-  public Integer getVersion() {
-    return this.version;
-  }
-
-  @Override
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
-
-  @Override
-  public String getRealmId() {
-    return this.realmId;
-  }
-
-  @Override
-  public void setRealmId(String realmId) {
-    this.realmId = realmId;
-  }
-
-  @Override
-  public String getCreateUserId() {
-    return this.createUserId;
-  }
-
-  @Override
-  public void setCreateUserId(String createUserId) {
-    this.createUserId = createUserId;
-  }
-
-  @Override
-  public LocalDateTime getCreateTime() {
-    return this.createTime;
-  }
-
-  @Override
-  public void setCreateTime(LocalDateTime createTime) {
-    this.createTime = createTime;
-  }
-
-  @Override
-  public String getUpdateUserId() {
-    return this.updateUserId;
-  }
-
-  @Override
-  public void setUpdateUserId(String updateUserId) {
-    this.updateUserId = updateUserId;
-  }
-
-  @Override
-  public LocalDateTime getUpdateTime() {
-    return this.updateTime;
-  }
-
-  @Override
-  public void setUpdateTime(LocalDateTime updateTime) {
-    this.updateTime = updateTime;
-  }
-
-  @Override
-  public String getCreateGroupId() {
-    return this.createGroupId;
-  }
-
-  @Override
-  public void setCreateGroupId(String createGroupId) {
-    this.createGroupId = createGroupId;
   }
 
   public String get__typename() {
@@ -223,5 +143,85 @@ public class __DirectiveLocations implements Meta {
 
   public void setDirectiveNameMin(String directiveNameMin) {
     this.directiveNameMin = directiveNameMin;
+  }
+
+  @Override
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  @Override
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
+  }
+
+  @Override
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  @Override
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  @Override
+  public Integer getRealmId() {
+    return this.realmId;
+  }
+
+  @Override
+  public void setRealmId(Integer realmId) {
+    this.realmId = realmId;
+  }
+
+  @Override
+  public String getCreateUserId() {
+    return this.createUserId;
+  }
+
+  @Override
+  public void setCreateUserId(String createUserId) {
+    this.createUserId = createUserId;
+  }
+
+  @Override
+  public LocalDateTime getCreateTime() {
+    return this.createTime;
+  }
+
+  @Override
+  public void setCreateTime(LocalDateTime createTime) {
+    this.createTime = createTime;
+  }
+
+  @Override
+  public String getUpdateUserId() {
+    return this.updateUserId;
+  }
+
+  @Override
+  public void setUpdateUserId(String updateUserId) {
+    this.updateUserId = updateUserId;
+  }
+
+  @Override
+  public LocalDateTime getUpdateTime() {
+    return this.updateTime;
+  }
+
+  @Override
+  public void setUpdateTime(LocalDateTime updateTime) {
+    this.updateTime = updateTime;
+  }
+
+  @Override
+  public String getCreateGroupId() {
+    return this.createGroupId;
+  }
+
+  @Override
+  public void setCreateGroupId(String createGroupId) {
+    this.createGroupId = createGroupId;
   }
 }

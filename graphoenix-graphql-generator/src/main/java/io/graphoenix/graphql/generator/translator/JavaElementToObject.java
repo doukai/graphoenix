@@ -43,7 +43,8 @@ public class JavaElementToObject {
                                             Field field = new Field()
                                                     .setName(ELEMENT_UTIL.getNameFromElement(element))
                                                     .setType(ELEMENT_UTIL.variableElementToTypeName((VariableElement) element, typeUtils))
-                                                    .setDescription(ELEMENT_UTIL.getDescriptionFromElement(element));
+                                                    .setDescription(ELEMENT_UTIL.getDescriptionFromElement(element))
+                                                    .addDirectives(ELEMENT_UTIL.getDirectivesFromElement(element));
                                             NumberFormat numberFormat = element.getAnnotation(NumberFormat.class);
                                             if (numberFormat != null) {
                                                 field.addDirective(
@@ -72,6 +73,7 @@ public class JavaElementToObject {
                                 .map(typeMirror -> typeUtils.asElement(typeMirror).getSimpleName().toString())
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 )
+                .addDirectives(ELEMENT_UTIL.getDirectivesFromElement(typeElement))
                 .addDirective(
                         new Directive(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", typeElement.getQualifiedName().toString())

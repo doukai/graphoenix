@@ -19,11 +19,17 @@ public @interface __TypeExpression0 {
 
   StringExpression description() default @StringExpression;
 
+  StringExpression __typename() default @StringExpression;
+
+  IntExpression schemaId() default @IntExpression;
+
+  StringExpression ofTypeName() default @StringExpression;
+
   BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 
-  StringExpression realmId() default @StringExpression;
+  IntExpression realmId() default @IntExpression;
 
   StringExpression createUserId() default @StringExpression;
 
@@ -34,12 +40,6 @@ public @interface __TypeExpression0 {
   StringExpression updateTime() default @StringExpression;
 
   StringExpression createGroupId() default @StringExpression;
-
-  StringExpression __typename() default @StringExpression;
-
-  IntExpression schemaId() default @IntExpression;
-
-  StringExpression ofTypeName() default @StringExpression;
 
   String[] groupBy() default {};
 

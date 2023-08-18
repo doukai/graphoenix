@@ -11,6 +11,14 @@ import java.lang.annotation.Target;
 public @interface __SchemaOrderBy0 {
   Sort id() default Sort.ASC;
 
+  Sort __typename() default Sort.ASC;
+
+  Sort queryTypeName() default Sort.ASC;
+
+  Sort mutationTypeName() default Sort.ASC;
+
+  Sort subscriptionTypeName() default Sort.ASC;
+
   Sort isDeprecated() default Sort.ASC;
 
   Sort version() default Sort.ASC;
@@ -26,12 +34,4 @@ public @interface __SchemaOrderBy0 {
   Sort updateTime() default Sort.ASC;
 
   Sort createGroupId() default Sort.ASC;
-
-  Sort __typename() default Sort.ASC;
-
-  Sort queryTypeName() default Sort.ASC;
-
-  Sort mutationTypeName() default Sort.ASC;
-
-  Sort subscriptionTypeName() default Sort.ASC;
 }

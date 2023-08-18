@@ -28,22 +28,6 @@ public class __SchemaMutationTypeArguments {
 
   private Collection<__DirectiveInput> directives;
 
-  private Boolean isDeprecated;
-
-  private Integer version;
-
-  private String realmId;
-
-  private String createUserId;
-
-  private LocalDateTime createTime;
-
-  private String updateUserId;
-
-  private LocalDateTime updateTime;
-
-  private String createGroupId;
-
   @DefaultValue("\"__Schema\"")
   private String __typename;
 
@@ -54,6 +38,22 @@ public class __SchemaMutationTypeArguments {
   private String subscriptionTypeName;
 
   private __SchemaExpression where;
+
+  private Boolean isDeprecated;
+
+  private Integer version;
+
+  private Integer realmId;
+
+  private String createUserId;
+
+  private LocalDateTime createTime;
+
+  private String updateUserId;
+
+  private LocalDateTime updateTime;
+
+  private String createGroupId;
 
   public String getId() {
     return this.id;
@@ -103,6 +103,46 @@ public class __SchemaMutationTypeArguments {
     this.directives = directives;
   }
 
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getQueryTypeName() {
+    return this.queryTypeName;
+  }
+
+  public void setQueryTypeName(String queryTypeName) {
+    this.queryTypeName = queryTypeName;
+  }
+
+  public String getMutationTypeName() {
+    return this.mutationTypeName;
+  }
+
+  public void setMutationTypeName(String mutationTypeName) {
+    this.mutationTypeName = mutationTypeName;
+  }
+
+  public String getSubscriptionTypeName() {
+    return this.subscriptionTypeName;
+  }
+
+  public void setSubscriptionTypeName(String subscriptionTypeName) {
+    this.subscriptionTypeName = subscriptionTypeName;
+  }
+
+  public __SchemaExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__SchemaExpression where) {
+    this.where = where;
+  }
+
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -119,11 +159,11 @@ public class __SchemaMutationTypeArguments {
     this.version = version;
   }
 
-  public String getRealmId() {
+  public Integer getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(String realmId) {
+  public void setRealmId(Integer realmId) {
     this.realmId = realmId;
   }
 
@@ -165,45 +205,5 @@ public class __SchemaMutationTypeArguments {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getQueryTypeName() {
-    return this.queryTypeName;
-  }
-
-  public void setQueryTypeName(String queryTypeName) {
-    this.queryTypeName = queryTypeName;
-  }
-
-  public String getMutationTypeName() {
-    return this.mutationTypeName;
-  }
-
-  public void setMutationTypeName(String mutationTypeName) {
-    this.mutationTypeName = mutationTypeName;
-  }
-
-  public String getSubscriptionTypeName() {
-    return this.subscriptionTypeName;
-  }
-
-  public void setSubscriptionTypeName(String subscriptionTypeName) {
-    this.subscriptionTypeName = subscriptionTypeName;
-  }
-
-  public __SchemaExpression getWhere() {
-    return this.where;
-  }
-
-  public void setWhere(__SchemaExpression where) {
-    this.where = where;
   }
 }

@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -24,17 +25,26 @@ public class __FieldInput {
 
   private String description;
 
+  @NonNull
   private Collection<__InputValueInput> args;
 
+  @NonNull
   private __TypeInput type;
 
   private String deprecationReason;
+
+  @DefaultValue("\"__Field\"")
+  private String __typename;
+
+  private String ofTypeName;
+
+  private String typeName;
 
   private Boolean isDeprecated;
 
   private Integer version;
 
-  private String realmId;
+  private Integer realmId;
 
   private String createUserId;
 
@@ -45,13 +55,6 @@ public class __FieldInput {
   private LocalDateTime updateTime;
 
   private String createGroupId;
-
-  @DefaultValue("\"__Field\"")
-  private String __typename;
-
-  private String ofTypeName;
-
-  private String typeName;
 
   public String getId() {
     return this.id;
@@ -109,6 +112,30 @@ public class __FieldInput {
     this.deprecationReason = deprecationReason;
   }
 
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
+
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -125,11 +152,11 @@ public class __FieldInput {
     this.version = version;
   }
 
-  public String getRealmId() {
+  public Integer getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(String realmId) {
+  public void setRealmId(Integer realmId) {
     this.realmId = realmId;
   }
 
@@ -171,29 +198,5 @@ public class __FieldInput {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
   }
 }

@@ -35,7 +35,7 @@ public class Role implements Meta {
 
   private Integer version;
 
-  private String realmId;
+  private Integer realmId;
 
   private String createUserId;
 
@@ -130,12 +130,12 @@ public class Role implements Meta {
   }
 
   @Override
-  public String getRealmId() {
+  public Integer getRealmId() {
     return this.realmId;
   }
 
   @Override
-  public void setRealmId(String realmId) {
+  public void setRealmId(Integer realmId) {
     this.realmId = realmId;
   }
 

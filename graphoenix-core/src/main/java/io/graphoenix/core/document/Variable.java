@@ -75,6 +75,14 @@ public class Variable {
         return this;
     }
 
+    public Variable addDirectives(Collection<Directive> directives) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        this.directives.addAll(directives);
+        return this;
+    }
+
     @Override
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/document/Variable.stg");

@@ -28,22 +28,6 @@ public class __SchemaListMutationTypeArguments {
 
   private Collection<__DirectiveInput> directives;
 
-  private Boolean isDeprecated;
-
-  private Integer version;
-
-  private String realmId;
-
-  private String createUserId;
-
-  private LocalDateTime createTime;
-
-  private String updateUserId;
-
-  private LocalDateTime updateTime;
-
-  private String createGroupId;
-
   @DefaultValue("\"__Schema\"")
   private String __typename;
 
@@ -56,6 +40,22 @@ public class __SchemaListMutationTypeArguments {
   private Collection<__SchemaInput> list;
 
   private __SchemaExpression where;
+
+  private Boolean isDeprecated;
+
+  private Integer version;
+
+  private Integer realmId;
+
+  private String createUserId;
+
+  private LocalDateTime createTime;
+
+  private String updateUserId;
+
+  private LocalDateTime updateTime;
+
+  private String createGroupId;
 
   public String getId() {
     return this.id;
@@ -105,70 +105,6 @@ public class __SchemaListMutationTypeArguments {
     this.directives = directives;
   }
 
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
-  }
-
-  public Integer getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
-
-  public String getRealmId() {
-    return this.realmId;
-  }
-
-  public void setRealmId(String realmId) {
-    this.realmId = realmId;
-  }
-
-  public String getCreateUserId() {
-    return this.createUserId;
-  }
-
-  public void setCreateUserId(String createUserId) {
-    this.createUserId = createUserId;
-  }
-
-  public LocalDateTime getCreateTime() {
-    return this.createTime;
-  }
-
-  public void setCreateTime(LocalDateTime createTime) {
-    this.createTime = createTime;
-  }
-
-  public String getUpdateUserId() {
-    return this.updateUserId;
-  }
-
-  public void setUpdateUserId(String updateUserId) {
-    this.updateUserId = updateUserId;
-  }
-
-  public LocalDateTime getUpdateTime() {
-    return this.updateTime;
-  }
-
-  public void setUpdateTime(LocalDateTime updateTime) {
-    this.updateTime = updateTime;
-  }
-
-  public String getCreateGroupId() {
-    return this.createGroupId;
-  }
-
-  public void setCreateGroupId(String createGroupId) {
-    this.createGroupId = createGroupId;
-  }
-
   public String get__typename() {
     return this.__typename;
   }
@@ -215,5 +151,69 @@ public class __SchemaListMutationTypeArguments {
 
   public void setWhere(__SchemaExpression where) {
     this.where = where;
+  }
+
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
+  }
+
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public Integer getRealmId() {
+    return this.realmId;
+  }
+
+  public void setRealmId(Integer realmId) {
+    this.realmId = realmId;
+  }
+
+  public String getCreateUserId() {
+    return this.createUserId;
+  }
+
+  public void setCreateUserId(String createUserId) {
+    this.createUserId = createUserId;
+  }
+
+  public LocalDateTime getCreateTime() {
+    return this.createTime;
+  }
+
+  public void setCreateTime(LocalDateTime createTime) {
+    this.createTime = createTime;
+  }
+
+  public String getUpdateUserId() {
+    return this.updateUserId;
+  }
+
+  public void setUpdateUserId(String updateUserId) {
+    this.updateUserId = updateUserId;
+  }
+
+  public LocalDateTime getUpdateTime() {
+    return this.updateTime;
+  }
+
+  public void setUpdateTime(LocalDateTime updateTime) {
+    this.updateTime = updateTime;
+  }
+
+  public String getCreateGroupId() {
+    return this.createGroupId;
+  }
+
+  public void setCreateGroupId(String createGroupId) {
+    this.createGroupId = createGroupId;
   }
 }

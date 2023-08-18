@@ -11,16 +11,19 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
 public class __TypeInput {
+  @NonNull
   private String name;
 
   private __SchemaInput ofSchema;
 
+  @NonNull
   private __TypeKind kind;
 
   private String description;
@@ -37,22 +40,6 @@ public class __TypeInput {
 
   private __TypeInput ofType;
 
-  private Boolean isDeprecated;
-
-  private Integer version;
-
-  private String realmId;
-
-  private String createUserId;
-
-  private LocalDateTime createTime;
-
-  private String updateUserId;
-
-  private LocalDateTime updateTime;
-
-  private String createGroupId;
-
   @DefaultValue("\"__Type\"")
   private String __typename;
 
@@ -63,6 +50,22 @@ public class __TypeInput {
   private Collection<__TypeInterfacesInput> __typeInterfaces;
 
   private Collection<__TypePossibleTypesInput> __typePossibleTypes;
+
+  private Boolean isDeprecated;
+
+  private Integer version;
+
+  private Integer realmId;
+
+  private String createUserId;
+
+  private LocalDateTime createTime;
+
+  private String updateUserId;
+
+  private LocalDateTime updateTime;
+
+  private String createGroupId;
 
   public String getName() {
     return this.name;
@@ -144,6 +147,46 @@ public class __TypeInput {
     this.ofType = ofType;
   }
 
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public Integer getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Integer schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public Collection<__TypeInterfacesInput> get__typeInterfaces() {
+    return this.__typeInterfaces;
+  }
+
+  public void set__typeInterfaces(Collection<__TypeInterfacesInput> __typeInterfaces) {
+    this.__typeInterfaces = __typeInterfaces;
+  }
+
+  public Collection<__TypePossibleTypesInput> get__typePossibleTypes() {
+    return this.__typePossibleTypes;
+  }
+
+  public void set__typePossibleTypes(Collection<__TypePossibleTypesInput> __typePossibleTypes) {
+    this.__typePossibleTypes = __typePossibleTypes;
+  }
+
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -160,11 +203,11 @@ public class __TypeInput {
     this.version = version;
   }
 
-  public String getRealmId() {
+  public Integer getRealmId() {
     return this.realmId;
   }
 
-  public void setRealmId(String realmId) {
+  public void setRealmId(Integer realmId) {
     this.realmId = realmId;
   }
 
@@ -206,45 +249,5 @@ public class __TypeInput {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public Integer getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(Integer schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public Collection<__TypeInterfacesInput> get__typeInterfaces() {
-    return this.__typeInterfaces;
-  }
-
-  public void set__typeInterfaces(Collection<__TypeInterfacesInput> __typeInterfaces) {
-    this.__typeInterfaces = __typeInterfaces;
-  }
-
-  public Collection<__TypePossibleTypesInput> get__typePossibleTypes() {
-    return this.__typePossibleTypes;
-  }
-
-  public void set__typePossibleTypes(Collection<__TypePossibleTypesInput> __typePossibleTypes) {
-    this.__typePossibleTypes = __typePossibleTypes;
   }
 }

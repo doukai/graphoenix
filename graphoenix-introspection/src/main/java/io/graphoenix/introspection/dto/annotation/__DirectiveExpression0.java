@@ -21,11 +21,15 @@ public @interface __DirectiveExpression0 {
 
   BooleanExpression isRepeatable() default @BooleanExpression;
 
+  StringExpression __typename() default @StringExpression;
+
+  IntExpression schemaId() default @IntExpression;
+
   BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 
-  StringExpression realmId() default @StringExpression;
+  IntExpression realmId() default @IntExpression;
 
   StringExpression createUserId() default @StringExpression;
 
@@ -36,10 +40,6 @@ public @interface __DirectiveExpression0 {
   StringExpression updateTime() default @StringExpression;
 
   StringExpression createGroupId() default @StringExpression;
-
-  StringExpression __typename() default @StringExpression;
-
-  IntExpression schemaId() default @IntExpression;
 
   String[] groupBy() default {};
 

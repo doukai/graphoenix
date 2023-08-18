@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.user.dto.annotation;
 
+import io.graphoenix.spi.annotation.Directive;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.annotation.Documented;
@@ -12,6 +13,7 @@ import java.lang.annotation.Target;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
+@Directive("containerType")
 @Target({ElementType.TYPE})
 public @interface ContainerType {
 }

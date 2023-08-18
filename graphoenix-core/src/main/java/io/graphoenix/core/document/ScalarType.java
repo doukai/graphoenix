@@ -50,6 +50,14 @@ public class ScalarType {
         return this;
     }
 
+    public ScalarType addDirectives(Collection<Directive> directives) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        this.directives.addAll(directives);
+        return this;
+    }
+
     public String getDescription() {
         return description;
     }
