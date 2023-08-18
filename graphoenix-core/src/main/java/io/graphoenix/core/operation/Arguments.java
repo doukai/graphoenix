@@ -1,11 +1,14 @@
 package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.context.BeanContext;
 import jakarta.json.*;
+import jakarta.json.spi.JsonProvider;
 import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -179,5 +182,14 @@ public class Arguments extends AbstractMap<String, JsonValue> implements ValueWi
         String render = st.render();
         stGroupFile.unload();
         return render;
+    }
+
+    public String toJson() {
+        StringWriter sw = new StringWriter();
+        BeanContext.get(JsonProvider.class).createWriter(sw);
+        try (JsonWriter jw = BeanContext.get(JsonProvider.class).createWriter(sw)) {
+            jw.write(this);
+        }
+        return sw.toString();
     }
 }

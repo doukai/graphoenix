@@ -116,7 +116,7 @@ public class DocumentBuilder {
                 .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
                 .filter(manager::isNotContainerType)
-                .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, !isPackage, true))
+                .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, isPackage, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
         buildArgumentInputObjects().forEach(inputObjectType -> manager.mergeDocument(inputObjectType.toString()));
@@ -256,6 +256,10 @@ public class DocumentBuilder {
             );
         }
 
+        if (buildInterface) {
+            objectType.addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields().stream().filter(metaField -> objectType.getFields().stream().noneMatch(field -> field.getName().equals(metaField.getName()))).collect(Collectors.toList()));
+        }
+
         if (buildArgument) {
             objectType.setFields(
                     fieldDefinitionContextList.stream()
@@ -266,10 +270,6 @@ public class DocumentBuilder {
                             )
                             .collect(Collectors.toCollection(LinkedHashSet::new))
             );
-        }
-
-        if (buildInterface) {
-            objectType.addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields().stream().filter(metaField -> objectType.getFields().stream().noneMatch(field -> field.getName().equals(metaField.getName()))).collect(Collectors.toList()));
         }
 
         if (buildField) {

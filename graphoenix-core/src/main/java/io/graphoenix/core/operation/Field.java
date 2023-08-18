@@ -104,6 +104,11 @@ public class Field {
         return this;
     }
 
+    public Field updateArguments(JsonObject jsonObject) {
+        this.arguments = new Arguments(ValueWithVariable.updateJsonObject(this.arguments, jsonObject));
+        return this;
+    }
+
     public Field addArguments(Arguments arguments) {
         if (this.arguments == null) {
             this.arguments = new Arguments();

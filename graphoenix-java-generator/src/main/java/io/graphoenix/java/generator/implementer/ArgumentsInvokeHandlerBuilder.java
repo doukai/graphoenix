@@ -250,17 +250,21 @@ public class ArgumentsInvokeHandlerBuilder {
                                                                                             String argumentInputName = fieldTypeName + operationTypeName + "Arguments";
                                                                                             return CodeBlock.builder().add("case $S:\n", fieldDefinitionContext.name().getText())
                                                                                                     .indent()
-                                                                                                    .add("return inputInvokeHandlerProvider.get().$L(jsonb.get().fromJson(field.getArguments().toString(), $T.class), selectionContext.field().arguments())\n",
+                                                                                                    .add("return $T.justOrEmpty(field.getArguments())\n", ClassName.get(Mono.class))
+                                                                                                    .indent()
+                                                                                                    .add(".flatMap(arguments -> inputInvokeHandlerProvider.get().$L(jsonb.get().fromJson(arguments.toJson(), $T.class), selectionContext.field().arguments()))\n",
                                                                                                             methodName,
                                                                                                             TYPE_UTIL.getClassName(packageManager.getClassName(manager.getInputObject(argumentInputName).orElseThrow(() -> new GraphQLErrors(INPUT_OBJECT_NOT_EXIST.bind(argumentInputName)))))
                                                                                                     )
-                                                                                                    .indent()
-                                                                                                    .add(".doOnSuccess($L -> field.setArguments(jsonProviderProvider.get().createReader(new $T(jsonb.get().toJson($L).toString())).readObject()))\n",
+                                                                                                    .add(".doOnNext($L -> field.updateArguments(jsonProviderProvider.get().createReader(new $T(jsonb.get().toJson($L).toString())).readObject()))\n",
                                                                                                             methodName,
                                                                                                             ClassName.get(StringReader.class),
                                                                                                             methodName
                                                                                                     )
-                                                                                                    .add(".then($L(selectionContext.field().selectionSet(), field));",
+                                                                                                    .add(".then($L(selectionContext.field().selectionSet(), field))\n",
+                                                                                                            getObjectMethodName(fieldTypeName)
+                                                                                                    )
+                                                                                                    .add(".switchIfEmpty($L(selectionContext.field().selectionSet(), field));",
                                                                                                             getObjectMethodName(fieldTypeName)
                                                                                                     )
                                                                                                     .unindent()
@@ -281,17 +285,21 @@ public class ArgumentsInvokeHandlerBuilder {
                                                                                             String argumentInputName = fieldTypeName + "List" + operationTypeName + "Arguments";
                                                                                             return CodeBlock.builder().add("case $S:\n", fieldDefinitionContext.name().getText())
                                                                                                     .indent()
-                                                                                                    .add("return inputInvokeHandlerProvider.get().$L(jsonb.get().fromJson(field.getArguments().toString(), $T.class), selectionContext.field().arguments())\n",
+                                                                                                    .add("return $T.justOrEmpty(field.getArguments())\n", ClassName.get(Mono.class))
+                                                                                                    .indent()
+                                                                                                    .add(".flatMap(arguments -> inputInvokeHandlerProvider.get().$L(jsonb.get().fromJson(arguments.toJson(), $T.class), selectionContext.field().arguments()))\n",
                                                                                                             methodName,
                                                                                                             TYPE_UTIL.getClassName(packageManager.getClassName(manager.getInputObject(argumentInputName).orElseThrow(() -> new GraphQLErrors(INPUT_OBJECT_NOT_EXIST.bind(argumentInputName)))))
                                                                                                     )
-                                                                                                    .indent()
-                                                                                                    .add(".doOnSuccess($L -> field.setArguments(jsonProviderProvider.get().createReader(new $T(jsonb.get().toJson($L).toString())).readObject()))\n",
+                                                                                                    .add(".doOnNext($L -> field.updateArguments(jsonProviderProvider.get().createReader(new $T(jsonb.get().toJson($L).toString())).readObject()))\n",
                                                                                                             methodName,
                                                                                                             ClassName.get(StringReader.class),
                                                                                                             methodName
                                                                                                     )
-                                                                                                    .add(".then($L(selectionContext.field().selectionSet(), field));",
+                                                                                                    .add(".then($L(selectionContext.field().selectionSet(), field))\n",
+                                                                                                            getObjectMethodName(fieldTypeName)
+                                                                                                    )
+                                                                                                    .add(".switchIfEmpty($L(selectionContext.field().selectionSet(), field));",
                                                                                                             getObjectMethodName(fieldTypeName)
                                                                                                     )
                                                                                                     .unindent()

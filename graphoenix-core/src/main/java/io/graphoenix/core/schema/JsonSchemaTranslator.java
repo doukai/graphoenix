@@ -128,17 +128,26 @@ public class JsonSchemaTranslator {
                                     }
                                     propertiesBuilder.add(
                                             fieldDefinitionContext.name().getText(),
-                                            jsonProvider.createObjectBuilder().add("anyOf", jsonArrayBuilder)
+                                            buildNullableType(
+                                                    jsonProvider.createObjectBuilder().add("anyOf", jsonArrayBuilder)
+                                            )
                                     );
                                 } else {
                                     propertiesBuilder.add(
                                             fieldDefinitionContext.name().getText(),
-                                            jsonProvider.createObjectBuilder()
-                                                    .add("$ref", objectTypeDefinitionContext.name().getText().concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldDefinitionContext.name().getText())))
+                                            buildNullableType(
+                                                    jsonProvider.createObjectBuilder()
+                                                            .add("$ref", objectTypeDefinitionContext.name().getText().concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldDefinitionContext.name().getText())))
+                                            )
                                     );
                                 }
                             } else {
-                                propertiesBuilder.add(fieldDefinitionContext.name().getText(), EMPTY_JSON_OBJECT);
+                                propertiesBuilder.add(
+                                        fieldDefinitionContext.name().getText(),
+                                        buildNullableType(
+                                                jsonProvider.createObjectBuilder(EMPTY_JSON_OBJECT)
+                                        )
+                                );
                             }
                         }
                 );

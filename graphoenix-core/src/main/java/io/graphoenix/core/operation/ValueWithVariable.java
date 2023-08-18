@@ -3,6 +3,7 @@ package io.graphoenix.core.operation;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
 import jakarta.json.*;
+import jakarta.json.stream.JsonCollectors;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -12,9 +13,11 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_VALUE;
 
@@ -155,5 +158,23 @@ public interface ValueWithVariable extends JsonValue {
 
     default boolean isVariable() {
         return false;
+    }
+
+    static JsonObject updateJsonObject(JsonObject original, JsonObject jsonObject) {
+        return original.entrySet().stream()
+                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), updateJsonValue(entry.getValue(), jsonObject.get(entry.getKey()))))
+                .collect(JsonCollectors.toJsonObject());
+    }
+
+    static JsonValue updateJsonValue(JsonValue original, JsonValue jsonValue) {
+        if (original.getValueType().equals(ValueType.OBJECT)) {
+            return updateJsonObject(original.asJsonObject(), jsonValue.asJsonObject());
+        } else if (original.getValueType().equals(ValueType.ARRAY)) {
+            return IntStream.range(0, original.asJsonArray().size())
+                    .mapToObj(index -> updateJsonValue(original.asJsonArray().get(index), jsonValue.asJsonArray().get(index)))
+                    .collect(JsonCollectors.toJsonArray());
+        } else {
+            return jsonValue;
+        }
     }
 }
