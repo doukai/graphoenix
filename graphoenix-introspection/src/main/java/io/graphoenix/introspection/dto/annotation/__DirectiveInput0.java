@@ -18,10 +18,6 @@ public @interface __DirectiveInput0 {
 
   boolean isRepeatable() default false;
 
-  String __typename() default "";
-
-  int schemaId() default 0;
-
   boolean isDeprecated() default false;
 
   int version() default 0;
@@ -38,6 +34,10 @@ public @interface __DirectiveInput0 {
 
   String createGroupId() default "";
 
+  String __typename() default "";
+
+  int schemaId() default 0;
+
   String $name() default "";
 
   String $ofSchema() default "";
@@ -49,20 +49,6 @@ public @interface __DirectiveInput0 {
   String $args() default "";
 
   String $isRepeatable() default "";
-
-  String $__typename() default "";
-
-  String $argsAggregate() default "";
-
-  String $argsConnection() default "";
-
-  String $schemaId() default "";
-
-  String $__directiveLocations() default "";
-
-  String $__directiveLocationsAggregate() default "";
-
-  String $__directiveLocationsConnection() default "";
 
   String $isDeprecated() default "";
 
@@ -79,4 +65,18 @@ public @interface __DirectiveInput0 {
   String $updateTime() default "";
 
   String $createGroupId() default "";
+
+  String $__typename() default "";
+
+  String $argsAggregate() default "";
+
+  String $argsConnection() default "";
+
+  String $schemaId() default "";
+
+  String $__directiveLocations() default "";
+
+  String $__directiveLocationsAggregate() default "";
+
+  String $__directiveLocationsConnection() default "";
 }

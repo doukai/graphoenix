@@ -25,11 +25,6 @@ public class __TypeInterfacesMutationTypeArguments {
 
   private __TypeInput to;
 
-  @DefaultValue("\"__TypeInterfaces\"")
-  private String __typename;
-
-  private __TypeInterfacesExpression where;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -45,6 +40,11 @@ public class __TypeInterfacesMutationTypeArguments {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  @DefaultValue("\"__TypeInterfaces\"")
+  private String __typename;
+
+  private __TypeInterfacesExpression where;
 
   public String getId() {
     return this.id;
@@ -84,22 +84,6 @@ public class __TypeInterfacesMutationTypeArguments {
 
   public void setTo(__TypeInput to) {
     this.to = to;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public __TypeInterfacesExpression getWhere() {
-    return this.where;
-  }
-
-  public void setWhere(__TypeInterfacesExpression where) {
-    this.where = where;
   }
 
   public Boolean getIsDeprecated() {
@@ -164,5 +148,21 @@ public class __TypeInterfacesMutationTypeArguments {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public __TypeInterfacesExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__TypeInterfacesExpression where) {
+    this.where = where;
   }
 }

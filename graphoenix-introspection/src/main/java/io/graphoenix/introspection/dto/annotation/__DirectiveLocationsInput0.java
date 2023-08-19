@@ -16,8 +16,6 @@ public @interface __DirectiveLocationsInput0 {
 
   __DirectiveLocation directiveLocation() default __DirectiveLocation.QUERY;
 
-  String __typename() default "";
-
   boolean isDeprecated() default false;
 
   int version() default 0;
@@ -34,6 +32,8 @@ public @interface __DirectiveLocationsInput0 {
 
   String createGroupId() default "";
 
+  String __typename() default "";
+
   String $id() default "";
 
   String $directiveName() default "";
@@ -41,8 +41,6 @@ public @interface __DirectiveLocationsInput0 {
   String $from() default "";
 
   String $directiveLocation() default "";
-
-  String $__typename() default "";
 
   String $isDeprecated() default "";
 
@@ -59,4 +57,6 @@ public @interface __DirectiveLocationsInput0 {
   String $updateTime() default "";
 
   String $createGroupId() default "";
+
+  String $__typename() default "";
 }

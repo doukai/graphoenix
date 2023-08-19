@@ -37,21 +37,6 @@ public class __TypeQueryTypeArguments {
 
   private __TypeExpression ofType;
 
-  private StringExpression __typename;
-
-  private IntExpression schemaId;
-
-  private StringExpression ofTypeName;
-
-  private __TypeInterfacesExpression __typeInterfaces;
-
-  private __TypePossibleTypesExpression __typePossibleTypes;
-
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private Collection<__TypeExpression> exs;
-
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
@@ -68,6 +53,21 @@ public class __TypeQueryTypeArguments {
   private StringExpression updateTime;
 
   private StringExpression createGroupId;
+
+  private StringExpression __typename;
+
+  private IntExpression schemaId;
+
+  private StringExpression ofTypeName;
+
+  private __TypeInterfacesExpression __typeInterfaces;
+
+  private __TypePossibleTypesExpression __typePossibleTypes;
+
+  @DefaultValue("AND")
+  private Conditional cond;
+
+  private Collection<__TypeExpression> exs;
 
   public StringExpression getName() {
     return this.name;
@@ -149,62 +149,6 @@ public class __TypeQueryTypeArguments {
     this.ofType = ofType;
   }
 
-  public StringExpression get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(StringExpression __typename) {
-    this.__typename = __typename;
-  }
-
-  public IntExpression getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(IntExpression schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public StringExpression getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(StringExpression ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public __TypeInterfacesExpression get__typeInterfaces() {
-    return this.__typeInterfaces;
-  }
-
-  public void set__typeInterfaces(__TypeInterfacesExpression __typeInterfaces) {
-    this.__typeInterfaces = __typeInterfaces;
-  }
-
-  public __TypePossibleTypesExpression get__typePossibleTypes() {
-    return this.__typePossibleTypes;
-  }
-
-  public void set__typePossibleTypes(__TypePossibleTypesExpression __typePossibleTypes) {
-    this.__typePossibleTypes = __typePossibleTypes;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public Collection<__TypeExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__TypeExpression> exs) {
-    this.exs = exs;
-  }
-
   public Boolean getIncludeDeprecated() {
     return this.includeDeprecated;
   }
@@ -267,5 +211,61 @@ public class __TypeQueryTypeArguments {
 
   public void setCreateGroupId(StringExpression createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public StringExpression get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(StringExpression __typename) {
+    this.__typename = __typename;
+  }
+
+  public IntExpression getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(IntExpression schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public StringExpression getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(StringExpression ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public __TypeInterfacesExpression get__typeInterfaces() {
+    return this.__typeInterfaces;
+  }
+
+  public void set__typeInterfaces(__TypeInterfacesExpression __typeInterfaces) {
+    this.__typeInterfaces = __typeInterfaces;
+  }
+
+  public __TypePossibleTypesExpression get__typePossibleTypes() {
+    return this.__typePossibleTypes;
+  }
+
+  public void set__typePossibleTypes(__TypePossibleTypesExpression __typePossibleTypes) {
+    this.__typePossibleTypes = __typePossibleTypes;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Collection<__TypeExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__TypeExpression> exs) {
+    this.exs = exs;
   }
 }

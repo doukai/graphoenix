@@ -26,13 +26,6 @@ public class __TypeInterfacesExpression {
 
   private __TypeExpression to;
 
-  private StringExpression __typename;
-
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private Collection<__TypeInterfacesExpression> exs;
-
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
@@ -49,6 +42,13 @@ public class __TypeInterfacesExpression {
   private StringExpression updateTime;
 
   private StringExpression createGroupId;
+
+  private StringExpression __typename;
+
+  @DefaultValue("AND")
+  private Conditional cond;
+
+  private Collection<__TypeInterfacesExpression> exs;
 
   public StringExpression getId() {
     return this.id;
@@ -88,30 +88,6 @@ public class __TypeInterfacesExpression {
 
   public void setTo(__TypeExpression to) {
     this.to = to;
-  }
-
-  public StringExpression get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(StringExpression __typename) {
-    this.__typename = __typename;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public Collection<__TypeInterfacesExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__TypeInterfacesExpression> exs) {
-    this.exs = exs;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -176,5 +152,29 @@ public class __TypeInterfacesExpression {
 
   public void setCreateGroupId(StringExpression createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public StringExpression get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(StringExpression __typename) {
+    this.__typename = __typename;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Collection<__TypeInterfacesExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__TypeInterfacesExpression> exs) {
+    this.exs = exs;
   }
 }

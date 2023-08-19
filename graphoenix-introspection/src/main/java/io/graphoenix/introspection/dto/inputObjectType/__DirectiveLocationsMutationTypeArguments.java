@@ -24,11 +24,6 @@ public class __DirectiveLocationsMutationTypeArguments {
 
   private __DirectiveLocation directiveLocation;
 
-  @DefaultValue("\"__DirectiveLocations\"")
-  private String __typename;
-
-  private __DirectiveLocationsExpression where;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -44,6 +39,11 @@ public class __DirectiveLocationsMutationTypeArguments {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  @DefaultValue("\"__DirectiveLocations\"")
+  private String __typename;
+
+  private __DirectiveLocationsExpression where;
 
   public String getId() {
     return this.id;
@@ -75,22 +75,6 @@ public class __DirectiveLocationsMutationTypeArguments {
 
   public void setDirectiveLocation(__DirectiveLocation directiveLocation) {
     this.directiveLocation = directiveLocation;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public __DirectiveLocationsExpression getWhere() {
-    return this.where;
-  }
-
-  public void setWhere(__DirectiveLocationsExpression where) {
-    this.where = where;
   }
 
   public Boolean getIsDeprecated() {
@@ -155,5 +139,21 @@ public class __DirectiveLocationsMutationTypeArguments {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public __DirectiveLocationsExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__DirectiveLocationsExpression where) {
+    this.where = where;
   }
 }

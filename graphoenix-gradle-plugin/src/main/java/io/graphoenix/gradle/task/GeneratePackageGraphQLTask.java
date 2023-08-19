@@ -42,7 +42,7 @@ public class GeneratePackageGraphQLTask extends BaseTask {
                 Files.createDirectories(filePath);
             }
             Files.writeString(
-                    filePath.resolve("package.gql"),
+                    filePath.resolve(graphQLConfig.getPackageName() + ".gql"),
                     documentBuilder.getPackageDocument().toString()
             );
         } catch (IOException | URISyntaxException e) {

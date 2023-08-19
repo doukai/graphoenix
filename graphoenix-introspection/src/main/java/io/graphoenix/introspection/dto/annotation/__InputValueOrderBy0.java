@@ -21,12 +21,6 @@ public @interface __InputValueOrderBy0 {
 
   Sort defaultValue() default Sort.ASC;
 
-  Sort __typename() default Sort.ASC;
-
-  Sort ofTypeName() default Sort.ASC;
-
-  Sort typeName() default Sort.ASC;
-
   Sort isDeprecated() default Sort.ASC;
 
   Sort version() default Sort.ASC;
@@ -42,4 +36,10 @@ public @interface __InputValueOrderBy0 {
   Sort updateTime() default Sort.ASC;
 
   Sort createGroupId() default Sort.ASC;
+
+  Sort __typename() default Sort.ASC;
+
+  Sort ofTypeName() default Sort.ASC;
+
+  Sort typeName() default Sort.ASC;
 }

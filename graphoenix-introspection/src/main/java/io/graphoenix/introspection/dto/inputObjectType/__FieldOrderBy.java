@@ -19,12 +19,6 @@ public class __FieldOrderBy {
 
   private Sort deprecationReason;
 
-  private Sort __typename;
-
-  private Sort ofTypeName;
-
-  private Sort typeName;
-
   private Sort isDeprecated;
 
   private Sort version;
@@ -40,6 +34,12 @@ public class __FieldOrderBy {
   private Sort updateTime;
 
   private Sort createGroupId;
+
+  private Sort __typename;
+
+  private Sort ofTypeName;
+
+  private Sort typeName;
 
   public Sort getId() {
     return this.id;
@@ -71,30 +71,6 @@ public class __FieldOrderBy {
 
   public void setDeprecationReason(Sort deprecationReason) {
     this.deprecationReason = deprecationReason;
-  }
-
-  public Sort get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(Sort __typename) {
-    this.__typename = __typename;
-  }
-
-  public Sort getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(Sort ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public Sort getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(Sort typeName) {
-    this.typeName = typeName;
   }
 
   public Sort getIsDeprecated() {
@@ -159,5 +135,29 @@ public class __FieldOrderBy {
 
   public void setCreateGroupId(Sort createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public Sort get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(Sort __typename) {
+    this.__typename = __typename;
+  }
+
+  public Sort getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(Sort ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public Sort getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(Sort typeName) {
+    this.typeName = typeName;
   }
 }

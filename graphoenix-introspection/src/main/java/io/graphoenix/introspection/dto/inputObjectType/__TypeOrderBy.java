@@ -17,12 +17,6 @@ public class __TypeOrderBy {
 
   private Sort description;
 
-  private Sort __typename;
-
-  private Sort schemaId;
-
-  private Sort ofTypeName;
-
   private Sort isDeprecated;
 
   private Sort version;
@@ -38,6 +32,12 @@ public class __TypeOrderBy {
   private Sort updateTime;
 
   private Sort createGroupId;
+
+  private Sort __typename;
+
+  private Sort schemaId;
+
+  private Sort ofTypeName;
 
   public Sort getName() {
     return this.name;
@@ -61,30 +61,6 @@ public class __TypeOrderBy {
 
   public void setDescription(Sort description) {
     this.description = description;
-  }
-
-  public Sort get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(Sort __typename) {
-    this.__typename = __typename;
-  }
-
-  public Sort getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(Sort schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public Sort getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(Sort ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public Sort getIsDeprecated() {
@@ -149,5 +125,29 @@ public class __TypeOrderBy {
 
   public void setCreateGroupId(Sort createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public Sort get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(Sort __typename) {
+    this.__typename = __typename;
+  }
+
+  public Sort getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Sort schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public Sort getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(Sort ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 }

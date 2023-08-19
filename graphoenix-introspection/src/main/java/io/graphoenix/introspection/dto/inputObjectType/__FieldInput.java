@@ -33,13 +33,6 @@ public class __FieldInput {
 
   private String deprecationReason;
 
-  @DefaultValue("\"__Field\"")
-  private String __typename;
-
-  private String ofTypeName;
-
-  private String typeName;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -55,6 +48,13 @@ public class __FieldInput {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  @DefaultValue("\"__Field\"")
+  private String __typename;
+
+  private String ofTypeName;
+
+  private String typeName;
 
   public String getId() {
     return this.id;
@@ -110,30 +110,6 @@ public class __FieldInput {
 
   public void setDeprecationReason(String deprecationReason) {
     this.deprecationReason = deprecationReason;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
   }
 
   public Boolean getIsDeprecated() {
@@ -198,5 +174,29 @@ public class __FieldInput {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
   }
 }

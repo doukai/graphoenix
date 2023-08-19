@@ -101,7 +101,7 @@ message QueryVersionResponse {
     optional int32 version = 1;
 }
 message QueryRealmIdResponse {
-    optional string realm_id = 1;
+    optional int32 realm_id = 1;
 }
 message QueryCreateUserIdResponse {
     optional string create_user_id = 1;

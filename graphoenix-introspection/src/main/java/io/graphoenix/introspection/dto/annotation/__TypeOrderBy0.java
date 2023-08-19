@@ -15,12 +15,6 @@ public @interface __TypeOrderBy0 {
 
   Sort description() default Sort.ASC;
 
-  Sort __typename() default Sort.ASC;
-
-  Sort schemaId() default Sort.ASC;
-
-  Sort ofTypeName() default Sort.ASC;
-
   Sort isDeprecated() default Sort.ASC;
 
   Sort version() default Sort.ASC;
@@ -36,4 +30,10 @@ public @interface __TypeOrderBy0 {
   Sort updateTime() default Sort.ASC;
 
   Sort createGroupId() default Sort.ASC;
+
+  Sort __typename() default Sort.ASC;
+
+  Sort schemaId() default Sort.ASC;
+
+  Sort ofTypeName() default Sort.ASC;
 }

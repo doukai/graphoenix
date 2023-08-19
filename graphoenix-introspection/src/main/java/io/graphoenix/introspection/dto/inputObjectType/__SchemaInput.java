@@ -32,15 +32,6 @@ public class __SchemaInput {
   @NonNull
   private Collection<__DirectiveInput> directives;
 
-  @DefaultValue("\"__Schema\"")
-  private String __typename;
-
-  private String queryTypeName;
-
-  private String mutationTypeName;
-
-  private String subscriptionTypeName;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -56,6 +47,15 @@ public class __SchemaInput {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  @DefaultValue("\"__Schema\"")
+  private String __typename;
+
+  private String queryTypeName;
+
+  private String mutationTypeName;
+
+  private String subscriptionTypeName;
 
   public String getId() {
     return this.id;
@@ -103,38 +103,6 @@ public class __SchemaInput {
 
   public void setDirectives(Collection<__DirectiveInput> directives) {
     this.directives = directives;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getQueryTypeName() {
-    return this.queryTypeName;
-  }
-
-  public void setQueryTypeName(String queryTypeName) {
-    this.queryTypeName = queryTypeName;
-  }
-
-  public String getMutationTypeName() {
-    return this.mutationTypeName;
-  }
-
-  public void setMutationTypeName(String mutationTypeName) {
-    this.mutationTypeName = mutationTypeName;
-  }
-
-  public String getSubscriptionTypeName() {
-    return this.subscriptionTypeName;
-  }
-
-  public void setSubscriptionTypeName(String subscriptionTypeName) {
-    this.subscriptionTypeName = subscriptionTypeName;
   }
 
   public Boolean getIsDeprecated() {
@@ -199,5 +167,37 @@ public class __SchemaInput {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getQueryTypeName() {
+    return this.queryTypeName;
+  }
+
+  public void setQueryTypeName(String queryTypeName) {
+    this.queryTypeName = queryTypeName;
+  }
+
+  public String getMutationTypeName() {
+    return this.mutationTypeName;
+  }
+
+  public void setMutationTypeName(String mutationTypeName) {
+    this.mutationTypeName = mutationTypeName;
+  }
+
+  public String getSubscriptionTypeName() {
+    return this.subscriptionTypeName;
+  }
+
+  public void setSubscriptionTypeName(String subscriptionTypeName) {
+    this.subscriptionTypeName = subscriptionTypeName;
   }
 }

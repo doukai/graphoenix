@@ -94,10 +94,6 @@ public class GraphQLConfigRegister {
     }
 
     public void registerPackage(ClassLoader classLoader) throws IOException, URISyntaxException {
-        registerPreset(classLoader, "package.gql");
-    }
-
-    public void registerPreset(ClassLoader classLoader, String fileName) throws IOException, URISyntaxException {
         Iterator<URL> urlIterator = Objects.requireNonNull(classLoader.getResources("META-INF/graphql")).asIterator();
         while (urlIterator.hasNext()) {
             URI uri = urlIterator.next().toURI();
@@ -110,16 +106,14 @@ public class GraphQLConfigRegister {
                 pathList = Files.list(fileSystem.getPath("META-INF/graphql")).collect(Collectors.toList());
             }
             try {
-                Optional<Path> exportGraphQLFile = pathList.stream().filter(path -> path.getFileName().getFileName().toString().equals(fileName)).findFirst();
-                if (exportGraphQLFile.isPresent()) {
-                    manager.mergePath(exportGraphQLFile.get());
-                } else {
-                    pathList.forEach(path -> {
-                                Try.run(() -> manager.mergePath(path));
-                                Logger.info("registered preset path {} from {}", path, classLoader.getName());
-                            }
-                    );
-                }
+                pathList.stream()
+                        .filter(path -> !path.getFileName().toString().equals("main.gql"))
+//                        .filter(path -> !path.getFileName().toString().equals(graphQLConfig.getPackageName() + ".gql"))
+                        .forEach(path -> {
+                                    Try.run(() -> manager.mergePath(path));
+                                    Logger.info("registered preset path {} from {}", path, classLoader.getName());
+                                }
+                        );
             } catch (IllegalArgumentException e) {
                 Logger.warn(e);
             }

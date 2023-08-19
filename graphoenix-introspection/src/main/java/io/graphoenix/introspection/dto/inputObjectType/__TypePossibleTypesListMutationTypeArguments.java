@@ -26,13 +26,6 @@ public class __TypePossibleTypesListMutationTypeArguments {
 
   private __TypeInput to;
 
-  @DefaultValue("\"__TypePossibleTypes\"")
-  private String __typename;
-
-  private Collection<__TypePossibleTypesInput> list;
-
-  private __TypePossibleTypesExpression where;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -48,6 +41,13 @@ public class __TypePossibleTypesListMutationTypeArguments {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  @DefaultValue("\"__TypePossibleTypes\"")
+  private String __typename;
+
+  private Collection<__TypePossibleTypesInput> list;
+
+  private __TypePossibleTypesExpression where;
 
   public String getId() {
     return this.id;
@@ -87,30 +87,6 @@ public class __TypePossibleTypesListMutationTypeArguments {
 
   public void setTo(__TypeInput to) {
     this.to = to;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public Collection<__TypePossibleTypesInput> getList() {
-    return this.list;
-  }
-
-  public void setList(Collection<__TypePossibleTypesInput> list) {
-    this.list = list;
-  }
-
-  public __TypePossibleTypesExpression getWhere() {
-    return this.where;
-  }
-
-  public void setWhere(__TypePossibleTypesExpression where) {
-    this.where = where;
   }
 
   public Boolean getIsDeprecated() {
@@ -175,5 +151,29 @@ public class __TypePossibleTypesListMutationTypeArguments {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public Collection<__TypePossibleTypesInput> getList() {
+    return this.list;
+  }
+
+  public void setList(Collection<__TypePossibleTypesInput> list) {
+    this.list = list;
+  }
+
+  public __TypePossibleTypesExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__TypePossibleTypesExpression where) {
+    this.where = where;
   }
 }

@@ -171,7 +171,7 @@ public class GraphQLArgumentsToWhere {
                                                            GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext,
                                                            GraphqlParser.ArgumentsContext argumentsContext,
                                                            int level) {
-        Stream<Expression> expressionStream = argumentsDefinitionContext.inputValueDefinition().stream()
+        Stream<Expression> expressionStream = Stream.ofNullable(argumentsDefinitionContext).map(GraphqlParser.ArgumentsDefinitionContext::inputValueDefinition).flatMap(Collection::stream)
                 .filter(this::isNotConditional)
                 .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME))
                 .filter(inputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText())))

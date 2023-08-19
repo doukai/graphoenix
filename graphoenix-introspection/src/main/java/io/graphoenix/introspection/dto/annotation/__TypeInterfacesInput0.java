@@ -15,8 +15,6 @@ public @interface __TypeInterfacesInput0 {
 
   String interfaceName() default "";
 
-  String __typename() default "";
-
   boolean isDeprecated() default false;
 
   int version() default 0;
@@ -33,6 +31,8 @@ public @interface __TypeInterfacesInput0 {
 
   String createGroupId() default "";
 
+  String __typename() default "";
+
   String $id() default "";
 
   String $typeName() default "";
@@ -42,8 +42,6 @@ public @interface __TypeInterfacesInput0 {
   String $interfaceName() default "";
 
   String $to() default "";
-
-  String $__typename() default "";
 
   String $isDeprecated() default "";
 
@@ -60,4 +58,6 @@ public @interface __TypeInterfacesInput0 {
   String $updateTime() default "";
 
   String $createGroupId() default "";
+
+  String $__typename() default "";
 }

@@ -28,6 +28,22 @@ public class __TypeInterfaces implements Meta {
 
   private __Type to;
 
+  private Boolean isDeprecated;
+
+  private Integer version;
+
+  private Integer realmId;
+
+  private String createUserId;
+
+  private LocalDateTime createTime;
+
+  private String updateUserId;
+
+  private LocalDateTime updateTime;
+
+  private String createGroupId;
+
   private String __typename;
 
   private Integer idCount;
@@ -47,22 +63,6 @@ public class __TypeInterfaces implements Meta {
   private String interfaceNameMax;
 
   private String interfaceNameMin;
-
-  private Boolean isDeprecated;
-
-  private Integer version;
-
-  private Integer realmId;
-
-  private String createUserId;
-
-  private LocalDateTime createTime;
-
-  private String updateUserId;
-
-  private LocalDateTime updateTime;
-
-  private String createGroupId;
 
   public String getId() {
     return this.id;
@@ -102,86 +102,6 @@ public class __TypeInterfaces implements Meta {
 
   public void setTo(__Type to) {
     this.to = to;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public Integer getIdCount() {
-    return this.idCount;
-  }
-
-  public void setIdCount(Integer idCount) {
-    this.idCount = idCount;
-  }
-
-  public Integer getIdMax() {
-    return this.idMax;
-  }
-
-  public void setIdMax(Integer idMax) {
-    this.idMax = idMax;
-  }
-
-  public Integer getIdMin() {
-    return this.idMin;
-  }
-
-  public void setIdMin(Integer idMin) {
-    this.idMin = idMin;
-  }
-
-  public Integer getTypeNameCount() {
-    return this.typeNameCount;
-  }
-
-  public void setTypeNameCount(Integer typeNameCount) {
-    this.typeNameCount = typeNameCount;
-  }
-
-  public String getTypeNameMax() {
-    return this.typeNameMax;
-  }
-
-  public void setTypeNameMax(String typeNameMax) {
-    this.typeNameMax = typeNameMax;
-  }
-
-  public String getTypeNameMin() {
-    return this.typeNameMin;
-  }
-
-  public void setTypeNameMin(String typeNameMin) {
-    this.typeNameMin = typeNameMin;
-  }
-
-  public Integer getInterfaceNameCount() {
-    return this.interfaceNameCount;
-  }
-
-  public void setInterfaceNameCount(Integer interfaceNameCount) {
-    this.interfaceNameCount = interfaceNameCount;
-  }
-
-  public String getInterfaceNameMax() {
-    return this.interfaceNameMax;
-  }
-
-  public void setInterfaceNameMax(String interfaceNameMax) {
-    this.interfaceNameMax = interfaceNameMax;
-  }
-
-  public String getInterfaceNameMin() {
-    return this.interfaceNameMin;
-  }
-
-  public void setInterfaceNameMin(String interfaceNameMin) {
-    this.interfaceNameMin = interfaceNameMin;
   }
 
   @Override
@@ -262,5 +182,85 @@ public class __TypeInterfaces implements Meta {
   @Override
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public Integer getIdCount() {
+    return this.idCount;
+  }
+
+  public void setIdCount(Integer idCount) {
+    this.idCount = idCount;
+  }
+
+  public Integer getIdMax() {
+    return this.idMax;
+  }
+
+  public void setIdMax(Integer idMax) {
+    this.idMax = idMax;
+  }
+
+  public Integer getIdMin() {
+    return this.idMin;
+  }
+
+  public void setIdMin(Integer idMin) {
+    this.idMin = idMin;
+  }
+
+  public Integer getTypeNameCount() {
+    return this.typeNameCount;
+  }
+
+  public void setTypeNameCount(Integer typeNameCount) {
+    this.typeNameCount = typeNameCount;
+  }
+
+  public String getTypeNameMax() {
+    return this.typeNameMax;
+  }
+
+  public void setTypeNameMax(String typeNameMax) {
+    this.typeNameMax = typeNameMax;
+  }
+
+  public String getTypeNameMin() {
+    return this.typeNameMin;
+  }
+
+  public void setTypeNameMin(String typeNameMin) {
+    this.typeNameMin = typeNameMin;
+  }
+
+  public Integer getInterfaceNameCount() {
+    return this.interfaceNameCount;
+  }
+
+  public void setInterfaceNameCount(Integer interfaceNameCount) {
+    this.interfaceNameCount = interfaceNameCount;
+  }
+
+  public String getInterfaceNameMax() {
+    return this.interfaceNameMax;
+  }
+
+  public void setInterfaceNameMax(String interfaceNameMax) {
+    this.interfaceNameMax = interfaceNameMax;
+  }
+
+  public String getInterfaceNameMin() {
+    return this.interfaceNameMin;
+  }
+
+  public void setInterfaceNameMin(String interfaceNameMin) {
+    this.interfaceNameMin = interfaceNameMin;
   }
 }

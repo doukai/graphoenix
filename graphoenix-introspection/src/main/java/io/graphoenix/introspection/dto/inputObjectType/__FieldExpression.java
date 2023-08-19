@@ -30,17 +30,6 @@ public class __FieldExpression {
 
   private StringExpression deprecationReason;
 
-  private StringExpression __typename;
-
-  private StringExpression ofTypeName;
-
-  private StringExpression typeName;
-
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private Collection<__FieldExpression> exs;
-
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
@@ -57,6 +46,17 @@ public class __FieldExpression {
   private StringExpression updateTime;
 
   private StringExpression createGroupId;
+
+  private StringExpression __typename;
+
+  private StringExpression ofTypeName;
+
+  private StringExpression typeName;
+
+  @DefaultValue("AND")
+  private Conditional cond;
+
+  private Collection<__FieldExpression> exs;
 
   public StringExpression getId() {
     return this.id;
@@ -112,46 +112,6 @@ public class __FieldExpression {
 
   public void setDeprecationReason(StringExpression deprecationReason) {
     this.deprecationReason = deprecationReason;
-  }
-
-  public StringExpression get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(StringExpression __typename) {
-    this.__typename = __typename;
-  }
-
-  public StringExpression getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(StringExpression ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public StringExpression getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(StringExpression typeName) {
-    this.typeName = typeName;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public Collection<__FieldExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__FieldExpression> exs) {
-    this.exs = exs;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -216,5 +176,45 @@ public class __FieldExpression {
 
   public void setCreateGroupId(StringExpression createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public StringExpression get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(StringExpression __typename) {
+    this.__typename = __typename;
+  }
+
+  public StringExpression getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(StringExpression ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public StringExpression getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(StringExpression typeName) {
+    this.typeName = typeName;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Collection<__FieldExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__FieldExpression> exs) {
+    this.exs = exs;
   }
 }

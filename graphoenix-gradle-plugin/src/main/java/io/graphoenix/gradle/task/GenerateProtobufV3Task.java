@@ -42,7 +42,7 @@ public class GenerateProtobufV3Task extends BaseTask {
             registerInvoke();
             configRegister.registerPackage(createClassLoader());
             if (graphQLConfig.getBuild()) {
-                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+                manager.registerGraphQL(documentBuilder.buildDocument(true).toString());
             } else {
                 mapper.registerFieldMaps();
             }

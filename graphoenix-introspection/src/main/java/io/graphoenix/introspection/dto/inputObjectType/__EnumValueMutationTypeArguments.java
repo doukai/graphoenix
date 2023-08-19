@@ -25,13 +25,6 @@ public class __EnumValueMutationTypeArguments {
 
   private String deprecationReason;
 
-  @DefaultValue("\"__EnumValue\"")
-  private String __typename;
-
-  private String ofTypeName;
-
-  private __EnumValueExpression where;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -47,6 +40,13 @@ public class __EnumValueMutationTypeArguments {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  @DefaultValue("\"__EnumValue\"")
+  private String __typename;
+
+  private String ofTypeName;
+
+  private __EnumValueExpression where;
 
   public String getId() {
     return this.id;
@@ -86,30 +86,6 @@ public class __EnumValueMutationTypeArguments {
 
   public void setDeprecationReason(String deprecationReason) {
     this.deprecationReason = deprecationReason;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public __EnumValueExpression getWhere() {
-    return this.where;
-  }
-
-  public void setWhere(__EnumValueExpression where) {
-    this.where = where;
   }
 
   public Boolean getIsDeprecated() {
@@ -174,5 +150,29 @@ public class __EnumValueMutationTypeArguments {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public __EnumValueExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__EnumValueExpression where) {
+    this.where = where;
   }
 }

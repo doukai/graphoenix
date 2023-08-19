@@ -28,19 +28,6 @@ public class __SchemaListMutationTypeArguments {
 
   private Collection<__DirectiveInput> directives;
 
-  @DefaultValue("\"__Schema\"")
-  private String __typename;
-
-  private String queryTypeName;
-
-  private String mutationTypeName;
-
-  private String subscriptionTypeName;
-
-  private Collection<__SchemaInput> list;
-
-  private __SchemaExpression where;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -56,6 +43,19 @@ public class __SchemaListMutationTypeArguments {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  @DefaultValue("\"__Schema\"")
+  private String __typename;
+
+  private String queryTypeName;
+
+  private String mutationTypeName;
+
+  private String subscriptionTypeName;
+
+  private Collection<__SchemaInput> list;
+
+  private __SchemaExpression where;
 
   public String getId() {
     return this.id;
@@ -103,54 +103,6 @@ public class __SchemaListMutationTypeArguments {
 
   public void setDirectives(Collection<__DirectiveInput> directives) {
     this.directives = directives;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getQueryTypeName() {
-    return this.queryTypeName;
-  }
-
-  public void setQueryTypeName(String queryTypeName) {
-    this.queryTypeName = queryTypeName;
-  }
-
-  public String getMutationTypeName() {
-    return this.mutationTypeName;
-  }
-
-  public void setMutationTypeName(String mutationTypeName) {
-    this.mutationTypeName = mutationTypeName;
-  }
-
-  public String getSubscriptionTypeName() {
-    return this.subscriptionTypeName;
-  }
-
-  public void setSubscriptionTypeName(String subscriptionTypeName) {
-    this.subscriptionTypeName = subscriptionTypeName;
-  }
-
-  public Collection<__SchemaInput> getList() {
-    return this.list;
-  }
-
-  public void setList(Collection<__SchemaInput> list) {
-    this.list = list;
-  }
-
-  public __SchemaExpression getWhere() {
-    return this.where;
-  }
-
-  public void setWhere(__SchemaExpression where) {
-    this.where = where;
   }
 
   public Boolean getIsDeprecated() {
@@ -215,5 +167,53 @@ public class __SchemaListMutationTypeArguments {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getQueryTypeName() {
+    return this.queryTypeName;
+  }
+
+  public void setQueryTypeName(String queryTypeName) {
+    this.queryTypeName = queryTypeName;
+  }
+
+  public String getMutationTypeName() {
+    return this.mutationTypeName;
+  }
+
+  public void setMutationTypeName(String mutationTypeName) {
+    this.mutationTypeName = mutationTypeName;
+  }
+
+  public String getSubscriptionTypeName() {
+    return this.subscriptionTypeName;
+  }
+
+  public void setSubscriptionTypeName(String subscriptionTypeName) {
+    this.subscriptionTypeName = subscriptionTypeName;
+  }
+
+  public Collection<__SchemaInput> getList() {
+    return this.list;
+  }
+
+  public void setList(Collection<__SchemaInput> list) {
+    this.list = list;
+  }
+
+  public __SchemaExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__SchemaExpression where) {
+    this.where = where;
   }
 }

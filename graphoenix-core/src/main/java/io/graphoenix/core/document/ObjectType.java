@@ -7,7 +7,6 @@ import org.stringtemplate.v4.STGroupFile;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -137,7 +136,7 @@ public class ObjectType {
         return this;
     }
 
-    public ObjectType addFields(List<Field> fields) {
+    public ObjectType addFields(Collection<Field> fields) {
         if (this.fields == null) {
             this.fields = new LinkedHashSet<>();
         }

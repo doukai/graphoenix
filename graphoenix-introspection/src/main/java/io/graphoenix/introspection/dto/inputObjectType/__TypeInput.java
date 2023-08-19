@@ -40,17 +40,6 @@ public class __TypeInput {
 
   private __TypeInput ofType;
 
-  @DefaultValue("\"__Type\"")
-  private String __typename;
-
-  private Integer schemaId;
-
-  private String ofTypeName;
-
-  private Collection<__TypeInterfacesInput> __typeInterfaces;
-
-  private Collection<__TypePossibleTypesInput> __typePossibleTypes;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -66,6 +55,17 @@ public class __TypeInput {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  @DefaultValue("\"__Type\"")
+  private String __typename;
+
+  private Integer schemaId;
+
+  private String ofTypeName;
+
+  private Collection<__TypeInterfacesInput> __typeInterfaces;
+
+  private Collection<__TypePossibleTypesInput> __typePossibleTypes;
 
   public String getName() {
     return this.name;
@@ -147,46 +147,6 @@ public class __TypeInput {
     this.ofType = ofType;
   }
 
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public Integer getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(Integer schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public Collection<__TypeInterfacesInput> get__typeInterfaces() {
-    return this.__typeInterfaces;
-  }
-
-  public void set__typeInterfaces(Collection<__TypeInterfacesInput> __typeInterfaces) {
-    this.__typeInterfaces = __typeInterfaces;
-  }
-
-  public Collection<__TypePossibleTypesInput> get__typePossibleTypes() {
-    return this.__typePossibleTypes;
-  }
-
-  public void set__typePossibleTypes(Collection<__TypePossibleTypesInput> __typePossibleTypes) {
-    this.__typePossibleTypes = __typePossibleTypes;
-  }
-
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -249,5 +209,45 @@ public class __TypeInput {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public Integer getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Integer schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public Collection<__TypeInterfacesInput> get__typeInterfaces() {
+    return this.__typeInterfaces;
+  }
+
+  public void set__typeInterfaces(Collection<__TypeInterfacesInput> __typeInterfaces) {
+    this.__typeInterfaces = __typeInterfaces;
+  }
+
+  public Collection<__TypePossibleTypesInput> get__typePossibleTypes() {
+    return this.__typePossibleTypes;
+  }
+
+  public void set__typePossibleTypes(Collection<__TypePossibleTypesInput> __typePossibleTypes) {
+    this.__typePossibleTypes = __typePossibleTypes;
   }
 }

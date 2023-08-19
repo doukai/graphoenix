@@ -14,14 +14,6 @@ public @interface __SchemaExpression0 {
 
   IDExpression id() default @IDExpression;
 
-  StringExpression __typename() default @StringExpression;
-
-  StringExpression queryTypeName() default @StringExpression;
-
-  StringExpression mutationTypeName() default @StringExpression;
-
-  StringExpression subscriptionTypeName() default @StringExpression;
-
   BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
@@ -37,6 +29,14 @@ public @interface __SchemaExpression0 {
   StringExpression updateTime() default @StringExpression;
 
   StringExpression createGroupId() default @StringExpression;
+
+  StringExpression __typename() default @StringExpression;
+
+  StringExpression queryTypeName() default @StringExpression;
+
+  StringExpression mutationTypeName() default @StringExpression;
+
+  StringExpression subscriptionTypeName() default @StringExpression;
 
   String[] groupBy() default {};
 

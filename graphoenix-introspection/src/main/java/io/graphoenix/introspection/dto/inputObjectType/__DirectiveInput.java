@@ -34,13 +34,6 @@ public class __DirectiveInput {
   @NonNull
   private Boolean isRepeatable;
 
-  @DefaultValue("\"__Directive\"")
-  private String __typename;
-
-  private Integer schemaId;
-
-  private Collection<__DirectiveLocationsInput> __directiveLocations;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -56,6 +49,13 @@ public class __DirectiveInput {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  @DefaultValue("\"__Directive\"")
+  private String __typename;
+
+  private Integer schemaId;
+
+  private Collection<__DirectiveLocationsInput> __directiveLocations;
 
   public String getName() {
     return this.name;
@@ -103,30 +103,6 @@ public class __DirectiveInput {
 
   public void setIsRepeatable(Boolean isRepeatable) {
     this.isRepeatable = isRepeatable;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public Integer getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(Integer schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public Collection<__DirectiveLocationsInput> get__directiveLocations() {
-    return this.__directiveLocations;
-  }
-
-  public void set__directiveLocations(Collection<__DirectiveLocationsInput> __directiveLocations) {
-    this.__directiveLocations = __directiveLocations;
   }
 
   public Boolean getIsDeprecated() {
@@ -191,5 +167,29 @@ public class __DirectiveInput {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public Integer getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Integer schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public Collection<__DirectiveLocationsInput> get__directiveLocations() {
+    return this.__directiveLocations;
+  }
+
+  public void set__directiveLocations(Collection<__DirectiveLocationsInput> __directiveLocations) {
+    this.__directiveLocations = __directiveLocations;
   }
 }

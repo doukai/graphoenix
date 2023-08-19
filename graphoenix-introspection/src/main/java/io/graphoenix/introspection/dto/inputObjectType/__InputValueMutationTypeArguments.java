@@ -31,15 +31,6 @@ public class __InputValueMutationTypeArguments {
 
   private String defaultValue;
 
-  @DefaultValue("\"__InputValue\"")
-  private String __typename;
-
-  private String ofTypeName;
-
-  private String typeName;
-
-  private __InputValueExpression where;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -55,6 +46,15 @@ public class __InputValueMutationTypeArguments {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  @DefaultValue("\"__InputValue\"")
+  private String __typename;
+
+  private String ofTypeName;
+
+  private String typeName;
+
+  private __InputValueExpression where;
 
   public String getId() {
     return this.id;
@@ -120,38 +120,6 @@ public class __InputValueMutationTypeArguments {
     this.defaultValue = defaultValue;
   }
 
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
-  }
-
-  public __InputValueExpression getWhere() {
-    return this.where;
-  }
-
-  public void setWhere(__InputValueExpression where) {
-    this.where = where;
-  }
-
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -214,5 +182,37 @@ public class __InputValueMutationTypeArguments {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
+
+  public __InputValueExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__InputValueExpression where) {
+    this.where = where;
   }
 }

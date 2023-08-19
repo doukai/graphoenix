@@ -18,8 +18,6 @@ public @interface __TypePossibleTypesExpression0 {
 
   StringExpression possibleTypeName() default @StringExpression;
 
-  StringExpression __typename() default @StringExpression;
-
   BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
@@ -35,6 +33,8 @@ public @interface __TypePossibleTypesExpression0 {
   StringExpression updateTime() default @StringExpression;
 
   StringExpression createGroupId() default @StringExpression;
+
+  StringExpression __typename() default @StringExpression;
 
   String[] groupBy() default {};
 

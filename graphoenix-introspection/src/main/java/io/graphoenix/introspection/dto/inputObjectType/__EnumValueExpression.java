@@ -26,15 +26,6 @@ public class __EnumValueExpression {
 
   private StringExpression deprecationReason;
 
-  private StringExpression __typename;
-
-  private StringExpression ofTypeName;
-
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private Collection<__EnumValueExpression> exs;
-
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
@@ -51,6 +42,15 @@ public class __EnumValueExpression {
   private StringExpression updateTime;
 
   private StringExpression createGroupId;
+
+  private StringExpression __typename;
+
+  private StringExpression ofTypeName;
+
+  @DefaultValue("AND")
+  private Conditional cond;
+
+  private Collection<__EnumValueExpression> exs;
 
   public StringExpression getId() {
     return this.id;
@@ -90,38 +90,6 @@ public class __EnumValueExpression {
 
   public void setDeprecationReason(StringExpression deprecationReason) {
     this.deprecationReason = deprecationReason;
-  }
-
-  public StringExpression get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(StringExpression __typename) {
-    this.__typename = __typename;
-  }
-
-  public StringExpression getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(StringExpression ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public Collection<__EnumValueExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__EnumValueExpression> exs) {
-    this.exs = exs;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -186,5 +154,37 @@ public class __EnumValueExpression {
 
   public void setCreateGroupId(StringExpression createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public StringExpression get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(StringExpression __typename) {
+    this.__typename = __typename;
+  }
+
+  public StringExpression getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(StringExpression ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Collection<__EnumValueExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__EnumValueExpression> exs) {
+    this.exs = exs;
   }
 }

@@ -73,7 +73,7 @@ message MutationVersionResponse {
     optional int32 version = 1;
 }
 message MutationRealmIdResponse {
-    optional string realm_id = 1;
+    optional int32 realm_id = 1;
 }
 message MutationCreateUserIdResponse {
     optional string create_user_id = 1;

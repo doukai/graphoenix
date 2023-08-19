@@ -26,15 +26,6 @@ public class __EnumValueListMutationTypeArguments {
 
   private String deprecationReason;
 
-  @DefaultValue("\"__EnumValue\"")
-  private String __typename;
-
-  private String ofTypeName;
-
-  private Collection<__EnumValueInput> list;
-
-  private __EnumValueExpression where;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -50,6 +41,15 @@ public class __EnumValueListMutationTypeArguments {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  @DefaultValue("\"__EnumValue\"")
+  private String __typename;
+
+  private String ofTypeName;
+
+  private Collection<__EnumValueInput> list;
+
+  private __EnumValueExpression where;
 
   public String getId() {
     return this.id;
@@ -89,38 +89,6 @@ public class __EnumValueListMutationTypeArguments {
 
   public void setDeprecationReason(String deprecationReason) {
     this.deprecationReason = deprecationReason;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public Collection<__EnumValueInput> getList() {
-    return this.list;
-  }
-
-  public void setList(Collection<__EnumValueInput> list) {
-    this.list = list;
-  }
-
-  public __EnumValueExpression getWhere() {
-    return this.where;
-  }
-
-  public void setWhere(__EnumValueExpression where) {
-    this.where = where;
   }
 
   public Boolean getIsDeprecated() {
@@ -185,5 +153,37 @@ public class __EnumValueListMutationTypeArguments {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public Collection<__EnumValueInput> getList() {
+    return this.list;
+  }
+
+  public void setList(Collection<__EnumValueInput> list) {
+    this.list = list;
+  }
+
+  public __EnumValueExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__EnumValueExpression where) {
+    this.where = where;
   }
 }

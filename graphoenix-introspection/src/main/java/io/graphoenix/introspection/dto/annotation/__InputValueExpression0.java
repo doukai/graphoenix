@@ -24,12 +24,6 @@ public @interface __InputValueExpression0 {
 
   StringExpression defaultValue() default @StringExpression;
 
-  StringExpression __typename() default @StringExpression;
-
-  StringExpression ofTypeName() default @StringExpression;
-
-  StringExpression typeName() default @StringExpression;
-
   BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
@@ -45,6 +39,12 @@ public @interface __InputValueExpression0 {
   StringExpression updateTime() default @StringExpression;
 
   StringExpression createGroupId() default @StringExpression;
+
+  StringExpression __typename() default @StringExpression;
+
+  StringExpression ofTypeName() default @StringExpression;
+
+  StringExpression typeName() default @StringExpression;
 
   String[] groupBy() default {};
 

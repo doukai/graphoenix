@@ -17,10 +17,6 @@ public @interface __EnumValueInput0 {
 
   String deprecationReason() default "";
 
-  String __typename() default "";
-
-  String ofTypeName() default "";
-
   boolean isDeprecated() default false;
 
   int version() default 0;
@@ -37,6 +33,10 @@ public @interface __EnumValueInput0 {
 
   String createGroupId() default "";
 
+  String __typename() default "";
+
+  String ofTypeName() default "";
+
   String $id() default "";
 
   String $name() default "";
@@ -46,10 +46,6 @@ public @interface __EnumValueInput0 {
   String $description() default "";
 
   String $deprecationReason() default "";
-
-  String $__typename() default "";
-
-  String $ofTypeName() default "";
 
   String $isDeprecated() default "";
 
@@ -66,4 +62,8 @@ public @interface __EnumValueInput0 {
   String $updateTime() default "";
 
   String $createGroupId() default "";
+
+  String $__typename() default "";
+
+  String $ofTypeName() default "";
 }

@@ -30,17 +30,6 @@ public class __FieldListMutationTypeArguments {
 
   private String deprecationReason;
 
-  @DefaultValue("\"__Field\"")
-  private String __typename;
-
-  private String ofTypeName;
-
-  private String typeName;
-
-  private Collection<__FieldInput> list;
-
-  private __FieldExpression where;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -56,6 +45,17 @@ public class __FieldListMutationTypeArguments {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  @DefaultValue("\"__Field\"")
+  private String __typename;
+
+  private String ofTypeName;
+
+  private String typeName;
+
+  private Collection<__FieldInput> list;
+
+  private __FieldExpression where;
 
   public String getId() {
     return this.id;
@@ -111,46 +111,6 @@ public class __FieldListMutationTypeArguments {
 
   public void setDeprecationReason(String deprecationReason) {
     this.deprecationReason = deprecationReason;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
-  }
-
-  public Collection<__FieldInput> getList() {
-    return this.list;
-  }
-
-  public void setList(Collection<__FieldInput> list) {
-    this.list = list;
-  }
-
-  public __FieldExpression getWhere() {
-    return this.where;
-  }
-
-  public void setWhere(__FieldExpression where) {
-    this.where = where;
   }
 
   public Boolean getIsDeprecated() {
@@ -215,5 +175,45 @@ public class __FieldListMutationTypeArguments {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
+
+  public Collection<__FieldInput> getList() {
+    return this.list;
+  }
+
+  public void setList(Collection<__FieldInput> list) {
+    this.list = list;
+  }
+
+  public __FieldExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__FieldExpression where) {
+    this.where = where;
   }
 }

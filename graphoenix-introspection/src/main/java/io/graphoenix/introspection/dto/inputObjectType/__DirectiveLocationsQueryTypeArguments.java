@@ -25,13 +25,6 @@ public class __DirectiveLocationsQueryTypeArguments {
 
   private __DirectiveLocationExpression directiveLocation;
 
-  private StringExpression __typename;
-
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private Collection<__DirectiveLocationsExpression> exs;
-
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
@@ -48,6 +41,13 @@ public class __DirectiveLocationsQueryTypeArguments {
   private StringExpression updateTime;
 
   private StringExpression createGroupId;
+
+  private StringExpression __typename;
+
+  @DefaultValue("AND")
+  private Conditional cond;
+
+  private Collection<__DirectiveLocationsExpression> exs;
 
   public StringExpression getId() {
     return this.id;
@@ -79,30 +79,6 @@ public class __DirectiveLocationsQueryTypeArguments {
 
   public void setDirectiveLocation(__DirectiveLocationExpression directiveLocation) {
     this.directiveLocation = directiveLocation;
-  }
-
-  public StringExpression get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(StringExpression __typename) {
-    this.__typename = __typename;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public Collection<__DirectiveLocationsExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__DirectiveLocationsExpression> exs) {
-    this.exs = exs;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -167,5 +143,29 @@ public class __DirectiveLocationsQueryTypeArguments {
 
   public void setCreateGroupId(StringExpression createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public StringExpression get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(StringExpression __typename) {
+    this.__typename = __typename;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Collection<__DirectiveLocationsExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__DirectiveLocationsExpression> exs) {
+    this.exs = exs;
   }
 }

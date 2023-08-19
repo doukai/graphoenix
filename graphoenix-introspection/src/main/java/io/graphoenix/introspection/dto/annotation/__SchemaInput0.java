@@ -11,14 +11,6 @@ import java.lang.annotation.Target;
 public @interface __SchemaInput0 {
   String id() default "";
 
-  String __typename() default "";
-
-  String queryTypeName() default "";
-
-  String mutationTypeName() default "";
-
-  String subscriptionTypeName() default "";
-
   boolean isDeprecated() default false;
 
   int version() default 0;
@@ -35,6 +27,14 @@ public @interface __SchemaInput0 {
 
   String createGroupId() default "";
 
+  String __typename() default "";
+
+  String queryTypeName() default "";
+
+  String mutationTypeName() default "";
+
+  String subscriptionTypeName() default "";
+
   String $id() default "";
 
   String $types() default "";
@@ -46,22 +46,6 @@ public @interface __SchemaInput0 {
   String $subscriptionType() default "";
 
   String $directives() default "";
-
-  String $__typename() default "";
-
-  String $typesAggregate() default "";
-
-  String $typesConnection() default "";
-
-  String $directivesAggregate() default "";
-
-  String $directivesConnection() default "";
-
-  String $queryTypeName() default "";
-
-  String $mutationTypeName() default "";
-
-  String $subscriptionTypeName() default "";
 
   String $isDeprecated() default "";
 
@@ -78,4 +62,20 @@ public @interface __SchemaInput0 {
   String $updateTime() default "";
 
   String $createGroupId() default "";
+
+  String $__typename() default "";
+
+  String $typesAggregate() default "";
+
+  String $typesConnection() default "";
+
+  String $directivesAggregate() default "";
+
+  String $directivesConnection() default "";
+
+  String $queryTypeName() default "";
+
+  String $mutationTypeName() default "";
+
+  String $subscriptionTypeName() default "";
 }

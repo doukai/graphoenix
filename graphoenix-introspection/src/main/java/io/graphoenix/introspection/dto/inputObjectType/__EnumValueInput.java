@@ -25,11 +25,6 @@ public class __EnumValueInput {
 
   private String deprecationReason;
 
-  @DefaultValue("\"__EnumValue\"")
-  private String __typename;
-
-  private String ofTypeName;
-
   private Boolean isDeprecated;
 
   private Integer version;
@@ -45,6 +40,11 @@ public class __EnumValueInput {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  @DefaultValue("\"__EnumValue\"")
+  private String __typename;
+
+  private String ofTypeName;
 
   public String getId() {
     return this.id;
@@ -84,22 +84,6 @@ public class __EnumValueInput {
 
   public void setDeprecationReason(String deprecationReason) {
     this.deprecationReason = deprecationReason;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public Boolean getIsDeprecated() {
@@ -164,5 +148,21 @@ public class __EnumValueInput {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 }

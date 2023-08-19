@@ -28,19 +28,6 @@ public class __SchemaQueryTypeArguments {
 
   private __DirectiveExpression directives;
 
-  private StringExpression __typename;
-
-  private StringExpression queryTypeName;
-
-  private StringExpression mutationTypeName;
-
-  private StringExpression subscriptionTypeName;
-
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private Collection<__SchemaExpression> exs;
-
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
@@ -57,6 +44,19 @@ public class __SchemaQueryTypeArguments {
   private StringExpression updateTime;
 
   private StringExpression createGroupId;
+
+  private StringExpression __typename;
+
+  private StringExpression queryTypeName;
+
+  private StringExpression mutationTypeName;
+
+  private StringExpression subscriptionTypeName;
+
+  @DefaultValue("AND")
+  private Conditional cond;
+
+  private Collection<__SchemaExpression> exs;
 
   public StringExpression getId() {
     return this.id;
@@ -104,54 +104,6 @@ public class __SchemaQueryTypeArguments {
 
   public void setDirectives(__DirectiveExpression directives) {
     this.directives = directives;
-  }
-
-  public StringExpression get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(StringExpression __typename) {
-    this.__typename = __typename;
-  }
-
-  public StringExpression getQueryTypeName() {
-    return this.queryTypeName;
-  }
-
-  public void setQueryTypeName(StringExpression queryTypeName) {
-    this.queryTypeName = queryTypeName;
-  }
-
-  public StringExpression getMutationTypeName() {
-    return this.mutationTypeName;
-  }
-
-  public void setMutationTypeName(StringExpression mutationTypeName) {
-    this.mutationTypeName = mutationTypeName;
-  }
-
-  public StringExpression getSubscriptionTypeName() {
-    return this.subscriptionTypeName;
-  }
-
-  public void setSubscriptionTypeName(StringExpression subscriptionTypeName) {
-    this.subscriptionTypeName = subscriptionTypeName;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public Collection<__SchemaExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__SchemaExpression> exs) {
-    this.exs = exs;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -216,5 +168,53 @@ public class __SchemaQueryTypeArguments {
 
   public void setCreateGroupId(StringExpression createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public StringExpression get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(StringExpression __typename) {
+    this.__typename = __typename;
+  }
+
+  public StringExpression getQueryTypeName() {
+    return this.queryTypeName;
+  }
+
+  public void setQueryTypeName(StringExpression queryTypeName) {
+    this.queryTypeName = queryTypeName;
+  }
+
+  public StringExpression getMutationTypeName() {
+    return this.mutationTypeName;
+  }
+
+  public void setMutationTypeName(StringExpression mutationTypeName) {
+    this.mutationTypeName = mutationTypeName;
+  }
+
+  public StringExpression getSubscriptionTypeName() {
+    return this.subscriptionTypeName;
+  }
+
+  public void setSubscriptionTypeName(StringExpression subscriptionTypeName) {
+    this.subscriptionTypeName = subscriptionTypeName;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Collection<__SchemaExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__SchemaExpression> exs) {
+    this.exs = exs;
   }
 }

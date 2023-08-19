@@ -30,17 +30,6 @@ public class __DirectiveQueryTypeArguments {
 
   private BooleanExpression isRepeatable;
 
-  private StringExpression __typename;
-
-  private IntExpression schemaId;
-
-  private __DirectiveLocationsExpression __directiveLocations;
-
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private Collection<__DirectiveExpression> exs;
-
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
@@ -57,6 +46,17 @@ public class __DirectiveQueryTypeArguments {
   private StringExpression updateTime;
 
   private StringExpression createGroupId;
+
+  private StringExpression __typename;
+
+  private IntExpression schemaId;
+
+  private __DirectiveLocationsExpression __directiveLocations;
+
+  @DefaultValue("AND")
+  private Conditional cond;
+
+  private Collection<__DirectiveExpression> exs;
 
   public StringExpression getName() {
     return this.name;
@@ -104,46 +104,6 @@ public class __DirectiveQueryTypeArguments {
 
   public void setIsRepeatable(BooleanExpression isRepeatable) {
     this.isRepeatable = isRepeatable;
-  }
-
-  public StringExpression get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(StringExpression __typename) {
-    this.__typename = __typename;
-  }
-
-  public IntExpression getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(IntExpression schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public __DirectiveLocationsExpression get__directiveLocations() {
-    return this.__directiveLocations;
-  }
-
-  public void set__directiveLocations(__DirectiveLocationsExpression __directiveLocations) {
-    this.__directiveLocations = __directiveLocations;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public Collection<__DirectiveExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__DirectiveExpression> exs) {
-    this.exs = exs;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -208,5 +168,45 @@ public class __DirectiveQueryTypeArguments {
 
   public void setCreateGroupId(StringExpression createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public StringExpression get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(StringExpression __typename) {
+    this.__typename = __typename;
+  }
+
+  public IntExpression getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(IntExpression schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public __DirectiveLocationsExpression get__directiveLocations() {
+    return this.__directiveLocations;
+  }
+
+  public void set__directiveLocations(__DirectiveLocationsExpression __directiveLocations) {
+    this.__directiveLocations = __directiveLocations;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Collection<__DirectiveExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__DirectiveExpression> exs) {
+    this.exs = exs;
   }
 }
