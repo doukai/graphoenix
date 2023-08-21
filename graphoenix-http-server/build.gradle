@@ -23,6 +23,7 @@ dependencies {
     annotationProcessor project(':graphoenix-interceptor')
     annotationProcessor project(':graphoenix-config')
     annotationProcessor 'io.projectreactor.netty:reactor-netty-core:1.0.18'
+    annotationProcessor 'io.projectreactor.netty:reactor-netty-http:1.0.18'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'

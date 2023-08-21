@@ -1,5 +1,6 @@
 package io.graphoenix.http.handler;
 
+import io.graphoenix.core.context.RequestScopeInstanceFactory;
 import io.graphoenix.core.dto.GraphQLRequest;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.core.handler.GraphQLSubscriptionHandler;
@@ -56,50 +57,52 @@ public class PostRequestHandler extends BaseHandler {
         Map<String, Object> context = new ConcurrentHashMap<>();
         context.put(REQUEST, request);
         context.put(RESPONSE, response);
+
         String accept = request.requestHeaders().get(ACCEPT);
         String contentType = request.requestHeaders().get(CONTENT_TYPE);
-
-        request = request.withConnection(connection -> {
-            if (connection.isDisposed()) {
-                System.out.println(requestId);
-            }
-        });
-
         QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
 
         if (contentType.startsWith(MimeType.Application.JSON)) {
             return response
                     .addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                     .sendString(
-                            request.receive().aggregate().asString()
-                                    .map(content -> GraphQLRequest.fromJson(jsonProvider.createReader(new StringReader(content)).readObject()))
-                                    .map(graphQLRequest -> operationPreprocessor.preprocess(graphQLRequest.getQuery(), graphQLRequest.getVariables()))
-                                    .doOnNext(operationDefinitionContext -> context.put(OPERATION_DEFINITION, operationDefinitionContext))
-                                    .flatMap(operationDefinitionContext ->
-                                            ScopeEventResolver.initialized(context, RequestScoped.class)
-                                                    .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
-                                                    .then(graphQLRequestHandler.handle(operationDefinitionContext))
+                            RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerRequest.class, request)
+                                    .then(RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerResponse.class, response))
+                                    .then(
+                                            request.receive().aggregate().asString()
+                                                    .map(content -> GraphQLRequest.fromJson(jsonProvider.createReader(new StringReader(content)).readObject()))
+                                                    .map(graphQLRequest -> operationPreprocessor.preprocess(graphQLRequest.getQuery(), graphQLRequest.getVariables()))
+                                                    .doOnNext(operationDefinitionContext -> context.put(OPERATION_DEFINITION, operationDefinitionContext))
+                                                    .flatMap(operationDefinitionContext ->
+                                                            ScopeEventResolver.initialized(context, RequestScoped.class)
+                                                                    .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
+                                                                    .then(graphQLRequestHandler.handle(operationDefinitionContext))
+                                                    )
+                                                    .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
+                                                    .onErrorResume(throwable -> this.errorHandler(throwable, response))
+                                                    .contextWrite(Context.of(REQUEST_ID, requestId))
                                     )
-                                    .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
-                                    .onErrorResume(throwable -> this.errorHandler(throwable, response))
-                                    .contextWrite(Context.of(REQUEST_ID, requestId))
                     );
         } else if (contentType.startsWith(MimeType.Application.GRAPHQL)) {
             return response
                     .addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                     .sendString(
-                            request.receive().aggregate().asString()
-                                    .map(GraphQLRequest::new)
-                                    .map(graphQLRequest -> operationPreprocessor.preprocess(graphQLRequest.getQuery(), graphQLRequest.getVariables()))
-                                    .doOnNext(operationDefinitionContext -> context.put(OPERATION_DEFINITION, operationDefinitionContext))
-                                    .flatMap(operationDefinitionContext ->
-                                            ScopeEventResolver.initialized(context, RequestScoped.class)
-                                                    .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
-                                                    .then(graphQLRequestHandler.handle(operationDefinitionContext))
+                            RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerRequest.class, request)
+                                    .then(RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerResponse.class, response))
+                                    .then(
+                                            request.receive().aggregate().asString()
+                                                    .map(GraphQLRequest::new)
+                                                    .map(graphQLRequest -> operationPreprocessor.preprocess(graphQLRequest.getQuery(), graphQLRequest.getVariables()))
+                                                    .doOnNext(operationDefinitionContext -> context.put(OPERATION_DEFINITION, operationDefinitionContext))
+                                                    .flatMap(operationDefinitionContext ->
+                                                            ScopeEventResolver.initialized(context, RequestScoped.class)
+                                                                    .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
+                                                                    .then(graphQLRequestHandler.handle(operationDefinitionContext))
+                                                    )
+                                                    .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
+                                                    .onErrorResume(throwable -> this.errorHandler(throwable, response))
+                                                    .contextWrite(Context.of(REQUEST_ID, requestId))
                                     )
-                                    .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
-                                    .onErrorResume(throwable -> this.errorHandler(throwable, response))
-                                    .contextWrite(Context.of(REQUEST_ID, requestId))
                     );
         } else if (contentType.startsWith(MimeType.Text.PLAIN) && accept.startsWith(MimeType.Text.EVENT_STREAM)) {
             String token = Optional.ofNullable(request.requestHeaders().get("X-GraphQL-Event-Stream-Token")).orElseGet(() -> decoder.parameters().containsKey("token") ? decoder.parameters().get("token").get(0) : null);
@@ -109,18 +112,22 @@ public class PostRequestHandler extends BaseHandler {
                     .addHeader(HttpHeaderNames.CONNECTION, "keep-alive")
                     .status(HttpResponseStatus.ACCEPTED)
                     .send(
-                            request.receive().aggregate().asString()
-                                    .map(content -> GraphQLRequest.fromJson(jsonProvider.createReader(new StringReader(content)).readObject()))
-                                    .map(graphQLRequest -> operationPreprocessor.preprocess(graphQLRequest.getQuery(), graphQLRequest.getVariables()))
-                                    .doOnNext(operationDefinitionContext -> context.put(OPERATION_DEFINITION, operationDefinitionContext))
-                                    .flatMapMany(operationDefinitionContext ->
-                                            ScopeEventResolver.initialized(context, RequestScoped.class)
-                                                    .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
-                                                    .thenMany(graphQLSubscriptionHandler.handle(operationDefinitionContext, token, operationId))
-                                    )
-                                    .onErrorResume(throwable -> this.errorSSEHandler(throwable, response, operationId))
-                                    .map(eventString -> ByteBufAllocator.DEFAULT.buffer().writeBytes(eventString.getBytes(StandardCharsets.UTF_8)))
-                                    .contextWrite(Context.of(REQUEST_ID, requestId)),
+                            RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerRequest.class, request)
+                                    .then(RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerResponse.class, response))
+                                    .thenMany(
+                                            request.receive().aggregate().asString()
+                                                    .map(content -> GraphQLRequest.fromJson(jsonProvider.createReader(new StringReader(content)).readObject()))
+                                                    .map(graphQLRequest -> operationPreprocessor.preprocess(graphQLRequest.getQuery(), graphQLRequest.getVariables()))
+                                                    .doOnNext(operationDefinitionContext -> context.put(OPERATION_DEFINITION, operationDefinitionContext))
+                                                    .flatMapMany(operationDefinitionContext ->
+                                                            ScopeEventResolver.initialized(context, RequestScoped.class)
+                                                                    .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
+                                                                    .thenMany(graphQLSubscriptionHandler.handle(operationDefinitionContext, token, operationId))
+                                                    )
+                                                    .onErrorResume(throwable -> this.errorSSEHandler(throwable, response, operationId))
+                                                    .map(eventString -> ByteBufAllocator.DEFAULT.buffer().writeBytes(eventString.getBytes(StandardCharsets.UTF_8)))
+                                                    .contextWrite(Context.of(REQUEST_ID, requestId))
+                                    ),
                             byteBuf -> true
                     );
         } else {

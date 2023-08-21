@@ -87,17 +87,31 @@ public class RequestScopeInstanceFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> Mono<T> putIfAbsent(T instance) {
-        return putIfAbsent((Class<T>) instance.getClass(), instance);
+    public static <T> Mono<T> computeIfAbsent(T instance) {
+        return computeIfAbsent((Class<T>) instance.getClass(), instance);
     }
 
-    public static <T, E extends T> Mono<T> putIfAbsent(Class<T> beanClass, E instance) {
-        return putIfAbsent(beanClass, beanClass.getName(), instance);
+    public static <T, E extends T> Mono<T> computeIfAbsent(Class<T> beanClass, E instance) {
+        return computeIfAbsent(beanClass, beanClass.getName(), instance);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T, E extends T> Mono<T> putIfAbsent(Class<T> beanClass, String name, E instance) {
-        return getScopeInstances().mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instance));
+    public static <T, E extends T> Mono<T> computeIfAbsent(Class<T> beanClass, String name, E instance) {
+        return getScopeInstances().mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).computeIfAbsent(name, (key) -> instance));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Mono<T> computeIfAbsent(String id, T instance) {
+        return computeIfAbsent(id, (Class<T>) instance.getClass(), instance);
+    }
+
+    public static <T, E extends T> Mono<T> computeIfAbsent(String id, Class<T> beanClass, E instance) {
+        return computeIfAbsent(id, beanClass, beanClass.getName(), instance);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T, E extends T> Mono<T> computeIfAbsent(String id, Class<T> beanClass, String name, E instance) {
+        return Mono.fromFuture(REQUEST_CACHE.get(id)).map(scopeInstances -> (T) scopeInstances.get(beanClass).computeIfAbsent(name, (key) -> instance));
     }
 
     public static void invalidate(String id) {

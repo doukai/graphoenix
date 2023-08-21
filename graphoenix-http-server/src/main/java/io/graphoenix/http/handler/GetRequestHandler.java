@@ -1,6 +1,7 @@
 package io.graphoenix.http.handler;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.context.RequestScopeInstanceFactory;
 import io.graphoenix.core.dto.GraphQLRequest;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.core.handler.GraphQLSubscriptionHandler;
@@ -57,12 +58,6 @@ public class GetRequestHandler extends BaseHandler {
         context.put(REQUEST, request);
         context.put(RESPONSE, response);
 
-        request = request.withConnection(connection -> {
-            if (connection.isDisposed()) {
-                System.out.println(requestId);
-            }
-        });
-
         QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
         String accept = decoder.parameters().getOrDefault(ACCEPT.toString(), Collections.singletonList(request.requestHeaders().get(ACCEPT))).get(0);
         GraphQLRequest graphQLRequest = new GraphQLRequest(
@@ -82,24 +77,32 @@ public class GetRequestHandler extends BaseHandler {
                     .addHeader(HttpHeaderNames.CONNECTION, "keep-alive")
                     .status(HttpResponseStatus.ACCEPTED)
                     .send(
-                            ScopeEventResolver.initialized(context, RequestScoped.class)
-                                    .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
-                                    .thenMany(graphQLSubscriptionHandler.handle(operationDefinitionContext, token, operationId))
-                                    .onErrorResume(throwable -> this.errorSSEHandler(throwable, response, operationId))
-                                    .map(eventString -> ByteBufAllocator.DEFAULT.buffer().writeBytes(eventString.getBytes(StandardCharsets.UTF_8)))
-                                    .contextWrite(Context.of(REQUEST_ID, requestId)),
+                            RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerRequest.class, request)
+                                    .then(RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerResponse.class, response))
+                                    .thenMany(
+                                            ScopeEventResolver.initialized(context, RequestScoped.class)
+                                                    .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
+                                                    .thenMany(graphQLSubscriptionHandler.handle(operationDefinitionContext, token, operationId))
+                                                    .onErrorResume(throwable -> this.errorSSEHandler(throwable, response, operationId))
+                                                    .map(eventString -> ByteBufAllocator.DEFAULT.buffer().writeBytes(eventString.getBytes(StandardCharsets.UTF_8)))
+                                                    .contextWrite(Context.of(REQUEST_ID, requestId))
+                                    ),
                             byteBuf -> true
                     );
         } else {
             return response
                     .addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                     .sendString(
-                            ScopeEventResolver.initialized(context, RequestScoped.class)
-                                    .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
-                                    .then(graphQLRequestHandler.handle(operationDefinitionContext))
-                                    .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
-                                    .onErrorResume(throwable -> this.errorHandler(throwable, response))
-                                    .contextWrite(Context.of(REQUEST_ID, requestId))
+                            RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerRequest.class, request)
+                                    .then(RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerResponse.class, response))
+                                    .then(
+                                            ScopeEventResolver.initialized(context, RequestScoped.class)
+                                                    .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
+                                                    .then(graphQLRequestHandler.handle(operationDefinitionContext))
+                                                    .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
+                                                    .onErrorResume(throwable -> this.errorHandler(throwable, response))
+                                                    .contextWrite(Context.of(REQUEST_ID, requestId))
+                                    )
                     );
         }
     }
