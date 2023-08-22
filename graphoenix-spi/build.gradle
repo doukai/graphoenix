@@ -24,7 +24,7 @@ dependencies {
     compile 'com.dslplatform:dsl-json:1.9.9'
     compile 'org.eclipse.microprofile.graphql:microprofile-graphql-api:1.1.0'
     compile 'org.eclipse.microprofile.config:microprofile-config-api:3.0.1'
-    compile 'org.eclipse.microprofile.jwt:microprofile-jwt-auth-api:2.0'
+    compile 'org.eclipse.microprofile.jwt:microprofile-jwt-auth-api:2.1'
     compile 'org.eclipse.microprofile.reactive-streams-operators:microprofile-reactive-streams-operators-api:2.0'
     compile 'jakarta.annotation:jakarta.annotation-api:2.0.0'
     compile 'jakarta.inject:jakarta.inject-api:2.0.1'
