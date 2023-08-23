@@ -266,7 +266,7 @@ public class OperationInterfaceImplementer {
                         Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(monoArgumentTypeName);
                         if (collectionImplementationClassName.isPresent()) {
                             return CodeBlock.of(
-                                    "return operationDAO.findAsync($L, $L, $T.class).map($T::$L).map($T::new)",
+                                    "return operationDAO.findAsync($L, $L, $T.class).mapNotNull($T::$L).mapNotNull($T::new)",
                                     resourceFieldName,
                                     mapOf,
                                     ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
@@ -277,7 +277,7 @@ public class OperationInterfaceImplementer {
                         }
                     }
                     return CodeBlock.of(
-                            "return operationDAO.findAsync($L, $L, $T.class).map($T::$L)",
+                            "return operationDAO.findAsync($L, $L, $T.class).mapNotNull($T::$L)",
                             resourceFieldName,
                             mapOf,
                             ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
@@ -289,7 +289,7 @@ public class OperationInterfaceImplementer {
                         Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(monoArgumentTypeName);
                         if (collectionImplementationClassName.isPresent()) {
                             return CodeBlock.of(
-                                    "return operationDAO.saveAsync($L, $L, $T.class).map($T::$L).map($T::new)",
+                                    "return operationDAO.saveAsync($L, $L, $T.class).mapNotNull($T::$L).mapNotNull($T::new)",
                                     resourceFieldName,
                                     mapOf,
                                     ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
@@ -300,7 +300,7 @@ public class OperationInterfaceImplementer {
                         }
                     }
                     return CodeBlock.of(
-                            "return operationDAO.saveAsync($L, $L, $T.class).map($T::$L)",
+                            "return operationDAO.saveAsync($L, $L, $T.class).mapNotNull($T::$L)",
                             resourceFieldName,
                             mapOf,
                             ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
@@ -316,7 +316,7 @@ public class OperationInterfaceImplementer {
                         Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(publisherArgumentTypeName);
                         if (collectionImplementationClassName.isPresent()) {
                             return CodeBlock.of(
-                                    "return operationDAO.findAsyncBuilder($L, $L, $T.class).map($T::$L).map($T::new)",
+                                    "return operationDAO.findAsyncBuilder($L, $L, $T.class).mapNotNull($T::$L).mapNotNull($T::new)",
                                     resourceFieldName,
                                     mapOf,
                                     ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
@@ -327,7 +327,7 @@ public class OperationInterfaceImplementer {
                         }
                     }
                     return CodeBlock.of(
-                            "return operationDAO.findAsyncBuilder($L, $L, $T.class).map($T::$L)",
+                            "return operationDAO.findAsyncBuilder($L, $L, $T.class).mapNotNull($T::$L)",
                             resourceFieldName,
                             mapOf,
                             ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
@@ -339,7 +339,7 @@ public class OperationInterfaceImplementer {
                         Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(publisherArgumentTypeName);
                         if (collectionImplementationClassName.isPresent()) {
                             return CodeBlock.of(
-                                    "return operationDAO.saveAsyncBuilder($L, $L, $T.class).map($T::$L).map($T::new)",
+                                    "return operationDAO.saveAsyncBuilder($L, $L, $T.class).mapNotNull($T::$L).mapNotNull($T::new)",
                                     resourceFieldName,
                                     mapOf,
                                     ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
@@ -350,7 +350,7 @@ public class OperationInterfaceImplementer {
                         }
                     }
                     return CodeBlock.of(
-                            "return operationDAO.saveAsyncBuilder($L, $L, $T.class).map($T::$L)",
+                            "return operationDAO.saveAsyncBuilder($L, $L, $T.class).mapNotNull($T::$L)",
                             resourceFieldName,
                             mapOf,
                             ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),

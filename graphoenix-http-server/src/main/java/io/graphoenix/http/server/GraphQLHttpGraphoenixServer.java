@@ -40,10 +40,10 @@ public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
     @Override
     public void run() {
         CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin()
-                .allowedRequestMethods(HttpMethod.GET)
-                .allowedRequestMethods(HttpMethod.POST)
                 .allowedRequestHeaders(HttpHeaderNames.CONTENT_TYPE)
                 .allowedRequestHeaders(HttpHeaderNames.AUTHORIZATION)
+                .allowedRequestMethods(HttpMethod.GET)
+                .allowedRequestMethods(HttpMethod.POST)
                 .build();
 
         DisposableServer server = HttpServer.create()
