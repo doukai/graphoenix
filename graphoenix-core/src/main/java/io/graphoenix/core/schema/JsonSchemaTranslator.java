@@ -7,7 +7,9 @@ import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.json.*;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 
 import java.io.StringWriter;
@@ -18,7 +20,6 @@ import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.utils.ValidationUtil.VALIDATION_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
-import static jakarta.json.JsonValue.EMPTY_JSON_OBJECT;
 import static jakarta.json.JsonValue.TRUE;
 
 @ApplicationScoped
@@ -128,19 +129,22 @@ public class JsonSchemaTranslator {
                                 }
                                 propertiesBuilder.add(
                                         fieldDefinitionContext.name().getText(),
-                                        jsonProvider.createObjectBuilder().add("anyOf", jsonArrayBuilder)
+                                        buildNullableType(
+                                                jsonProvider.createObjectBuilder().add("anyOf", jsonArrayBuilder)
+                                        )
                                 );
                             } else {
                                 propertiesBuilder.add(
                                         fieldDefinitionContext.name().getText(),
-                                        jsonProvider.createObjectBuilder()
-                                                .add("$ref", objectTypeDefinitionContext.name().getText().concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldDefinitionContext.name().getText())))
+                                        buildNullableType(
+                                                jsonProvider.createObjectBuilder()
+                                                        .add("$ref", objectTypeDefinitionContext.name().getText().concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldDefinitionContext.name().getText())))
+                                        )
                                 );
                             }
                         }
                 );
         builder.add("properties", propertiesBuilder);
-        ;
         return builder.build();
     }
 
@@ -149,12 +153,12 @@ public class JsonSchemaTranslator {
                 .map(this::buildValidation)
                 .orElseGet(jsonProvider::createObjectBuilder);
         JsonObjectBuilder builder = jsonSchemaBuilder.add(
-                "$id",
-                jsonProvider.createValue(
-                        "#".concat(objectTypeDefinitionContext.name().getText())
-                                .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldDefinitionContext.name().getText()))
+                        "$id",
+                        jsonProvider.createValue(
+                                "#".concat(objectTypeDefinitionContext.name().getText())
+                                        .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldDefinitionContext.name().getText()))
+                        )
                 )
-        )
                 .add("type", jsonProvider.createValue("object"))
                 .add("properties", fieldArgumentsToProperties(fieldDefinitionContext))
                 .add("additionalProperties", TRUE);
@@ -169,13 +173,13 @@ public class JsonSchemaTranslator {
                 .map(this::buildValidation)
                 .orElseGet(jsonProvider::createObjectBuilder);
         JsonObjectBuilder builder = jsonSchemaBuilder.add(
-                "$id",
-                jsonProvider.createValue(
-                        "#".concat(objectTypeDefinitionContext.name().getText())
-                                .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldDefinitionContext.name().getText()))
-                                .concat("UpdateById")
+                        "$id",
+                        jsonProvider.createValue(
+                                "#".concat(objectTypeDefinitionContext.name().getText())
+                                        .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldDefinitionContext.name().getText()))
+                                        .concat("UpdateById")
+                        )
                 )
-        )
                 .add("type", jsonProvider.createValue("object"))
                 .add("properties", fieldArgumentsToUpdateByIdProperties(fieldDefinitionContext))
                 .add("additionalProperties", TRUE);
@@ -187,13 +191,13 @@ public class JsonSchemaTranslator {
                 .map(this::buildValidation)
                 .orElseGet(jsonProvider::createObjectBuilder);
         JsonObjectBuilder builder = jsonSchemaBuilder.add(
-                "$id",
-                jsonProvider.createValue(
-                        "#".concat(objectTypeDefinitionContext.name().getText())
-                                .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldDefinitionContext.name().getText()))
-                                .concat("UpdateByWhere")
+                        "$id",
+                        jsonProvider.createValue(
+                                "#".concat(objectTypeDefinitionContext.name().getText())
+                                        .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldDefinitionContext.name().getText()))
+                                        .concat("UpdateByWhere")
+                        )
                 )
-        )
                 .add("type", jsonProvider.createValue("object"))
                 .add("properties", fieldArgumentsToUpdateByWhereProperties(fieldDefinitionContext))
                 .add("additionalProperties", TRUE);
@@ -205,12 +209,12 @@ public class JsonSchemaTranslator {
                 .map(this::buildValidation)
                 .orElseGet(jsonProvider::createObjectBuilder);
         JsonObjectBuilder builder = jsonSchemaBuilder.add(
-                "$id",
-                jsonProvider.createValue(
-                        "#".concat(objectTypeDefinitionContext.name().getText())
-                                .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldDefinitionContext.name().getText()))
+                        "$id",
+                        jsonProvider.createValue(
+                                "#".concat(objectTypeDefinitionContext.name().getText())
+                                        .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldDefinitionContext.name().getText()))
+                        )
                 )
-        )
                 .add("type", jsonProvider.createValue("object"))
                 .add("properties", fieldArgumentsToListProperties(fieldDefinitionContext))
                 .add("additionalProperties", TRUE);

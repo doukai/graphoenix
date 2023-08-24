@@ -47,7 +47,7 @@ public class ScopeEventResolver {
                                 .sorted(Comparator.comparing(scopeEventProvider -> getPriority(scopeEventProvider.type())))
                                 .collect(Collectors.toList())
                 )
-                .flatMap(scopeEventProvider -> scopeEventProvider.get().fireAsync(context))
+                .concatMap(scopeEventProvider -> scopeEventProvider.get().fireAsync(context))
                 .then();
     }
 
