@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.utils.ValidationUtil.VALIDATION_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.UPDATE_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
 import static jakarta.json.JsonValue.TRUE;
 
@@ -183,6 +184,11 @@ public class JsonSchemaTranslator {
                 .add("type", jsonProvider.createValue("object"))
                 .add("properties", fieldArgumentsToUpdateByIdProperties(fieldDefinitionContext))
                 .add("additionalProperties", TRUE);
+
+        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+        Optional<String> objectTypeIDFieldName = manager.getObjectTypeIDFieldName(fieldTypeName);
+        objectTypeIDFieldName.ifPresent(idFieldName -> builder.add("required", jsonProvider.createArrayBuilder().add(idFieldName).add(UPDATE_DIRECTIVE_NAME)));
+
         return builder.build();
     }
 
@@ -200,7 +206,8 @@ public class JsonSchemaTranslator {
                 )
                 .add("type", jsonProvider.createValue("object"))
                 .add("properties", fieldArgumentsToUpdateByWhereProperties(fieldDefinitionContext))
-                .add("additionalProperties", TRUE);
+                .add("additionalProperties", TRUE)
+                .add("required", jsonProvider.createArrayBuilder().add(WHERE_INPUT_NAME).add(UPDATE_DIRECTIVE_NAME));
         return builder.build();
     }
 
@@ -257,7 +264,12 @@ public class JsonSchemaTranslator {
                             if (objectTypeIDFieldName.isPresent() && objectTypeIDFieldName.get().equals(inputValueDefinitionContext.name().getText())) {
                                 propertiesBuilder.add(inputValueDefinitionContext.name().getText(), jsonProvider.createObjectBuilder().add("type", "string"));
                             } else {
-                                propertiesBuilder.add(inputValueDefinitionContext.name().getText(), fieldToProperty(inputValueDefinitionContext.type(), VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives()).orElse(null)));
+                                Optional<GraphqlParser.FieldDefinitionContext> subFieldDefinitionContext = manager.getField(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText());
+                                if (subFieldDefinitionContext.isPresent()) {
+                                    propertiesBuilder.add(subFieldDefinitionContext.get().name().getText(), fieldToProperty(subFieldDefinitionContext.get().type(), VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives()).orElse(null)));
+                                } else {
+                                    propertiesBuilder.add(inputValueDefinitionContext.name().getText(), fieldToProperty(inputValueDefinitionContext.type(), VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives()).orElse(null)));
+                                }
                             }
                         }
                 );
@@ -283,7 +295,12 @@ public class JsonSchemaTranslator {
                                     propertiesBuilder.add(inputValueDefinitionContext.name().getText(), buildType(inputValueDefinitionContext.type().typeName(), propertyBuilder));
                                 }
                             } else {
-                                propertiesBuilder.add(inputValueDefinitionContext.name().getText(), fieldToProperty(inputValueDefinitionContext.type(), VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives()).orElse(null)));
+                                Optional<GraphqlParser.FieldDefinitionContext> subFieldDefinitionContext = manager.getField(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText());
+                                if (subFieldDefinitionContext.isPresent()) {
+                                    propertiesBuilder.add(subFieldDefinitionContext.get().name().getText(), fieldToProperty(subFieldDefinitionContext.get().type(), VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives()).orElse(null)));
+                                } else {
+                                    propertiesBuilder.add(inputValueDefinitionContext.name().getText(), fieldToProperty(inputValueDefinitionContext.type(), VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives()).orElse(null)));
+                                }
                             }
                         }
                 );
