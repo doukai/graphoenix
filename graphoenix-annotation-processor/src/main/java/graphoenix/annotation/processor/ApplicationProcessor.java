@@ -1,7 +1,6 @@
 package graphoenix.annotation.processor;
 
 import com.google.auto.service.AutoService;
-import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
@@ -11,21 +10,12 @@ import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.core.schema.JsonSchemaTranslator;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.java.generator.implementer.*;
-import io.graphoenix.java.generator.implementer.grpc.GrpcFetchHandlerBuilder;
-import io.graphoenix.java.generator.implementer.grpc.GrpcInputObjectHandlerBuilder;
-import io.graphoenix.java.generator.implementer.grpc.GrpcObjectHandlerBuilder;
-import io.graphoenix.java.generator.implementer.grpc.GrpcRequestHandlerBuilder;
-import io.graphoenix.java.generator.implementer.grpc.GrpcServiceImplementer;
+import io.graphoenix.java.generator.implementer.grpc.*;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import org.tinylog.Logger;
 
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.Processor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
+import javax.annotation.processing.*;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -33,7 +23,10 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static javax.lang.model.SourceVersion.RELEASE_11;
@@ -119,6 +112,7 @@ public class ApplicationProcessor extends BaseProcessor {
                     .flatMap(operationTypeDefinitionContext -> manager.getObject(operationTypeDefinitionContext.typeName().name().getText()).stream())
                     .flatMap(objectTypeDefinitionContext ->
                             objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                    .filter(fieldDefinitionContext -> fieldDefinitionContext.argumentsDefinition() != null)
                                     .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(objectTypeDefinitionContext, fieldDefinitionContext))
                     )
                     .collect(Collectors.toList());
@@ -130,7 +124,8 @@ public class ApplicationProcessor extends BaseProcessor {
                             "",
                             "META-INF/schema/"
                                     .concat(entry.getKey().name().getText())
-                                    .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
+                                    .concat("_")
+                                    .concat(entry.getValue().name().getText())
                     );
                     writer = schema.openWriter();
                     writer.write(jsonSchemaTranslator.operationObjectFieldArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
@@ -141,7 +136,23 @@ public class ApplicationProcessor extends BaseProcessor {
                             "",
                             "META-INF/schema/"
                                     .concat(entry.getKey().name().getText())
-                                    .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
+                                    .concat("_")
+                                    .concat(entry.getValue().name().getText())
+                    );
+                    writer = schema.openWriter();
+                    if (manager.fieldTypeIsList(entry.getValue().type())) {
+                        writer.write(jsonSchemaTranslator.operationObjectFieldListArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
+                    } else {
+                        writer.write(jsonSchemaTranslator.operationObjectFieldInsertArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
+                    }
+                    writer.close();
+                    schema = filer.createResource(
+                            StandardLocation.CLASS_OUTPUT,
+                            "",
+                            "META-INF/schema/"
+                                    .concat(entry.getKey().name().getText())
+                                    .concat("_")
+                                    .concat(entry.getValue().name().getText())
                                     .concat("UpdateById")
                     );
                     writer = schema.openWriter();
@@ -152,24 +163,13 @@ public class ApplicationProcessor extends BaseProcessor {
                             "",
                             "META-INF/schema/"
                                     .concat(entry.getKey().name().getText())
-                                    .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
+                                    .concat("_")
+                                    .concat(entry.getValue().name().getText())
                                     .concat("UpdateByWhere")
                     );
                     writer = schema.openWriter();
                     writer.write(jsonSchemaTranslator.operationObjectFieldUpdateByWhereArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
                     writer.close();
-                    if (manager.fieldTypeIsList(entry.getValue().type())) {
-                        schema = filer.createResource(
-                                StandardLocation.CLASS_OUTPUT,
-                                "",
-                                "META-INF/schema/"
-                                        .concat(entry.getKey().name().getText())
-                                        .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
-                        );
-                        writer = schema.openWriter();
-                        writer.write(jsonSchemaTranslator.operationObjectFieldListArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
-                        writer.close();
-                    }
                 }
             }
 
@@ -178,6 +178,7 @@ public class ApplicationProcessor extends BaseProcessor {
                     .flatMap(operationTypeDefinitionContext -> manager.getObject(operationTypeDefinitionContext.typeName().name().getText()).stream())
                     .flatMap(objectTypeDefinitionContext ->
                             objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                    .filter(fieldDefinitionContext -> fieldDefinitionContext.argumentsDefinition() != null)
                                     .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(objectTypeDefinitionContext, fieldDefinitionContext))
                     )
                     .collect(Collectors.toList());
@@ -188,7 +189,8 @@ public class ApplicationProcessor extends BaseProcessor {
                         "",
                         "META-INF/schema/"
                                 .concat(entry.getKey().name().getText())
-                                .concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, entry.getValue().name().getText()))
+                                .concat("_")
+                                .concat(entry.getValue().name().getText())
                 );
                 writer = schema.openWriter();
                 writer.write(jsonSchemaTranslator.operationObjectFieldArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
