@@ -153,7 +153,10 @@ public class ApplicationProcessor extends BaseProcessor {
                                     .concat(entry.getKey().name().getText())
                                     .concat("_")
                                     .concat(entry.getValue().name().getText())
-                                    .concat("UpdateById")
+                                    .concat("_")
+                                    .concat("update")
+                                    .concat("_")
+                                    .concat("id")
                     );
                     writer = schema.openWriter();
                     writer.write(jsonSchemaTranslator.operationObjectFieldUpdateByIdArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
@@ -165,7 +168,10 @@ public class ApplicationProcessor extends BaseProcessor {
                                     .concat(entry.getKey().name().getText())
                                     .concat("_")
                                     .concat(entry.getValue().name().getText())
-                                    .concat("UpdateByWhere")
+                                    .concat("_")
+                                    .concat("update")
+                                    .concat("_")
+                                    .concat("where")
                     );
                     writer = schema.openWriter();
                     writer.write(jsonSchemaTranslator.operationObjectFieldUpdateByWhereArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
