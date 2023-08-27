@@ -11,25 +11,20 @@ import io.graphoenix.core.manager.GraphQLDocumentManager;
 import io.graphoenix.spi.dto.GraphQLError;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
 
 import java.util.AbstractMap;
-import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
+import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.UPDATE;
-import static io.graphoenix.spi.constant.Hammurabi.SCHEMA_EXCLUDE_INPUT;
-import static jakarta.json.JsonValue.FALSE;
-import static jakarta.json.JsonValue.NULL;
-import static jakarta.json.JsonValue.TRUE;
+import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
+import static jakarta.json.JsonValue.*;
 
 @ApplicationScoped
 public class JsonSchemaValidator {
@@ -49,8 +44,8 @@ public class JsonSchemaValidator {
         this.factory = new JsonSchemaFactory.Builder().defaultMetaSchemaURI(jsonMetaSchema.getUri()).addMetaSchema(jsonMetaSchema).addUrnFactory(jsonSchemaResourceURNFactory).build();
     }
 
-    public Set<ValidationMessage> validate(String operationTypeName, String json) throws JsonProcessingException {
-        return factory.getSchema(jsonSchemaManager.getJsonSchema(operationTypeName)).validate(mapper.readTree(json));
+    public Set<ValidationMessage> validate(String schemaName, String json) throws JsonProcessingException {
+        return factory.getSchema(jsonSchemaManager.getJsonSchema(schemaName)).validate(mapper.readTree(json));
     }
 
     public void validateOperation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
@@ -65,36 +60,42 @@ public class JsonSchemaValidator {
             throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
         }
 
-        JsonObject operationJsonElement = operationDefinitionContext.selectionSet().selection().stream()
-                .map(selectionContext -> new AbstractMap.SimpleEntry<>(selectionContext.field().name().getText(), selectionToJsonElement(selectionContext)))
-                .collect(JsonCollectors.toJsonObject());
+        Set<ValidationMessage> messageSet = operationDefinitionContext.selectionSet().selection().stream()
+                .filter(selectionContext -> selectionContext.field().arguments() != null)
+                .flatMap(selectionContext -> validateSelection(operationTypeName, selectionContext))
+                .collect(Collectors.toSet());
 
-        try {
-            Set<ValidationMessage> messageSet = validate(operationTypeName, operationJsonElement.toString());
-            if (messageSet.size() > 0) {
-                GraphQLErrors graphQLErrors = new GraphQLErrors();
-                messageSet.forEach(validationMessage -> graphQLErrors.add(new GraphQLError(validationMessage.getMessage()).setSchemaPath(validationMessage.getSchemaPath())));
-                throw graphQLErrors;
-            }
-        } catch (JsonProcessingException e) {
-            throw new GraphQLErrors(e);
+        if (messageSet.size() > 0) {
+            GraphQLErrors graphQLErrors = new GraphQLErrors();
+            messageSet.forEach(validationMessage -> graphQLErrors.add(new GraphQLError(validationMessage.getMessage()).setSchemaPath(validationMessage.getSchemaPath())));
+            throw graphQLErrors;
         }
     }
 
-    protected JsonValue selectionToJsonElement(GraphqlParser.SelectionContext selectionContext) {
+    protected Stream<ValidationMessage> validateSelection(String operationTypeName, GraphqlParser.SelectionContext selectionContext) {
         boolean isUpdate = manager.getMutationType(selectionContext).equals(UPDATE);
         JsonValue jsonValue = argumentsToJsonElement(selectionContext.field().arguments());
-        if (isUpdate) {
-            return jsonProvider.createObjectBuilder(jsonValue.asJsonObject()).add("update", true).build();
+        String schemaName = operationTypeName + "_" + selectionContext.field().name().getText();
+        try {
+            if (isUpdate) {
+                if (jsonValue.asJsonObject().containsKey(WHERE_INPUT_NAME)) {
+                    schemaName += "_update_where";
+                } else {
+                    schemaName += "_update_id";
+                }
+                return validate(schemaName, jsonProvider.createObjectBuilder(jsonValue.asJsonObject()).add("update", true).build().toString()).stream();
+            }
+            return validate(schemaName, jsonValue.toString()).stream();
+        } catch (JsonProcessingException e) {
+            throw new GraphQLErrors(e);
         }
-        return jsonValue;
     }
 
     protected JsonValue argumentsToJsonElement(GraphqlParser.ArgumentsContext argumentsContext) {
         if (argumentsContext != null) {
             return argumentsContext.argument().stream()
 //                    .filter(argumentContext -> argumentContext.valueWithVariable().NullValue() == null)
-                    .filter(argumentContext -> Arrays.stream(SCHEMA_EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(argumentContext.name().getText())))
+//                    .filter(argumentContext -> Arrays.stream(SCHEMA_EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(argumentContext.name().getText())))
                     .map(argumentContext -> new AbstractMap.SimpleEntry<>(argumentContext.name().getText(), valueWithVariableToJsonElement(argumentContext.valueWithVariable())))
                     .collect(JsonCollectors.toJsonObject());
         }
