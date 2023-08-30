@@ -197,6 +197,20 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                     ((ExecutableElement) subElement).getParameters().stream()
                                             .anyMatch(variableElement ->
                                                     variableElement.getAnnotation(Source.class) != null &&
+                                                            typeUtils.asElement(variableElement.asType()).getAnnotation(Interface.class) != null
+                                            )
+                            ) {
+                                Tuple2<String, Field> objectField = graphQLApiBuilder.variableElementToObjectField((ExecutableElement) subElement, typeUtils);
+                                manager.getImplementsObjectType(objectField._1())
+                                        .forEach(objectTypeDefinitionContext -> {
+                                                    ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(objectField._2());
+                                                    manager.mergeDocument(objectType.toString());
+                                                }
+                                        );
+                            } else if (subElement.getKind().equals(ElementKind.METHOD) &&
+                                    ((ExecutableElement) subElement).getParameters().stream()
+                                            .anyMatch(variableElement ->
+                                                    variableElement.getAnnotation(Source.class) != null &&
                                                             typeUtils.asElement(variableElement.asType()).getAnnotation(Input.class) != null
                                             )
                             ) {

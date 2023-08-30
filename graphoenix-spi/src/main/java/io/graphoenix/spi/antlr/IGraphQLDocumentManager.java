@@ -124,6 +124,8 @@ public interface IGraphQLDocumentManager {
 
     Optional<GraphqlParser.InterfaceTypeDefinitionContext> getInterface(String name);
 
+    Stream<GraphqlParser.ObjectTypeDefinitionContext> getImplementsObjectType(String name);
+
     Optional<GraphqlParser.UnionTypeDefinitionContext> getUnion(String name);
 
     Optional<GraphqlParser.InputObjectTypeDefinitionContext> getInputObject(String name);

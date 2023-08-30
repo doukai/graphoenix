@@ -278,6 +278,74 @@ public class BaseTask extends DefaultTask {
                         .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
                         .forEach(typeDeclaration ->
                                 typeDeclaration.getMethods().stream()
+                                        .filter(methodDeclaration -> !methodDeclaration.isAnnotationPresent(Query.class))
+                                        .filter(methodDeclaration -> !methodDeclaration.isAnnotationPresent(Mutation.class))
+                                        .filter(methodDeclaration ->
+                                                methodDeclaration.getParameters().stream()
+                                                        .anyMatch(parameter ->
+                                                                parameter.isAnnotationPresent(Source.class) &&
+                                                                        parameter.getType().isClassOrInterfaceType() &&
+                                                                        parameter.getType().asClassOrInterfaceType().isAnnotationPresent(org.eclipse.microprofile.graphql.Interface.class)
+                                                        )
+                                        )
+                                        .forEach(methodDeclaration -> {
+                                                    String interfaceName = methodDeclaration.getParameters().stream()
+                                                            .filter(parameter -> parameter.isAnnotationPresent(Source.class))
+                                                            .filter(parameter -> parameter.getType().isClassOrInterfaceType())
+                                                            .filter(parameter -> parameter.getType().asClassOrInterfaceType().isAnnotationPresent(org.eclipse.microprofile.graphql.Interface.class))
+                                                            .findFirst()
+                                                            .orElseThrow(() -> new RuntimeException("@Source annotation parameter not exist in " + methodDeclaration.getNameAsString()))
+                                                            .getType()
+                                                            .asString();
+
+                                                    manager.getImplementsObjectType(interfaceName)
+                                                            .forEach(objectTypeDefinitionContext -> {
+                                                                        ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext)
+                                                                                .addField(
+                                                                                        new Field()
+                                                                                                .setName(getSourceNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
+                                                                                                .setType(getInvokeFieldTypeName(methodDeclaration.getType()))
+                                                                                                .addDirective(
+                                                                                                        new Directive().setName(INVOKE_DIRECTIVE_NAME)
+                                                                                                                .addArgument("className",
+                                                                                                                        typeDeclaration.getFullyQualifiedName()
+                                                                                                                                .orElseGet(() ->
+                                                                                                                                        compilationUnit.getPackageDeclaration()
+                                                                                                                                                .map(packageDeclaration -> packageDeclaration.getNameAsString().concat("."))
+                                                                                                                                                .orElse("")
+                                                                                                                                                .concat(typeDeclaration.getNameAsString())
+                                                                                                                                )
+                                                                                                                )
+                                                                                                                .addArgument("methodName", methodDeclaration.getNameAsString())
+                                                                                                                .addArgument(
+                                                                                                                        "parameters",
+                                                                                                                        new ArrayValueWithVariable(
+                                                                                                                                methodDeclaration.getParameters().stream()
+                                                                                                                                        .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", getTypeName(parameter.getType())))
+                                                                                                                                        .collect(Collectors.toList())
+                                                                                                                        )
+                                                                                                                )
+                                                                                                                .addArgument("returnClassName", getTypeName(methodDeclaration.getType()))
+                                                                                                )
+                                                                                                .addDirective(
+                                                                                                        new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                                                                                                .addArgument("packageName", graphQLConfig.getPackageName())
+                                                                                                                .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
+                                                                                                )
+                                                                                );
+                                                                        manager.mergeDocument(objectType.toString());
+                                                                    }
+                                                            );
+                                                }
+                                        )
+                        )
+        );
+
+        compilations.forEach(compilationUnit ->
+                compilationUnit.getTypes().stream()
+                        .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
+                        .forEach(typeDeclaration ->
+                                typeDeclaration.getMethods().stream()
                                         .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Query.class))
                                         .forEach(methodDeclaration -> {
                                                     ObjectType objectType = manager.getObject(manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME))

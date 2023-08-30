@@ -377,6 +377,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         } else if (typeDefinitionContext.objectTypeDefinition() != null) {
             graphQLObjectManager.register(typeDefinitionContext.objectTypeDefinition());
             graphQLFieldManager.register(typeDefinitionContext.objectTypeDefinition());
+            graphQLInterfaceManager.registerImplements(typeDefinitionContext.objectTypeDefinition());
         } else if (typeDefinitionContext.interfaceTypeDefinition() != null) {
             graphQLInterfaceManager.register(typeDefinitionContext.interfaceTypeDefinition());
             graphQLFieldManager.register(typeDefinitionContext.interfaceTypeDefinition());
@@ -405,9 +406,11 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = DOCUMENT_UTIL.graphqlToObjectTypeDefinition(ObjectType.merge(original.get(), typeDefinitionContext.objectTypeDefinition()).toString());
                 graphQLObjectManager.register(objectTypeDefinitionContext);
                 graphQLFieldManager.register(objectTypeDefinitionContext);
+                graphQLInterfaceManager.registerImplements(objectTypeDefinitionContext);
             } else {
                 graphQLObjectManager.register(typeDefinitionContext.objectTypeDefinition());
                 graphQLFieldManager.register(typeDefinitionContext.objectTypeDefinition());
+                graphQLInterfaceManager.registerImplements(typeDefinitionContext.objectTypeDefinition());
             }
         } else if (typeDefinitionContext.interfaceTypeDefinition() != null) {
             Optional<GraphqlParser.InterfaceTypeDefinitionContext> original = getInterface(typeDefinitionContext.interfaceTypeDefinition().name().getText());
@@ -602,6 +605,11 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     @Override
     public Optional<GraphqlParser.InterfaceTypeDefinitionContext> getInterface(String name) {
         return graphQLInterfaceManager.getInterfaceTypeDefinition(name);
+    }
+
+    @Override
+    public Stream<GraphqlParser.ObjectTypeDefinitionContext> getImplementsObjectType(String name) {
+        return graphQLInterfaceManager.getImplementsObjectTypeDefinition(name);
     }
 
     @Override
