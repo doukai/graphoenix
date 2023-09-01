@@ -45,7 +45,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.io.IOException;
@@ -82,7 +81,6 @@ public abstract class BaseProcessor extends AbstractProcessor {
         super.init(processingEnv);
         typeUtils = processingEnv.getTypeUtils();
         Filer filer = processingEnv.getFiler();
-        Elements elementUtils = processingEnv.getElementUtils();
         CONFIG_UTIL.load(filer);
         BeanContext.load(BaseProcessor.class.getClassLoader());
         manager = BeanContext.get(IGraphQLDocumentManager.class);
