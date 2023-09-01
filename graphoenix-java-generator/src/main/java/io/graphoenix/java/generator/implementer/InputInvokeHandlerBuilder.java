@@ -152,6 +152,7 @@ public class InputInvokeHandlerBuilder {
     private MethodSpec buildInputTypeInvokeMethod(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext, boolean arguments) {
         ClassName typeClassName = TYPE_NAME_UTIL.toClassName(packageManager.getClassName(inputObjectTypeDefinitionContext));
         String typeParameterName = getParameterName(inputObjectTypeDefinitionContext);
+        String resultParameterName = "result";
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
                 .addModifiers(Modifier.PUBLIC)
@@ -164,19 +165,66 @@ public class InputInvokeHandlerBuilder {
             builder.addParameter(ClassName.get(GraphqlParser.ObjectValueWithVariableContext.class), "objectValueWithVariableContext");
         }
 
-        builder.addStatement(
+        List<Tuple3<String, String, String>> tuple3List = invokeMethods.get(inputObjectTypeDefinitionContext.name().getText());
+        if (tuple3List != null && tuple3List.size() > 0) {
+            int index = 0;
+            for (Tuple3<String, String, String> tuple3 : tuple3List) {
+                String apiVariableName = typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(tuple3._1()).simpleName());
+                String methodName = tuple3._2();
+                ClassName returnClassName = TYPE_UTIL.getClassName(tuple3._3());
+                CodeBlock invokeCodeBlock;
+                if (returnClassName.canonicalName().equals(PublisherBuilder.class.getCanonicalName())) {
+                    invokeCodeBlock = CodeBlock.of("$T.from($L.get().$L($L).buildRs())",
+                            ClassName.get(Mono.class),
+                            apiVariableName,
+                            methodName,
+                            index == 0 ? typeParameterName : resultParameterName
+                    );
+                } else if (returnClassName.canonicalName().equals(Mono.class.getCanonicalName())) {
+                    invokeCodeBlock = CodeBlock.of("$L.get().$L($L)",
+                            apiVariableName,
+                            methodName,
+                            index == 0 ? typeParameterName : resultParameterName
+                    );
+                } else if (returnClassName.canonicalName().equals(Flux.class.getCanonicalName())) {
+                    invokeCodeBlock = CodeBlock.of("$L.get().$L($L).last()",
+                            apiVariableName,
+                            methodName,
+                            index == 0 ? typeParameterName : resultParameterName
+                    );
+                } else {
+                    invokeCodeBlock = CodeBlock.of("$T.justOrEmpty($L.get().$L($L))",
+                            ClassName.get(Mono.class),
+                            apiVariableName,
+                            methodName,
+                            index == 0 ? typeParameterName : resultParameterName
+                    );
+                }
+                if (index == 0) {
+                    builder.addCode("return $L\n", invokeCodeBlock);
+                } else {
+                    builder.addCode(".map(result -> $L)\n", invokeCodeBlock);
+                }
+                index++;
+            }
+        } else {
+            builder.addCode("return $T.just($L)", ClassName.get(Mono.class), typeParameterName);
+        }
+
+        builder.addCode(
                 CodeBlock.join(
                         Stream.of(
                                 CodeBlock.of(
                                         arguments ?
-                                                "Mono<Void> invokeField = $T.fromStream($T.ofNullable(argumentsContext).map($T.ArgumentsContext::argument).flatMap(argumentContexts -> argumentContexts.stream()))" :
-                                                "Mono<Void> invokeField = $T.fromStream($T.ofNullable(objectValueWithVariableContext).map($T.ObjectValueWithVariableContext::objectFieldWithVariable).flatMap(objectFieldWithVariableContexts -> objectFieldWithVariableContexts.stream()))"
+                                                ".flatMap(result -> $T.fromStream($T.ofNullable(argumentsContext).map($T.ArgumentsContext::argument).flatMap(argumentContexts -> argumentContexts.stream()))" :
+                                                ".flatMap(result -> $T.fromStream($T.ofNullable(objectValueWithVariableContext).map($T.ObjectValueWithVariableContext::objectFieldWithVariable).flatMap(objectFieldWithVariableContexts -> objectFieldWithVariableContexts.stream()))"
                                         ,
                                         ClassName.get(Flux.class),
                                         ClassName.get(Stream.class),
                                         ClassName.get(GraphqlParser.class)
                                 ),
                                 CodeBlock.builder()
+                                        .indent()
                                         .add(".flatMap(argumentContext -> {\n")
                                         .indent()
                                         .add("String fieldName = argumentContext.name().getText();\n")
@@ -192,11 +240,11 @@ public class InputInvokeHandlerBuilder {
                                                                                             CodeBlock caseCodeBlock = CodeBlock.of("case $S:\n", inputValueDefinitionContext.name().getText());
                                                                                             CodeBlock invokeCodeBlock = CodeBlock.of("return $T.justOrEmpty($L.$L()).flatMap(inputValue -> $L(inputValue, argumentContext.valueWithVariable().objectValueWithVariable())).doOnNext($L -> $L.$L($L));",
                                                                                                     ClassName.get(Mono.class),
-                                                                                                    typeParameterName,
+                                                                                                    resultParameterName,
                                                                                                     typeManager.getInputValueGetterMethodName(inputValueDefinitionContext),
                                                                                                     getObjectMethodName(manager.getFieldTypeName(inputValueDefinitionContext.type())),
                                                                                                     typeManager.getFieldName(inputValueDefinitionContext.name().getText()),
-                                                                                                    typeParameterName,
+                                                                                                    resultParameterName,
                                                                                                     typeManager.getInputValueSetterMethodName(inputValueDefinitionContext),
                                                                                                     typeManager.getFieldName(inputValueDefinitionContext.name().getText())
                                                                                             );
@@ -211,12 +259,12 @@ public class InputInvokeHandlerBuilder {
                                                                                             CodeBlock invokeCodeBlock = CodeBlock.of("return $T.from($T.justOrEmpty($L.$L())).flatMap($T::fromIterable).flatMap(item-> $L(item, selectionContext.field().selectionSet())).collectList().doOnNext($L -> $L.$L($L));",
                                                                                                     ClassName.get(Flux.class),
                                                                                                     ClassName.get(Mono.class),
-                                                                                                    typeParameterName,
+                                                                                                    resultParameterName,
                                                                                                     typeManager.getInputValueGetterMethodName(inputValueDefinitionContext),
                                                                                                     ClassName.get(Flux.class),
                                                                                                     getObjectMethodName(manager.getFieldTypeName(inputValueDefinitionContext.type())),
                                                                                                     typeManager.getFieldName(inputValueDefinitionContext.name().getText()),
-                                                                                                    typeParameterName,
+                                                                                                    resultParameterName,
                                                                                                     typeManager.getInputValueSetterMethodName(inputValueDefinitionContext),
                                                                                                     typeManager.getFieldName(inputValueDefinitionContext.name().getText())
                                                                                             );
@@ -233,61 +281,16 @@ public class InputInvokeHandlerBuilder {
                                                 .build()
                                         )
                                         .unindent()
-                                        .add("})")
-                                        .build(),
-                                CodeBlock.of(".then()")
+                                        .add("})\n")
+                                        .add(".then()\n")
+                                        .add(".thenReturn(result)\n")
+                                        .unindent()
+                                        .add(");")
+                                        .build()
                         ).collect(Collectors.toList()),
                         System.lineSeparator()
                 )
         );
-
-        List<Tuple3<String, String, String>> tuple3List = invokeMethods.get(inputObjectTypeDefinitionContext.name().getText());
-        if (tuple3List != null && tuple3List.size() > 0) {
-            int index = 0;
-            for (Tuple3<String, String, String> tuple3 : tuple3List) {
-                String apiVariableName = typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(tuple3._1()).simpleName());
-                String methodName = tuple3._2();
-                ClassName returnClassName = TYPE_UTIL.getClassName(tuple3._3());
-                CodeBlock invokeCodeBlock;
-                if (returnClassName.canonicalName().equals(PublisherBuilder.class.getCanonicalName())) {
-                    invokeCodeBlock = CodeBlock.of("$T.from($L.get().$L($L).buildRs())",
-                            ClassName.get(Mono.class),
-                            apiVariableName,
-                            methodName,
-                            typeParameterName
-                    );
-                } else if (returnClassName.canonicalName().equals(Mono.class.getCanonicalName())) {
-                    invokeCodeBlock = CodeBlock.of("$L.get().$L($L)",
-                            apiVariableName,
-                            methodName,
-                            typeParameterName
-                    );
-                } else if (returnClassName.canonicalName().equals(Flux.class.getCanonicalName())) {
-                    invokeCodeBlock = CodeBlock.of("$L.get().$L($L).last()",
-                            apiVariableName,
-                            methodName,
-                            typeParameterName
-                    );
-                } else {
-                    invokeCodeBlock = CodeBlock.of("$T.justOrEmpty($L.get().$L($L))",
-                            ClassName.get(Mono.class),
-                            apiVariableName,
-                            methodName,
-                            typeParameterName
-                    );
-                }
-                if (index == 0) {
-                    builder.addCode("return $L\n", invokeCodeBlock);
-                } else {
-                    builder.addCode(".then($L)\n", invokeCodeBlock);
-                }
-                index++;
-            }
-            builder.addCode(".then(invokeField)\n")
-                    .addCode(".thenReturn($L);\n", typeParameterName);
-        } else {
-            builder.addCode("return invokeField.thenReturn($L);\n", typeParameterName);
-        }
         return builder.build();
     }
 
