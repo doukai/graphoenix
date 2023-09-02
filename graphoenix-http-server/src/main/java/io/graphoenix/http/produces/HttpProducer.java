@@ -1,5 +1,6 @@
 package io.graphoenix.http.produces;
 
+import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.context.RequestScopeInstanceFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
@@ -21,5 +22,11 @@ public class HttpProducer {
     @RequestScoped
     public Mono<HttpServerResponse> httpServerResponseMono() {
         return RequestScopeInstanceFactory.get(HttpServerResponse.class);
+    }
+
+    @Produces
+    @RequestScoped
+    public Mono<GraphqlParser.OperationDefinitionContext> operationDefinitionContextMono() {
+        return RequestScopeInstanceFactory.get(GraphqlParser.OperationDefinitionContext.class);
     }
 }

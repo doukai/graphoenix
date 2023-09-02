@@ -1,5 +1,6 @@
 package io.graphoenix.http.handler;
 
+import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.context.RequestScopeInstanceFactory;
 import io.graphoenix.core.dto.GraphQLRequest;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
@@ -72,6 +73,7 @@ public class PostRequestHandler extends BaseHandler {
                                             request.receive().aggregate().asString()
                                                     .map(content -> GraphQLRequest.fromJson(jsonProvider.createReader(new StringReader(content)).readObject()))
                                                     .map(graphQLRequest -> operationPreprocessor.preprocess(graphQLRequest.getQuery(), graphQLRequest.getVariables()))
+                                                    .flatMap(operationDefinitionContext -> RequestScopeInstanceFactory.computeIfAbsent(requestId, GraphqlParser.OperationDefinitionContext.class, operationDefinitionContext))
                                                     .doOnNext(operationDefinitionContext -> context.put(OPERATION_DEFINITION, operationDefinitionContext))
                                                     .flatMap(operationDefinitionContext ->
                                                             ScopeEventResolver.initialized(context, RequestScoped.class)
@@ -93,6 +95,7 @@ public class PostRequestHandler extends BaseHandler {
                                             request.receive().aggregate().asString()
                                                     .map(GraphQLRequest::new)
                                                     .map(graphQLRequest -> operationPreprocessor.preprocess(graphQLRequest.getQuery(), graphQLRequest.getVariables()))
+                                                    .flatMap(operationDefinitionContext -> RequestScopeInstanceFactory.computeIfAbsent(requestId, GraphqlParser.OperationDefinitionContext.class, operationDefinitionContext))
                                                     .doOnNext(operationDefinitionContext -> context.put(OPERATION_DEFINITION, operationDefinitionContext))
                                                     .flatMap(operationDefinitionContext ->
                                                             ScopeEventResolver.initialized(context, RequestScoped.class)
@@ -118,6 +121,7 @@ public class PostRequestHandler extends BaseHandler {
                                             request.receive().aggregate().asString()
                                                     .map(content -> GraphQLRequest.fromJson(jsonProvider.createReader(new StringReader(content)).readObject()))
                                                     .map(graphQLRequest -> operationPreprocessor.preprocess(graphQLRequest.getQuery(), graphQLRequest.getVariables()))
+                                                    .flatMap(operationDefinitionContext -> RequestScopeInstanceFactory.computeIfAbsent(requestId, GraphqlParser.OperationDefinitionContext.class, operationDefinitionContext))
                                                     .doOnNext(operationDefinitionContext -> context.put(OPERATION_DEFINITION, operationDefinitionContext))
                                                     .flatMapMany(operationDefinitionContext ->
                                                             ScopeEventResolver.initialized(context, RequestScoped.class)

@@ -79,6 +79,7 @@ public class GetRequestHandler extends BaseHandler {
                     .send(
                             RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerRequest.class, request)
                                     .then(RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerResponse.class, response))
+                                    .then(RequestScopeInstanceFactory.computeIfAbsent(requestId, GraphqlParser.OperationDefinitionContext.class, operationDefinitionContext))
                                     .thenMany(
                                             ScopeEventResolver.initialized(context, RequestScoped.class)
                                                     .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
@@ -95,6 +96,7 @@ public class GetRequestHandler extends BaseHandler {
                     .sendString(
                             RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerRequest.class, request)
                                     .then(RequestScopeInstanceFactory.computeIfAbsent(requestId, HttpServerResponse.class, response))
+                                    .then(RequestScopeInstanceFactory.computeIfAbsent(requestId, GraphqlParser.OperationDefinitionContext.class, operationDefinitionContext))
                                     .then(
                                             ScopeEventResolver.initialized(context, RequestScoped.class)
                                                     .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))

@@ -1162,9 +1162,9 @@ public class InjectProcessor extends AbstractProcessor {
 
                             String returnTypeName = processorManager.getQualifiedNameByType(providesMethodDeclaration.getType());
                             if (providesMethodDeclaration.getType().isClassOrInterfaceType() && returnTypeName.equals(PublisherBuilder.class.getName()) || returnTypeName.equals(Mono.class.getName())) {
-                                producesComponentInterfaceDeclaration.setName(providesMethodDeclaration.getType().asClassOrInterfaceType().getTypeArguments().orElseThrow(() -> new InjectionProcessException(TYPE_ARGUMENT_NOT_EXIST)).get(0).toString() + "_Component");
+                                producesComponentInterfaceDeclaration.setName(providesMethodDeclaration.getType().asClassOrInterfaceType().getTypeArguments().orElseThrow(() -> new InjectionProcessException(TYPE_ARGUMENT_NOT_EXIST)).get(0).toString().replaceAll("\\.", "_") + "_Component");
                             } else {
-                                producesComponentInterfaceDeclaration.setName(providesMethodDeclaration.getType().toString() + "_Component");
+                                producesComponentInterfaceDeclaration.setName(providesMethodDeclaration.getType().toString().replaceAll("\\.", "_") + "_Component");
                             }
 
                             Type typeClone = providesMethodDeclaration.getType().clone();
