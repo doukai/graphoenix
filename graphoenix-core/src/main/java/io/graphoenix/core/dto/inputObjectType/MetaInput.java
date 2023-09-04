@@ -1,31 +1,18 @@
-package io.graphoenix.showcase.user.dto.inputObjectType;
+package io.graphoenix.core.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.core.dto.inputObjectType.MetaInput;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
-import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
 import java.time.LocalDateTime;
-import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
 @Input
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class UserProfileMutationTypeArguments extends MetaInput {
-  private String id;
-
-  private UserInput user;
-
-  private String email;
-
-  private String address;
-
-  private Boolean isDeprecated;
-
+public class MetaInput {
   private Integer version;
 
   private Integer realmId;
@@ -39,53 +26,6 @@ public class UserProfileMutationTypeArguments extends MetaInput {
   private LocalDateTime updateTime;
 
   private String createGroupId;
-
-  @DefaultValue("\"UserProfile\"")
-  private String __typename;
-
-  private Integer userId;
-
-  private UserProfileExpression where;
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public UserInput getUser() {
-    return this.user;
-  }
-
-  public void setUser(UserInput user) {
-    this.user = user;
-  }
-
-  public String getEmail() {
-    return this.email;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  public String getAddress() {
-    return this.address;
-  }
-
-  public void setAddress(String address) {
-    this.address = address;
-  }
-
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
-  }
 
   public Integer getVersion() {
     return this.version;
@@ -141,29 +81,5 @@ public class UserProfileMutationTypeArguments extends MetaInput {
 
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public String get__typename() {
-    return this.__typename;
-  }
-
-  public void set__typename(String __typename) {
-    this.__typename = __typename;
-  }
-
-  public Integer getUserId() {
-    return this.userId;
-  }
-
-  public void setUserId(Integer userId) {
-    this.userId = userId;
-  }
-
-  public UserProfileExpression getWhere() {
-    return this.where;
-  }
-
-  public void setWhere(UserProfileExpression where) {
-    this.where = where;
   }
 }

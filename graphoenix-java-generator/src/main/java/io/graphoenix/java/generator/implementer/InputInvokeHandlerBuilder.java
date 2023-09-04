@@ -11,6 +11,9 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.handler.MetaExpressionHandler;
+import io.graphoenix.core.handler.MetaInputHandler;
 import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple3;
@@ -34,8 +37,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.java.generator.utils.TypeUtil.TYPE_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.ARGUMENTS_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.EXPRESSION_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
 
 @ApplicationScoped
 public class InputInvokeHandlerBuilder {
@@ -86,6 +95,22 @@ public class InputInvokeHandlerBuilder {
                                 Modifier.FINAL
                         ).build()
                 )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(MetaExpressionHandler.class)),
+                                "metaExpressionHandlerProvider",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(MetaInputHandler.class)),
+                                "metaInputHandlerProvider",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
                 .addFields(buildFields())
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeInvokeMethods())
@@ -116,6 +141,8 @@ public class InputInvokeHandlerBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(Jsonb.class)), "jsonb")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(MetaExpressionHandler.class)), "metaExpressionHandlerProvider")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(MetaInputHandler.class)), "metaInputHandlerProvider")
                 .addParameters(
                         classNameSet.stream()
                                 .map(className ->
@@ -126,7 +153,9 @@ public class InputInvokeHandlerBuilder {
                                 )
                                 .collect(Collectors.toList())
                 )
-                .addStatement("this.jsonb = jsonb");
+                .addStatement("this.jsonb = jsonb")
+                .addStatement("this.metaExpressionHandlerProvider = metaExpressionHandlerProvider")
+                .addStatement("this.metaInputHandlerProvider = metaInputHandlerProvider");
 
         classNameSet.forEach(className ->
                 builder.addStatement("this.$L = $L",
@@ -165,9 +194,63 @@ public class InputInvokeHandlerBuilder {
             builder.addParameter(ClassName.get(GraphqlParser.ObjectValueWithVariableContext.class), "objectValueWithVariableContext");
         }
 
+        String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
+        String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
+        String subscriptionTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIBE_TYPE_NOT_EXIST));
+        if (inputObjectTypeDefinitionContext.name().getText().endsWith(INPUT_SUFFIX) && manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(INPUT_SUFFIX)))) {
+            builder.addCode("return metaInputHandlerProvider.get().handle($S, $L, $T.class)",
+                    inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(INPUT_SUFFIX)),
+                    typeParameterName,
+                    typeClassName
+            );
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith("List" + mutationTypeName + ARGUMENTS_SUFFIX) && manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf("List" + mutationTypeName + ARGUMENTS_SUFFIX)))) {
+            builder.addCode("return metaInputHandlerProvider.get().handle($S, $L, $T.class)",
+                    inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf("List" + mutationTypeName + ARGUMENTS_SUFFIX)),
+                    typeParameterName,
+                    typeClassName
+            );
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(mutationTypeName + ARGUMENTS_SUFFIX) && manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(mutationTypeName + ARGUMENTS_SUFFIX)))) {
+            builder.addCode("return metaInputHandlerProvider.get().handle($S, $L, $T.class)",
+                    inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(mutationTypeName + ARGUMENTS_SUFFIX)),
+                    typeParameterName,
+                    typeClassName
+            );
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(EXPRESSION_SUFFIX) && manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(EXPRESSION_SUFFIX)))) {
+            builder.addCode("return metaExpressionHandlerProvider.get().handle($S, $L, $T.class)",
+                    inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(EXPRESSION_SUFFIX)),
+                    typeParameterName,
+                    typeClassName
+            );
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith("List" + queryTypeName + ARGUMENTS_SUFFIX) && manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf("List" + queryTypeName + ARGUMENTS_SUFFIX)))) {
+            builder.addCode("return metaExpressionHandlerProvider.get().handle($S, $L, $T.class)",
+                    inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf("List" + queryTypeName + ARGUMENTS_SUFFIX)),
+                    typeParameterName,
+                    typeClassName
+            );
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith("List" + subscriptionTypeName + ARGUMENTS_SUFFIX) && manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf("List" + subscriptionTypeName + ARGUMENTS_SUFFIX)))) {
+            builder.addCode("return metaExpressionHandlerProvider.get().handle($S, $L, $T.class)",
+                    inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf("List" + subscriptionTypeName + ARGUMENTS_SUFFIX)),
+                    typeParameterName,
+                    typeClassName
+            );
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(queryTypeName + ARGUMENTS_SUFFIX) && manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(queryTypeName + ARGUMENTS_SUFFIX)))) {
+            builder.addCode("return metaExpressionHandlerProvider.get().handle($S, $L, $T.class)",
+                    inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(queryTypeName + ARGUMENTS_SUFFIX)),
+                    typeParameterName,
+                    typeClassName
+            );
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(subscriptionTypeName + ARGUMENTS_SUFFIX) && manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(subscriptionTypeName + ARGUMENTS_SUFFIX)))) {
+            builder.addCode("return metaExpressionHandlerProvider.get().handle($S, $L, $T.class)",
+                    inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(subscriptionTypeName + ARGUMENTS_SUFFIX)),
+                    typeParameterName,
+                    typeClassName
+            );
+        } else {
+            builder.addCode("return $T.just($L)", ClassName.get(Mono.class), typeParameterName);
+        }
+
         List<Tuple3<String, String, String>> tuple3List = invokeMethods.get(inputObjectTypeDefinitionContext.name().getText());
         if (tuple3List != null && tuple3List.size() > 0) {
-            int index = 0;
             for (Tuple3<String, String, String> tuple3 : tuple3List) {
                 String apiVariableName = typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(tuple3._1()).simpleName());
                 String methodName = tuple3._2();
@@ -178,37 +261,30 @@ public class InputInvokeHandlerBuilder {
                             ClassName.get(Mono.class),
                             apiVariableName,
                             methodName,
-                            index == 0 ? typeParameterName : resultParameterName
+                            resultParameterName
                     );
                 } else if (returnClassName.canonicalName().equals(Mono.class.getCanonicalName())) {
                     invokeCodeBlock = CodeBlock.of("$L.get().$L($L)",
                             apiVariableName,
                             methodName,
-                            index == 0 ? typeParameterName : resultParameterName
+                            resultParameterName
                     );
                 } else if (returnClassName.canonicalName().equals(Flux.class.getCanonicalName())) {
                     invokeCodeBlock = CodeBlock.of("$L.get().$L($L).last()",
                             apiVariableName,
                             methodName,
-                            index == 0 ? typeParameterName : resultParameterName
+                            resultParameterName
                     );
                 } else {
                     invokeCodeBlock = CodeBlock.of("$T.justOrEmpty($L.get().$L($L))",
                             ClassName.get(Mono.class),
                             apiVariableName,
                             methodName,
-                            index == 0 ? typeParameterName : resultParameterName
+                            resultParameterName
                     );
                 }
-                if (index == 0) {
-                    builder.addCode("return $L\n", invokeCodeBlock);
-                } else {
-                    builder.addCode(".map(result -> $L)\n", invokeCodeBlock);
-                }
-                index++;
+                builder.addCode(".flatMap(result -> $L)\n", invokeCodeBlock);
             }
-        } else {
-            builder.addCode("return $T.just($L)", ClassName.get(Mono.class), typeParameterName);
         }
 
         builder.addCode(

@@ -2,6 +2,7 @@ package io.graphoenix.introspection.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
 import io.graphoenix.core.dto.enumType.__TypeKind;
+import io.graphoenix.core.dto.inputObjectType.MetaInput;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -16,7 +17,7 @@ import org.eclipse.microprofile.graphql.Input;
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class __TypeListMutationTypeArguments {
+public class __TypeListMutationTypeArguments extends MetaInput {
   private String name;
 
   private __SchemaInput ofSchema;

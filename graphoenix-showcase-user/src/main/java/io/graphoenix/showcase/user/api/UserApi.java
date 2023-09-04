@@ -34,11 +34,11 @@ public class UserApi {
                 );
     }
 
-    public Mono<Void> userTest(@Source UserListQueryTypeArguments userListQueryTypeArguments) {
+    public Mono<UserListQueryTypeArguments> userTest(@Source UserListQueryTypeArguments userListQueryTypeArguments) {
         return Mono.empty();
     }
 
-    public Mono<Void> userTest2(@Source UserListQueryTypeArguments userListQueryTypeArguments) {
+    public Mono<UserListQueryTypeArguments> userTest2(@Source UserListQueryTypeArguments userListQueryTypeArguments) {
         return Mono.empty();
     }
 }

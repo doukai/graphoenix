@@ -3,6 +3,7 @@ package io.graphoenix.introspection.dto.inputObjectType;
 import com.dslplatform.json.CompiledJson;
 import io.graphoenix.core.dto.enumType.Conditional;
 import io.graphoenix.core.dto.inputObjectType.IntExpression;
+import io.graphoenix.core.dto.inputObjectType.MetaExpression;
 import io.graphoenix.core.dto.inputObjectType.StringExpression;
 import io.graphoenix.core.dto.inputObjectType.__DirectiveLocationExpression;
 import io.graphoenix.spi.annotation.Ignore;
@@ -16,7 +17,7 @@ import org.eclipse.microprofile.graphql.Input;
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class __DirectiveLocationsQueryTypeArguments {
+public class __DirectiveLocationsQueryTypeArguments extends MetaExpression {
   private StringExpression id;
 
   private StringExpression directiveName;

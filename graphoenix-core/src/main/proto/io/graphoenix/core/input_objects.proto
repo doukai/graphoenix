@@ -6,7 +6,25 @@ option java_package = "io.graphoenix.core.dto.inputObjectType.grpc";
 package io.graphoenix.core.grpc;
 
 import "io/graphoenix/core/enums.proto";
+import "google/protobuf/timestamp.proto";
 
+message MetaInput {
+    optional int32 version = 1;
+    optional int32 realm_id = 2;
+    optional string create_user_id = 3;
+    optional google.protobuf.Timestamp create_time = 4;
+    optional string update_user_id = 5;
+    optional google.protobuf.Timestamp update_time = 6;
+    optional string create_group_id = 7;
+}
+message MetaExpression {
+    optional IntExpression realm_id = 1;
+    optional StringExpression create_user_id = 2;
+    optional StringExpression create_time = 3;
+    optional StringExpression update_user_id = 4;
+    optional StringExpression update_time = 5;
+    optional StringExpression create_group_id = 6;
+}
 message IDExpression {
     optional Operator opr = 1;
     optional string val = 2;
