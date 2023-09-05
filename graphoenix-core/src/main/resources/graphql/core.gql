@@ -98,6 +98,30 @@ interface Meta {
     updateTime: Timestamp
     createGroupId: String
 }
+
+input MetaInput @inputInterface {
+    version: Int
+    realmId: Int
+    createUserId: String
+    createTime: Timestamp
+    updateUserId: String
+    updateTime: Timestamp
+    createGroupId: String
+}
+
+input MetaArguments @inputInterface {
+    where: MetaExpression
+}
+
+input MetaExpression @inputInterface {
+    realmId: IntExpression
+    createUserId: StringExpression
+    createTime: StringExpression
+    updateUserId: StringExpression
+    updateTime: StringExpression
+    createGroupId: StringExpression
+}
+
 type PageInfo @containerType {
     hasNextPage: Boolean!
     hasPreviousPage: Boolean!
@@ -219,3 +243,7 @@ directive @permitAll on FIELD | OBJECT
 directive @denyAll on FIELD | OBJECT
 
 directive @rolesAllowed(roles: [String]) on FIELD | OBJECT
+
+directive @implementInputs(inputs: [String!]) on INPUT_OBJECT
+
+directive @inputInterface on INPUT_OBJECT

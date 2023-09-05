@@ -90,6 +90,26 @@ interface Meta @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageN
   updateTime: Timestamp
   createGroupId: String
 }
+input MetaInput @inputInterface @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.MetaInput", annotationName: "io.graphoenix.core.dto.annotation.MetaInput", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.MetaInput") {
+  version: Int
+  realmId: Int
+  createUserId: String
+  createTime: Timestamp
+  updateUserId: String
+  updateTime: Timestamp
+  createGroupId: String
+}
+input MetaArguments @inputInterface @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.MetaArguments", annotationName: "io.graphoenix.core.dto.annotation.MetaArguments", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.MetaArguments") {
+  where: MetaExpression
+}
+input MetaExpression @inputInterface @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.MetaExpression", annotationName: "io.graphoenix.core.dto.annotation.MetaExpression", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.MetaExpression") {
+  realmId: IntExpression
+  createUserId: StringExpression
+  createTime: StringExpression
+  updateUserId: StringExpression
+  updateTime: StringExpression
+  createGroupId: StringExpression
+}
 type PageInfo @containerType @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(grpcClassName: "io.graphoenix.core.dto.objectType.grpc.PageInfo", className: "io.graphoenix.core.dto.objectType.PageInfo") {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
@@ -227,4 +247,6 @@ directive @format(value: String locale: String) on FIELD | FIELD_DEFINITION
 directive @permitAll on FIELD | OBJECT
 directive @denyAll on FIELD | OBJECT
 directive @rolesAllowed(roles: [String]) on FIELD | OBJECT
+directive @implementInputs(inputs: [String]) on INPUT_OBJECT
+directive @inputInterface on INPUT_OBJECT
 directive @validation(minLength: Int maxLength: Int pattern: String format: String contentMediaType: String contentEncoding: String minimum: Float exclusiveMinimum: Float maximum: Float exclusiveMaximum: Float multipleOf: Float const: String enum: [String] items: ValidationInput minItems: Int maxItems: Int uniqueItems: Boolean allOf: [ValidationInput] anyOf: [ValidationInput] oneOf: [ValidationInput] not: ValidationInput properties: [Property] if: ValidationInput then: ValidationInput else: ValidationInput dependentRequired: [Property]) on OBJECT | FIELD_DEFINITION | INPUT_OBJECT | INPUT_FIELD_DEFINITION

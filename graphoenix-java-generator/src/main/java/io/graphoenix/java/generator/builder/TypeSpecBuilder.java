@@ -134,19 +134,34 @@ public class TypeSpecBuilder {
     }
 
     public TypeSpec buildClass(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        TypeSpec.Builder builder = TypeSpec.classBuilder(inputObjectTypeDefinitionContext.name().getText())
-                .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Input.class)
-                .addAnnotation(CompiledJson.class)
+        boolean isInputInterface = manager.isInputInterface(inputObjectTypeDefinitionContext);
+        TypeSpec.Builder builder;
+        if (isInputInterface) {
+            builder = TypeSpec.interfaceBuilder(inputObjectTypeDefinitionContext.name().getText());
+        } else {
+            builder = TypeSpec.classBuilder(inputObjectTypeDefinitionContext.name().getText())
+                    .addAnnotation(CompiledJson.class)
+                    .addAnnotation(Input.class);
+        }
+        builder.addModifiers(Modifier.PUBLIC)
                 .addAnnotation(getGeneratedAnnotationSpec())
                 .addAnnotation(getSchemaBeanAnnotationSpec());
         inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
                 .forEach(inputValueDefinitionContext -> {
                             FieldSpec fieldSpec = buildField(inputValueDefinitionContext);
-                            builder.addField(fieldSpec);
+                            if (!isInputInterface) {
+                                builder.addField(fieldSpec);
+                            }
                             addGetterAndSetter(fieldSpec, builder, null);
                         }
                 );
+        if (manager.hasImplementInputs(inputObjectTypeDefinitionContext)) {
+            builder.addSuperinterfaces(
+                    manager.getInputInterfaces(inputObjectTypeDefinitionContext)
+                            .map(interfaceTypeDefinitionContext -> TYPE_NAME_UTIL.toClassName(packageManager.getClassName(interfaceTypeDefinitionContext)))
+                            .collect(Collectors.toList())
+            );
+        }
         if (inputObjectTypeDefinitionContext.description() != null) {
             builder.addJavadoc("$S", inputObjectTypeDefinitionContext.description().getText());
             builder.addAnnotation(

@@ -10,10 +10,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+
 @ApplicationScoped
 public class GraphQLInputObjectManager implements IGraphQLInputObjectManager {
 
     private final Map<String, GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinitionMap = new LinkedHashMap<>();
+
+    private final Map<String, Map<String, GraphqlParser.InputObjectTypeDefinitionContext>> implementsMap = new LinkedHashMap<>();
 
     @Override
     public Map<String, GraphqlParser.InputObjectTypeDefinitionContext> register(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
@@ -21,6 +25,17 @@ public class GraphQLInputObjectManager implements IGraphQLInputObjectManager {
         Logger.info("registered inputObject {}", inputObjectTypeDefinitionContext.name().getText());
 
         return inputObjectTypeDefinitionMap;
+    }
+
+    @Override
+    public Map<String, Map<String, GraphqlParser.InputObjectTypeDefinitionContext>> registerImplements(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        getInterfaceNames(inputObjectTypeDefinitionContext.directives())
+                .forEach(interfaceName -> {
+                            implementsMap.computeIfAbsent(interfaceName, key -> new LinkedHashMap<>());
+                            implementsMap.get(interfaceName).put(inputObjectTypeDefinitionContext.name().getText(), inputObjectTypeDefinitionContext);
+                        }
+                );
+        return implementsMap;
     }
 
     @Override
@@ -36,6 +51,18 @@ public class GraphQLInputObjectManager implements IGraphQLInputObjectManager {
     @Override
     public Stream<GraphqlParser.InputObjectTypeDefinitionContext> getInputObjectTypeDefinitions() {
         return inputObjectTypeDefinitionMap.values().stream();
+    }
+
+    @Override
+    public Stream<String> getInterfaceNames(GraphqlParser.DirectivesContext directivesContext) {
+        if (directivesContext == null) {
+            return Stream.empty();
+        }
+        return directivesContext.directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals("implementInputs"))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("inputs")))
+                .flatMap(argumentContext -> argumentContext.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream())
+                .map(valueWithVariableContext -> DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue()));
     }
 
     @Override

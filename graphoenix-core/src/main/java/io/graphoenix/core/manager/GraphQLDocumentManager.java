@@ -386,6 +386,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         } else if (typeDefinitionContext.inputObjectTypeDefinition() != null) {
             graphQLInputObjectManager.register(typeDefinitionContext.inputObjectTypeDefinition());
             graphQLInputValueManager.register(typeDefinitionContext.inputObjectTypeDefinition());
+            graphQLInputObjectManager.registerImplements(typeDefinitionContext.inputObjectTypeDefinition());
         }
     }
 
@@ -434,6 +435,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 graphQLInputObjectManager.register(typeDefinitionContext.inputObjectTypeDefinition());
                 graphQLInputValueManager.register(typeDefinitionContext.inputObjectTypeDefinition());
             }
+            graphQLInputObjectManager.registerImplements(typeDefinitionContext.inputObjectTypeDefinition());
         }
     }
 
@@ -1688,6 +1690,27 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 Stream.ofNullable(directiveLocationsContext.directiveLocations())
                         .flatMap(this::getDirectiveLocations)
         );
+    }
+
+    @Override
+    public boolean isInputInterface(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Stream.ofNullable(inputObjectTypeDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals("inputInterface"));
+    }
+
+    @Override
+    public boolean hasImplementInputs(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Stream.ofNullable(inputObjectTypeDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals("implementInputs"));
+    }
+
+    @Override
+    public Stream<GraphqlParser.InputObjectTypeDefinitionContext> getInputInterfaces(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return graphQLInputObjectManager.getInterfaceNames(inputObjectTypeDefinitionContext.directives())
+                .map(this::getInputObject)
+                .flatMap(Optional::stream);
     }
 
     @Override
