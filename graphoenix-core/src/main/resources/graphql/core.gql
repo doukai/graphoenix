@@ -98,23 +98,6 @@ interface Meta {
     updateTime: Timestamp
     createGroupId: String
 }
-input MetaInput {
-    version: Int
-    realmId: Int
-    createUserId: String
-    createTime: Timestamp
-    updateUserId: String
-    updateTime: Timestamp
-    createGroupId: String
-}
-input MetaExpression {
-    realmId: IntExpression
-    createUserId: StringExpression
-    createTime: StringExpression
-    updateUserId: StringExpression
-    updateTime: StringExpression
-    createGroupId: StringExpression
-}
 type PageInfo @containerType {
     hasNextPage: Boolean!
     hasPreviousPage: Boolean!

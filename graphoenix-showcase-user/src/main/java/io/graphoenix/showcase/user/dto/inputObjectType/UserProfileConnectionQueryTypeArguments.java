@@ -3,7 +3,6 @@ package io.graphoenix.showcase.user.dto.inputObjectType;
 import com.dslplatform.json.CompiledJson;
 import io.graphoenix.core.dto.enumType.Conditional;
 import io.graphoenix.core.dto.inputObjectType.IntExpression;
-import io.graphoenix.core.dto.inputObjectType.MetaExpression;
 import io.graphoenix.core.dto.inputObjectType.StringExpression;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
@@ -18,7 +17,7 @@ import org.eclipse.microprofile.graphql.Input;
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class UserProfileConnectionQueryTypeArguments extends MetaExpression {
+public class UserProfileConnectionQueryTypeArguments {
   private StringExpression id;
 
   private UserExpression user;

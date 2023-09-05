@@ -16,7 +16,7 @@ import org.eclipse.microprofile.graphql.Name;
 @Documented
 @Retention(RetentionPolicy.SOURCE)
 @Directive("validation")
-@Target({ElementType.TYPE,ElementType.FIELD})
+@Target({ElementType.FIELD,ElementType.TYPE})
 public @interface Validation {
   int minLength();
 

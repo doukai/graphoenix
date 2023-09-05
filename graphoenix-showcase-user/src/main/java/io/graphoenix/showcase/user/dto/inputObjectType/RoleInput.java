@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.user.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.core.dto.inputObjectType.MetaInput;
 import io.graphoenix.showcase.user.dto.enumType.RoleType;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
@@ -18,7 +17,7 @@ import org.eclipse.microprofile.graphql.NonNull;
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class RoleInput extends MetaInput {
+public class RoleInput {
   private String id;
 
   @NonNull

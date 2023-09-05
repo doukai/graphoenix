@@ -13,8 +13,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.dto.inputObjectType.MetaExpression;
-import io.graphoenix.core.dto.inputObjectType.MetaInput;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.java.generator.implementer.TypeManager;
@@ -58,7 +56,6 @@ import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
-import static io.graphoenix.spi.constant.Hammurabi.ARGUMENTS_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.CURSOR_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.EXPRESSION_SUFFIX;
@@ -67,13 +64,10 @@ import static io.graphoenix.spi.constant.Hammurabi.GROUP_BY_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.LAST_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.OFFSET_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.ORDER_BY_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.ORDER_BY_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.PAGE_INFO_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.SUBSCRIPTION_TYPE_NAME;
 
 @ApplicationScoped
 public class TypeSpecBuilder {
@@ -146,44 +140,6 @@ public class TypeSpecBuilder {
                 .addAnnotation(CompiledJson.class)
                 .addAnnotation(getGeneratedAnnotationSpec())
                 .addAnnotation(getSchemaBeanAnnotationSpec());
-
-        String queryTypeName = manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME);
-        String mutationTypeName = manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME);
-        String subscriptionTypeName = manager.getSubscriptionOperationTypeName().orElse(SUBSCRIPTION_TYPE_NAME);
-        if (inputObjectTypeDefinitionContext.name().getText().endsWith(INPUT_SUFFIX)) {
-            if (manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(INPUT_SUFFIX)))) {
-                builder.superclass(MetaInput.class);
-            }
-        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith("List" + mutationTypeName + ARGUMENTS_SUFFIX)) {
-            if (manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf("List" + mutationTypeName + ARGUMENTS_SUFFIX)))) {
-                builder.superclass(MetaInput.class);
-            }
-        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(mutationTypeName + ARGUMENTS_SUFFIX)) {
-            if (manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(mutationTypeName + ARGUMENTS_SUFFIX)))) {
-                builder.superclass(MetaInput.class);
-            }
-        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(EXPRESSION_SUFFIX)) {
-            if (manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(EXPRESSION_SUFFIX)))) {
-                builder.superclass(MetaExpression.class);
-            }
-        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith("List" + queryTypeName + ARGUMENTS_SUFFIX)) {
-            if (manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf("List" + queryTypeName + ARGUMENTS_SUFFIX)))) {
-                builder.superclass(MetaExpression.class);
-            }
-        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith("List" + subscriptionTypeName + ARGUMENTS_SUFFIX)) {
-            if (manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf("List" + subscriptionTypeName + ARGUMENTS_SUFFIX)))) {
-                builder.superclass(MetaExpression.class);
-            }
-        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(queryTypeName + ARGUMENTS_SUFFIX)) {
-            if (manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(queryTypeName + ARGUMENTS_SUFFIX)))) {
-                builder.superclass(MetaExpression.class);
-            }
-        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(subscriptionTypeName + ARGUMENTS_SUFFIX)) {
-            if (manager.isObject(inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(subscriptionTypeName + ARGUMENTS_SUFFIX)))) {
-                builder.superclass(MetaExpression.class);
-            }
-        }
-
         inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
                 .forEach(inputValueDefinitionContext -> {
                             FieldSpec fieldSpec = buildField(inputValueDefinitionContext);
@@ -1196,24 +1152,24 @@ public class TypeSpecBuilder {
                                     );
                             if (layer < graphQLConfig.getInputLayers() - 1) {
                                 builder.addMethods(
-                                                manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                        .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                        .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
-                                                        .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-                                                        .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
-                                                        .map(fieldDefinitionContext ->
-                                                                MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
-                                                                        .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                        .returns(
-                                                                                manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
-                                                                                        ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))) :
-                                                                                        ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))
-                                                                        )
-                                                                        .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type(), layer + 1))
-                                                                        .build()
-                                                        )
-                                                        .collect(Collectors.toList())
-                                        )
+                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
+                                                .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                                                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                                                .map(fieldDefinitionContext ->
+                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                .returns(
+                                                                        manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
+                                                                                ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))) :
+                                                                                ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))
+                                                                )
+                                                                .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type(), layer + 1))
+                                                                .build()
+                                                )
+                                                .collect(Collectors.toList())
+                                )
                                         .addMethod(
                                                 MethodSpec.methodBuilder(LIST_INPUT_NAME)
                                                         .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)

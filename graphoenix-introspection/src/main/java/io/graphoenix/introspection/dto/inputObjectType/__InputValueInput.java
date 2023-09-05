@@ -1,7 +1,6 @@
 package io.graphoenix.introspection.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.core.dto.inputObjectType.MetaInput;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -16,7 +15,7 @@ import org.eclipse.microprofile.graphql.NonNull;
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class __InputValueInput extends MetaInput {
+public class __InputValueInput {
   private String id;
 
   private String name;

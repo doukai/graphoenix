@@ -4,7 +4,6 @@ import com.dslplatform.json.CompiledJson;
 import io.graphoenix.core.dto.enumType.Conditional;
 import io.graphoenix.core.dto.inputObjectType.BooleanExpression;
 import io.graphoenix.core.dto.inputObjectType.IntExpression;
-import io.graphoenix.core.dto.inputObjectType.MetaExpression;
 import io.graphoenix.core.dto.inputObjectType.StringExpression;
 import io.graphoenix.core.dto.inputObjectType.__DirectiveLocationExpression;
 import io.graphoenix.spi.annotation.Ignore;
@@ -20,7 +19,7 @@ import org.eclipse.microprofile.graphql.Input;
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class __DirectiveConnectionQueryTypeArguments extends MetaExpression {
+public class __DirectiveConnectionQueryTypeArguments {
   private StringExpression name;
 
   private __SchemaExpression ofSchema;
