@@ -99,9 +99,6 @@ input MetaInput @inputInterface @packageInfo(grpcPackageName: "io.graphoenix.cor
   updateTime: Timestamp
   createGroupId: String
 }
-input MetaArguments @inputInterface @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.MetaArguments", annotationName: "io.graphoenix.core.dto.annotation.MetaArguments", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.MetaArguments") {
-  where: MetaExpression
-}
 input MetaExpression @inputInterface @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.MetaExpression", annotationName: "io.graphoenix.core.dto.annotation.MetaExpression", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.MetaExpression") {
   realmId: IntExpression
   createUserId: StringExpression

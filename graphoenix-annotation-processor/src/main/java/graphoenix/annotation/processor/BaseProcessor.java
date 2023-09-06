@@ -219,6 +219,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                         typeUtils.asElement(variableElement.asType()).getAnnotation(Input.class) != null
                                         )
                                         .map(variableElement -> typeUtils.asElement(variableElement.asType()).getSimpleName().toString())
+                                        .filter(inputName -> manager.getInputObject(inputName).isEmpty() || !manager.isInputInterface(manager.getInputObject(inputName).get()))
                                         .map(inputName ->
                                                 manager.getInputObject(inputName)
                                                         .map(inputObjectTypeDefinitionContext ->
@@ -255,7 +256,57 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                                         )
                                                         );
                                                     }
-                                                    manager.registerGraphQL(inputObjectType.toString());
+                                                    manager.mergeDocument(inputObjectType.toString());
+                                                }
+                                        );
+                            } else if (subElement.getKind().equals(ElementKind.METHOD) &&
+                                    ((ExecutableElement) subElement).getParameters().stream()
+                                            .anyMatch(variableElement ->
+                                                    variableElement.getAnnotation(Source.class) != null &&
+                                                            typeUtils.asElement(variableElement.asType()).getAnnotation(Input.class) != null
+                                            )
+                            ) {
+                                ExecutableElement executableElement = (ExecutableElement) subElement;
+                                executableElement.getParameters().stream()
+                                        .filter(variableElement ->
+                                                variableElement.getAnnotation(Source.class) != null &&
+                                                        typeUtils.asElement(variableElement.asType()).getAnnotation(Input.class) != null
+                                        )
+                                        .map(variableElement -> typeUtils.asElement(variableElement.asType()).getSimpleName().toString())
+                                        .flatMap(inputName -> manager.getInputObject(inputName).stream())
+                                        .filter(manager::isInputInterface)
+                                        .flatMap(inputObjectTypeDefinitionContext -> manager.getImplementsInputObjectTypeDefinition(inputObjectTypeDefinitionContext.name().getText()))
+                                        .map(inputObjectTypeDefinitionContext -> documentBuilder.buildInputObjectType(inputObjectTypeDefinitionContext))
+                                        .forEach(inputObjectType -> {
+                                                    Map<String, Object> invoke = Map.of(
+                                                            "className", executableElement.getEnclosingElement().toString(),
+                                                            "methodName", executableElement.getSimpleName().toString(),
+                                                            "parameters",
+                                                            new ArrayValueWithVariable(
+                                                                    executableElement.getParameters().stream()
+                                                                            .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", ELEMENT_UTIL.getTypeMirrorName(parameter.asType(), typeUtils)))
+                                                                            .collect(Collectors.toList())
+                                                            ),
+                                                            "returnClassName", executableElement.getReturnType().toString()
+                                                    );
+                                                    Optional<Directive> invokes = Stream.ofNullable(inputObjectType.getDirectives())
+                                                            .flatMap(Collection::stream)
+                                                            .filter(directive -> directive.getName().equals(INVOKES_DIRECTIVE_NAME))
+                                                            .findFirst();
+                                                    if (invokes.isPresent() && invokes.get().getArguments().get("list") != null && invokes.get().getArguments().get("list").getValueType().equals(JsonValue.ValueType.ARRAY)) {
+                                                        invokes.get().getArguments().put("list", jsonProvider.createArrayBuilder(invokes.get().getArguments().get("list").asJsonArray()).add(new ObjectValueWithVariable(invoke)).build());
+                                                    } else {
+                                                        inputObjectType.addDirective(
+                                                                new Directive()
+                                                                        .setName(INVOKES_DIRECTIVE_NAME)
+                                                                        .addArgument("list",
+                                                                                new ArrayValueWithVariable(
+                                                                                        Collections.singleton(invoke)
+                                                                                )
+                                                                        )
+                                                        );
+                                                    }
+                                                    manager.mergeDocument(inputObjectType.toString());
                                                 }
                                         );
                             }

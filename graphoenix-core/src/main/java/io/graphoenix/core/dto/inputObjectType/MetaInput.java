@@ -1,85 +1,39 @@
 package io.graphoenix.core.dto.inputObjectType;
 
-import com.dslplatform.json.CompiledJson;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Integer;
 import java.lang.String;
 import java.time.LocalDateTime;
-import org.eclipse.microprofile.graphql.Input;
 
-@Input
-@CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class MetaInput {
-  private Integer version;
+public interface MetaInput {
+  Integer getVersion();
 
-  private Integer realmId;
+  void setVersion(Integer version);
 
-  private String createUserId;
+  Integer getRealmId();
 
-  private LocalDateTime createTime;
+  void setRealmId(Integer realmId);
 
-  private String updateUserId;
+  String getCreateUserId();
 
-  private LocalDateTime updateTime;
+  void setCreateUserId(String createUserId);
 
-  private String createGroupId;
+  LocalDateTime getCreateTime();
 
-  public Integer getVersion() {
-    return this.version;
-  }
+  void setCreateTime(LocalDateTime createTime);
 
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
+  String getUpdateUserId();
 
-  public Integer getRealmId() {
-    return this.realmId;
-  }
+  void setUpdateUserId(String updateUserId);
 
-  public void setRealmId(Integer realmId) {
-    this.realmId = realmId;
-  }
+  LocalDateTime getUpdateTime();
 
-  public String getCreateUserId() {
-    return this.createUserId;
-  }
+  void setUpdateTime(LocalDateTime updateTime);
 
-  public void setCreateUserId(String createUserId) {
-    this.createUserId = createUserId;
-  }
+  String getCreateGroupId();
 
-  public LocalDateTime getCreateTime() {
-    return this.createTime;
-  }
-
-  public void setCreateTime(LocalDateTime createTime) {
-    this.createTime = createTime;
-  }
-
-  public String getUpdateUserId() {
-    return this.updateUserId;
-  }
-
-  public void setUpdateUserId(String updateUserId) {
-    this.updateUserId = updateUserId;
-  }
-
-  public LocalDateTime getUpdateTime() {
-    return this.updateTime;
-  }
-
-  public void setUpdateTime(LocalDateTime updateTime) {
-    this.updateTime = updateTime;
-  }
-
-  public String getCreateGroupId() {
-    return this.createGroupId;
-  }
-
-  public void setCreateGroupId(String createGroupId) {
-    this.createGroupId = createGroupId;
-  }
+  void setCreateGroupId(String createGroupId);
 }

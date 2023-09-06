@@ -109,10 +109,6 @@ input MetaInput @inputInterface {
     createGroupId: String
 }
 
-input MetaArguments @inputInterface {
-    where: MetaExpression
-}
-
 input MetaExpression @inputInterface {
     realmId: IntExpression
     createUserId: StringExpression

@@ -217,14 +217,6 @@ public class OperationHandlerImplementer {
                                 Modifier.FINAL
                         ).build()
                 )
-                .addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationInterceptorHandler.class)),
-                                "operationInterceptorHandlerProvider",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
                 .addMethod(buildDefaultOperationMethod(type))
                 .addMethod(buildOperationMethod(type))
                 .addMethod(buildConstructor(type))
@@ -444,7 +436,6 @@ public class OperationHandlerImplementer {
                                 CodeBlock.join(
                                         List.of(
                                                 CodeBlock.of("return argumentsInvokeHandlerProvider.get().$L(operationDefinitionContext)", operationName),
-                                                CodeBlock.of(".flatMap(operation -> operationInterceptorHandlerProvider.get().handle(operation))"),
                                                 CodeBlock.of(".map(operation -> fetchFieldProcessor.get().buildFetchFields(operation))"),
                                                 CodeBlock.builder()
                                                         .add(".flatMap(operationWithFetchFieldDefinitionContext ->\n")
@@ -471,7 +462,6 @@ public class OperationHandlerImplementer {
                                 CodeBlock.join(
                                         List.of(
                                                 CodeBlock.of("return argumentsInvokeHandlerProvider.get().$L(operationDefinitionContext)", operationName),
-                                                CodeBlock.of(".flatMap(operation -> operationInterceptorHandlerProvider.get().handle(operation))"),
                                                 CodeBlock.of(".flatMap(operation -> mutationBeforeHandler.get().handle(operationDefinitionContext, operation, mutationLoader))"),
                                                 CodeBlock.builder()
                                                         .add(".map(operation -> operationSubscriber.get().buildSubscriptionFilterSelection(operation))\n")
@@ -507,7 +497,6 @@ public class OperationHandlerImplementer {
                                 CodeBlock.join(
                                         List.of(
                                                 CodeBlock.of("return argumentsInvokeHandlerProvider.get().$L(operationDefinitionContext)", operationName),
-                                                CodeBlock.of(".flatMap(operation -> operationInterceptorHandlerProvider.get().handle(operation))"),
                                                 CodeBlock.of(".map(operation -> operationSubscriber.get().buildIDSelection(operation))"),
                                                 CodeBlock.of(".map(operation -> fetchFieldProcessor.get().buildFetchFields(operation))"),
                                                 CodeBlock.builder()
@@ -673,7 +662,6 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(QueryDataLoader.class)), "queryDataLoader")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "QueryAfterHandler")), "queryHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)), "validator")
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationInterceptorHandler.class)), "operationInterceptorHandlerProvider")
                 .addStatement("this.graphQLConfig = graphQLConfig")
                 .addStatement("this.manager = manager")
                 .addStatement("this.fetchFieldProcessor = fetchFieldProcessor")
@@ -693,8 +681,7 @@ public class OperationHandlerImplementer {
                 .addStatement("this.argumentBuilder = argumentBuilder")
                 .addStatement("this.queryDataLoader = queryDataLoader")
                 .addStatement("this.queryHandler = queryHandler")
-                .addStatement("this.validator = validator")
-                .addStatement("this.operationInterceptorHandlerProvider = operationInterceptorHandlerProvider");
+                .addStatement("this.validator = validator");
 
         switch (type) {
             case QUERY:

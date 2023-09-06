@@ -6,8 +6,8 @@ import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import org.eclipse.microprofile.graphql.Input;
 
-@Input
 @CompiledJson
+@Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
 public class OrganizationOrderBy {

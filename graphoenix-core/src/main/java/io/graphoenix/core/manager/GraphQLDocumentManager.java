@@ -615,6 +615,11 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public Stream<GraphqlParser.InputObjectTypeDefinitionContext> getImplementsInputObjectTypeDefinition(String name) {
+        return graphQLInputObjectManager.getImplementsInputObjectTypeDefinition(name);
+    }
+
+    @Override
     public Optional<GraphqlParser.UnionTypeDefinitionContext> getUnion(String name) {
         return graphQLUnionManager.getUnionTypeDefinition(name);
     }

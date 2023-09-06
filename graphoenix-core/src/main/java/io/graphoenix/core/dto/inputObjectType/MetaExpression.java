@@ -1,72 +1,32 @@
 package io.graphoenix.core.dto.inputObjectType;
 
-import com.dslplatform.json.CompiledJson;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
-import org.eclipse.microprofile.graphql.Input;
 
-@Input
-@CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class MetaExpression {
-  private IntExpression realmId;
+public interface MetaExpression {
+  IntExpression getRealmId();
 
-  private StringExpression createUserId;
+  void setRealmId(IntExpression realmId);
 
-  private StringExpression createTime;
+  StringExpression getCreateUserId();
 
-  private StringExpression updateUserId;
+  void setCreateUserId(StringExpression createUserId);
 
-  private StringExpression updateTime;
+  StringExpression getCreateTime();
 
-  private StringExpression createGroupId;
+  void setCreateTime(StringExpression createTime);
 
-  public IntExpression getRealmId() {
-    return this.realmId;
-  }
+  StringExpression getUpdateUserId();
 
-  public void setRealmId(IntExpression realmId) {
-    this.realmId = realmId;
-  }
+  void setUpdateUserId(StringExpression updateUserId);
 
-  public StringExpression getCreateUserId() {
-    return this.createUserId;
-  }
+  StringExpression getUpdateTime();
 
-  public void setCreateUserId(StringExpression createUserId) {
-    this.createUserId = createUserId;
-  }
+  void setUpdateTime(StringExpression updateTime);
 
-  public StringExpression getCreateTime() {
-    return this.createTime;
-  }
+  StringExpression getCreateGroupId();
 
-  public void setCreateTime(StringExpression createTime) {
-    this.createTime = createTime;
-  }
-
-  public StringExpression getUpdateUserId() {
-    return this.updateUserId;
-  }
-
-  public void setUpdateUserId(StringExpression updateUserId) {
-    this.updateUserId = updateUserId;
-  }
-
-  public StringExpression getUpdateTime() {
-    return this.updateTime;
-  }
-
-  public void setUpdateTime(StringExpression updateTime) {
-    this.updateTime = updateTime;
-  }
-
-  public StringExpression getCreateGroupId() {
-    return this.createGroupId;
-  }
-
-  public void setCreateGroupId(StringExpression createGroupId) {
-    this.createGroupId = createGroupId;
-  }
+  void setCreateGroupId(StringExpression createGroupId);
 }

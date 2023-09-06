@@ -40,7 +40,9 @@ import java.util.stream.Stream;
 import static io.graphoenix.core.error.GraphQLErrorType.INPUT_OBJECT_NOT_EXIST;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.java.generator.utils.TypeUtil.TYPE_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.SUBSCRIPTION_TYPE_NAME;
 
 @ApplicationScoped
 public class ArgumentsInvokeHandlerBuilder {
@@ -191,13 +193,13 @@ public class ArgumentsInvokeHandlerBuilder {
         String operationTypeName;
         boolean isOperationType = manager.isOperationType(objectTypeDefinitionContext);
         if (manager.getMutationOperationTypeName().isPresent() && manager.getMutationOperationTypeName().get().equals(objectTypeDefinitionContext.name().getText())) {
-            operationTypeName = manager.getMutationOperationTypeName().get();
+            operationTypeName = manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME);
             typeParameterName = "mutation";
         } else if (manager.getQueryOperationTypeName().isPresent() && manager.getQueryOperationTypeName().get().equals(objectTypeDefinitionContext.name().getText())) {
             operationTypeName = manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME);
             typeParameterName = "query";
         } else if (manager.getSubscriptionOperationTypeName().isPresent() && manager.getSubscriptionOperationTypeName().get().equals(objectTypeDefinitionContext.name().getText())) {
-            operationTypeName = manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME);
+            operationTypeName = manager.getSubscriptionOperationTypeName().orElse(SUBSCRIPTION_TYPE_NAME);
             typeParameterName = "subscription";
         } else {
             operationTypeName = manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME);

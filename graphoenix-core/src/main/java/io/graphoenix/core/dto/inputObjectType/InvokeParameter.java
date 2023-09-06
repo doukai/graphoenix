@@ -7,8 +7,8 @@ import java.lang.String;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.Input;
 
-@Input
 @CompiledJson
+@Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
 public class InvokeParameter {
