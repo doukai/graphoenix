@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.user.api;
 
+import io.graphoenix.core.dto.inputObjectType.MetaInput;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.showcase.user.dao.UserOperationDAO;
 import io.graphoenix.showcase.user.dto.inputObjectType.UserListQueryTypeArguments;
@@ -39,6 +40,10 @@ public class UserApi {
     }
 
     public Mono<UserListQueryTypeArguments> userTest2(@Source UserListQueryTypeArguments userListQueryTypeArguments) {
+        return Mono.empty();
+    }
+
+    public Mono<MetaInput> userTest3(@Source MetaInput metaInput) {
         return Mono.empty();
     }
 }

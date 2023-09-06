@@ -140,10 +140,10 @@ public class TypeSpecBuilder {
             builder = TypeSpec.interfaceBuilder(inputObjectTypeDefinitionContext.name().getText());
         } else {
             builder = TypeSpec.classBuilder(inputObjectTypeDefinitionContext.name().getText())
-                    .addAnnotation(CompiledJson.class)
-                    .addAnnotation(Input.class);
+                    .addAnnotation(CompiledJson.class);
         }
         builder.addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Input.class)
                 .addAnnotation(getGeneratedAnnotationSpec())
                 .addAnnotation(getSchemaBeanAnnotationSpec());
         inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()

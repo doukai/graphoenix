@@ -5,7 +5,9 @@ import jakarta.annotation.Generated;
 import java.lang.Integer;
 import java.lang.String;
 import java.time.LocalDateTime;
+import org.eclipse.microprofile.graphql.Input;
 
+@Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
 public interface MetaInput {

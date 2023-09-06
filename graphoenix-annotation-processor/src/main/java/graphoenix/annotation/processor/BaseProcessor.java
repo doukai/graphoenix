@@ -259,14 +259,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                     manager.mergeDocument(inputObjectType.toString());
                                                 }
                                         );
-                            } else if (subElement.getKind().equals(ElementKind.METHOD) &&
-                                    ((ExecutableElement) subElement).getParameters().stream()
-                                            .anyMatch(variableElement ->
-                                                    variableElement.getAnnotation(Source.class) != null &&
-                                                            typeUtils.asElement(variableElement.asType()).getAnnotation(Input.class) != null
-                                            )
-                            ) {
-                                ExecutableElement executableElement = (ExecutableElement) subElement;
+
                                 executableElement.getParameters().stream()
                                         .filter(variableElement ->
                                                 variableElement.getAnnotation(Source.class) != null &&
