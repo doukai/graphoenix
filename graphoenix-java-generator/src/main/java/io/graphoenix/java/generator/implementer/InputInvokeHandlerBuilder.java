@@ -201,12 +201,9 @@ public class InputInvokeHandlerBuilder {
                     );
                 }
                 if (index == 0) {
-                    builder.addCode("return $L\n", invokeCodeBlock);
+                    builder.addCode("return $L.map(result -> (($T)result))\n", invokeCodeBlock, typeClassName);
                 } else {
-                    builder.addCode(".flatMap(result -> $L)\n", invokeCodeBlock);
-                }
-                if (index == tuple3List.size() - 1) {
-                    builder.addCode(".map(result -> (($T)result))\n", typeClassName);
+                    builder.addCode(".flatMap(result -> $L).map(result -> (($T)result))\n", invokeCodeBlock, typeClassName);
                 }
                 index++;
             }
