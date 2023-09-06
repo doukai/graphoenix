@@ -33,6 +33,8 @@ public @interface OrganizationInput0 {
 
   int aboveId() default 0;
 
+  String metaInfo() default "";
+
   String $id() default "";
 
   String $name() default "";
@@ -64,4 +66,6 @@ public @interface OrganizationInput0 {
   String $usersConnection() default "";
 
   String $aboveId() default "";
+
+  String $metaInfo() default "";
 }

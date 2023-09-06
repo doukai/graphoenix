@@ -13,7 +13,6 @@ import "io/graphoenix/showcase/user/query_requests.proto";
 import "io/graphoenix/showcase/user/query_responses.proto";
 
 service QueryTypeService {
-    rpc Login (QueryLoginRequest) returns (QueryLoginResponse);
     rpc User (QueryUserRequest) returns (QueryUserResponse);
     rpc UserList (QueryUserListRequest) returns (QueryUserListResponse);
     rpc UserConnection (QueryUserConnectionRequest) returns (QueryUserConnectionResponse);
@@ -43,4 +42,6 @@ service QueryTypeService {
     rpc UpdateUserId (QueryUpdateUserIdRequest) returns (QueryUpdateUserIdResponse);
     rpc UpdateTime (QueryUpdateTimeRequest) returns (QueryUpdateTimeResponse);
     rpc CreateGroupId (QueryCreateGroupIdRequest) returns (QueryCreateGroupIdResponse);
+    rpc MetaInfo (QueryMetaInfoRequest) returns (QueryMetaInfoResponse);
+    rpc Login (QueryLoginRequest) returns (QueryLoginResponse);
 }

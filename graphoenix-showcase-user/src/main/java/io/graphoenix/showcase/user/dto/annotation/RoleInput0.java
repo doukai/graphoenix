@@ -34,6 +34,8 @@ public @interface RoleInput0 {
 
   String __typename() default "";
 
+  String metaInfo() default "";
+
   String $id() default "";
 
   String $name() default "";
@@ -75,4 +77,6 @@ public @interface RoleInput0 {
   String $userRoleAggregate() default "";
 
   String $userRoleConnection() default "";
+
+  String $metaInfo() default "";
 }

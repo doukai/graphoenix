@@ -62,7 +62,7 @@ public class ObjectType {
         objectType.name = objectTypes[0].getName();
         objectType.description = objectTypes[0].getDescription();
         objectType.interfaces = Stream.of(objectTypes).flatMap(item -> Stream.ofNullable(item.getInterfaces()).flatMap(Collection::stream).distinct()).collect(Collectors.toCollection(LinkedHashSet::new));
-        objectType.directives = Stream.of(objectTypes).flatMap(item -> io.vavr.collection.Stream.ofAll(Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream)).distinctBy(Directive::getName).toJavaStream()).collect(Collectors.toCollection(LinkedHashSet::new));
+        objectType.directives = io.vavr.collection.Stream.ofAll(Stream.of(objectTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream))).distinctBy(Directive::getName).collect(Collectors.toCollection(LinkedHashSet::new));
         objectType.fields = objectTypes[0].getFields();
         for (ObjectType item : objectTypes) {
             for (Field itemField : item.getFields()) {

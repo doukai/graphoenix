@@ -220,14 +220,18 @@ public class BaseTask extends DefaultTask {
                                                         .anyMatch(parameter ->
                                                                 parameter.isAnnotationPresent(Source.class) &&
                                                                         parameter.getType().isClassOrInterfaceType() &&
-                                                                        parameter.getType().asClassOrInterfaceType().isAnnotationPresent(org.eclipse.microprofile.graphql.Type.class)
+                                                                        parameter.getType().resolve().asReferenceType().getTypeDeclaration().stream()
+                                                                                .anyMatch(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Type.class.getCanonicalName()))
                                                         )
                                         )
                                         .forEach(methodDeclaration -> {
                                                     String objectName = methodDeclaration.getParameters().stream()
                                                             .filter(parameter -> parameter.isAnnotationPresent(Source.class))
                                                             .filter(parameter -> parameter.getType().isClassOrInterfaceType())
-                                                            .filter(parameter -> parameter.getType().asClassOrInterfaceType().isAnnotationPresent(org.eclipse.microprofile.graphql.Type.class))
+                                                            .filter(parameter ->
+                                                                    parameter.getType().resolve().asReferenceType().getTypeDeclaration().stream()
+                                                                            .anyMatch(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Type.class.getCanonicalName()))
+                                                            )
                                                             .findFirst()
                                                             .orElseThrow(() -> new RuntimeException("@Source annotation parameter not exist in " + methodDeclaration.getNameAsString()))
                                                             .getType()
@@ -285,14 +289,18 @@ public class BaseTask extends DefaultTask {
                                                         .anyMatch(parameter ->
                                                                 parameter.isAnnotationPresent(Source.class) &&
                                                                         parameter.getType().isClassOrInterfaceType() &&
-                                                                        parameter.getType().asClassOrInterfaceType().isAnnotationPresent(org.eclipse.microprofile.graphql.Interface.class)
+                                                                        parameter.getType().resolve().asReferenceType().getTypeDeclaration().stream()
+                                                                                .anyMatch(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Interface.class.getCanonicalName()))
                                                         )
                                         )
                                         .forEach(methodDeclaration -> {
                                                     String interfaceName = methodDeclaration.getParameters().stream()
                                                             .filter(parameter -> parameter.isAnnotationPresent(Source.class))
                                                             .filter(parameter -> parameter.getType().isClassOrInterfaceType())
-                                                            .filter(parameter -> parameter.getType().asClassOrInterfaceType().isAnnotationPresent(org.eclipse.microprofile.graphql.Interface.class))
+                                                            .filter(parameter ->
+                                                                    parameter.getType().resolve().asReferenceType().getTypeDeclaration().stream()
+                                                                            .anyMatch(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Interface.class.getCanonicalName()))
+                                                            )
                                                             .findFirst()
                                                             .orElseThrow(() -> new RuntimeException("@Source annotation parameter not exist in " + methodDeclaration.getNameAsString()))
                                                             .getType()

@@ -48,7 +48,7 @@ public class GraphQLInterfaceManager implements IGraphQLInterfaceManager {
 
     @Override
     public Stream<GraphqlParser.ObjectTypeDefinitionContext> getImplementsObjectTypeDefinition(String interfaceTypeName) {
-        return implementsMap.get(interfaceTypeName).values().stream();
+        return Stream.ofNullable(implementsMap.get(interfaceTypeName)).flatMap(map -> map.values().stream());
     }
 
     @Override

@@ -35,6 +35,8 @@ public @interface UserProfileInput0 {
 
   int userId() default 0;
 
+  String metaInfo() default "";
+
   String $id() default "";
 
   String $user() default "";
@@ -62,4 +64,6 @@ public @interface UserProfileInput0 {
   String $__typename() default "";
 
   String $userId() default "";
+
+  String $metaInfo() default "";
 }

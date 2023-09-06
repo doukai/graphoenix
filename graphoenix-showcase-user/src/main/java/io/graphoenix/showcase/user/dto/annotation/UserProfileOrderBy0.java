@@ -34,4 +34,6 @@ public @interface UserProfileOrderBy0 {
   Sort __typename() default Sort.ASC;
 
   Sort userId() default Sort.ASC;
+
+  Sort metaInfo() default Sort.ASC;
 }

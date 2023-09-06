@@ -36,6 +36,8 @@ public @interface OrganizationExpression0 {
 
   IntExpression aboveId() default @IntExpression;
 
+  StringExpression metaInfo() default @StringExpression;
+
   String[] groupBy() default {};
 
   OrganizationOrderBy0 orderBy() default @OrganizationOrderBy0;

@@ -66,6 +66,8 @@ public class UserMobileNumbers implements Meta {
 
   private Integer userIdMin;
 
+  private String metaInfo;
+
   public String getId() {
     return this.id;
   }
@@ -272,5 +274,13 @@ public class UserMobileNumbers implements Meta {
 
   public void setUserIdMin(Integer userIdMin) {
     this.userIdMin = userIdMin;
+  }
+
+  public String getMetaInfo() {
+    return this.metaInfo;
+  }
+
+  public void setMetaInfo(String metaInfo) {
+    this.metaInfo = metaInfo;
   }
 }

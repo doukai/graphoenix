@@ -35,4 +35,5 @@ service MutationTypeService {
     rpc UpdateUserId (MutationUpdateUserIdRequest) returns (MutationUpdateUserIdResponse);
     rpc UpdateTime (MutationUpdateTimeRequest) returns (MutationUpdateTimeResponse);
     rpc CreateGroupId (MutationCreateGroupIdRequest) returns (MutationCreateGroupIdResponse);
+    rpc MetaInfo (MutationMetaInfoRequest) returns (MutationMetaInfoResponse);
 }

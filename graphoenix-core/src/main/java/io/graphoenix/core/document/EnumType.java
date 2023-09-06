@@ -43,7 +43,7 @@ public class EnumType {
         EnumType enumType = new EnumType();
         enumType.name = enumTypes[0].getName();
         enumType.description = enumTypes[0].getDescription();
-        enumType.directives = Stream.of(enumTypes).flatMap(item -> io.vavr.collection.Stream.ofAll(Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream)).distinctBy(Directive::getName).toJavaStream()).collect(Collectors.toCollection(LinkedHashSet::new));
+        enumType.directives = io.vavr.collection.Stream.ofAll(Stream.of(enumTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream))).distinctBy(Directive::getName).collect(Collectors.toCollection(LinkedHashSet::new));
         enumType.enumValues = enumTypes[0].getEnumValues();
         for (EnumType item : enumTypes) {
             for (EnumValue itemEnumValue : item.getEnumValues()) {

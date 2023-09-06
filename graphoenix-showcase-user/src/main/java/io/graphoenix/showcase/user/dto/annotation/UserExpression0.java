@@ -48,6 +48,8 @@ public @interface UserExpression0 {
 
   IntExpression organizationId() default @IntExpression;
 
+  StringExpression metaInfo() default @StringExpression;
+
   String[] groupBy() default {};
 
   UserOrderBy0 orderBy() default @UserOrderBy0;

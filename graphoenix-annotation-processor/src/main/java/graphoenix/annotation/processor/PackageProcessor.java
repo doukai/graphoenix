@@ -48,7 +48,7 @@ public class PackageProcessor extends BaseProcessor {
         IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
-        registerElements(roundEnv);
+        roundInit(roundEnv);
         try {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
             configRegister.registerPackage(PackageProcessor.class.getClassLoader());
@@ -57,6 +57,7 @@ public class PackageProcessor extends BaseProcessor {
             } else {
                 mapper.registerFieldMaps();
             }
+            registerElements(roundEnv);
             registerOperations(roundEnv);
             FileObject packageGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/" + graphQLConfig.getPackageName() + ".gql");
             Writer writer = packageGraphQL.openWriter();

@@ -46,6 +46,8 @@ public @interface UserInput0 {
 
   int organizationId() default 0;
 
+  String metaInfo() default "";
+
   String $id() default "";
 
   String $login() default "";
@@ -103,4 +105,6 @@ public @interface UserInput0 {
   String $userMobileNumbersAggregate() default "";
 
   String $userMobileNumbersConnection() default "";
+
+  String $metaInfo() default "";
 }

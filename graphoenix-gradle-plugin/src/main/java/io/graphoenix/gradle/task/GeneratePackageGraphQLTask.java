@@ -29,7 +29,6 @@ public class GeneratePackageGraphQLTask extends BaseTask {
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         String resourcePath = sourceSet.getResources().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_RESOURCES_PATH)).getAsPath();
         try {
-            registerInvoke();
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
             configRegister.registerPackage(createClassLoader());
             if (graphQLConfig.getBuild()) {
@@ -37,6 +36,7 @@ public class GeneratePackageGraphQLTask extends BaseTask {
             } else {
                 mapper.registerFieldMaps();
             }
+            registerInvoke();
             Path filePath = Path.of(resourcePath).resolve("META-INF").resolve("graphql");
             if (Files.notExists(filePath)) {
                 Files.createDirectories(filePath);

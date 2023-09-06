@@ -61,6 +61,8 @@ public class RoleRoleType implements Meta {
 
   private Integer roleIdMin;
 
+  private String metaInfo;
+
   public String getId() {
     return this.id;
   }
@@ -243,5 +245,13 @@ public class RoleRoleType implements Meta {
 
   public void setRoleIdMin(Integer roleIdMin) {
     this.roleIdMin = roleIdMin;
+  }
+
+  public String getMetaInfo() {
+    return this.metaInfo;
+  }
+
+  public void setMetaInfo(String metaInfo) {
+    this.metaInfo = metaInfo;
   }
 }

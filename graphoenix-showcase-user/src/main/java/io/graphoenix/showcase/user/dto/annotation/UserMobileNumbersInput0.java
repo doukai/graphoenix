@@ -33,6 +33,8 @@ public @interface UserMobileNumbersInput0 {
 
   String __typename() default "";
 
+  String metaInfo() default "";
+
   String $id() default "";
 
   String $userId() default "";
@@ -58,4 +60,6 @@ public @interface UserMobileNumbersInput0 {
   String $createGroupId() default "";
 
   String $__typename() default "";
+
+  String $metaInfo() default "";
 }

@@ -39,13 +39,13 @@ public class GenerateProtobufV3Task extends BaseTask {
                 .resolve("proto")
                 .resolve(graphQLConfig.getPackageName().replaceAll("\\.", Matcher.quoteReplacement(File.separator)));
         try {
-            registerInvoke();
             configRegister.registerPackage(createClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument(true).toString());
             } else {
                 mapper.registerFieldMaps();
             }
+            registerInvoke();
             if (Files.notExists(protoPath)) {
                 Files.createDirectories(protoPath);
             }

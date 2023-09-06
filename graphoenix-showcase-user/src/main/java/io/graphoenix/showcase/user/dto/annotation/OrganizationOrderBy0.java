@@ -32,4 +32,6 @@ public @interface OrganizationOrderBy0 {
   Sort __typename() default Sort.ASC;
 
   Sort aboveId() default Sort.ASC;
+
+  Sort metaInfo() default Sort.ASC;
 }

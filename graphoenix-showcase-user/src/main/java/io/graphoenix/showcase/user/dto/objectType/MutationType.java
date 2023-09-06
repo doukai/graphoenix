@@ -61,6 +61,8 @@ public class MutationType implements Meta {
 
   private String createGroupId;
 
+  private String metaInfo;
+
   public User getUser() {
     return this.user;
   }
@@ -251,5 +253,13 @@ public class MutationType implements Meta {
   @Override
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String getMetaInfo() {
+    return this.metaInfo;
+  }
+
+  public void setMetaInfo(String metaInfo) {
+    this.metaInfo = metaInfo;
   }
 }

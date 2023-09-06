@@ -36,6 +36,8 @@ public @interface UserMobileNumbersExpression0 {
 
   StringExpression __typename() default @StringExpression;
 
+  StringExpression metaInfo() default @StringExpression;
+
   String[] groupBy() default {};
 
   UserMobileNumbersOrderBy0 orderBy() default @UserMobileNumbersOrderBy0;

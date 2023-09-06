@@ -75,6 +75,8 @@ public class Organization implements Meta {
 
   private Integer aboveIdMin;
 
+  private String metaInfo;
+
   public String getId() {
     return this.id;
   }
@@ -305,5 +307,13 @@ public class Organization implements Meta {
 
   public void setAboveIdMin(Integer aboveIdMin) {
     this.aboveIdMin = aboveIdMin;
+  }
+
+  public String getMetaInfo() {
+    return this.metaInfo;
+  }
+
+  public void setMetaInfo(String metaInfo) {
+    this.metaInfo = metaInfo;
   }
 }

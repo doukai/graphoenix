@@ -44,4 +44,6 @@ public @interface UserOrderBy0 {
   Sort __typename() default Sort.ASC;
 
   Sort organizationId() default Sort.ASC;
+
+  Sort metaInfo() default Sort.ASC;
 }

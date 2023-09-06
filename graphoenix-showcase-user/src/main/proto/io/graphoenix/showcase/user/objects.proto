@@ -61,6 +61,7 @@ message User {
     repeated UserMobileNumbers user_mobile_numbers = 49;
     optional UserMobileNumbers user_mobile_numbers_aggregate = 50;
     optional UserMobileNumbersConnection user_mobile_numbers_connection = 51;
+    optional string meta_info = 52;
 }
 message UserProfile {
     optional string id = 1;
@@ -91,6 +92,7 @@ message UserProfile {
     optional int32 user_id_avg = 26;
     optional int32 user_id_max = 27;
     optional int32 user_id_min = 28;
+    optional string meta_info = 29;
 }
 message Role {
     optional string id = 1;
@@ -120,6 +122,7 @@ message Role {
     repeated UserRole user_role = 25;
     optional UserRole user_role_aggregate = 26;
     optional UserRoleConnection user_role_connection = 27;
+    optional string meta_info = 28;
 }
 message Organization {
     optional string id = 1;
@@ -149,6 +152,7 @@ message Organization {
     optional int32 above_id_avg = 25;
     optional int32 above_id_max = 26;
     optional int32 above_id_min = 27;
+    optional string meta_info = 28;
 }
 message UserRole {
     optional string id = 1;
@@ -178,6 +182,7 @@ message UserRole {
     optional int32 role_id_avg = 25;
     optional int32 role_id_max = 26;
     optional int32 role_id_min = 27;
+    optional string meta_info = 28;
 }
 message UserMobileNumbers {
     optional string id = 1;
@@ -204,6 +209,7 @@ message UserMobileNumbers {
     optional int32 user_id_avg = 22;
     optional int32 user_id_max = 23;
     optional int32 user_id_min = 24;
+    optional string meta_info = 25;
 }
 message RoleRoleType {
     optional string id = 1;
@@ -227,6 +233,7 @@ message RoleRoleType {
     optional int32 role_id_avg = 19;
     optional int32 role_id_max = 20;
     optional int32 role_id_min = 21;
+    optional string meta_info = 22;
 }
 message UserConnection {
     optional int32 total_count = 1;

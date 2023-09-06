@@ -50,7 +50,7 @@ public class GraphQLInputObjectManager implements IGraphQLInputObjectManager {
 
     @Override
     public Stream<GraphqlParser.InputObjectTypeDefinitionContext> getImplementsInputObjectTypeDefinition(String inputObjectName) {
-        return implementsMap.get(inputObjectName).values().stream();
+        return Stream.ofNullable(implementsMap.get(inputObjectName)).flatMap(map -> map.values().stream());
     }
 
     @Override

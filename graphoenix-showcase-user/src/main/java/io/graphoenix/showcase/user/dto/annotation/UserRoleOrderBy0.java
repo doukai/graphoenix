@@ -32,4 +32,6 @@ public @interface UserRoleOrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
+
+  Sort metaInfo() default Sort.ASC;
 }

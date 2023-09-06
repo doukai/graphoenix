@@ -112,10 +112,13 @@ public abstract class BaseProcessor extends AbstractProcessor {
                 .map(packageElement -> packageElement.getQualifiedName().toString());
     }
 
-    public void registerElements(RoundEnvironment roundEnv) {
+    public void roundInit(RoundEnvironment roundEnv) {
         if (graphQLConfig.getPackageName() == null) {
             getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
         }
+    }
+
+    public void registerElements(RoundEnvironment roundEnv) {
         roundEnv.getElementsAnnotatedWith(Enum.class).stream()
                 .filter(element -> element.getAnnotation(Ignore.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.ENUM))
@@ -200,6 +203,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
                             ) {
                                 Tuple2<String, Field> objectField = graphQLApiBuilder.variableElementToObjectField((ExecutableElement) subElement, typeUtils);
                                 manager.getImplementsObjectType(objectField._1())
+                                        .filter(objectTypeDefinitionContext -> manager.isNotOperationType(objectTypeDefinitionContext))
                                         .forEach(objectTypeDefinitionContext -> {
                                                     ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(objectField._2());
                                                     manager.mergeDocument(objectType.toString());

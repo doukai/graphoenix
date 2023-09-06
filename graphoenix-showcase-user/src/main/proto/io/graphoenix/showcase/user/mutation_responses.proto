@@ -77,3 +77,6 @@ message MutationUpdateTimeResponse {
 message MutationCreateGroupIdResponse {
     optional string create_group_id = 1;
 }
+message MutationMetaInfoResponse {
+    optional string meta_info = 1;
+}

@@ -77,6 +77,8 @@ public class Role implements Meta {
 
   private UserRoleConnection userRoleConnection;
 
+  private String metaInfo;
+
   public String getId() {
     return this.id;
   }
@@ -307,5 +309,13 @@ public class Role implements Meta {
 
   public void setUserRoleConnection(UserRoleConnection userRoleConnection) {
     this.userRoleConnection = userRoleConnection;
+  }
+
+  public String getMetaInfo() {
+    return this.metaInfo;
+  }
+
+  public void setMetaInfo(String metaInfo) {
+    this.metaInfo = metaInfo;
   }
 }

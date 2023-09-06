@@ -71,8 +71,8 @@ public class ApplicationProcessor extends BaseProcessor {
         GrpcRequestHandlerBuilder grpcRequestHandlerBuilder = BeanContext.get(GrpcRequestHandlerBuilder.class);
         GrpcServiceImplementer grpcServiceImplementer = BeanContext.get(GrpcServiceImplementer.class);
         GrpcFetchHandlerBuilder grpcFetchHandlerBuilder = BeanContext.get(GrpcFetchHandlerBuilder.class);
+        roundInit(roundEnv);
 
-        registerElements(roundEnv);
         try {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
             configRegister.registerPackage(ApplicationProcessor.class.getClassLoader());
@@ -81,6 +81,7 @@ public class ApplicationProcessor extends BaseProcessor {
             } else {
                 mapper.registerFieldMaps();
             }
+            registerElements(roundEnv);
             registerOperations(roundEnv);
             FileObject mainGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/main.gql");
             Writer writer = mainGraphQL.openWriter();

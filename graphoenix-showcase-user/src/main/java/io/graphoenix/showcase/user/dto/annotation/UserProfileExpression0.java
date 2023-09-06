@@ -38,6 +38,8 @@ public @interface UserProfileExpression0 {
 
   IntExpression userId() default @IntExpression;
 
+  StringExpression metaInfo() default @StringExpression;
+
   String[] groupBy() default {};
 
   UserProfileOrderBy0 orderBy() default @UserProfileOrderBy0;

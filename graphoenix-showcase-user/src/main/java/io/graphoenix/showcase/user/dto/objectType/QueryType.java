@@ -17,8 +17,6 @@ import org.eclipse.microprofile.graphql.Type;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
 public class QueryType implements Meta {
-  private String login;
-
   private User user;
 
   private Collection<User> userList;
@@ -77,13 +75,9 @@ public class QueryType implements Meta {
 
   private String createGroupId;
 
-  public String getLogin() {
-    return this.login;
-  }
+  private String metaInfo;
 
-  public void setLogin(String login) {
-    this.login = login;
-  }
+  private String login;
 
   public User getUser() {
     return this.user;
@@ -332,5 +326,21 @@ public class QueryType implements Meta {
   @Override
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String getMetaInfo() {
+    return this.metaInfo;
+  }
+
+  public void setMetaInfo(String metaInfo) {
+    this.metaInfo = metaInfo;
+  }
+
+  public String getLogin() {
+    return this.login;
+  }
+
+  public void setLogin(String login) {
+    this.login = login;
   }
 }

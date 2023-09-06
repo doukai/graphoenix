@@ -58,7 +58,7 @@ public class InterfaceType {
         interfaceType.name = interfaceTypes[0].getName();
         interfaceType.description = interfaceTypes[0].getDescription();
         interfaceType.interfaces = Stream.of(interfaceTypes).flatMap(item -> Stream.ofNullable(item.getInterfaces()).flatMap(Collection::stream).distinct()).collect(Collectors.toCollection(LinkedHashSet::new));
-        interfaceType.directives = Stream.of(interfaceTypes).flatMap(item -> io.vavr.collection.Stream.ofAll(Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream)).distinctBy(Directive::getName).toJavaStream()).collect(Collectors.toCollection(LinkedHashSet::new));
+        interfaceType.directives = io.vavr.collection.Stream.ofAll(Stream.of(interfaceTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream))).distinctBy(Directive::getName).collect(Collectors.toCollection(LinkedHashSet::new));
         interfaceType.fields = interfaceTypes[0].getFields();
         for (InterfaceType item : interfaceTypes) {
             for (Field itemField : item.getFields()) {

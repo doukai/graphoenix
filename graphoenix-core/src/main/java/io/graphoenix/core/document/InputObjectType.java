@@ -47,7 +47,7 @@ public class InputObjectType {
         InputObjectType inputObjectType = new InputObjectType();
         inputObjectType.name = inputObjectTypes[0].getName();
         inputObjectType.description = inputObjectTypes[0].getDescription();
-        inputObjectType.directives = Stream.of(inputObjectTypes).flatMap(item -> io.vavr.collection.Stream.ofAll(Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream)).distinctBy(Directive::getName).toJavaStream()).collect(Collectors.toCollection(LinkedHashSet::new));
+        inputObjectType.directives = io.vavr.collection.Stream.ofAll(Stream.of(inputObjectTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream))).distinctBy(Directive::getName).collect(Collectors.toCollection(LinkedHashSet::new));
         inputObjectType.inputValues = inputObjectTypes[0].getInputValues();
         for (InputObjectType item : inputObjectTypes) {
             for (InputValue itemInputValue : item.getInputValues()) {

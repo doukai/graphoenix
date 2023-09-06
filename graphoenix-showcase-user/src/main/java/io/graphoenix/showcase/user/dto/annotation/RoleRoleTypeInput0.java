@@ -34,6 +34,8 @@ public @interface RoleRoleTypeInput0 {
 
   String __typename() default "";
 
+  String metaInfo() default "";
+
   String $id() default "";
 
   String $roleId() default "";
@@ -59,4 +61,6 @@ public @interface RoleRoleTypeInput0 {
   String $createGroupId() default "";
 
   String $__typename() default "";
+
+  String $metaInfo() default "";
 }

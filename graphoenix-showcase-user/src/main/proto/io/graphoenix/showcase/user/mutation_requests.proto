@@ -332,3 +332,7 @@ message MutationCreateGroupIdRequest {
     optional string selection_set = 1;
     optional string arguments = 2;
 }
+message MutationMetaInfoRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}

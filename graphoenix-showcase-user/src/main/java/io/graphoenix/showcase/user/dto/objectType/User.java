@@ -126,6 +126,8 @@ public class User implements Meta {
 
   private UserMobileNumbersConnection userMobileNumbersConnection;
 
+  private String metaInfo;
+
   public String getId() {
     return this.id;
   }
@@ -549,5 +551,13 @@ public class User implements Meta {
   public void setUserMobileNumbersConnection(
       UserMobileNumbersConnection userMobileNumbersConnection) {
     this.userMobileNumbersConnection = userMobileNumbersConnection;
+  }
+
+  public String getMetaInfo() {
+    return this.metaInfo;
+  }
+
+  public void setMetaInfo(String metaInfo) {
+    this.metaInfo = metaInfo;
   }
 }

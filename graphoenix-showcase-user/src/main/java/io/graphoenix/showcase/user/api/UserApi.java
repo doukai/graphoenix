@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.user.api;
 
 import io.graphoenix.core.dto.inputObjectType.MetaInput;
+import io.graphoenix.core.dto.interfaceType.Meta;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.showcase.user.dao.UserOperationDAO;
 import io.graphoenix.showcase.user.dto.inputObjectType.UserListQueryTypeArguments;
@@ -45,5 +46,9 @@ public class UserApi {
 
     public Mono<MetaInput> userTest3(@Source MetaInput metaInput) {
         return Mono.empty();
+    }
+
+    public Mono<String> metaInfo(@Source Meta meta) {
+        return Mono.just(meta.getCreateUserId());
     }
 }

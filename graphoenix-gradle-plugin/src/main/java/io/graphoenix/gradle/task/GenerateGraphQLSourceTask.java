@@ -31,13 +31,13 @@ public class GenerateGraphQLSourceTask extends BaseTask {
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         String javaPath = sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_JAVA_PATH)).getAsPath();
         try {
-            registerInvoke();
             configRegister.registerPackage(createClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument(true).toString());
             } else {
                 mapper.registerFieldMaps();
             }
+            registerInvoke();
             javaFileBuilder.writeToPath(new File(javaPath));
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);

@@ -36,6 +36,8 @@ public @interface UserRoleExpression0 {
 
   StringExpression __typename() default @StringExpression;
 
+  StringExpression metaInfo() default @StringExpression;
+
   String[] groupBy() default {};
 
   UserRoleOrderBy0 orderBy() default @UserRoleOrderBy0;

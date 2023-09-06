@@ -13,12 +13,6 @@ import "io/graphoenix/core/enums.proto";
 import "io/graphoenix/core/input_objects.proto";
 import "google/protobuf/timestamp.proto";
 
-message QueryLoginRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string login = 3;
-    optional string password = 4;
-}
 message QueryUserRequest {
     optional string selection_set = 1;
     optional string arguments = 2;
@@ -592,4 +586,14 @@ message QueryUpdateTimeRequest {
 message QueryCreateGroupIdRequest {
     optional string selection_set = 1;
     optional string arguments = 2;
+}
+message QueryMetaInfoRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message QueryLoginRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string login = 3;
+    optional string password = 4;
 }
