@@ -2,15 +2,20 @@ package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.context.BeanContext;
+import io.vavr.CheckedFunction2;
 import jakarta.json.*;
 import jakarta.json.spi.JsonProvider;
 import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.graphoenix.core.utils.ElementUtil.ELEMENT_UTIL;
 
 public class Arguments extends AbstractMap<String, JsonValue> implements ValueWithVariable, JsonObject, Iterable<JsonValue> {
 
@@ -34,6 +39,19 @@ public class Arguments extends AbstractMap<String, JsonValue> implements ValueWi
         this.arguments = jsonObject.entrySet().stream()
                 .map(entry -> new SimpleEntry<>(entry.getKey(), ValueWithVariable.of(entry.getValue())))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (x, y) -> y, LinkedHashMap::new));
+    }
+
+    public Arguments(AnnotationMirror arguments) {
+        this.arguments = arguments.getElementValues().entrySet().stream().collect(Collectors.toMap(entry -> ELEMENT_UTIL.getNameFromElement(entry.getKey()), entry -> ValueWithVariable.of(entry.getValue())));
+    }
+
+    public Arguments(Object arguments) {
+        Class<?> clazz = arguments.getClass();
+        CheckedFunction2<java.lang.reflect.Field, Object, Object> getField = (field, object) -> {
+            field.setAccessible(true);
+            return field.get(object);
+        };
+        this.arguments = Arrays.stream(clazz.getDeclaredFields()).collect(Collectors.toMap(Field::getName, field -> ValueWithVariable.of(getField.unchecked().apply(field, arguments))));
     }
 
     public Map<String, ValueWithVariable> getArguments() {
