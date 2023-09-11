@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.order.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
+import io.graphoenix.core.dto.inputObjectType.MetaInput;
 import io.graphoenix.showcase.user.dto.inputObjectType.OrganizationInput;
 import io.graphoenix.showcase.user.dto.inputObjectType.UserInput;
 import io.graphoenix.spi.annotation.Ignore;
@@ -14,11 +15,11 @@ import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.NonNull;
 
-@Input
 @CompiledJson
+@Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class MerchantInput {
+public class MerchantInput implements MetaInput {
   private String id;
 
   @NonNull

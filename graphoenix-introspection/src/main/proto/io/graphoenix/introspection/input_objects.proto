@@ -367,9 +367,9 @@ message IntroDirectiveOrderBy {
 message IntroTypeInterfacesExpression {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression interface_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression interface_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -385,9 +385,9 @@ message IntroTypeInterfacesExpression {
 message IntroTypeInterfacesInput {
     optional string id = 1;
     optional string type_name = 2;
-    optional IntroTypeInput from = 3;
+    optional IntroTypeInput type_name_type = 3;
     optional string interface_name = 4;
-    optional IntroTypeInput to = 5;
+    optional IntroTypeInput interface_name_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -415,9 +415,9 @@ message IntroTypeInterfacesOrderBy {
 message IntroTypePossibleTypesExpression {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression possible_type_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression possible_type_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -433,9 +433,9 @@ message IntroTypePossibleTypesExpression {
 message IntroTypePossibleTypesInput {
     optional string id = 1;
     optional string type_name = 2;
-    optional IntroTypeInput from = 3;
+    optional IntroTypeInput type_name_type = 3;
     optional string possible_type_name = 4;
-    optional IntroTypeInput to = 5;
+    optional IntroTypeInput possible_type_name_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -463,7 +463,7 @@ message IntroTypePossibleTypesOrderBy {
 message IntroDirectiveLocationsExpression {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression directive_name = 2;
-    optional IntroDirectiveExpression from = 3;
+    optional IntroDirectiveExpression directive_name_type = 3;
     optional io.graphoenix.core.grpc.IntroDirectiveLocationExpression directive_location = 4;
     optional bool include_deprecated = 5;
     optional io.graphoenix.core.grpc.IntExpression version = 6;
@@ -480,7 +480,7 @@ message IntroDirectiveLocationsExpression {
 message IntroDirectiveLocationsInput {
     optional string id = 1;
     optional string directive_name = 2;
-    optional IntroDirectiveInput from = 3;
+    optional IntroDirectiveInput directive_name_type = 3;
     optional io.graphoenix.core.grpc.IntroDirectiveLocation directive_location = 4;
     optional bool is_deprecated = 5;
     optional int32 version = 6;
@@ -995,9 +995,9 @@ message IntroDirectiveConnectionQueryTypeArguments {
 message IntroTypeInterfacesQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression interface_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression interface_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -1013,9 +1013,9 @@ message IntroTypeInterfacesQueryTypeArguments {
 message IntroTypeInterfacesListQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression interface_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression interface_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -1038,9 +1038,9 @@ message IntroTypeInterfacesListQueryTypeArguments {
 message IntroTypeInterfacesConnectionQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression interface_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression interface_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -1063,9 +1063,9 @@ message IntroTypeInterfacesConnectionQueryTypeArguments {
 message IntroTypePossibleTypesQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression possible_type_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression possible_type_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -1081,9 +1081,9 @@ message IntroTypePossibleTypesQueryTypeArguments {
 message IntroTypePossibleTypesListQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression possible_type_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression possible_type_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -1106,9 +1106,9 @@ message IntroTypePossibleTypesListQueryTypeArguments {
 message IntroTypePossibleTypesConnectionQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression possible_type_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression possible_type_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -1131,7 +1131,7 @@ message IntroTypePossibleTypesConnectionQueryTypeArguments {
 message IntroDirectiveLocationsQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression directive_name = 2;
-    optional IntroDirectiveExpression from = 3;
+    optional IntroDirectiveExpression directive_name_type = 3;
     optional io.graphoenix.core.grpc.IntroDirectiveLocationExpression directive_location = 4;
     optional bool include_deprecated = 5;
     optional io.graphoenix.core.grpc.IntExpression version = 6;
@@ -1148,7 +1148,7 @@ message IntroDirectiveLocationsQueryTypeArguments {
 message IntroDirectiveLocationsListQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression directive_name = 2;
-    optional IntroDirectiveExpression from = 3;
+    optional IntroDirectiveExpression directive_name_type = 3;
     optional io.graphoenix.core.grpc.IntroDirectiveLocationExpression directive_location = 4;
     optional bool include_deprecated = 5;
     optional io.graphoenix.core.grpc.IntExpression version = 6;
@@ -1172,7 +1172,7 @@ message IntroDirectiveLocationsListQueryTypeArguments {
 message IntroDirectiveLocationsConnectionQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression directive_name = 2;
-    optional IntroDirectiveExpression from = 3;
+    optional IntroDirectiveExpression directive_name_type = 3;
     optional io.graphoenix.core.grpc.IntroDirectiveLocationExpression directive_location = 4;
     optional bool include_deprecated = 5;
     optional io.graphoenix.core.grpc.IntExpression version = 6;
@@ -1458,9 +1458,9 @@ message IntroDirectiveListMutationTypeArguments {
 message IntroTypeInterfacesMutationTypeArguments {
     optional string id = 1;
     optional string type_name = 2;
-    optional IntroTypeInput from = 3;
+    optional IntroTypeInput type_name_type = 3;
     optional string interface_name = 4;
-    optional IntroTypeInput to = 5;
+    optional IntroTypeInput interface_name_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -1475,9 +1475,9 @@ message IntroTypeInterfacesMutationTypeArguments {
 message IntroTypeInterfacesListMutationTypeArguments {
     optional string id = 1;
     optional string type_name = 2;
-    optional IntroTypeInput from = 3;
+    optional IntroTypeInput type_name_type = 3;
     optional string interface_name = 4;
-    optional IntroTypeInput to = 5;
+    optional IntroTypeInput interface_name_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -1493,9 +1493,9 @@ message IntroTypeInterfacesListMutationTypeArguments {
 message IntroTypePossibleTypesMutationTypeArguments {
     optional string id = 1;
     optional string type_name = 2;
-    optional IntroTypeInput from = 3;
+    optional IntroTypeInput type_name_type = 3;
     optional string possible_type_name = 4;
-    optional IntroTypeInput to = 5;
+    optional IntroTypeInput possible_type_name_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -1510,9 +1510,9 @@ message IntroTypePossibleTypesMutationTypeArguments {
 message IntroTypePossibleTypesListMutationTypeArguments {
     optional string id = 1;
     optional string type_name = 2;
-    optional IntroTypeInput from = 3;
+    optional IntroTypeInput type_name_type = 3;
     optional string possible_type_name = 4;
-    optional IntroTypeInput to = 5;
+    optional IntroTypeInput possible_type_name_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -1528,7 +1528,7 @@ message IntroTypePossibleTypesListMutationTypeArguments {
 message IntroDirectiveLocationsMutationTypeArguments {
     optional string id = 1;
     optional string directive_name = 2;
-    optional IntroDirectiveInput from = 3;
+    optional IntroDirectiveInput directive_name_type = 3;
     optional io.graphoenix.core.grpc.IntroDirectiveLocation directive_location = 4;
     optional bool is_deprecated = 5;
     optional int32 version = 6;
@@ -1544,7 +1544,7 @@ message IntroDirectiveLocationsMutationTypeArguments {
 message IntroDirectiveLocationsListMutationTypeArguments {
     optional string id = 1;
     optional string directive_name = 2;
-    optional IntroDirectiveInput from = 3;
+    optional IntroDirectiveInput directive_name_type = 3;
     optional io.graphoenix.core.grpc.IntroDirectiveLocation directive_location = 4;
     optional bool is_deprecated = 5;
     optional int32 version = 6;
@@ -2047,9 +2047,9 @@ message IntroDirectiveConnectionSubscriptionTypeArguments {
 message IntroTypeInterfacesSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression interface_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression interface_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -2065,9 +2065,9 @@ message IntroTypeInterfacesSubscriptionTypeArguments {
 message IntroTypeInterfacesListSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression interface_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression interface_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -2090,9 +2090,9 @@ message IntroTypeInterfacesListSubscriptionTypeArguments {
 message IntroTypeInterfacesConnectionSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression interface_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression interface_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -2115,9 +2115,9 @@ message IntroTypeInterfacesConnectionSubscriptionTypeArguments {
 message IntroTypePossibleTypesSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression possible_type_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression possible_type_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -2133,9 +2133,9 @@ message IntroTypePossibleTypesSubscriptionTypeArguments {
 message IntroTypePossibleTypesListSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression possible_type_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression possible_type_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -2158,9 +2158,9 @@ message IntroTypePossibleTypesListSubscriptionTypeArguments {
 message IntroTypePossibleTypesConnectionSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
-    optional IntroTypeExpression from = 3;
+    optional IntroTypeExpression type_name_type = 3;
     optional io.graphoenix.core.grpc.StringExpression possible_type_name = 4;
-    optional IntroTypeExpression to = 5;
+    optional IntroTypeExpression possible_type_name_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -2183,7 +2183,7 @@ message IntroTypePossibleTypesConnectionSubscriptionTypeArguments {
 message IntroDirectiveLocationsSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression directive_name = 2;
-    optional IntroDirectiveExpression from = 3;
+    optional IntroDirectiveExpression directive_name_type = 3;
     optional io.graphoenix.core.grpc.IntroDirectiveLocationExpression directive_location = 4;
     optional bool include_deprecated = 5;
     optional io.graphoenix.core.grpc.IntExpression version = 6;
@@ -2200,7 +2200,7 @@ message IntroDirectiveLocationsSubscriptionTypeArguments {
 message IntroDirectiveLocationsListSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression directive_name = 2;
-    optional IntroDirectiveExpression from = 3;
+    optional IntroDirectiveExpression directive_name_type = 3;
     optional io.graphoenix.core.grpc.IntroDirectiveLocationExpression directive_location = 4;
     optional bool include_deprecated = 5;
     optional io.graphoenix.core.grpc.IntExpression version = 6;
@@ -2224,7 +2224,7 @@ message IntroDirectiveLocationsListSubscriptionTypeArguments {
 message IntroDirectiveLocationsConnectionSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression directive_name = 2;
-    optional IntroDirectiveExpression from = 3;
+    optional IntroDirectiveExpression directive_name_type = 3;
     optional io.graphoenix.core.grpc.IntroDirectiveLocationExpression directive_location = 4;
     optional bool include_deprecated = 5;
     optional io.graphoenix.core.grpc.IntExpression version = 6;

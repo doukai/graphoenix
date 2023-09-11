@@ -40,7 +40,7 @@ public @interface RoleRoleTypeInput0 {
 
   String $roleId() default "";
 
-  String $from() default "";
+  String $roleIdType() default "";
 
   String $type() default "";
 

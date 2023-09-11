@@ -3,6 +3,7 @@ package io.graphoenix.showcase.order.dto.inputObjectType;
 import com.dslplatform.json.CompiledJson;
 import io.graphoenix.core.dto.enumType.Conditional;
 import io.graphoenix.core.dto.inputObjectType.IntExpression;
+import io.graphoenix.core.dto.inputObjectType.MetaExpression;
 import io.graphoenix.core.dto.inputObjectType.StringExpression;
 import io.graphoenix.showcase.user.dto.inputObjectType.OrganizationExpression;
 import io.graphoenix.showcase.user.dto.inputObjectType.UserExpression;
@@ -13,11 +14,11 @@ import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
-@Input
 @CompiledJson
+@Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class MerchantQueryTypeArguments {
+public class MerchantQueryTypeArguments implements MetaExpression {
   private StringExpression id;
 
   private StringExpression name;

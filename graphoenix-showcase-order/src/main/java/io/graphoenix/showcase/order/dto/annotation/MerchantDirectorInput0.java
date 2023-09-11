@@ -37,11 +37,11 @@ public @interface MerchantDirectorInput0 {
 
   String $merchantId() default "";
 
-  String $from() default "";
+  String $merchantIdType() default "";
 
   String $userId() default "";
 
-  String $to() default "";
+  String $userIdType() default "";
 
   String $isDeprecated() default "";
 

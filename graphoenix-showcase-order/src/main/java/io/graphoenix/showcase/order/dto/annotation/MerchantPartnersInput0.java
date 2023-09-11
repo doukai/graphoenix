@@ -37,11 +37,11 @@ public @interface MerchantPartnersInput0 {
 
   String $merchantId() default "";
 
-  String $from() default "";
+  String $merchantIdType() default "";
 
   String $organizationId() default "";
 
-  String $to() default "";
+  String $organizationIdType() default "";
 
   String $isDeprecated() default "";
 

@@ -21,7 +21,7 @@ public class RoleRoleTypeQueryTypeArguments implements MetaExpression {
 
   private IntExpression roleId;
 
-  private RoleExpression from;
+  private RoleExpression roleIdType;
 
   private RoleTypeExpression type;
 
@@ -65,12 +65,12 @@ public class RoleRoleTypeQueryTypeArguments implements MetaExpression {
     this.roleId = roleId;
   }
 
-  public RoleExpression getFrom() {
-    return this.from;
+  public RoleExpression getRoleIdType() {
+    return this.roleIdType;
   }
 
-  public void setFrom(RoleExpression from) {
-    this.from = from;
+  public void setRoleIdType(RoleExpression roleIdType) {
+    this.roleIdType = roleIdType;
   }
 
   public RoleTypeExpression getType() {

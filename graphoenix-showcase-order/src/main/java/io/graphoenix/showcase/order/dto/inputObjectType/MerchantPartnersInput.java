@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.order.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
+import io.graphoenix.core.dto.inputObjectType.MetaInput;
 import io.graphoenix.showcase.user.dto.inputObjectType.OrganizationInput;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
@@ -11,20 +12,20 @@ import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
-@Input
 @CompiledJson
+@Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class MerchantPartnersInput {
+public class MerchantPartnersInput implements MetaInput {
   private String id;
 
   private Integer merchantId;
 
-  private MerchantInput from;
+  private MerchantInput merchantIdType;
 
   private Integer organizationId;
 
-  private OrganizationInput to;
+  private OrganizationInput organizationIdType;
 
   private Boolean isDeprecated;
 
@@ -61,12 +62,12 @@ public class MerchantPartnersInput {
     this.merchantId = merchantId;
   }
 
-  public MerchantInput getFrom() {
-    return this.from;
+  public MerchantInput getMerchantIdType() {
+    return this.merchantIdType;
   }
 
-  public void setFrom(MerchantInput from) {
-    this.from = from;
+  public void setMerchantIdType(MerchantInput merchantIdType) {
+    this.merchantIdType = merchantIdType;
   }
 
   public Integer getOrganizationId() {
@@ -77,12 +78,12 @@ public class MerchantPartnersInput {
     this.organizationId = organizationId;
   }
 
-  public OrganizationInput getTo() {
-    return this.to;
+  public OrganizationInput getOrganizationIdType() {
+    return this.organizationIdType;
   }
 
-  public void setTo(OrganizationInput to) {
-    this.to = to;
+  public void setOrganizationIdType(OrganizationInput organizationIdType) {
+    this.organizationIdType = organizationIdType;
   }
 
   public Boolean getIsDeprecated() {

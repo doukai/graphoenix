@@ -157,9 +157,9 @@ message Organization {
 message UserRole {
     optional string id = 1;
     optional int32 user_id = 2;
-    optional User from = 3;
+    optional User user_id_type = 3;
     optional int32 role_id = 4;
-    optional Role to = 5;
+    optional Role role_id_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -187,7 +187,7 @@ message UserRole {
 message UserMobileNumbers {
     optional string id = 1;
     optional int32 user_id = 2;
-    optional User from = 3;
+    optional User user_id_type = 3;
     optional string mobile_number = 4;
     optional bool is_deprecated = 5;
     optional int32 version = 6;
@@ -214,7 +214,7 @@ message UserMobileNumbers {
 message RoleRoleType {
     optional string id = 1;
     optional int32 role_id = 2;
-    optional Role from = 3;
+    optional Role role_id_type = 3;
     optional RoleType type = 4;
     optional bool is_deprecated = 5;
     optional int32 version = 6;

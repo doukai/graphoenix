@@ -192,9 +192,9 @@ message MutationUserRoleRequest {
     optional string arguments = 2;
     optional string id = 3;
     optional int32 user_id = 4;
-    optional UserInput from = 5;
+    optional UserInput user_id_type = 5;
     optional int32 role_id = 6;
-    optional RoleInput to = 7;
+    optional RoleInput role_id_type = 7;
     optional bool is_deprecated = 8;
     optional int32 version = 9;
     optional int32 realm_id = 10;
@@ -211,9 +211,9 @@ message MutationUserRoleListRequest {
     optional string arguments = 2;
     optional string id = 3;
     optional int32 user_id = 4;
-    optional UserInput from = 5;
+    optional UserInput user_id_type = 5;
     optional int32 role_id = 6;
-    optional RoleInput to = 7;
+    optional RoleInput role_id_type = 7;
     optional bool is_deprecated = 8;
     optional int32 version = 9;
     optional int32 realm_id = 10;
@@ -231,7 +231,7 @@ message MutationUserMobileNumbersRequest {
     optional string arguments = 2;
     optional string id = 3;
     optional int32 user_id = 4;
-    optional UserInput from = 5;
+    optional UserInput user_id_type = 5;
     optional string mobile_number = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;
@@ -249,7 +249,7 @@ message MutationUserMobileNumbersListRequest {
     optional string arguments = 2;
     optional string id = 3;
     optional int32 user_id = 4;
-    optional UserInput from = 5;
+    optional UserInput user_id_type = 5;
     optional string mobile_number = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;
@@ -268,7 +268,7 @@ message MutationRoleRoleTypeRequest {
     optional string arguments = 2;
     optional string id = 3;
     optional int32 role_id = 4;
-    optional RoleInput from = 5;
+    optional RoleInput role_id_type = 5;
     optional RoleType type = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;
@@ -286,7 +286,7 @@ message MutationRoleRoleTypeListRequest {
     optional string arguments = 2;
     optional string id = 3;
     optional int32 role_id = 4;
-    optional RoleInput from = 5;
+    optional RoleInput role_id_type = 5;
     optional RoleType type = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;

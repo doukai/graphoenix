@@ -260,7 +260,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                                         )
                                                         );
                                                     }
-                                                    manager.mergeDocument(inputObjectType.toString());
+                                                    manager.registerGraphQL(inputObjectType.toString());
                                                 }
                                         );
 
@@ -303,7 +303,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                                         )
                                                         );
                                                     }
-                                                    manager.mergeDocument(inputObjectType.toString());
+                                                    manager.registerGraphQL(inputObjectType.toString());
                                                 }
                                         );
                             }

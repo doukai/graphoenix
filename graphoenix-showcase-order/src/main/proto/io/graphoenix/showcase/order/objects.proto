@@ -142,9 +142,9 @@ message Merchant {
 message MerchantPartners {
     optional string id = 1;
     optional int32 merchant_id = 2;
-    optional Merchant from = 3;
+    optional Merchant merchant_id_type = 3;
     optional int32 organization_id = 4;
-    optional io.graphoenix.showcase.user.grpc.Organization to = 5;
+    optional io.graphoenix.showcase.user.grpc.Organization organization_id_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -171,9 +171,9 @@ message MerchantPartners {
 message MerchantDirector {
     optional string id = 1;
     optional int32 merchant_id = 2;
-    optional Merchant from = 3;
+    optional Merchant merchant_id_type = 3;
     optional int32 user_id = 4;
-    optional io.graphoenix.showcase.user.grpc.User to = 5;
+    optional io.graphoenix.showcase.user.grpc.User user_id_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;

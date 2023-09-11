@@ -192,10 +192,6 @@ public class JsonSchemaTranslator {
                 .map(this::buildValidation)
                 .orElseGet(jsonProvider::createObjectBuilder);
 
-        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext = manager.getInputObject(fieldTypeName + "Input")
-                .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.INPUT_OBJECT_NOT_EXIST.bind(fieldTypeName + "Input")));
-
         JsonObjectBuilder builder = jsonSchemaBuilder
                 .add("$id",
                         jsonProvider.createValue(
@@ -205,9 +201,9 @@ public class JsonSchemaTranslator {
                         )
                 )
                 .add("type", jsonProvider.createValue("object"))
-                .add("properties", inputObjectToProperties(inputObjectTypeDefinitionContext))
+                .add("properties", fieldArgumentsToProperties(fieldDefinitionContext))
                 .add("additionalProperties", TRUE)
-                .add("required", buildRequired(inputObjectTypeDefinitionContext));
+                .add("required", buildRequired(fieldDefinitionContext.argumentsDefinition()));
         return builder.build();
     }
 

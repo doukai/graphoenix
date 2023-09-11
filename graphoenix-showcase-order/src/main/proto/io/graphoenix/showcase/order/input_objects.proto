@@ -218,9 +218,9 @@ message MerchantOrderBy {
 message MerchantPartnersExpression {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
-    optional MerchantExpression from = 3;
+    optional MerchantExpression merchant_id_type = 3;
     optional io.graphoenix.core.grpc.IntExpression organization_id = 4;
-    optional io.graphoenix.showcase.user.grpc.OrganizationExpression to = 5;
+    optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization_id_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -236,9 +236,9 @@ message MerchantPartnersExpression {
 message MerchantPartnersInput {
     optional string id = 1;
     optional int32 merchant_id = 2;
-    optional MerchantInput from = 3;
+    optional MerchantInput merchant_id_type = 3;
     optional int32 organization_id = 4;
-    optional io.graphoenix.showcase.user.grpc.OrganizationInput to = 5;
+    optional io.graphoenix.showcase.user.grpc.OrganizationInput organization_id_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -266,9 +266,9 @@ message MerchantPartnersOrderBy {
 message MerchantDirectorExpression {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
-    optional MerchantExpression from = 3;
+    optional MerchantExpression merchant_id_type = 3;
     optional io.graphoenix.core.grpc.IntExpression user_id = 4;
-    optional io.graphoenix.showcase.user.grpc.UserExpression to = 5;
+    optional io.graphoenix.showcase.user.grpc.UserExpression user_id_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -284,9 +284,9 @@ message MerchantDirectorExpression {
 message MerchantDirectorInput {
     optional string id = 1;
     optional int32 merchant_id = 2;
-    optional MerchantInput from = 3;
+    optional MerchantInput merchant_id_type = 3;
     optional int32 user_id = 4;
-    optional io.graphoenix.showcase.user.grpc.UserInput to = 5;
+    optional io.graphoenix.showcase.user.grpc.UserInput user_id_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -601,9 +601,9 @@ message MerchantConnectionQueryTypeArguments {
 message MerchantPartnersQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
-    optional MerchantExpression from = 3;
+    optional MerchantExpression merchant_id_type = 3;
     optional io.graphoenix.core.grpc.IntExpression organization_id = 4;
-    optional io.graphoenix.showcase.user.grpc.OrganizationExpression to = 5;
+    optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization_id_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -619,9 +619,9 @@ message MerchantPartnersQueryTypeArguments {
 message MerchantPartnersListQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
-    optional MerchantExpression from = 3;
+    optional MerchantExpression merchant_id_type = 3;
     optional io.graphoenix.core.grpc.IntExpression organization_id = 4;
-    optional io.graphoenix.showcase.user.grpc.OrganizationExpression to = 5;
+    optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization_id_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -644,9 +644,9 @@ message MerchantPartnersListQueryTypeArguments {
 message MerchantPartnersConnectionQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
-    optional MerchantExpression from = 3;
+    optional MerchantExpression merchant_id_type = 3;
     optional io.graphoenix.core.grpc.IntExpression organization_id = 4;
-    optional io.graphoenix.showcase.user.grpc.OrganizationExpression to = 5;
+    optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization_id_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -669,9 +669,9 @@ message MerchantPartnersConnectionQueryTypeArguments {
 message MerchantDirectorQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
-    optional MerchantExpression from = 3;
+    optional MerchantExpression merchant_id_type = 3;
     optional io.graphoenix.core.grpc.IntExpression user_id = 4;
-    optional io.graphoenix.showcase.user.grpc.UserExpression to = 5;
+    optional io.graphoenix.showcase.user.grpc.UserExpression user_id_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -687,9 +687,9 @@ message MerchantDirectorQueryTypeArguments {
 message MerchantDirectorListQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
-    optional MerchantExpression from = 3;
+    optional MerchantExpression merchant_id_type = 3;
     optional io.graphoenix.core.grpc.IntExpression user_id = 4;
-    optional io.graphoenix.showcase.user.grpc.UserExpression to = 5;
+    optional io.graphoenix.showcase.user.grpc.UserExpression user_id_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -712,9 +712,9 @@ message MerchantDirectorListQueryTypeArguments {
 message MerchantDirectorConnectionQueryTypeArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
-    optional MerchantExpression from = 3;
+    optional MerchantExpression merchant_id_type = 3;
     optional io.graphoenix.core.grpc.IntExpression user_id = 4;
-    optional io.graphoenix.showcase.user.grpc.UserExpression to = 5;
+    optional io.graphoenix.showcase.user.grpc.UserExpression user_id_type = 5;
     optional bool include_deprecated = 6;
     optional io.graphoenix.core.grpc.IntExpression version = 7;
     optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
@@ -887,9 +887,9 @@ message MerchantListMutationTypeArguments {
 message MerchantPartnersMutationTypeArguments {
     optional string id = 1;
     optional int32 merchant_id = 2;
-    optional MerchantInput from = 3;
+    optional MerchantInput merchant_id_type = 3;
     optional int32 organization_id = 4;
-    optional io.graphoenix.showcase.user.grpc.OrganizationInput to = 5;
+    optional io.graphoenix.showcase.user.grpc.OrganizationInput organization_id_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -904,9 +904,9 @@ message MerchantPartnersMutationTypeArguments {
 message MerchantPartnersListMutationTypeArguments {
     optional string id = 1;
     optional int32 merchant_id = 2;
-    optional MerchantInput from = 3;
+    optional MerchantInput merchant_id_type = 3;
     optional int32 organization_id = 4;
-    optional io.graphoenix.showcase.user.grpc.OrganizationInput to = 5;
+    optional io.graphoenix.showcase.user.grpc.OrganizationInput organization_id_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -922,9 +922,9 @@ message MerchantPartnersListMutationTypeArguments {
 message MerchantDirectorMutationTypeArguments {
     optional string id = 1;
     optional int32 merchant_id = 2;
-    optional MerchantInput from = 3;
+    optional MerchantInput merchant_id_type = 3;
     optional int32 user_id = 4;
-    optional io.graphoenix.showcase.user.grpc.UserInput to = 5;
+    optional io.graphoenix.showcase.user.grpc.UserInput user_id_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -939,9 +939,9 @@ message MerchantDirectorMutationTypeArguments {
 message MerchantDirectorListMutationTypeArguments {
     optional string id = 1;
     optional int32 merchant_id = 2;
-    optional MerchantInput from = 3;
+    optional MerchantInput merchant_id_type = 3;
     optional int32 user_id = 4;
-    optional io.graphoenix.showcase.user.grpc.UserInput to = 5;
+    optional io.graphoenix.showcase.user.grpc.UserInput user_id_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -953,4 +953,427 @@ message MerchantDirectorListMutationTypeArguments {
     optional string intro_typename = 14;
     repeated MerchantDirectorInput list = 15;
     optional MerchantDirectorExpression where = 16;
+}
+message OrderSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.StringExpression number = 2;
+    optional io.graphoenix.showcase.user.grpc.UserExpression buyer = 3;
+    optional GoodExpression goods = 4;
+    optional bool include_deprecated = 5;
+    optional io.graphoenix.core.grpc.IntExpression version = 6;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 7;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 9;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 11;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 12;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 13;
+    optional io.graphoenix.core.grpc.IntExpression buyer_id = 14;
+    optional io.graphoenix.core.grpc.Conditional cond = 15;
+    repeated OrderExpression exs = 16;
+}
+message OrderListSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.StringExpression number = 2;
+    optional io.graphoenix.showcase.user.grpc.UserExpression buyer = 3;
+    optional GoodExpression goods = 4;
+    optional bool include_deprecated = 5;
+    optional io.graphoenix.core.grpc.IntExpression version = 6;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 7;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 9;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 11;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 12;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 13;
+    optional io.graphoenix.core.grpc.IntExpression buyer_id = 14;
+    optional OrderOrderBy order_by = 15;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated OrderExpression exs = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
+}
+message OrderConnectionSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.StringExpression number = 2;
+    optional io.graphoenix.showcase.user.grpc.UserExpression buyer = 3;
+    optional GoodExpression goods = 4;
+    optional bool include_deprecated = 5;
+    optional io.graphoenix.core.grpc.IntExpression version = 6;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 7;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 9;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 11;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 12;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 13;
+    optional io.graphoenix.core.grpc.IntExpression buyer_id = 14;
+    optional OrderOrderBy order_by = 15;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated OrderExpression exs = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
+}
+message GoodSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.IntExpression quantity = 2;
+    optional OrderExpression order = 3;
+    optional ProductExpression product = 4;
+    optional MerchantExpression merchant = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional io.graphoenix.core.grpc.IntExpression order_id = 15;
+    optional io.graphoenix.core.grpc.IntExpression product_id = 16;
+    optional io.graphoenix.core.grpc.IntExpression merchant_id = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated GoodExpression exs = 19;
+}
+message GoodListSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.IntExpression quantity = 2;
+    optional OrderExpression order = 3;
+    optional ProductExpression product = 4;
+    optional MerchantExpression merchant = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional io.graphoenix.core.grpc.IntExpression order_id = 15;
+    optional io.graphoenix.core.grpc.IntExpression product_id = 16;
+    optional io.graphoenix.core.grpc.IntExpression merchant_id = 17;
+    optional GoodOrderBy order_by = 18;
+    repeated string group_by = 19;
+    optional io.graphoenix.core.grpc.Conditional cond = 20;
+    repeated GoodExpression exs = 21;
+    optional int32 first = 22;
+    optional int32 last = 23;
+    optional int32 offset = 24;
+    optional string after = 25;
+    optional string before = 26;
+}
+message GoodConnectionSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.IntExpression quantity = 2;
+    optional OrderExpression order = 3;
+    optional ProductExpression product = 4;
+    optional MerchantExpression merchant = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional io.graphoenix.core.grpc.IntExpression order_id = 15;
+    optional io.graphoenix.core.grpc.IntExpression product_id = 16;
+    optional io.graphoenix.core.grpc.IntExpression merchant_id = 17;
+    optional GoodOrderBy order_by = 18;
+    repeated string group_by = 19;
+    optional io.graphoenix.core.grpc.Conditional cond = 20;
+    repeated GoodExpression exs = 21;
+    optional int32 first = 22;
+    optional int32 last = 23;
+    optional int32 offset = 24;
+    optional string after = 25;
+    optional string before = 26;
+}
+message ProductSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.StringExpression name = 2;
+    optional io.graphoenix.core.grpc.FloatExpression price = 3;
+    optional bool include_deprecated = 4;
+    optional io.graphoenix.core.grpc.IntExpression version = 5;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 6;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 7;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 8;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 12;
+    optional io.graphoenix.core.grpc.Conditional cond = 13;
+    repeated ProductExpression exs = 14;
+}
+message ProductListSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.StringExpression name = 2;
+    optional io.graphoenix.core.grpc.FloatExpression price = 3;
+    optional bool include_deprecated = 4;
+    optional io.graphoenix.core.grpc.IntExpression version = 5;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 6;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 7;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 8;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 12;
+    optional ProductOrderBy order_by = 13;
+    repeated string group_by = 14;
+    optional io.graphoenix.core.grpc.Conditional cond = 15;
+    repeated ProductExpression exs = 16;
+    optional int32 first = 17;
+    optional int32 last = 18;
+    optional int32 offset = 19;
+    optional string after = 20;
+    optional string before = 21;
+}
+message ProductConnectionSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.StringExpression name = 2;
+    optional io.graphoenix.core.grpc.FloatExpression price = 3;
+    optional bool include_deprecated = 4;
+    optional io.graphoenix.core.grpc.IntExpression version = 5;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 6;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 7;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 8;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 12;
+    optional ProductOrderBy order_by = 13;
+    repeated string group_by = 14;
+    optional io.graphoenix.core.grpc.Conditional cond = 15;
+    repeated ProductExpression exs = 16;
+    optional int32 first = 17;
+    optional int32 last = 18;
+    optional int32 offset = 19;
+    optional string after = 20;
+    optional string before = 21;
+}
+message MerchantSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.StringExpression name = 2;
+    optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization = 3;
+    optional io.graphoenix.showcase.user.grpc.UserExpression customer_services = 4;
+    optional io.graphoenix.showcase.user.grpc.OrganizationExpression partners = 5;
+    optional io.graphoenix.showcase.user.grpc.UserExpression director = 6;
+    optional bool include_deprecated = 7;
+    optional io.graphoenix.core.grpc.IntExpression version = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 10;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 12;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 13;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 14;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
+    optional io.graphoenix.core.grpc.IntExpression organization_id = 16;
+    optional MerchantPartnersExpression merchant_partners = 17;
+    optional MerchantDirectorExpression merchant_director = 18;
+    optional io.graphoenix.core.grpc.Conditional cond = 19;
+    repeated MerchantExpression exs = 20;
+}
+message MerchantListSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.StringExpression name = 2;
+    optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization = 3;
+    optional io.graphoenix.showcase.user.grpc.UserExpression customer_services = 4;
+    optional io.graphoenix.showcase.user.grpc.OrganizationExpression partners = 5;
+    optional io.graphoenix.showcase.user.grpc.UserExpression director = 6;
+    optional bool include_deprecated = 7;
+    optional io.graphoenix.core.grpc.IntExpression version = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 10;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 12;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 13;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 14;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
+    optional io.graphoenix.core.grpc.IntExpression organization_id = 16;
+    optional MerchantPartnersExpression merchant_partners = 17;
+    optional MerchantDirectorExpression merchant_director = 18;
+    optional MerchantOrderBy order_by = 19;
+    repeated string group_by = 20;
+    optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated MerchantExpression exs = 22;
+    optional int32 first = 23;
+    optional int32 last = 24;
+    optional int32 offset = 25;
+    optional string after = 26;
+    optional string before = 27;
+}
+message MerchantConnectionSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.StringExpression name = 2;
+    optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization = 3;
+    optional io.graphoenix.showcase.user.grpc.UserExpression customer_services = 4;
+    optional io.graphoenix.showcase.user.grpc.OrganizationExpression partners = 5;
+    optional io.graphoenix.showcase.user.grpc.UserExpression director = 6;
+    optional bool include_deprecated = 7;
+    optional io.graphoenix.core.grpc.IntExpression version = 8;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 10;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 12;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 13;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 14;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
+    optional io.graphoenix.core.grpc.IntExpression organization_id = 16;
+    optional MerchantPartnersExpression merchant_partners = 17;
+    optional MerchantDirectorExpression merchant_director = 18;
+    optional MerchantOrderBy order_by = 19;
+    repeated string group_by = 20;
+    optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated MerchantExpression exs = 22;
+    optional int32 first = 23;
+    optional int32 last = 24;
+    optional int32 offset = 25;
+    optional string after = 26;
+    optional string before = 27;
+}
+message MerchantPartnersSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
+    optional MerchantExpression merchant_id_type = 3;
+    optional io.graphoenix.core.grpc.IntExpression organization_id = 4;
+    optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization_id_type = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional io.graphoenix.core.grpc.Conditional cond = 15;
+    repeated MerchantPartnersExpression exs = 16;
+}
+message MerchantPartnersListSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
+    optional MerchantExpression merchant_id_type = 3;
+    optional io.graphoenix.core.grpc.IntExpression organization_id = 4;
+    optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization_id_type = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional MerchantPartnersOrderBy order_by = 15;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated MerchantPartnersExpression exs = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
+}
+message MerchantPartnersConnectionSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
+    optional MerchantExpression merchant_id_type = 3;
+    optional io.graphoenix.core.grpc.IntExpression organization_id = 4;
+    optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization_id_type = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional MerchantPartnersOrderBy order_by = 15;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated MerchantPartnersExpression exs = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
+}
+message MerchantDirectorSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
+    optional MerchantExpression merchant_id_type = 3;
+    optional io.graphoenix.core.grpc.IntExpression user_id = 4;
+    optional io.graphoenix.showcase.user.grpc.UserExpression user_id_type = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional io.graphoenix.core.grpc.Conditional cond = 15;
+    repeated MerchantDirectorExpression exs = 16;
+}
+message MerchantDirectorListSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
+    optional MerchantExpression merchant_id_type = 3;
+    optional io.graphoenix.core.grpc.IntExpression user_id = 4;
+    optional io.graphoenix.showcase.user.grpc.UserExpression user_id_type = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional MerchantDirectorOrderBy order_by = 15;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated MerchantDirectorExpression exs = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
+}
+message MerchantDirectorConnectionSubscriptionTypeArguments {
+    optional io.graphoenix.core.grpc.StringExpression id = 1;
+    optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
+    optional MerchantExpression merchant_id_type = 3;
+    optional io.graphoenix.core.grpc.IntExpression user_id = 4;
+    optional io.graphoenix.showcase.user.grpc.UserExpression user_id_type = 5;
+    optional bool include_deprecated = 6;
+    optional io.graphoenix.core.grpc.IntExpression version = 7;
+    optional io.graphoenix.core.grpc.IntExpression realm_id = 8;
+    optional io.graphoenix.core.grpc.StringExpression create_user_id = 9;
+    optional io.graphoenix.core.grpc.StringExpression create_time = 10;
+    optional io.graphoenix.core.grpc.StringExpression update_user_id = 11;
+    optional io.graphoenix.core.grpc.StringExpression update_time = 12;
+    optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
+    optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
+    optional MerchantDirectorOrderBy order_by = 15;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated MerchantDirectorExpression exs = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
 }

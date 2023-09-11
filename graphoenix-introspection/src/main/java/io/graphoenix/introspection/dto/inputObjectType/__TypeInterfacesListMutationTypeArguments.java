@@ -21,11 +21,11 @@ public class __TypeInterfacesListMutationTypeArguments implements MetaInput {
 
   private String typeName;
 
-  private __TypeInput from;
+  private __TypeInput typeNameType;
 
   private String interfaceName;
 
-  private __TypeInput to;
+  private __TypeInput interfaceNameType;
 
   private Boolean isDeprecated;
 
@@ -66,12 +66,12 @@ public class __TypeInterfacesListMutationTypeArguments implements MetaInput {
     this.typeName = typeName;
   }
 
-  public __TypeInput getFrom() {
-    return this.from;
+  public __TypeInput getTypeNameType() {
+    return this.typeNameType;
   }
 
-  public void setFrom(__TypeInput from) {
-    this.from = from;
+  public void setTypeNameType(__TypeInput typeNameType) {
+    this.typeNameType = typeNameType;
   }
 
   public String getInterfaceName() {
@@ -82,12 +82,12 @@ public class __TypeInterfacesListMutationTypeArguments implements MetaInput {
     this.interfaceName = interfaceName;
   }
 
-  public __TypeInput getTo() {
-    return this.to;
+  public __TypeInput getInterfaceNameType() {
+    return this.interfaceNameType;
   }
 
-  public void setTo(__TypeInput to) {
-    this.to = to;
+  public void setInterfaceNameType(__TypeInput interfaceNameType) {
+    this.interfaceNameType = interfaceNameType;
   }
 
   public Boolean getIsDeprecated() {

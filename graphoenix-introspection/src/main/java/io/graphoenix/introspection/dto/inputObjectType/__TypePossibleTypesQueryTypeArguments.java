@@ -21,11 +21,11 @@ public class __TypePossibleTypesQueryTypeArguments implements MetaExpression {
 
   private StringExpression typeName;
 
-  private __TypeExpression from;
+  private __TypeExpression typeNameType;
 
   private StringExpression possibleTypeName;
 
-  private __TypeExpression to;
+  private __TypeExpression possibleTypeNameType;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -67,12 +67,12 @@ public class __TypePossibleTypesQueryTypeArguments implements MetaExpression {
     this.typeName = typeName;
   }
 
-  public __TypeExpression getFrom() {
-    return this.from;
+  public __TypeExpression getTypeNameType() {
+    return this.typeNameType;
   }
 
-  public void setFrom(__TypeExpression from) {
-    this.from = from;
+  public void setTypeNameType(__TypeExpression typeNameType) {
+    this.typeNameType = typeNameType;
   }
 
   public StringExpression getPossibleTypeName() {
@@ -83,12 +83,12 @@ public class __TypePossibleTypesQueryTypeArguments implements MetaExpression {
     this.possibleTypeName = possibleTypeName;
   }
 
-  public __TypeExpression getTo() {
-    return this.to;
+  public __TypeExpression getPossibleTypeNameType() {
+    return this.possibleTypeNameType;
   }
 
-  public void setTo(__TypeExpression to) {
-    this.to = to;
+  public void setPossibleTypeNameType(__TypeExpression possibleTypeNameType) {
+    this.possibleTypeNameType = possibleTypeNameType;
   }
 
   public Boolean getIncludeDeprecated() {

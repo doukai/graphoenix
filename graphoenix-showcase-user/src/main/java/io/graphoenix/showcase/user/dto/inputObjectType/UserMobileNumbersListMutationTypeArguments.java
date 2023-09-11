@@ -21,7 +21,7 @@ public class UserMobileNumbersListMutationTypeArguments implements MetaInput {
 
   private Integer userId;
 
-  private UserInput from;
+  private UserInput userIdType;
 
   private String mobileNumber;
 
@@ -64,12 +64,12 @@ public class UserMobileNumbersListMutationTypeArguments implements MetaInput {
     this.userId = userId;
   }
 
-  public UserInput getFrom() {
-    return this.from;
+  public UserInput getUserIdType() {
+    return this.userIdType;
   }
 
-  public void setFrom(UserInput from) {
-    this.from = from;
+  public void setUserIdType(UserInput userIdType) {
+    this.userIdType = userIdType;
   }
 
   public String getMobileNumber() {

@@ -23,7 +23,7 @@ public class RoleRoleType implements Meta {
 
   private Integer roleId;
 
-  private Role from;
+  private Role roleIdType;
 
   private RoleType type;
 
@@ -79,12 +79,12 @@ public class RoleRoleType implements Meta {
     this.roleId = roleId;
   }
 
-  public Role getFrom() {
-    return this.from;
+  public Role getRoleIdType() {
+    return this.roleIdType;
   }
 
-  public void setFrom(Role from) {
-    this.from = from;
+  public void setRoleIdType(Role roleIdType) {
+    this.roleIdType = roleIdType;
   }
 
   public RoleType getType() {

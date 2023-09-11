@@ -22,7 +22,7 @@ public class __DirectiveLocationsExpression implements MetaExpression {
 
   private StringExpression directiveName;
 
-  private __DirectiveExpression from;
+  private __DirectiveExpression directiveNameType;
 
   private __DirectiveLocationExpression directiveLocation;
 
@@ -66,12 +66,12 @@ public class __DirectiveLocationsExpression implements MetaExpression {
     this.directiveName = directiveName;
   }
 
-  public __DirectiveExpression getFrom() {
-    return this.from;
+  public __DirectiveExpression getDirectiveNameType() {
+    return this.directiveNameType;
   }
 
-  public void setFrom(__DirectiveExpression from) {
-    this.from = from;
+  public void setDirectiveNameType(__DirectiveExpression directiveNameType) {
+    this.directiveNameType = directiveNameType;
   }
 
   public __DirectiveLocationExpression getDirectiveLocation() {

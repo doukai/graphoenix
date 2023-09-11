@@ -21,7 +21,7 @@ public class RoleRoleTypeInput implements MetaInput {
 
   private Integer roleId;
 
-  private RoleInput from;
+  private RoleInput roleIdType;
 
   private RoleType type;
 
@@ -60,12 +60,12 @@ public class RoleRoleTypeInput implements MetaInput {
     this.roleId = roleId;
   }
 
-  public RoleInput getFrom() {
-    return this.from;
+  public RoleInput getRoleIdType() {
+    return this.roleIdType;
   }
 
-  public void setFrom(RoleInput from) {
-    this.from = from;
+  public void setRoleIdType(RoleInput roleIdType) {
+    this.roleIdType = roleIdType;
   }
 
   public RoleType getType() {

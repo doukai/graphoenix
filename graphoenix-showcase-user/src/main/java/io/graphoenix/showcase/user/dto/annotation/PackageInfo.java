@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.SOURCE)
 @Directive("packageInfo")
-@Target({ElementType.METHOD,ElementType.TYPE,ElementType.FIELD})
+@Target({ElementType.TYPE,ElementType.METHOD,ElementType.FIELD})
 public @interface PackageInfo {
   String packageName();
 

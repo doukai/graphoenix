@@ -23,11 +23,11 @@ public class __TypeInterfacesListQueryTypeArguments implements MetaExpression {
 
   private StringExpression typeName;
 
-  private __TypeExpression from;
+  private __TypeExpression typeNameType;
 
   private StringExpression interfaceName;
 
-  private __TypeExpression to;
+  private __TypeExpression interfaceNameType;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -83,12 +83,12 @@ public class __TypeInterfacesListQueryTypeArguments implements MetaExpression {
     this.typeName = typeName;
   }
 
-  public __TypeExpression getFrom() {
-    return this.from;
+  public __TypeExpression getTypeNameType() {
+    return this.typeNameType;
   }
 
-  public void setFrom(__TypeExpression from) {
-    this.from = from;
+  public void setTypeNameType(__TypeExpression typeNameType) {
+    this.typeNameType = typeNameType;
   }
 
   public StringExpression getInterfaceName() {
@@ -99,12 +99,12 @@ public class __TypeInterfacesListQueryTypeArguments implements MetaExpression {
     this.interfaceName = interfaceName;
   }
 
-  public __TypeExpression getTo() {
-    return this.to;
+  public __TypeExpression getInterfaceNameType() {
+    return this.interfaceNameType;
   }
 
-  public void setTo(__TypeExpression to) {
-    this.to = to;
+  public void setInterfaceNameType(__TypeExpression interfaceNameType) {
+    this.interfaceNameType = interfaceNameType;
   }
 
   public Boolean getIncludeDeprecated() {

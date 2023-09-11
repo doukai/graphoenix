@@ -1126,9 +1126,6 @@ public class DocumentBuilder {
             } else {
                 inputTypeName = fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName + InputType.INPUT);
             }
-            if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
-                inputTypeName = inputTypeName.replace("!", "");
-            }
             InputValue inputValue = new InputValue().setName(fieldDefinitionContext.name().getText()).setType(inputTypeName);
             Optional.ofNullable(fieldDefinitionContext.directives())
                     .flatMap(directivesContext ->

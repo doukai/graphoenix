@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.order.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
+import io.graphoenix.core.dto.inputObjectType.MetaInput;
 import io.graphoenix.showcase.user.dto.inputObjectType.UserInput;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
@@ -11,20 +12,20 @@ import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
-@Input
 @CompiledJson
+@Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class MerchantDirectorInput {
+public class MerchantDirectorInput implements MetaInput {
   private String id;
 
   private Integer merchantId;
 
-  private MerchantInput from;
+  private MerchantInput merchantIdType;
 
   private Integer userId;
 
-  private UserInput to;
+  private UserInput userIdType;
 
   private Boolean isDeprecated;
 
@@ -61,12 +62,12 @@ public class MerchantDirectorInput {
     this.merchantId = merchantId;
   }
 
-  public MerchantInput getFrom() {
-    return this.from;
+  public MerchantInput getMerchantIdType() {
+    return this.merchantIdType;
   }
 
-  public void setFrom(MerchantInput from) {
-    this.from = from;
+  public void setMerchantIdType(MerchantInput merchantIdType) {
+    this.merchantIdType = merchantIdType;
   }
 
   public Integer getUserId() {
@@ -77,12 +78,12 @@ public class MerchantDirectorInput {
     this.userId = userId;
   }
 
-  public UserInput getTo() {
-    return this.to;
+  public UserInput getUserIdType() {
+    return this.userIdType;
   }
 
-  public void setTo(UserInput to) {
-    this.to = to;
+  public void setUserIdType(UserInput userIdType) {
+    this.userIdType = userIdType;
   }
 
   public Boolean getIsDeprecated() {

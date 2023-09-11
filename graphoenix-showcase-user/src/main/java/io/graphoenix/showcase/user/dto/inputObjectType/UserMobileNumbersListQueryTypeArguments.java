@@ -23,7 +23,7 @@ public class UserMobileNumbersListQueryTypeArguments implements MetaExpression {
 
   private IntExpression userId;
 
-  private UserExpression from;
+  private UserExpression userIdType;
 
   private StringExpression mobileNumber;
 
@@ -81,12 +81,12 @@ public class UserMobileNumbersListQueryTypeArguments implements MetaExpression {
     this.userId = userId;
   }
 
-  public UserExpression getFrom() {
-    return this.from;
+  public UserExpression getUserIdType() {
+    return this.userIdType;
   }
 
-  public void setFrom(UserExpression from) {
-    this.from = from;
+  public void setUserIdType(UserExpression userIdType) {
+    this.userIdType = userIdType;
   }
 
   public StringExpression getMobileNumber() {

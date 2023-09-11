@@ -23,11 +23,11 @@ public class UserRoleListQueryTypeArguments implements MetaExpression {
 
   private IntExpression userId;
 
-  private UserExpression from;
+  private UserExpression userIdType;
 
   private IntExpression roleId;
 
-  private RoleExpression to;
+  private RoleExpression roleIdType;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -83,12 +83,12 @@ public class UserRoleListQueryTypeArguments implements MetaExpression {
     this.userId = userId;
   }
 
-  public UserExpression getFrom() {
-    return this.from;
+  public UserExpression getUserIdType() {
+    return this.userIdType;
   }
 
-  public void setFrom(UserExpression from) {
-    this.from = from;
+  public void setUserIdType(UserExpression userIdType) {
+    this.userIdType = userIdType;
   }
 
   public IntExpression getRoleId() {
@@ -99,12 +99,12 @@ public class UserRoleListQueryTypeArguments implements MetaExpression {
     this.roleId = roleId;
   }
 
-  public RoleExpression getTo() {
-    return this.to;
+  public RoleExpression getRoleIdType() {
+    return this.roleIdType;
   }
 
-  public void setTo(RoleExpression to) {
-    this.to = to;
+  public void setRoleIdType(RoleExpression roleIdType) {
+    this.roleIdType = roleIdType;
   }
 
   public Boolean getIncludeDeprecated() {

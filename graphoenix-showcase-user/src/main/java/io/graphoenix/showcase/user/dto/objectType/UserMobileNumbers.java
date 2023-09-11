@@ -22,7 +22,7 @@ public class UserMobileNumbers implements Meta {
 
   private Integer userId;
 
-  private User from;
+  private User userIdType;
 
   private String mobileNumber;
 
@@ -84,12 +84,12 @@ public class UserMobileNumbers implements Meta {
     this.userId = userId;
   }
 
-  public User getFrom() {
-    return this.from;
+  public User getUserIdType() {
+    return this.userIdType;
   }
 
-  public void setFrom(User from) {
-    this.from = from;
+  public void setUserIdType(User userIdType) {
+    this.userIdType = userIdType;
   }
 
   public String getMobileNumber() {

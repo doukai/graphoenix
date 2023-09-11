@@ -303,9 +303,9 @@ message MutationIntroTypeInterfacesRequest {
     optional string arguments = 2;
     optional string id = 3;
     optional string type_name = 4;
-    optional IntroTypeInput from = 5;
+    optional IntroTypeInput type_name_type = 5;
     optional string interface_name = 6;
-    optional IntroTypeInput to = 7;
+    optional IntroTypeInput interface_name_type = 7;
     optional bool is_deprecated = 8;
     optional int32 version = 9;
     optional int32 realm_id = 10;
@@ -322,9 +322,9 @@ message MutationIntroTypeInterfacesListRequest {
     optional string arguments = 2;
     optional string id = 3;
     optional string type_name = 4;
-    optional IntroTypeInput from = 5;
+    optional IntroTypeInput type_name_type = 5;
     optional string interface_name = 6;
-    optional IntroTypeInput to = 7;
+    optional IntroTypeInput interface_name_type = 7;
     optional bool is_deprecated = 8;
     optional int32 version = 9;
     optional int32 realm_id = 10;
@@ -342,9 +342,9 @@ message MutationIntroTypePossibleTypesRequest {
     optional string arguments = 2;
     optional string id = 3;
     optional string type_name = 4;
-    optional IntroTypeInput from = 5;
+    optional IntroTypeInput type_name_type = 5;
     optional string possible_type_name = 6;
-    optional IntroTypeInput to = 7;
+    optional IntroTypeInput possible_type_name_type = 7;
     optional bool is_deprecated = 8;
     optional int32 version = 9;
     optional int32 realm_id = 10;
@@ -361,9 +361,9 @@ message MutationIntroTypePossibleTypesListRequest {
     optional string arguments = 2;
     optional string id = 3;
     optional string type_name = 4;
-    optional IntroTypeInput from = 5;
+    optional IntroTypeInput type_name_type = 5;
     optional string possible_type_name = 6;
-    optional IntroTypeInput to = 7;
+    optional IntroTypeInput possible_type_name_type = 7;
     optional bool is_deprecated = 8;
     optional int32 version = 9;
     optional int32 realm_id = 10;
@@ -381,7 +381,7 @@ message MutationIntroDirectiveLocationsRequest {
     optional string arguments = 2;
     optional string id = 3;
     optional string directive_name = 4;
-    optional IntroDirectiveInput from = 5;
+    optional IntroDirectiveInput directive_name_type = 5;
     optional io.graphoenix.core.grpc.IntroDirectiveLocation directive_location = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;
@@ -399,7 +399,7 @@ message MutationIntroDirectiveLocationsListRequest {
     optional string arguments = 2;
     optional string id = 3;
     optional string directive_name = 4;
-    optional IntroDirectiveInput from = 5;
+    optional IntroDirectiveInput directive_name_type = 5;
     optional io.graphoenix.core.grpc.IntroDirectiveLocation directive_location = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;

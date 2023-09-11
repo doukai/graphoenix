@@ -23,7 +23,7 @@ public class RoleRoleTypeConnectionSubscriptionTypeArguments implements MetaExpr
 
   private IntExpression roleId;
 
-  private RoleExpression from;
+  private RoleExpression roleIdType;
 
   private RoleTypeExpression type;
 
@@ -81,12 +81,12 @@ public class RoleRoleTypeConnectionSubscriptionTypeArguments implements MetaExpr
     this.roleId = roleId;
   }
 
-  public RoleExpression getFrom() {
-    return this.from;
+  public RoleExpression getRoleIdType() {
+    return this.roleIdType;
   }
 
-  public void setFrom(RoleExpression from) {
-    this.from = from;
+  public void setRoleIdType(RoleExpression roleIdType) {
+    this.roleIdType = roleIdType;
   }
 
   public RoleTypeExpression getType() {

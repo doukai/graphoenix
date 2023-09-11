@@ -22,11 +22,11 @@ public class __TypePossibleTypes implements Meta {
 
   private String typeName;
 
-  private __Type from;
+  private __Type typeNameType;
 
   private String possibleTypeName;
 
-  private __Type to;
+  private __Type possibleTypeNameType;
 
   private Boolean isDeprecated;
 
@@ -80,12 +80,12 @@ public class __TypePossibleTypes implements Meta {
     this.typeName = typeName;
   }
 
-  public __Type getFrom() {
-    return this.from;
+  public __Type getTypeNameType() {
+    return this.typeNameType;
   }
 
-  public void setFrom(__Type from) {
-    this.from = from;
+  public void setTypeNameType(__Type typeNameType) {
+    this.typeNameType = typeNameType;
   }
 
   public String getPossibleTypeName() {
@@ -96,12 +96,12 @@ public class __TypePossibleTypes implements Meta {
     this.possibleTypeName = possibleTypeName;
   }
 
-  public __Type getTo() {
-    return this.to;
+  public __Type getPossibleTypeNameType() {
+    return this.possibleTypeNameType;
   }
 
-  public void setTo(__Type to) {
-    this.to = to;
+  public void setPossibleTypeNameType(__Type possibleTypeNameType) {
+    this.possibleTypeNameType = possibleTypeNameType;
   }
 
   @Override

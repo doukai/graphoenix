@@ -3,6 +3,7 @@ package io.graphoenix.showcase.order.dto.inputObjectType;
 import com.dslplatform.json.CompiledJson;
 import io.graphoenix.core.dto.enumType.Conditional;
 import io.graphoenix.core.dto.inputObjectType.IntExpression;
+import io.graphoenix.core.dto.inputObjectType.MetaExpression;
 import io.graphoenix.core.dto.inputObjectType.StringExpression;
 import io.graphoenix.showcase.user.dto.inputObjectType.OrganizationExpression;
 import io.graphoenix.spi.annotation.Ignore;
@@ -12,20 +13,20 @@ import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
-@Input
 @CompiledJson
+@Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class MerchantPartnersExpression {
+public class MerchantPartnersExpression implements MetaExpression {
   private StringExpression id;
 
   private IntExpression merchantId;
 
-  private MerchantExpression from;
+  private MerchantExpression merchantIdType;
 
   private IntExpression organizationId;
 
-  private OrganizationExpression to;
+  private OrganizationExpression organizationIdType;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -67,12 +68,12 @@ public class MerchantPartnersExpression {
     this.merchantId = merchantId;
   }
 
-  public MerchantExpression getFrom() {
-    return this.from;
+  public MerchantExpression getMerchantIdType() {
+    return this.merchantIdType;
   }
 
-  public void setFrom(MerchantExpression from) {
-    this.from = from;
+  public void setMerchantIdType(MerchantExpression merchantIdType) {
+    this.merchantIdType = merchantIdType;
   }
 
   public IntExpression getOrganizationId() {
@@ -83,12 +84,12 @@ public class MerchantPartnersExpression {
     this.organizationId = organizationId;
   }
 
-  public OrganizationExpression getTo() {
-    return this.to;
+  public OrganizationExpression getOrganizationIdType() {
+    return this.organizationIdType;
   }
 
-  public void setTo(OrganizationExpression to) {
-    this.to = to;
+  public void setOrganizationIdType(OrganizationExpression organizationIdType) {
+    this.organizationIdType = organizationIdType;
   }
 
   public Boolean getIncludeDeprecated() {

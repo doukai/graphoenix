@@ -23,11 +23,11 @@ public class MerchantPartners implements Meta {
 
   private Integer merchantId;
 
-  private Merchant from;
+  private Merchant merchantIdType;
 
   private Integer organizationId;
 
-  private Organization to;
+  private Organization organizationIdType;
 
   private Boolean isDeprecated;
 
@@ -89,12 +89,12 @@ public class MerchantPartners implements Meta {
     this.merchantId = merchantId;
   }
 
-  public Merchant getFrom() {
-    return this.from;
+  public Merchant getMerchantIdType() {
+    return this.merchantIdType;
   }
 
-  public void setFrom(Merchant from) {
-    this.from = from;
+  public void setMerchantIdType(Merchant merchantIdType) {
+    this.merchantIdType = merchantIdType;
   }
 
   public Integer getOrganizationId() {
@@ -105,12 +105,12 @@ public class MerchantPartners implements Meta {
     this.organizationId = organizationId;
   }
 
-  public Organization getTo() {
-    return this.to;
+  public Organization getOrganizationIdType() {
+    return this.organizationIdType;
   }
 
-  public void setTo(Organization to) {
-    this.to = to;
+  public void setOrganizationIdType(Organization organizationIdType) {
+    this.organizationIdType = organizationIdType;
   }
 
   @Override

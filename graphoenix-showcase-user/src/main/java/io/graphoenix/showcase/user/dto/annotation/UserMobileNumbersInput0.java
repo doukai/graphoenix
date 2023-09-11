@@ -39,7 +39,7 @@ public @interface UserMobileNumbersInput0 {
 
   String $userId() default "";
 
-  String $from() default "";
+  String $userIdType() default "";
 
   String $mobileNumber() default "";
 

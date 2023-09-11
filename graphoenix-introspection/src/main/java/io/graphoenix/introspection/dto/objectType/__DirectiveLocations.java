@@ -23,7 +23,7 @@ public class __DirectiveLocations implements Meta {
 
   private String directiveName;
 
-  private __Directive from;
+  private __Directive directiveNameType;
 
   private __DirectiveLocation directiveLocation;
 
@@ -73,12 +73,12 @@ public class __DirectiveLocations implements Meta {
     this.directiveName = directiveName;
   }
 
-  public __Directive getFrom() {
-    return this.from;
+  public __Directive getDirectiveNameType() {
+    return this.directiveNameType;
   }
 
-  public void setFrom(__Directive from) {
-    this.from = from;
+  public void setDirectiveNameType(__Directive directiveNameType) {
+    this.directiveNameType = directiveNameType;
   }
 
   public __DirectiveLocation getDirectiveLocation() {

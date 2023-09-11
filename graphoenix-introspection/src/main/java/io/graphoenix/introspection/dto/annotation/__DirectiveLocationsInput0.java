@@ -38,7 +38,7 @@ public @interface __DirectiveLocationsInput0 {
 
   String $directiveName() default "";
 
-  String $from() default "";
+  String $directiveNameType() default "";
 
   String $directiveLocation() default "";
 

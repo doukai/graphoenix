@@ -255,9 +255,9 @@ message IntroDirective {
 message IntroTypeInterfaces {
     optional string id = 1;
     optional string type_name = 2;
-    optional IntroType from = 3;
+    optional IntroType type_name_type = 3;
     optional string interface_name = 4;
-    optional IntroType to = 5;
+    optional IntroType interface_name_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -280,9 +280,9 @@ message IntroTypeInterfaces {
 message IntroTypePossibleTypes {
     optional string id = 1;
     optional string type_name = 2;
-    optional IntroType from = 3;
+    optional IntroType type_name_type = 3;
     optional string possible_type_name = 4;
-    optional IntroType to = 5;
+    optional IntroType possible_type_name_type = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -305,7 +305,7 @@ message IntroTypePossibleTypes {
 message IntroDirectiveLocations {
     optional string id = 1;
     optional string directive_name = 2;
-    optional IntroDirective from = 3;
+    optional IntroDirective directive_name_type = 3;
     optional io.graphoenix.core.grpc.IntroDirectiveLocation directive_location = 4;
     optional bool is_deprecated = 5;
     optional int32 version = 6;

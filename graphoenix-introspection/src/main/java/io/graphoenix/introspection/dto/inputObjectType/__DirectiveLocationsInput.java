@@ -21,7 +21,7 @@ public class __DirectiveLocationsInput implements MetaInput {
 
   private String directiveName;
 
-  private __DirectiveInput from;
+  private __DirectiveInput directiveNameType;
 
   private __DirectiveLocation directiveLocation;
 
@@ -60,12 +60,12 @@ public class __DirectiveLocationsInput implements MetaInput {
     this.directiveName = directiveName;
   }
 
-  public __DirectiveInput getFrom() {
-    return this.from;
+  public __DirectiveInput getDirectiveNameType() {
+    return this.directiveNameType;
   }
 
-  public void setFrom(__DirectiveInput from) {
-    this.from = from;
+  public void setDirectiveNameType(__DirectiveInput directiveNameType) {
+    this.directiveNameType = directiveNameType;
   }
 
   public __DirectiveLocation getDirectiveLocation() {
