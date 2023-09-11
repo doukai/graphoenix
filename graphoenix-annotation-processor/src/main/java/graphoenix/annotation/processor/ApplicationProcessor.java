@@ -144,7 +144,7 @@ public class ApplicationProcessor extends BaseProcessor {
                     if (manager.fieldTypeIsList(entry.getValue().type())) {
                         writer.write(jsonSchemaTranslator.operationObjectFieldListArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
                     } else {
-                        writer.write(jsonSchemaTranslator.operationObjectFieldInsertArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
+                        writer.write(jsonSchemaTranslator.operationObjectFieldArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
                     }
                     writer.close();
                     schema = filer.createResource(
