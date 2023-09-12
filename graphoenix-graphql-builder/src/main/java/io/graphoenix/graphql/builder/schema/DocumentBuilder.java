@@ -1120,22 +1120,26 @@ public class DocumentBuilder {
             if (fieldDefinitionContext.name().getText().equals("__typename")) {
                 return new InputValue().setName("__typename").setType("String").setDefaultValue(objectTypeDefinitionContext.name().getText());
             }
-            String inputTypeName;
-            if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
-                if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
-                    inputTypeName = fieldDefinitionContext.type().getText().replaceAll("!", "");
-                } else {
-                    inputTypeName = fieldDefinitionContext.type().getText();
-                }
-            } else {
-                if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
-                    String mutationTypeName = manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME);
-                    inputTypeName = fieldDefinitionContext.type().getText().replace(fieldTypeName, objectTypeDefinitionContext.name().getText() + mutationTypeName + InputType.MUTATION_ARGUMENTS).replaceAll("!", "");
-                } else {
-                    inputTypeName = fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName + InputType.INPUT);
-                }
+            String argumentTypeName;
+            switch (fieldTypeName) {
+                case "Boolean":
+                case "ID":
+                case "String":
+                case "Date":
+                case "Time":
+                case "DateTime":
+                case "Timestamp":
+                case "Int":
+                case "BigInteger":
+                case "Float":
+                case "BigDecimal":
+                    argumentTypeName = fieldTypeName;
+                    break;
+                default:
+                    argumentTypeName = fieldTypeName + InputType.INPUT;
+                    break;
             }
-            InputValue inputValue = new InputValue().setName(fieldDefinitionContext.name().getText()).setType(inputTypeName);
+            InputValue inputValue = new InputValue().setName(fieldDefinitionContext.name().getText()).setType(argumentTypeName);
             Optional.ofNullable(fieldDefinitionContext.directives())
                     .flatMap(directivesContext ->
                             directivesContext.directive().stream()
@@ -1215,7 +1219,8 @@ public class DocumentBuilder {
         InputObjectType inputObjectType = new InputObjectType()
                 .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaInput"))))
                 .setName(objectTypeDefinitionContext.name().getText() + InputType.INPUT)
-                .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.INPUT));
+                .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.INPUT))
+                .addInputValue(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
 
         Optional.ofNullable(objectTypeDefinitionContext.directives())
                 .flatMap(directivesContext ->

@@ -40,9 +40,6 @@ import static io.graphoenix.spi.constant.Hammurabi.FETCH_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MAP_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MERGE_TO_LIST_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.MutationType.DELETE;
-import static io.graphoenix.spi.constant.Hammurabi.MutationType.MERGE;
-import static io.graphoenix.spi.constant.Hammurabi.MutationType.UPDATE;
 import static io.graphoenix.spi.constant.Hammurabi.PACKAGE_INFO_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.SUBSCRIPTION_TYPE_NAME;
@@ -264,37 +261,6 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     @Override
     public Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         return operationDefinitionContext.variableDefinitions().variableDefinition().stream();
-    }
-
-    @Override
-    public Hammurabi.MutationType getMutationType(GraphqlParser.SelectionContext selectionContext) {
-        return Stream.ofNullable(selectionContext.field())
-                .flatMap(fieldContext -> Stream.ofNullable(fieldContext.directives()))
-                .map(directivesContext ->
-                        directivesContext.directive().stream()
-                                .filter(directiveContext -> directiveContext.name().getText().equals(UPDATE_DIRECTIVE_NAME))
-                                .filter(directiveContext ->
-                                        directiveContext.arguments().argument().stream()
-                                                .filter(argumentContext -> argumentContext.name().getText().equals("if"))
-                                                .anyMatch(argumentContext -> argumentContext.valueWithVariable().BooleanValue() != null && Boolean.parseBoolean(argumentContext.valueWithVariable().BooleanValue().getText()))
-                                )
-                                .findFirst()
-                                .map(directiveContext -> UPDATE)
-                                .orElseGet(() ->
-                                        directivesContext.directive().stream()
-                                                .filter(directiveContext -> directiveContext.name().getText().equals(DELETE_DIRECTIVE_NAME))
-                                                .filter(directiveContext ->
-                                                        directiveContext.arguments().argument().stream()
-                                                                .filter(argumentContext -> argumentContext.name().getText().equals("if"))
-                                                                .anyMatch(argumentContext -> argumentContext.valueWithVariable().BooleanValue() != null && Boolean.parseBoolean(argumentContext.valueWithVariable().BooleanValue().getText()))
-                                                )
-                                                .findFirst()
-                                                .map(directiveContext -> DELETE)
-                                                .orElse(MERGE)
-                                )
-                )
-                .findFirst()
-                .orElse(MERGE);
     }
 
     @Override

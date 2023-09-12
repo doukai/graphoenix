@@ -1,7 +1,6 @@
 package io.graphoenix.spi.antlr;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.spi.constant.Hammurabi;
 
 import javax.annotation.processing.Filer;
 import java.io.File;
@@ -49,8 +48,6 @@ public interface IGraphQLDocumentManager {
     GraphqlParser.OperationTypeContext getOperationType(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
 
     Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
-
-    Hammurabi.MutationType getMutationType(GraphqlParser.SelectionContext selectionContext);
 
     boolean mergeToList(GraphqlParser.SelectionContext selectionContext, String argumentName);
 

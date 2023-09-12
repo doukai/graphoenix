@@ -1641,6 +1641,56 @@ public class GraphQLArgumentsToWhere {
                 );
     }
 
+    protected Optional<Expression> objectValueWithVariableToWhereExpression(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                            GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext,
+                                                                            int level) {
+
+        return fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(WHERE_INPUT_NAME))
+                .findFirst()
+                .flatMap(inputValueDefinitionContext ->
+                        Stream.ofNullable(objectValueWithVariableContext)
+                                .map(GraphqlParser.ObjectValueWithVariableContext::objectFieldWithVariable)
+                                .flatMap(Collection::stream)
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(inputValueDefinitionContext.name().getText()))
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable() != null)
+                                .findFirst()
+                                .flatMap(objectFieldWithVariableContext ->
+                                        objectValueWithVariableToMultipleExpression(
+                                                fieldDefinitionContext.type(),
+                                                inputValueDefinitionContext,
+                                                objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable(),
+                                                level
+                                        )
+                                )
+                );
+    }
+
+    protected Optional<Expression> objectValueWithVariableToWhereExpression(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                            GraphqlParser.ObjectValueContext objectValueContext,
+                                                                            int level) {
+
+        return fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(WHERE_INPUT_NAME))
+                .findFirst()
+                .flatMap(inputValueDefinitionContext ->
+                        Stream.ofNullable(objectValueContext)
+                                .map(GraphqlParser.ObjectValueContext::objectField)
+                                .flatMap(Collection::stream)
+                                .filter(objectFieldContext -> objectFieldContext.name().getText().equals(inputValueDefinitionContext.name().getText()))
+                                .filter(objectFieldContext -> objectFieldContext.value().objectValue() != null)
+                                .findFirst()
+                                .flatMap(objectFieldContext ->
+                                        objectValueToMultipleExpression(
+                                                fieldDefinitionContext.type(),
+                                                inputValueDefinitionContext,
+                                                objectFieldContext.value().objectValue(),
+                                                level
+                                        )
+                                )
+                );
+    }
+
     protected PlainSelect mapFieldPlainSelect(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext,
                                               GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                               int level) {

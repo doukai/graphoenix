@@ -63,8 +63,4 @@ public class Hammurabi {
     public enum TransactionType {
         NO_TRANSACTION, IN_TRANSACTION
     }
-
-    public enum MutationType {
-        MERGE, UPDATE, DELETE
-    }
 }
