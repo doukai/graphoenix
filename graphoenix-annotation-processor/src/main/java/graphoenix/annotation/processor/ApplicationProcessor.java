@@ -139,36 +139,6 @@ public class ApplicationProcessor extends BaseProcessor {
                                     .concat(entry.getKey().name().getText())
                                     .concat("_")
                                     .concat(entry.getValue().name().getText())
-                    );
-                    writer = schema.openWriter();
-                    if (manager.fieldTypeIsList(entry.getValue().type())) {
-                        writer.write(jsonSchemaTranslator.operationObjectFieldListArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
-                    } else {
-                        writer.write(jsonSchemaTranslator.operationObjectFieldArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
-                    }
-                    writer.close();
-                    schema = filer.createResource(
-                            StandardLocation.CLASS_OUTPUT,
-                            "",
-                            "META-INF/schema/"
-                                    .concat(entry.getKey().name().getText())
-                                    .concat("_")
-                                    .concat(entry.getValue().name().getText())
-                                    .concat("_")
-                                    .concat("update")
-                                    .concat("_")
-                                    .concat("id")
-                    );
-                    writer = schema.openWriter();
-                    writer.write(jsonSchemaTranslator.operationObjectFieldUpdateByIdArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
-                    writer.close();
-                    schema = filer.createResource(
-                            StandardLocation.CLASS_OUTPUT,
-                            "",
-                            "META-INF/schema/"
-                                    .concat(entry.getKey().name().getText())
-                                    .concat("_")
-                                    .concat(entry.getValue().name().getText())
                                     .concat("_")
                                     .concat("update")
                                     .concat("_")
@@ -177,6 +147,35 @@ public class ApplicationProcessor extends BaseProcessor {
                     writer = schema.openWriter();
                     writer.write(jsonSchemaTranslator.operationObjectFieldUpdateByWhereArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
                     writer.close();
+                    if (manager.fieldTypeIsList(entry.getValue().type())) {
+                        schema = filer.createResource(
+                                StandardLocation.CLASS_OUTPUT,
+                                "",
+                                "META-INF/schema/"
+                                        .concat(entry.getKey().name().getText())
+                                        .concat("_")
+                                        .concat(entry.getValue().name().getText())
+                        );
+                        writer = schema.openWriter();
+                        writer.write(jsonSchemaTranslator.operationObjectFieldListArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
+                        writer.close();
+                    } else {
+                        schema = filer.createResource(
+                                StandardLocation.CLASS_OUTPUT,
+                                "",
+                                "META-INF/schema/"
+                                        .concat(entry.getKey().name().getText())
+                                        .concat("_")
+                                        .concat(entry.getValue().name().getText())
+                                        .concat("_")
+                                        .concat("update")
+                                        .concat("_")
+                                        .concat("id")
+                        );
+                        writer = schema.openWriter();
+                        writer.write(jsonSchemaTranslator.operationObjectFieldUpdateByIdArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
+                        writer.close();
+                    }
                 }
             }
 

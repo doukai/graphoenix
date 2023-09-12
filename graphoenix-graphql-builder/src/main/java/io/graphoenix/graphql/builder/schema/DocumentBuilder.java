@@ -1122,9 +1122,18 @@ public class DocumentBuilder {
             }
             String inputTypeName;
             if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
-                inputTypeName = fieldDefinitionContext.type().getText();
+                if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
+                    inputTypeName = fieldDefinitionContext.type().getText().replaceAll("!", "");
+                } else {
+                    inputTypeName = fieldDefinitionContext.type().getText();
+                }
             } else {
-                inputTypeName = fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName + InputType.INPUT);
+                if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
+                    String mutationTypeName = manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME);
+                    inputTypeName = fieldDefinitionContext.type().getText().replace(fieldTypeName, objectTypeDefinitionContext.name().getText() + mutationTypeName + InputType.MUTATION_ARGUMENTS).replaceAll("!", "");
+                } else {
+                    inputTypeName = fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName + InputType.INPUT);
+                }
             }
             InputValue inputValue = new InputValue().setName(fieldDefinitionContext.name().getText()).setType(inputTypeName);
             Optional.ofNullable(fieldDefinitionContext.directives())
