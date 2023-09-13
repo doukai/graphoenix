@@ -154,21 +154,21 @@ public class GrpcServiceImplementer {
 
     private JavaFile buildGrpcServerProducerClass(String packageName) {
         TypeSpec typeSpec = buildGrpcServerBuilder(packageName);
-        return JavaFile.builder(packageName.concat(".grpc"), typeSpec).build();
+        return JavaFile.builder(packageName + ".grpc", typeSpec).build();
     }
 
     private JavaFile buildTypeServiceImplClass(String packageName, OperationType operationType, List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList) {
         TypeSpec typeSpec = buildOperationTypeServiceImpl(packageName, operationType, fieldDefinitionContextList);
-        return JavaFile.builder(packageName.concat(".grpc"), typeSpec).build();
+        return JavaFile.builder(packageName + ".grpc", typeSpec).build();
     }
 
     private JavaFile buildGraphQLServiceImplClass(String packageName) {
         TypeSpec typeSpec = buildGraphQLServiceImpl(packageName);
-        return JavaFile.builder(packageName.concat(".grpc"), typeSpec).build();
+        return JavaFile.builder(packageName + ".grpc", typeSpec).build();
     }
 
     private TypeSpec buildGrpcServerBuilder(String packageName) {
-        String grpcPackageName = packageName.concat(".grpc");
+        String grpcPackageName = packageName + ".grpc";
         return TypeSpec.classBuilder("GrpcServerProducer")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
@@ -205,7 +205,7 @@ public class GrpcServiceImplementer {
     }
 
     private TypeSpec buildOperationTypeServiceImpl(String packageName, OperationType operationType, List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList) {
-        String grpcPackageName = packageName.concat(".grpc");
+        String grpcPackageName = packageName + ".grpc";
         String className;
         String superClassName;
         String serviceName;
@@ -366,7 +366,7 @@ public class GrpcServiceImplementer {
     }
 
     private MethodSpec buildTypeMethod(String packageName, OperationType operationType, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        String grpcPackageName = packageName.concat(".grpc");
+        String grpcPackageName = packageName + ".grpc";
         String requestParameterName = "request";
         String grpcHandlerMethodName = grpcNameUtil.getGrpcFieldName(fieldDefinitionContext);
         String grpcRequestClassName = grpcNameUtil.getGrpcRequestClassName(fieldDefinitionContext, operationType);
@@ -778,7 +778,7 @@ public class GrpcServiceImplementer {
 
     private TypeSpec buildGraphQLServiceImpl(String packageName) {
         return TypeSpec.classBuilder("GrpcGraphQLServiceImpl")
-                .superclass(ClassName.get(packageName.concat(".grpc"), "ReactorGraphQLServiceGrpc", "GraphQLServiceImplBase"))
+                .superclass(ClassName.get(packageName + ".grpc", "ReactorGraphQLServiceGrpc", "GraphQLServiceImplBase"))
                 .addModifiers(Modifier.PUBLIC)
                 .addField(
                         FieldSpec.builder(
@@ -801,7 +801,7 @@ public class GrpcServiceImplementer {
     }
 
     private MethodSpec buildOperationMethod(String packageName) {
-        String grpcPackageName = packageName.concat(".grpc");
+        String grpcPackageName = packageName + ".grpc";
         String requestParameterName = "request";
         ParameterizedTypeName requestClassName = ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(grpcPackageName, "GraphQLRequest"));
         ParameterizedTypeName responseClassName = ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(grpcPackageName, "GraphQLResponse"));

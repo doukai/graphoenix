@@ -58,9 +58,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static io.graphoenix.core.utils.ElementUtil.ELEMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.INVOKES_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 public abstract class BaseProcessor extends AbstractProcessor {
 
@@ -247,13 +245,13 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                             .flatMap(Collection::stream)
                                                             .filter(directive -> directive.getName().equals(INVOKES_DIRECTIVE_NAME))
                                                             .findFirst();
-                                                    if (invokes.isPresent() && invokes.get().getArguments().get("list") != null && invokes.get().getArguments().get("list").getValueType().equals(JsonValue.ValueType.ARRAY)) {
-                                                        invokes.get().getArguments().put("list", jsonProvider.createArrayBuilder(invokes.get().getArguments().get("list").asJsonArray()).add(new ObjectValueWithVariable(invoke)).build());
+                                                    if (invokes.isPresent() && invokes.get().getArguments().get(LIST_INPUT_NAME) != null && invokes.get().getArguments().get(LIST_INPUT_NAME).getValueType().equals(JsonValue.ValueType.ARRAY)) {
+                                                        invokes.get().getArguments().put(LIST_INPUT_NAME, jsonProvider.createArrayBuilder(invokes.get().getArguments().get(LIST_INPUT_NAME).asJsonArray()).add(new ObjectValueWithVariable(invoke)).build());
                                                     } else {
                                                         inputObjectType.addDirective(
                                                                 new Directive()
                                                                         .setName(INVOKES_DIRECTIVE_NAME)
-                                                                        .addArgument("list",
+                                                                        .addArgument(LIST_INPUT_NAME,
                                                                                 new ArrayValueWithVariable(
                                                                                         Collections.singleton(invoke)
                                                                                 )

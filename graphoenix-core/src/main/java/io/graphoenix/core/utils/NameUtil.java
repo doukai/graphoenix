@@ -14,7 +14,7 @@ public enum NameUtil {
 
     public String getSchemaFieldName(String name) {
         if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return INTROSPECTION_PREFIX.concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name.replace(INTROSPECTION_PREFIX, "")));
+            return INTROSPECTION_PREFIX + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name.replace(INTROSPECTION_PREFIX, ""));
         } else {
             return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name);
         }

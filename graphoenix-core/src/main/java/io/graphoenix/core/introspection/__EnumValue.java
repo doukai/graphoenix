@@ -2,6 +2,8 @@ package io.graphoenix.core.introspection;
 
 import io.graphoenix.core.operation.ObjectValueWithVariable;
 
+import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
+
 public class __EnumValue {
 
     private String name;
@@ -53,7 +55,7 @@ public class __EnumValue {
             objectValueWithVariable.put("description", this.getDescription());
         }
         if (this.getIsDeprecated() != null) {
-            objectValueWithVariable.put("isDeprecated", this.getIsDeprecated());
+            objectValueWithVariable.put(DEPRECATED_FIELD_NAME, this.getIsDeprecated());
         }
         if (this.getDeprecationReason() != null) {
             objectValueWithVariable.put("deprecationReason", this.getDeprecationReason());

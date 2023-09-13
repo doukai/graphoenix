@@ -5,6 +5,8 @@ import io.graphoenix.core.operation.ObjectValueWithVariable;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
+
 public class __Field {
 
     private String name;
@@ -82,7 +84,7 @@ public class __Field {
             objectValueWithVariable.put("typeName", this.getType().getName());
         }
         if (this.getIsDeprecated() != null) {
-            objectValueWithVariable.put("isDeprecated", this.getIsDeprecated());
+            objectValueWithVariable.put(DEPRECATED_FIELD_NAME, this.getIsDeprecated());
         }
         if (this.getDeprecationReason() != null) {
             objectValueWithVariable.put("deprecationReason", this.getDeprecationReason());

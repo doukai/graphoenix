@@ -314,19 +314,15 @@ public class OperationPreprocessor {
 
     public String jsonElementToVariableString(JsonValue element) {
         if (element.getValueType().equals(OBJECT)) {
-            return "{"
-                    .concat(
-                            element.asJsonObject().entrySet().stream()
-                                    .map(entry -> entry.getKey().concat(": ").concat(jsonElementToVariableString(entry.getValue())))
-                                    .collect(Collectors.joining(" "))
-                    )
-                    .concat("}");
+            return "{" +
+                    element.asJsonObject().entrySet().stream()
+                            .map(entry -> entry.getKey() + ": " + jsonElementToVariableString(entry.getValue()))
+                            .collect(Collectors.joining(" ")) +
+                    "}";
         } else if (element.getValueType().equals(ARRAY)) {
-            return "["
-                    .concat(
-                            element.asJsonArray().stream().map(this::jsonElementToVariableString).collect(Collectors.joining(", "))
-                    )
-                    .concat("]");
+            return "[" +
+                    element.asJsonArray().stream().map(this::jsonElementToVariableString).collect(Collectors.joining(", ")) +
+                    "]";
         } else {
             return element.toString();
         }

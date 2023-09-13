@@ -28,9 +28,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
-import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
-import static io.graphoenix.spi.constant.Hammurabi.PAGE_INFO_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class MutationHandlerBuilder {
@@ -150,10 +148,10 @@ public class MutationHandlerBuilder {
                             String withTo = manager.getFetchWithTo(fieldDefinitionContext);
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
                             builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, field.getValue().asJsonArray().stream().map(item -> jsonProvider.createObjectBuilder().build()).collect($T.toJsonArray()))",
-                                            fieldDefinitionContext.name().getText(),
-                                            withObjectField.name().getText(),
-                                            ClassName.get(JsonCollectors.class)
-                                    )
+                                    fieldDefinitionContext.name().getText(),
+                                    withObjectField.name().getText(),
+                                    ClassName.get(JsonCollectors.class)
+                            )
                                     .addStatement("loader.registerArray($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue(), false)",
                                             packageName,
                                             protocol,
@@ -179,9 +177,9 @@ public class MutationHandlerBuilder {
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (before) {
-                        builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S)", fieldParameterName.concat("List"), fieldDefinitionContext.name().getText());
+                        builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S)", fieldParameterName + LIST_SUFFIX, fieldDefinitionContext.name().getText());
                     } else {
-                        builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S, valueWithVariable.asJsonObject().get($S))", fieldParameterName.concat("List"), fieldDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());
+                        builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S, valueWithVariable.asJsonObject().get($S))", fieldParameterName + LIST_SUFFIX, fieldDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());
                     }
                 }
             } else {
@@ -209,9 +207,9 @@ public class MutationHandlerBuilder {
                             String withTo = manager.getFetchWithTo(fieldDefinitionContext);
                             GraphqlParser.FieldDefinitionContext withObjectField = manager.getFetchWithObjectField(objectTypeDefinitionContext, fieldDefinitionContext);
                             builder.addStatement("loader.registerReplaceFiled(jsonPointer, $S, $S, jsonProvider.createObjectBuilder().build())",
-                                            fieldDefinitionContext.name().getText(),
-                                            withObjectField.name().getText()
-                                    )
+                                    fieldDefinitionContext.name().getText(),
+                                    withObjectField.name().getText()
+                            )
                                     .addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue(), false)",
                                             packageName,
                                             protocol,
@@ -269,7 +267,7 @@ public class MutationHandlerBuilder {
 
     private MethodSpec buildListTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean before) {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
-        String listTypeParameterName = typeParameterName.concat("List");
+        String listTypeParameterName = typeParameterName + LIST_SUFFIX;
         MethodSpec.Builder builder = MethodSpec.methodBuilder(listTypeParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(JsonValue.class), "valueWithVariable")

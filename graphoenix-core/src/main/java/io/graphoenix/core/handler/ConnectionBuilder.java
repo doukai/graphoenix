@@ -115,7 +115,7 @@ public class ConnectionBuilder {
                         switch (connectionSelectionContext.field().name().getText()) {
                             case "totalCount":
                                 String idFieldName = manager.getObjectTypeIDFieldName(fieldTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)));
-                                connectionObjectBuilder.add("totalCount", jsonValue.asJsonObject().get(connectionAggFieldName.get()).asJsonObject().get(idFieldName.concat("Count")));
+                                connectionObjectBuilder.add("totalCount", jsonValue.asJsonObject().get(connectionAggFieldName.get()).asJsonObject().get(idFieldName + "Count"));
                                 break;
                             case "edges":
                                 if (connectionSelectionContext.field().selectionSet() == null || connectionSelectionContext.field().selectionSet().selection().size() == 0) {

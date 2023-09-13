@@ -15,16 +15,16 @@ public class DBNameUtil {
 
     public String graphqlTypeNameToTableName(String graphqlTypeName) {
         if (graphqlTypeName.startsWith(INTROSPECTION_PREFIX)) {
-            return nameToDBEscape(INTROSPECTION_PREFIX.concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName.replaceFirst(INTROSPECTION_PREFIX, ""))));
+            return nameToDBEscape(INTROSPECTION_PREFIX + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName.replaceFirst(INTROSPECTION_PREFIX, "")));
         }
         return nameToDBEscape(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName));
     }
 
     public String graphqlTypeNameToTableAliaName(String graphqlTypeName, int level) {
         if (graphqlTypeName.startsWith(INTROSPECTION_PREFIX)) {
-            return INTROSPECTION_PREFIX.concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("_").concat(String.valueOf(level));
+            return INTROSPECTION_PREFIX + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName.replaceFirst(INTROSPECTION_PREFIX, "")) + "_" + level;
         }
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName).concat("_").concat(String.valueOf(level));
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName) + "_" + level;
     }
 
     public String graphqlFieldNameToColumnName(String graphqlFieldName) {

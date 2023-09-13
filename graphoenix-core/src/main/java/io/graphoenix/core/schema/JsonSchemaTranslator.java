@@ -17,17 +17,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.core.utils.NameUtil.NAME_UTIL;
 import static io.graphoenix.core.utils.ValidationUtil.VALIDATION_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.ARGUMENTS_SUFFIX;
-import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
-import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.SUBSCRIPTION_TYPE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 import static jakarta.json.JsonValue.TRUE;
 
 @ApplicationScoped
@@ -62,87 +54,79 @@ public class JsonSchemaTranslator {
     public Stream<JsonValue> inputObjectToJsonSchema(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         String mutationTypeName = manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME);
         if (inputObjectTypeDefinitionContext.name().getText().endsWith(INPUT_SUFFIX)) {
-            JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
-                    .map(this::buildValidation)
-                    .orElseGet(jsonProvider::createObjectBuilder)
-                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText() + "_update"))
-                    .add("type", jsonProvider.createValue("object"))
-                    .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
-                    .add("additionalProperties", TRUE)
-                    .add("required", buildRequired(inputObjectTypeDefinitionContext));
-
             String objectName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(INPUT_SUFFIX));
-            GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectName)));
-            JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
-                    .map(this::buildValidation)
-                    .orElseGet(jsonProvider::createObjectBuilder)
-                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
-                    .add("type", jsonProvider.createValue("object"))
-                    .add("properties", inputObjectToInsertProperties(inputObjectTypeDefinitionContext, objectTypeDefinitionContext))
-                    .add("additionalProperties", TRUE)
-                    .add("required", buildRequired(objectTypeDefinitionContext));
-            return Stream.of(updateBuilder.build(), builder.build());
-        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith("List" + mutationTypeName + ARGUMENTS_SUFFIX)) {
-            JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
-                    .map(this::buildValidation)
-                    .orElseGet(jsonProvider::createObjectBuilder)
-                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText() + "_update"))
-                    .add("type", jsonProvider.createValue("object"))
-                    .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
-                    .add("additionalProperties", TRUE)
-                    .add("required", buildRequired(inputObjectTypeDefinitionContext));
+            Optional<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContext = manager.getObject(objectName);
+            if (objectTypeDefinitionContext.isPresent()) {
+                JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                        .map(this::buildValidation)
+                        .orElseGet(jsonProvider::createObjectBuilder)
+                        .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText() + "_update"))
+                        .add("type", jsonProvider.createValue("object"))
+                        .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
+                        .add("additionalProperties", TRUE)
+                        .add("required", buildRequired(inputObjectTypeDefinitionContext));
 
-            JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
-                    .map(this::buildValidation)
-                    .orElseGet(jsonProvider::createObjectBuilder)
-                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
-                    .add("type", jsonProvider.createValue("object"))
-                    .add("properties", inputObjectToListProperties(inputObjectTypeDefinitionContext))
-                    .add("additionalProperties", TRUE)
-                    .add("required", jsonProvider.createArrayBuilder().add(LIST_INPUT_NAME));
-            return Stream.of(updateBuilder.build(), builder.build());
-        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(mutationTypeName + ARGUMENTS_SUFFIX)) {
-            JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
-                    .map(this::buildValidation)
-                    .orElseGet(jsonProvider::createObjectBuilder)
-                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText() + "_update"))
-                    .add("type", jsonProvider.createValue("object"))
-                    .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
-                    .add("additionalProperties", TRUE)
-                    .add("required", buildRequired(inputObjectTypeDefinitionContext));
-
-            String objectName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(mutationTypeName + ARGUMENTS_SUFFIX));
-            GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectName)));
-            JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
-                    .map(this::buildValidation)
-                    .orElseGet(jsonProvider::createObjectBuilder)
-                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
-                    .add("type", jsonProvider.createValue("object"))
-                    .add("properties", inputObjectToInsertProperties(inputObjectTypeDefinitionContext, objectTypeDefinitionContext))
-                    .add("additionalProperties", TRUE)
-                    .add("required", buildRequired(objectTypeDefinitionContext));
-            return Stream.of(updateBuilder.build(), builder.build());
-        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(ARGUMENTS_SUFFIX)) {
-            JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
-                    .map(this::buildValidation)
-                    .orElseGet(jsonProvider::createObjectBuilder)
-                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
-                    .add("type", jsonProvider.createValue("object"))
-                    .add("properties", inputObjectToProperties(inputObjectTypeDefinitionContext))
-                    .add("additionalProperties", TRUE)
-                    .add("required", buildRequired(inputObjectTypeDefinitionContext));
-            return Stream.of(builder.build());
-        } else {
-            JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
-                    .map(this::buildValidation)
-                    .orElseGet(jsonProvider::createObjectBuilder)
-                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
-                    .add("type", jsonProvider.createValue("object"))
-                    .add("properties", inputObjectToProperties(inputObjectTypeDefinitionContext))
-                    .add("additionalProperties", TRUE)
-                    .add("required", buildRequired(inputObjectTypeDefinitionContext));
-            return Stream.of(builder.build());
+                JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                        .map(this::buildValidation)
+                        .orElseGet(jsonProvider::createObjectBuilder)
+                        .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
+                        .add("type", jsonProvider.createValue("object"))
+                        .add("properties", inputObjectToInsertProperties(inputObjectTypeDefinitionContext, objectTypeDefinitionContext.get()))
+                        .add("additionalProperties", TRUE)
+                        .add("required", buildRequired(objectTypeDefinitionContext.get()));
+                return Stream.of(updateBuilder.build(), builder.build());
+            }
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith("_" + ARGUMENTS_SUFFIX)) {
+            String[] inputNameParts = inputObjectTypeDefinitionContext.name().getText().split("_");
+            if (inputNameParts.length == 3 && inputNameParts[0].equals(mutationTypeName)) {
+                Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = manager.getField(inputNameParts[0], inputNameParts[1]);
+                if (fieldDefinitionContext.isPresent()) {
+                    String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.get().type());
+                    boolean fieldTypeIsList = manager.fieldTypeIsList(fieldDefinitionContext.get().type());
+                    Optional<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContext = manager.getObject(fieldTypeName);
+                    if (objectTypeDefinitionContext.isPresent()) {
+                        JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                                .map(this::buildValidation)
+                                .orElseGet(jsonProvider::createObjectBuilder)
+                                .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText() + "_update"))
+                                .add("type", jsonProvider.createValue("object"))
+                                .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
+                                .add("additionalProperties", TRUE)
+                                .add("required", buildRequired(inputObjectTypeDefinitionContext));
+                        JsonObjectBuilder builder;
+                        if (fieldTypeIsList) {
+                            builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                                    .map(this::buildValidation)
+                                    .orElseGet(jsonProvider::createObjectBuilder)
+                                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
+                                    .add("type", jsonProvider.createValue("object"))
+                                    .add("properties", inputObjectToListProperties(inputObjectTypeDefinitionContext))
+                                    .add("additionalProperties", TRUE)
+                                    .add("required", jsonProvider.createArrayBuilder().add(LIST_INPUT_NAME));
+                        } else {
+                            builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                                    .map(this::buildValidation)
+                                    .orElseGet(jsonProvider::createObjectBuilder)
+                                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
+                                    .add("type", jsonProvider.createValue("object"))
+                                    .add("properties", inputObjectToInsertProperties(inputObjectTypeDefinitionContext, objectTypeDefinitionContext.get()))
+                                    .add("additionalProperties", TRUE)
+                                    .add("required", buildRequired(objectTypeDefinitionContext.get()));
+                        }
+                        return Stream.of(updateBuilder.build(), builder.build());
+                    }
+                }
+            }
         }
+        JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                .map(this::buildValidation)
+                .orElseGet(jsonProvider::createObjectBuilder)
+                .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
+                .add("type", jsonProvider.createValue("object"))
+                .add("properties", inputObjectToProperties(inputObjectTypeDefinitionContext))
+                .add("additionalProperties", TRUE)
+                .add("required", buildRequired(inputObjectTypeDefinitionContext));
+        return Stream.of(builder.build());
     }
 
     public JsonValue operationObjectToJsonSchema(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext) {
@@ -233,7 +217,8 @@ public class JsonSchemaTranslator {
 
     protected JsonObjectBuilder inputObjectToUpdateProperties(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
-        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
+        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(LIST_INPUT_NAME))
                 .forEach(inputValueDefinitionContext -> {
                             if (WHERE_INPUT_NAME.equals(inputValueDefinitionContext.name().getText())) {
                                 JsonObjectBuilder propertyBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives())
@@ -266,6 +251,7 @@ public class JsonSchemaTranslator {
         JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
         inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(WHERE_INPUT_NAME))
+                .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(LIST_INPUT_NAME))
                 .forEach(inputValueDefinitionContext -> {
                             Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionFromInputValueDefinition = manager.getFieldDefinitionFromInputValueDefinition(objectTypeDefinitionContext, inputValueDefinitionContext);
                             if (fieldDefinitionFromInputValueDefinition.isPresent()) {

@@ -45,7 +45,7 @@ public class GenerateBannerTask extends BaseTask {
             }
             stringBuilder.append(System.lineSeparator());
             Files.writeString(
-                    Path.of(resourcePath.concat(File.separator).concat(BANNER_FILE_NAME)),
+                    Path.of(resourcePath + File.separator + BANNER_FILE_NAME),
                     stringBuilder.toString()
             );
         } catch (IOException e) {

@@ -53,7 +53,7 @@ public class GenerateProtobufV3Task extends BaseTask {
             Set<Map.Entry<String, String>> entries = protobufFileBuilder.buildProto3().entrySet();
             for (Map.Entry<String, String> entry : entries) {
                 Files.writeString(
-                        protoPath.resolve(entry.getKey().concat(".proto")),
+                        protoPath.resolve(entry.getKey() + ".proto"),
                         entry.getValue()
                 );
             }

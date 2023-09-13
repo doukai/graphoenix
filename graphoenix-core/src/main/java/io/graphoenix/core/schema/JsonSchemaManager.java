@@ -19,7 +19,7 @@ public class JsonSchemaManager {
     public String getJsonSchema(String objectName) {
         String jsonSchema = jsonSchemaMap.get(objectName);
         if (jsonSchema == null) {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("META-INF/schema/".concat(objectName));
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("META-INF/schema/" + objectName);
             String schema = new BufferedReader(
                     new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8))
                     .lines()

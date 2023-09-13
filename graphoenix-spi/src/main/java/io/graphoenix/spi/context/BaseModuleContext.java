@@ -25,7 +25,7 @@ public abstract class BaseModuleContext implements ModuleContext {
 
     @Override
     public <T> Supplier<T> get(Class<T> beanClass, String name) {
-        return getOptional(beanClass, name).orElseThrow(() -> new RuntimeException(beanClass.getName().concat(" not found")));
+        return getOptional(beanClass, name).orElseThrow(() -> new RuntimeException(beanClass.getName() + " not found"));
     }
 
     @Override

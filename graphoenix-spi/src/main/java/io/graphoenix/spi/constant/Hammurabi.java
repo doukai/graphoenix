@@ -2,9 +2,9 @@ package io.graphoenix.spi.constant;
 
 public class Hammurabi {
 
-    public static final String QUERY_TYPE_NAME = "QueryType";
-    public static final String MUTATION_TYPE_NAME = "MutationType";
-    public static final String SUBSCRIPTION_TYPE_NAME = "SubscriptionType";
+    public static final String QUERY_TYPE_NAME = "Query";
+    public static final String MUTATION_TYPE_NAME = "Mutation";
+    public static final String SUBSCRIPTION_TYPE_NAME = "Subscription";
     public static final String META_INTERFACE_NAME = "Meta";
     public static final String DEPRECATED_FIELD_NAME = "isDeprecated";
     public static final String DEPRECATED_INPUT_NAME = "includeDeprecated";
@@ -19,7 +19,6 @@ public class Hammurabi {
     public static final String GROUP_BY_INPUT_NAME = "groupBy";
     public static final String SORT_INPUT_NAME = "sort";
     public static final String[] EXCLUDE_INPUT = {DEPRECATED_INPUT_NAME, FIRST_INPUT_NAME, LAST_INPUT_NAME, OFFSET_INPUT_NAME, AFTER_INPUT_NAME, BEFORE_INPUT_NAME, GROUP_BY_INPUT_NAME, ORDER_BY_INPUT_NAME, SORT_INPUT_NAME, LIST_INPUT_NAME, WHERE_INPUT_NAME};
-    public static final String[] SCHEMA_EXCLUDE_INPUT = {DEPRECATED_INPUT_NAME, FIRST_INPUT_NAME, LAST_INPUT_NAME, OFFSET_INPUT_NAME, AFTER_INPUT_NAME, BEFORE_INPUT_NAME, GROUP_BY_INPUT_NAME, ORDER_BY_INPUT_NAME, SORT_INPUT_NAME, WHERE_INPUT_NAME};
     public static final String FUNC_DIRECTIVE_NAME = "func";
     public static final String CURSOR_DIRECTIVE_NAME = "cursor";
     public static final String INVOKE_DIRECTIVE_NAME = "invoke";
@@ -29,8 +28,6 @@ public class Hammurabi {
     public static final String DATA_TYPE_DIRECTIVE_NAME = "dataType";
     public static final String VALIDATION_DIRECTIVE_NAME = "validation";
     public static final String FETCH_DIRECTIVE_NAME = "fetch";
-    public static final String UPDATE_DIRECTIVE_NAME = "update";
-    public static final String DELETE_DIRECTIVE_NAME = "delete";
     public static final String CONTAINER_TYPE_DIRECTIVE_NAME = "containerType";
     public static final String PACKAGE_INFO_DIRECTIVE_NAME = "packageInfo";
     public static final String CLASS_INFO_DIRECTIVE_NAME = "classInfo";
@@ -39,6 +36,7 @@ public class Hammurabi {
     public static final String INPUT_SUFFIX = "Input";
     public static final String ARGUMENTS_SUFFIX = "Arguments";
     public static final String ORDER_BY_SUFFIX = "OrderBy";
+    public static final String LIST_SUFFIX = "List";
     public static final String PAGE_INFO_NAME = "PageInfo";
     public static final String CONNECTION_SUFFIX = "Connection";
     public static final String AGGREGATE_SUFFIX = "Aggregate";
@@ -50,8 +48,6 @@ public class Hammurabi {
     public static final String TRANSACTION_TYPE = "TransactionType";
     public static final String REQUEST = "request";
     public static final String RESPONSE = "response";
-    public static final String INBOUND = "inbound";
-    public static final String OUTBOUND = "outbound";
     public static final String SUBSCRIPTION_DATA_NAME = "subscription-data";
     public static final String GRAPHQL_REQUEST = "graphQLRequest";
     public static final String CURRENT_USER = "currentUser";

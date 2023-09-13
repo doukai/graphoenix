@@ -298,7 +298,7 @@ public class ProcessorManager {
         } else if (type.isPrimitiveType()) {
             return getQualifiedNameByType(type.asPrimitiveType().toBoxedType());
         } else if (type.isArrayType()) {
-            return getQualifiedNameByType(type.asArrayType().getElementType()).concat("[]");
+            return getQualifiedNameByType(type.asArrayType().getElementType()) + "[]";
         }
         return type.asString();
     }

@@ -78,7 +78,7 @@ public class JavaElementToObject {
                         new Directive(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", typeElement.getQualifiedName().toString())
                                 .addArgument("exists", true)
-                                .addArgument("grpcClassName", graphQLConfig.getGrpcObjectTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(typeElement.getSimpleName().toString())))
+                                .addArgument("grpcClassName", graphQLConfig.getGrpcObjectTypePackageName() + "." + TYPE_NAME_UTIL.getGrpcTypeName(typeElement.getSimpleName().toString()))
                 )
                 .addDirective(
                         new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)

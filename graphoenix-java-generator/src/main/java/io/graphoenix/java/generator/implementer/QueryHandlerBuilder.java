@@ -31,6 +31,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.utils.NameUtil.NAME_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.LIST_SUFFIX;
 
 @ApplicationScoped
 public class QueryHandlerBuilder {
@@ -170,7 +171,7 @@ public class QueryHandlerBuilder {
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     builder.addStatement("$L(jsonValue.asJsonObject().get(selectionName), selectionContext.field().selectionSet(), loader, jsonPointer + \"/\" + selectionName)",
-                            fieldParameterName.concat("List")
+                            fieldParameterName + LIST_SUFFIX
                     );
                 }
             } else {
@@ -220,7 +221,7 @@ public class QueryHandlerBuilder {
 
     private MethodSpec buildListTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
-        String listTypeParameterName = typeParameterName.concat("List");
+        String listTypeParameterName = typeParameterName + LIST_SUFFIX;
         MethodSpec.Builder builder = MethodSpec.methodBuilder(listTypeParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")

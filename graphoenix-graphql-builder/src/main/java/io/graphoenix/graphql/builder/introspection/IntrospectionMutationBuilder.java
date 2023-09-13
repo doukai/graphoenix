@@ -277,7 +277,7 @@ public class IntrospectionMutationBuilder {
             __Type listType = new __Type();
             listType.setKind(__TypeKind.LIST);
             listType.setOfType(buildType(typeContext.listType().type(), level));
-            listType.setName("[".concat(listType.getOfType().getName().concat("]")));
+            listType.setName("[" + listType.getOfType().getName() + "]");
             return listType;
         } else if (typeContext.nonNullType() != null) {
             __Type nonNullType = new __Type();
@@ -296,10 +296,10 @@ public class IntrospectionMutationBuilder {
                 __Type listType = new __Type();
                 listType.setKind(__TypeKind.LIST);
                 listType.setOfType(buildType(typeContext.nonNullType().listType().type(), level));
-                listType.setName("[".concat(listType.getOfType().getName()).concat("]"));
+                listType.setName("[" + listType.getOfType().getName() + "]");
                 nonNullType.setOfType(listType);
             }
-            nonNullType.setName(nonNullType.getOfType().getName().concat("!"));
+            nonNullType.setName(nonNullType.getOfType().getName() + "!");
             return nonNullType;
         }
         throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
@@ -404,7 +404,7 @@ public class IntrospectionMutationBuilder {
 
     private __Type buildNonNullType(__Type __type) {
         __Type nonNullType = new __Type();
-        nonNullType.setName(__type.getName().concat("!"));
+        nonNullType.setName(__type.getName() + "!");
         nonNullType.setOfType(__type);
         nonNullType.setKind(__TypeKind.NON_NULL);
         return nonNullType;
@@ -412,7 +412,7 @@ public class IntrospectionMutationBuilder {
 
     private __Type buildListType(__Type __type) {
         __Type listType = new __Type();
-        listType.setName("[".concat(__type.getName()).concat("]"));
+        listType.setName("[" + __type.getName() + "]");
         listType.setOfType(__type);
         listType.setKind(__TypeKind.LIST);
         return listType;

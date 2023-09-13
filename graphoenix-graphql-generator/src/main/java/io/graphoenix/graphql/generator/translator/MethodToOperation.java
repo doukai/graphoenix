@@ -55,12 +55,12 @@ public class MethodToOperation {
             case QUERY:
                 operationTypeNameName = "query";
                 typeName = getQueryTypeName(fieldName);
-                typeInputName = typeName.concat("Expression");
+                typeInputName = typeName + EXPRESSION_SUFFIX;
                 break;
             case MUTATION:
                 operationTypeNameName = "mutation";
                 typeName = getMutationTypeName(fieldName);
-                typeInputName = typeName.concat("Input");
+                typeInputName = typeName + INPUT_SUFFIX;
                 break;
             default:
                 throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);

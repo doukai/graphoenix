@@ -100,11 +100,11 @@ public class OperationInterfaceImplementer {
                                                     String generatorName = entry.getKey();
                                                     GeneratorHandler generatorHandler = entry.getValue();
                                                     this.buildImplementClass(generatorName, generatorHandler.operationDAOName(), packageName, name, operationList, generatorHandler.extension()).writeTo(filer);
-                                                    Logger.info("{} build success", interfaceName.concat("Impl"));
+                                                    Logger.info("{} build success", interfaceName + "Impl");
                                                     for (GraphqlParser.OperationDefinitionContext operationDefinitionContext : operationList) {
                                                         String methodName = typeManager.getMethodName(operationDefinitionContext);
                                                         int index = getIndex(operationDefinitionContext);
-                                                        String resourceName = name.concat("_").concat(methodName).concat("_").concat(String.valueOf(index)).concat(".").concat(generatorHandler.extension());
+                                                        String resourceName = name + "_" + methodName + "_" + index + "." + generatorHandler.extension();
                                                         String content;
                                                         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
                                                             content = generatorHandler.query(operationDefinitionContext);
@@ -115,7 +115,7 @@ public class OperationInterfaceImplementer {
                                                         }
                                                         FileObject fileObject = filer.createResource(
                                                                 StandardLocation.CLASS_OUTPUT,
-                                                                graphQLConfig.getOperationPackageName().concat(".").concat(generatorName),
+                                                                graphQLConfig.getOperationPackageName() + "." + generatorName,
                                                                 resourceName
                                                         );
                                                         Writer writer = fileObject.openWriter();
@@ -134,7 +134,7 @@ public class OperationInterfaceImplementer {
     }
 
     public JavaFile buildImplementClass(String generatorName, String operationDAOName, String packageName, String interfaceName, List<GraphqlParser.OperationDefinitionContext> operationDefinitionContextList, String suffix) {
-        TypeSpec.Builder builder = TypeSpec.classBuilder(interfaceName.concat("Impl"))
+        TypeSpec.Builder builder = TypeSpec.classBuilder(interfaceName + "Impl")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
                 .addSuperinterface(ClassName.get(packageName, interfaceName))
@@ -158,7 +158,7 @@ public class OperationInterfaceImplementer {
         if (graphQLConfig.getDefaultOperationHandlerName() != null && graphQLConfig.getDefaultOperationHandlerName().equals(generatorName)) {
             builder.addAnnotation(Default.class);
         }
-        return JavaFile.builder(graphQLConfig.getOperationPackageName().concat(".").concat(generatorName), builder.build()).build();
+        return JavaFile.builder(graphQLConfig.getOperationPackageName() + "." + generatorName, builder.build()).build();
     }
 
     private MethodSpec buildConstructor(String operationDAOName) {
@@ -185,7 +185,7 @@ public class OperationInterfaceImplementer {
         int index = getIndex(operationDefinitionContext);
         return FieldSpec.builder(
                 TypeName.get(String.class),
-                methodName.concat("_").concat(String.valueOf(index)),
+                methodName + "_" + index,
                 Modifier.PRIVATE,
                 Modifier.STATIC,
                 Modifier.FINAL
@@ -193,25 +193,25 @@ public class OperationInterfaceImplementer {
     }
 
     private CodeBlock buildContentFieldInitializeCodeBlock(String generatorName, String interfaceName, List<GraphqlParser.OperationDefinitionContext> operationDefinitionContextList, String suffix) {
-        ClassName typeClassName = ClassName.get(graphQLConfig.getOperationPackageName().concat(".").concat(generatorName), interfaceName.concat("Impl"));
+        ClassName typeClassName = ClassName.get(graphQLConfig.getOperationPackageName() + "." + generatorName, interfaceName + "Impl");
         CodeBlock.Builder builder = CodeBlock.builder();
         operationDefinitionContextList.stream()
                 .sorted(Comparator.comparingInt(this::getIndex))
                 .forEach(operationDefinitionContext ->
                         builder.addStatement(
                                 "$L = $T.FILE_UTIL.fileToString($T.class, $S)",
-                                typeManager.getMethodName(operationDefinitionContext)
-                                        .concat("_")
-                                        .concat(String.valueOf(getIndex(operationDefinitionContext))),
+                                typeManager.getMethodName(operationDefinitionContext) +
+                                        "_" +
+                                        getIndex(operationDefinitionContext),
                                 ClassName.get(FileUtil.class),
                                 typeClassName,
-                                interfaceName
-                                        .concat("_")
-                                        .concat(typeManager.getMethodName(operationDefinitionContext))
-                                        .concat("_")
-                                        .concat(String.valueOf(getIndex(operationDefinitionContext)))
-                                        .concat(".")
-                                        .concat(suffix)
+                                interfaceName +
+                                        "_" +
+                                        typeManager.getMethodName(operationDefinitionContext) +
+                                        "_" +
+                                        getIndex(operationDefinitionContext) +
+                                        "." +
+                                        suffix
                         )
                 );
         return builder.build();
@@ -250,7 +250,7 @@ public class OperationInterfaceImplementer {
         String fieldName = operationDefinitionContext.selectionSet().selection(0).field().name().getText();
         String methodName = typeManager.getMethodName(operationDefinitionContext);
         int index = getIndex(operationDefinitionContext);
-        String resourceFieldName = methodName.concat("_").concat(String.valueOf(index));
+        String resourceFieldName = methodName + "_" + index;
         String typeName = typeManager.getReturnClassName(operationDefinitionContext);
         String className = TYPE_NAME_UTIL.getClassName(typeName);
         String[] argumentTypeNames = TYPE_NAME_UTIL.getArgumentTypeNames(typeName);

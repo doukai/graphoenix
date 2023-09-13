@@ -91,9 +91,9 @@ public class BaseTask extends DefaultTask {
     private IGraphQLDocumentManager manager;
     private DocumentBuilder documentBuilder;
 
-    protected static final String MAIN_PATH = "src".concat(File.separator).concat("main");
-    protected static final String MAIN_JAVA_PATH = MAIN_PATH.concat(File.separator).concat("java");
-    protected static final String MAIN_RESOURCES_PATH = MAIN_PATH.concat(File.separator).concat("resources");
+    protected static final String MAIN_PATH = "src" + File.separator + "main";
+    protected static final String MAIN_JAVA_PATH = MAIN_PATH + File.separator + "java";
+    protected static final String MAIN_RESOURCES_PATH = MAIN_PATH + File.separator + "resources";
 
     protected void init() {
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
@@ -245,9 +245,9 @@ public class BaseTask extends DefaultTask {
                                                                                                     typeDeclaration.getFullyQualifiedName()
                                                                                                             .orElseGet(() ->
                                                                                                                     compilationUnit.getPackageDeclaration()
-                                                                                                                            .map(packageDeclaration -> packageDeclaration.getNameAsString().concat("."))
-                                                                                                                            .orElse("")
-                                                                                                                            .concat(typeDeclaration.getNameAsString())
+                                                                                                                            .map(packageDeclaration -> packageDeclaration.getNameAsString() + ".")
+                                                                                                                            .orElse("") +
+                                                                                                                            typeDeclaration.getNameAsString()
                                                                                                             )
                                                                                             )
                                                                                             .addArgument("methodName", methodDeclaration.getNameAsString())
@@ -311,9 +311,9 @@ public class BaseTask extends DefaultTask {
                                                                                                                         typeDeclaration.getFullyQualifiedName()
                                                                                                                                 .orElseGet(() ->
                                                                                                                                         compilationUnit.getPackageDeclaration()
-                                                                                                                                                .map(packageDeclaration -> packageDeclaration.getNameAsString().concat("."))
-                                                                                                                                                .orElse("")
-                                                                                                                                                .concat(typeDeclaration.getNameAsString())
+                                                                                                                                                .map(packageDeclaration -> packageDeclaration.getNameAsString() + ".")
+                                                                                                                                                .orElse("") +
+                                                                                                                                                typeDeclaration.getNameAsString()
                                                                                                                                 )
                                                                                                                 )
                                                                                                                 .addArgument("methodName", methodDeclaration.getNameAsString())
@@ -369,9 +369,9 @@ public class BaseTask extends DefaultTask {
                                                                                                     typeDeclaration.getFullyQualifiedName()
                                                                                                             .orElseGet(() ->
                                                                                                                     compilationUnit.getPackageDeclaration()
-                                                                                                                            .map(packageDeclaration -> packageDeclaration.getNameAsString().concat("."))
-                                                                                                                            .orElse("")
-                                                                                                                            .concat(typeDeclaration.getNameAsString())
+                                                                                                                            .map(packageDeclaration -> packageDeclaration.getNameAsString() + ".")
+                                                                                                                            .orElse("") +
+                                                                                                                            typeDeclaration.getNameAsString()
                                                                                                             )
                                                                                             )
                                                                                             .addArgument("methodName", methodDeclaration.getNameAsString())
@@ -425,9 +425,9 @@ public class BaseTask extends DefaultTask {
                                                                                                     typeDeclaration.getFullyQualifiedName()
                                                                                                             .orElseGet(() ->
                                                                                                                     compilationUnit.getPackageDeclaration()
-                                                                                                                            .map(packageDeclaration -> packageDeclaration.getNameAsString().concat("."))
-                                                                                                                            .orElse("")
-                                                                                                                            .concat(typeDeclaration.getNameAsString())
+                                                                                                                            .map(packageDeclaration -> packageDeclaration.getNameAsString() + ".")
+                                                                                                                            .orElse("") +
+                                                                                                                            typeDeclaration.getNameAsString()
                                                                                                             )
                                                                                             )
                                                                                             .addArgument("methodName", methodDeclaration.getNameAsString())
@@ -541,7 +541,7 @@ public class BaseTask extends DefaultTask {
                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", resolvedReferenceTypeDeclaration.getQualifiedName())
                                 .addArgument("exists", true)
-                                .addArgument("grpcClassName", graphQLConfig.getGrpcObjectTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(resolvedReferenceTypeDeclaration.getClassName())))
+                                .addArgument("grpcClassName", graphQLConfig.getGrpcObjectTypePackageName() + "." + TYPE_NAME_UTIL.getGrpcTypeName(resolvedReferenceTypeDeclaration.getClassName()))
                 )
                 .addDirective(
                         new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
@@ -563,7 +563,7 @@ public class BaseTask extends DefaultTask {
                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", resolvedReferenceTypeDeclaration.getQualifiedName())
                                 .addArgument("exists", true)
-                                .addArgument("grpcClassName", graphQLConfig.getGrpcInterfaceTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(resolvedReferenceTypeDeclaration.getClassName())))
+                                .addArgument("grpcClassName", graphQLConfig.getGrpcInterfaceTypePackageName() + "." + TYPE_NAME_UTIL.getGrpcTypeName(resolvedReferenceTypeDeclaration.getClassName()))
                 )
                 .addDirective(
                         new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
@@ -583,7 +583,7 @@ public class BaseTask extends DefaultTask {
                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", resolvedReferenceTypeDeclaration.getQualifiedName())
                                 .addArgument("exists", true)
-                                .addArgument("grpcClassName", graphQLConfig.getGrpcEnumTypePackageName().concat(".").concat(TYPE_NAME_UTIL.getGrpcTypeName(resolvedReferenceTypeDeclaration.getClassName())))
+                                .addArgument("grpcClassName", graphQLConfig.getGrpcEnumTypePackageName() + "." + TYPE_NAME_UTIL.getGrpcTypeName(resolvedReferenceTypeDeclaration.getClassName()))
                 )
                 .addDirective(
                         new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
@@ -684,7 +684,7 @@ public class BaseTask extends DefaultTask {
 
     private String getInvokeFieldTypeName(Type type) {
         if (type.isArrayType()) {
-            return "[".concat(getInvokeFieldTypeName(type.asArrayType().getComponentType())).concat("]");
+            return "[" + getInvokeFieldTypeName(type.asArrayType().getComponentType()) + "]";
         } else if (type.isPrimitiveType()) {
             if (type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.SHORT) ||
                     type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.INT) ||
@@ -713,14 +713,14 @@ public class BaseTask extends DefaultTask {
     private String getInvokeFieldTypeName(String typeName) {
         String className = TYPE_NAME_UTIL.getClassName(typeName);
         if (typeName.endsWith("[]")) {
-            return "[".concat(getInvokeFieldTypeName(typeName.replace("[]", ""))).concat("]");
+            return "[" + getInvokeFieldTypeName(typeName.replace("[]", "")) + "]";
         } else if (className.equals(PublisherBuilder.class.getSimpleName()) || className.equals(Mono.class.getSimpleName())) {
             return getInvokeFieldTypeName(TYPE_NAME_UTIL.getArgumentTypeName0(typeName));
         } else if (className.equals(Collection.class.getSimpleName()) ||
                 className.equals(List.class.getSimpleName()) ||
                 className.equals(Set.class.getSimpleName()) ||
                 className.equals(Flux.class.getSimpleName())) {
-            return "[".concat(getInvokeFieldTypeName(TYPE_NAME_UTIL.getArgumentTypeName0(typeName))).concat("]");
+            return "[" + getInvokeFieldTypeName(TYPE_NAME_UTIL.getArgumentTypeName0(typeName)) + "]";
         } else if (className.equals(int.class.getSimpleName()) ||
                 className.equals(short.class.getSimpleName()) ||
                 className.equals(byte.class.getSimpleName()) ||
@@ -758,14 +758,14 @@ public class BaseTask extends DefaultTask {
     private String getInvokeFieldArgumentTypeName(Type type) {
         String invokeFieldTypeName = getInvokeFieldTypeName(type);
         if (manager.isObject(invokeFieldTypeName)) {
-            return invokeFieldTypeName.concat("Input");
+            return invokeFieldTypeName + "Input";
         }
         return invokeFieldTypeName;
     }
 
     private String getInvokeFieldTypeName(ResolvedType resolvedType) {
         if (resolvedType.isArray()) {
-            return "[".concat(getInvokeFieldTypeName(resolvedType.asArrayType().getComponentType())).concat("]");
+            return "[" + getInvokeFieldTypeName(resolvedType.asArrayType().getComponentType()) + "]";
         } else if (resolvedType.isPrimitive()) {
             return getInvokeFieldTypeName(resolvedType.asPrimitive());
         } else if (resolvedType.isReferenceType()) {
@@ -795,7 +795,7 @@ public class BaseTask extends DefaultTask {
                 resolvedReferenceType.getQualifiedName().equals(List.class.getCanonicalName()) ||
                 resolvedReferenceType.getQualifiedName().equals(Set.class.getCanonicalName()) ||
                 resolvedReferenceType.getQualifiedName().equals(Flux.class.getCanonicalName())) {
-            return "[".concat(getInvokeFieldTypeName(resolvedReferenceType.typeParametersValues().get(0).asReferenceType())).concat("]");
+            return "[" + getInvokeFieldTypeName(resolvedReferenceType.typeParametersValues().get(0).asReferenceType()) + "]";
         } else if (resolvedReferenceType.getQualifiedName().equals(Integer.class.getCanonicalName()) ||
                 resolvedReferenceType.getQualifiedName().equals(Short.class.getCanonicalName()) ||
                 resolvedReferenceType.getQualifiedName().equals(Byte.class.getCanonicalName())) {

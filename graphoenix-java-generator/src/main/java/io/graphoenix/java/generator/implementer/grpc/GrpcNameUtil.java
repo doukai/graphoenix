@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
+import static io.graphoenix.spi.constant.Hammurabi.LIST_SUFFIX;
 
 @ApplicationScoped
 public class GrpcNameUtil {
@@ -27,7 +28,7 @@ public class GrpcNameUtil {
 
     public String getGrpcFieldName(String name) {
         if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "intro".concat(getUpperCamelName(name.replaceFirst(INTROSPECTION_PREFIX, "")));
+            return "intro" + getUpperCamelName(name.replaceFirst(INTROSPECTION_PREFIX, ""));
         }
         return name;
     }
@@ -73,39 +74,39 @@ public class GrpcNameUtil {
     }
 
     public String getGrpcEnumValueSuffixName(GraphqlParser.TypeContext typeContext) {
-        return "_".concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, getGrpcTypeName(typeContext)));
+        return "_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, getGrpcTypeName(typeContext));
     }
 
     public String getGrpcGetMethodName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        return "get".concat(getUpperCamelName(getGrpcFieldName(inputValueDefinitionContext)));
+        return "get" + getUpperCamelName(getGrpcFieldName(inputValueDefinitionContext));
     }
 
     public String getGrpcHasMethodName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        return "has".concat(getUpperCamelName(getGrpcFieldName(inputValueDefinitionContext)));
+        return "has" + getUpperCamelName(getGrpcFieldName(inputValueDefinitionContext));
     }
 
     public String getGrpcGetListMethodName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        return "get".concat(getUpperCamelName(getGrpcFieldName(inputValueDefinitionContext))).concat("List");
+        return "get" + getUpperCamelName(getGrpcFieldName(inputValueDefinitionContext)) + LIST_SUFFIX;
     }
 
     public String getGrpcGetCountMethodName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        return "get".concat(getUpperCamelName(getGrpcFieldName(inputValueDefinitionContext))).concat("Count");
+        return "get" + getUpperCamelName(getGrpcFieldName(inputValueDefinitionContext)) + "Count";
     }
 
     public String getGetMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         String name = fieldDefinitionContext.name().getText();
         if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "get".concat(name);
+            return "get" + name;
         }
-        return "get".concat(getUpperCamelName(name));
+        return "get" + getUpperCamelName(name);
     }
 
     public String getGrpcSetMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return "set".concat(getUpperCamelName(getGrpcFieldName(fieldDefinitionContext)));
+        return "set" + getUpperCamelName(getGrpcFieldName(fieldDefinitionContext));
     }
 
     public String getGrpcAddAllMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return "addAll".concat(getUpperCamelName(getGrpcFieldName(fieldDefinitionContext)));
+        return "addAll" + getUpperCamelName(getGrpcFieldName(fieldDefinitionContext));
     }
 
     public String packageNameToUnderline(String packageName) {
@@ -113,15 +114,15 @@ public class GrpcNameUtil {
     }
 
     public String getGraphQLServiceStubParameterName(String packageName) {
-        return packageNameToUnderline(packageName).concat("_GraphQLServiceStub");
+        return packageNameToUnderline(packageName) + "_GraphQLServiceStub";
     }
 
     public String getGrpcRequestClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, OperationType operationType) {
         switch (operationType) {
             case QUERY:
-                return "Query".concat(getUpperCamelName(getGrpcFieldName(fieldDefinitionContext))).concat("Request");
+                return "Query" + getUpperCamelName(getGrpcFieldName(fieldDefinitionContext)) + "Request";
             case MUTATION:
-                return "Mutation".concat(getUpperCamelName(getGrpcFieldName(fieldDefinitionContext))).concat("Request");
+                return "Mutation" + getUpperCamelName(getGrpcFieldName(fieldDefinitionContext)) + "Request";
             default:
                 throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
         }
@@ -130,9 +131,9 @@ public class GrpcNameUtil {
     public String getGrpcResponseClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, OperationType operationType) {
         switch (operationType) {
             case QUERY:
-                return "Query".concat(getUpperCamelName(getGrpcFieldName(fieldDefinitionContext))).concat("Response");
+                return "Query" + getUpperCamelName(getGrpcFieldName(fieldDefinitionContext)) + "Response";
             case MUTATION:
-                return "Mutation".concat(getUpperCamelName(getGrpcFieldName(fieldDefinitionContext))).concat("Response");
+                return "Mutation" + getUpperCamelName(getGrpcFieldName(fieldDefinitionContext)) + "Response";
             default:
                 throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
         }
@@ -141,7 +142,7 @@ public class GrpcNameUtil {
     public String getTypeInvokeMethodName(GraphqlParser.TypeContext typeContext) {
         String name = manager.getFieldTypeName(typeContext);
         if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return INTROSPECTION_PREFIX.concat(getLowerCamelName(name.replaceFirst(INTROSPECTION_PREFIX, "")));
+            return INTROSPECTION_PREFIX + getLowerCamelName(name.replaceFirst(INTROSPECTION_PREFIX, ""));
         }
         return getLowerCamelName(name);
     }

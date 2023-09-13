@@ -387,7 +387,7 @@ public class GraphQLQueryToSelect {
                 .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("totalCount"))
                 .findFirst();
         Field field = new Field(connectionAggFieldDefinitionContext.name().getText())
-                .addField(new Field(manager.getObjectTypeIDFieldName(fieldTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName))).concat("Count")));
+                .addField(new Field(manager.getObjectTypeIDFieldName(fieldTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName))) + "Count"));
 
         if (selectionContext.field().arguments() != null && selectionContext.field().arguments().argument().size() > 0) {
             Arguments arguments = new Arguments(

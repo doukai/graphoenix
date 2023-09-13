@@ -168,19 +168,19 @@ public class PackageManager {
     }
 
     public String getClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return manager.getClassName(objectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()));
+        return manager.getClassName(objectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getObjectTypePackageName() + "." + objectTypeDefinitionContext.name().getText());
     }
 
     public String getClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        return manager.getClassName(enumTypeDefinitionContext).orElseGet(() -> graphQLConfig.getEnumTypePackageName().concat(".").concat(enumTypeDefinitionContext.name().getText()));
+        return manager.getClassName(enumTypeDefinitionContext).orElseGet(() -> graphQLConfig.getEnumTypePackageName() + "." + enumTypeDefinitionContext.name().getText());
     }
 
     public String getClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        return manager.getClassName(interfaceTypeDefinitionContext).orElseGet(() -> graphQLConfig.getInterfaceTypePackageName().concat(".").concat(interfaceTypeDefinitionContext.name().getText()));
+        return manager.getClassName(interfaceTypeDefinitionContext).orElseGet(() -> graphQLConfig.getInterfaceTypePackageName() + "." + interfaceTypeDefinitionContext.name().getText());
     }
 
     public String getClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return manager.getClassName(inputObjectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getInputObjectTypePackageName().concat(".").concat(inputObjectTypeDefinitionContext.name().getText()));
+        return manager.getClassName(inputObjectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getInputObjectTypePackageName() + "." + inputObjectTypeDefinitionContext.name().getText());
     }
 
     public String getClassName(GraphqlParser.TypeContext typeContext) {
@@ -198,7 +198,7 @@ public class PackageManager {
     }
 
     public String getAnnotationName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return manager.getAnnotationName(inputObjectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getAnnotationPackageName().concat(".").concat(inputObjectTypeDefinitionContext.name().getText()));
+        return manager.getAnnotationName(inputObjectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getAnnotationPackageName() + "." + inputObjectTypeDefinitionContext.name().getText());
     }
 
     public String getAnnotationName(GraphqlParser.TypeContext typeContext) {
@@ -210,19 +210,19 @@ public class PackageManager {
     }
 
     public String getGrpcClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return manager.getGrpcClassName(objectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getGrpcObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()));
+        return manager.getGrpcClassName(objectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getGrpcObjectTypePackageName() + "." + objectTypeDefinitionContext.name().getText());
     }
 
     public String getGrpcClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        return manager.getGrpcClassName(enumTypeDefinitionContext).orElseGet(() -> graphQLConfig.getGrpcEnumTypePackageName().concat(".").concat(enumTypeDefinitionContext.name().getText()));
+        return manager.getGrpcClassName(enumTypeDefinitionContext).orElseGet(() -> graphQLConfig.getGrpcEnumTypePackageName() + "." + enumTypeDefinitionContext.name().getText());
     }
 
     public String getGrpcClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        return manager.getGrpcClassName(interfaceTypeDefinitionContext).orElseGet(() -> graphQLConfig.getGrpcInterfaceTypePackageName().concat(".").concat(interfaceTypeDefinitionContext.name().getText()));
+        return manager.getGrpcClassName(interfaceTypeDefinitionContext).orElseGet(() -> graphQLConfig.getGrpcInterfaceTypePackageName() + "." + interfaceTypeDefinitionContext.name().getText());
     }
 
     public String getGrpcClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return manager.getGrpcClassName(inputObjectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getGrpcInputObjectTypePackageName().concat(".").concat(inputObjectTypeDefinitionContext.name().getText()));
+        return manager.getGrpcClassName(inputObjectTypeDefinitionContext).orElseGet(() -> graphQLConfig.getGrpcInputObjectTypePackageName() + "." + inputObjectTypeDefinitionContext.name().getText());
     }
 
     public String getGrpcClassName(GraphqlParser.TypeContext typeContext) {

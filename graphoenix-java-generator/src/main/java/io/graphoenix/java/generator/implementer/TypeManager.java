@@ -78,9 +78,9 @@ public class TypeManager {
             fieldName = "_" + fieldName;
         }
         if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
-            return "get".concat(fieldName);
+            return "get" + fieldName;
         } else {
-            return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName));
+            return "get" + CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName);
         }
     }
 
@@ -90,9 +90,9 @@ public class TypeManager {
             fieldName = "_" + fieldName;
         }
         if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
-            return "set".concat(fieldName);
+            return "set" + fieldName;
         } else {
-            return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName));
+            return "set" + CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName);
         }
     }
 
@@ -207,7 +207,7 @@ public class TypeManager {
 
     public String typeToLowerCamelName(String fieldTypeName) {
         if (fieldTypeName.startsWith(INTROSPECTION_PREFIX)) {
-            return INTROSPECTION_PREFIX.concat(typeToLowerCamelName(fieldTypeName.replaceFirst(INTROSPECTION_PREFIX, "")));
+            return INTROSPECTION_PREFIX + typeToLowerCamelName(fieldTypeName.replaceFirst(INTROSPECTION_PREFIX, ""));
         } else {
             return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, fieldTypeName);
         }

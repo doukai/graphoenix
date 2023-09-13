@@ -84,7 +84,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                 )
                 .collect(Collectors.groupingBy(Tuple2::_1, Collectors.mapping(Tuple2::_2, Collectors.toSet())))
                 .forEach((key, value) -> {
-                            Optional<FileObject> fileObject = processorManager.getResource("META-INF/interceptor/".concat(key));
+                            Optional<FileObject> fileObject = processorManager.getResource("META-INF/interceptor/" + key);
                             if (fileObject.isPresent()) {
                                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileObject.get().openInputStream()))) {
                                     String line;
@@ -96,7 +96,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                     Logger.warn(e);
                                 }
                             }
-                            processorManager.createResource("META-INF/interceptor/".concat(key), String.join(System.lineSeparator(), value));
+                            processorManager.createResource("META-INF/interceptor/" + key, String.join(System.lineSeparator(), value));
                             Logger.info("annotation interceptor resource build success: {}", key);
                         }
                 );
@@ -139,13 +139,12 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                         .setType(methodDeclaration.getType())
                                         .addAnnotation(Override.class);
 
-                                String proxyMethodName = methodDeclaration.getNameAsString()
-                                        .concat("_")
-                                        .concat(methodDeclaration.getParameters().stream()
+                                String proxyMethodName = methodDeclaration.getNameAsString() +
+                                        "_" +
+                                        methodDeclaration.getParameters().stream()
                                                 .map(parameter -> parameter.getType().isClassOrInterfaceType() ? parameter.getType().asClassOrInterfaceType().getNameAsString() : parameter.getType().asString())
-                                                .collect(Collectors.joining("_"))
-                                        )
-                                        .concat("_Proxy");
+                                                .collect(Collectors.joining("_")) +
+                                        "_Proxy";
                                 MethodDeclaration proxyMethodDeclaration = componentProxyClassDeclaration.addMethod(proxyMethodName)
                                         .setModifiers(methodDeclaration.getModifiers())
                                         .addParameter(InvocationContext.class, "invocationContext")
@@ -204,8 +203,8 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                         MethodDeclaration invokeMethodDeclaration = tuple3._3();
 
                                         String interceptorFieldName = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL,
-                                                annotationExpr.getNameAsString().concat("_").concat(invokeClassOrInterfaceDeclaration.getNameAsString()).concat("_").concat(invokeMethodDeclaration.getNameAsString()));
-                                        String contextName = interceptorFieldName.concat("Context");
+                                                annotationExpr.getNameAsString() + "_" + invokeClassOrInterfaceDeclaration.getNameAsString() + "_" + invokeMethodDeclaration.getNameAsString());
+                                        String contextName = interceptorFieldName + "Context";
 
                                         Expression createContextExpr = new MethodCallExpr()
                                                 .setName("setOwner")
@@ -370,14 +369,14 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                 componentProxyCompilationUnit.addImport(InvocationContext.class);
                                 componentProxyCompilationUnit.addImport(InvocationContextProxy.class);
                                 componentProxyCompilationUnit.addImport("io.graphoenix.core.context.BeanContext");
-                                MethodDeclaration creatorMethod = componentProxyClassDeclaration.addMethod("create".concat(componentProxyClassDeclaration.getNameAsString()))
+                                MethodDeclaration creatorMethod = componentProxyClassDeclaration.addMethod("create" + componentProxyClassDeclaration.getNameAsString())
                                         .setModifiers(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC)
                                         .setType(componentProxyClassDeclaration.getNameAsString())
                                         .setParameters(constructorDeclaration.getParameters())
                                         .addAnnotation(Produces.class)
                                         .setThrownExceptions(constructorDeclaration.getThrownExceptions());
 
-                                MethodDeclaration invocationCreatorMethod = componentProxyClassDeclaration.addMethod("create".concat(componentProxyClassDeclaration.getNameAsString()))
+                                MethodDeclaration invocationCreatorMethod = componentProxyClassDeclaration.addMethod("create" + componentProxyClassDeclaration.getNameAsString())
                                         .setModifiers(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC)
                                         .setType(Object.class)
                                         .addParameter(InvocationContext.class, "invocationContext")
@@ -429,8 +428,8 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                         MethodDeclaration invokeMethodDeclaration = tuple3._3();
 
                                         String interceptorFieldName = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL,
-                                                annotationExpr.getNameAsString().concat("_").concat(invokeClassOrInterfaceDeclaration.getNameAsString()).concat("_").concat(invokeMethodDeclaration.getNameAsString()));
-                                        String contextName = interceptorFieldName.concat("Context");
+                                                annotationExpr.getNameAsString() + "_" + invokeClassOrInterfaceDeclaration.getNameAsString() + "_" + invokeMethodDeclaration.getNameAsString());
+                                        String contextName = interceptorFieldName + "Context";
 
                                         Expression createContextExpr = new MethodCallExpr()
                                                 .setName("setOwner")
@@ -448,7 +447,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                                     .setName("setFunction")
                                                     .addArgument(
                                                             new MethodReferenceExpr()
-                                                                    .setIdentifier("create".concat(componentProxyClassDeclaration.getNameAsString()))
+                                                                    .setIdentifier("create" + componentProxyClassDeclaration.getNameAsString())
                                                                     .setScope(new NameExpr(componentProxyClassDeclaration.getNameAsString()))
                                                     )
                                                     .setScope(createContextExpr);

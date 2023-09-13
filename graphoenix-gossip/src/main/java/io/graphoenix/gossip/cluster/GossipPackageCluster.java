@@ -94,14 +94,14 @@ public class GossipPackageCluster implements Runnable {
                                                     }
                                             );
                                         }
-                                        Logger.debug(event.member().toString().concat(" merged"));
+                                        Logger.debug(event.member().toString() + " merged");
                                         break;
                                     case LEAVING:
                                         gossipPackageRegister.removeMemberURLs(event.member().address().toString());
-                                        Logger.debug(event.member().toString().concat(" leaving"));
+                                        Logger.debug(event.member().toString() + " leaving");
                                         break;
                                     case REMOVED:
-                                        Logger.debug(event.member().toString().concat(" removed"));
+                                        Logger.debug(event.member().toString() + " removed");
                                         break;
                                 }
                             }

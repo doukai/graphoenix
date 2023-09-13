@@ -28,7 +28,7 @@ public class Option {
     }
 
     public Option setValue(String value) {
-        this.value = "\"".concat(value).concat("\"");
+        this.value = "\"" + value + "\"";
         return this;
     }
 

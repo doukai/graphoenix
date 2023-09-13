@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.java.generator.utils.TypeUtil.TYPE_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.LIST_SUFFIX;
 import static io.graphoenix.spi.dto.type.OperationType.*;
 
 @ApplicationScoped
@@ -558,7 +559,7 @@ public class OperationHandlerImplementer {
                 if (manager.isObject(fieldTypeName)) {
                     String filterMethodName;
                     if (fieldTypeIsList) {
-                        filterMethodName = fieldTypeParameterName.concat("List");
+                        filterMethodName = fieldTypeParameterName + LIST_SUFFIX;
                     } else {
                         filterMethodName = fieldTypeParameterName;
                     }
@@ -602,17 +603,17 @@ public class OperationHandlerImplementer {
                                 .addStatement(
                                         "$T $L = jsonb.get().fromJson(jsonValue.toString(), type)",
                                         typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                                        fieldTypeParameterName.concat("List")
+                                        fieldTypeParameterName + LIST_SUFFIX
                                 )
-                                .beginControlFlow("if($L == null)", fieldTypeParameterName.concat("List"))
+                                .beginControlFlow("if($L == null)", fieldTypeParameterName + LIST_SUFFIX)
                                 .addStatement("return $T.just($T.NULL)", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
                                 .endControlFlow()
                                 .addStatement(
                                         CodeBlock.of("return $T.fromIterable($L).flatMap(item -> invokeHandler.get().$L(item, selectionContext.field().selectionSet())).collectList().map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
                                                 ClassName.get(Flux.class),
-                                                fieldTypeParameterName.concat("List"),
+                                                fieldTypeParameterName + LIST_SUFFIX,
                                                 fieldTypeParameterName,
-                                                fieldTypeParameterName.concat("List")
+                                                fieldTypeParameterName + LIST_SUFFIX
                                         )
 
                                 );

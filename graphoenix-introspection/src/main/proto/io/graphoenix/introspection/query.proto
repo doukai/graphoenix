@@ -12,7 +12,7 @@ import "io/graphoenix/introspection/input_objects.proto";
 import "io/graphoenix/introspection/query_requests.proto";
 import "io/graphoenix/introspection/query_responses.proto";
 
-service QueryTypeService {
+service QueryService {
     rpc IntroSchema (QueryIntroSchemaRequest) returns (QueryIntroSchemaResponse);
     rpc IntroSchemaList (QueryIntroSchemaListRequest) returns (QueryIntroSchemaListResponse);
     rpc IntroSchemaConnection (QueryIntroSchemaConnectionRequest) returns (QueryIntroSchemaConnectionResponse);

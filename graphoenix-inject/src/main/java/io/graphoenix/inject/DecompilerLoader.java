@@ -44,7 +44,7 @@ public class DecompilerLoader implements Loader {
         if (classBytesCache.containsKey(compileClassName + ".class") || loadAndCache(compileClassName)) {
             return classBytesCache.get(compileClassName + ".class");
         }
-        throw new LoaderException(compileClassName.concat(" not find"));
+        throw new LoaderException(compileClassName + " not find");
     }
 
     public boolean classExists(String className) {

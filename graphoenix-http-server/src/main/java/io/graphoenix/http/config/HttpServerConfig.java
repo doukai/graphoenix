@@ -34,7 +34,7 @@ public class HttpServerConfig {
         if (graphqlContextPath.startsWith("/")) {
             return graphqlContextPath;
         } else {
-            return "/".concat(graphqlContextPath);
+            return "/" + graphqlContextPath;
         }
     }
 
@@ -46,7 +46,7 @@ public class HttpServerConfig {
         if (subscriptionsContextPath.startsWith("/")) {
             return subscriptionsContextPath;
         } else {
-            return "/".concat(subscriptionsContextPath);
+            return "/" + subscriptionsContextPath;
         }
     }
 
@@ -58,7 +58,7 @@ public class HttpServerConfig {
         if (schemaContextPath.startsWith("/")) {
             return schemaContextPath;
         } else {
-            return "/".concat(schemaContextPath);
+            return "/" + schemaContextPath;
         }
     }
 

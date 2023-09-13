@@ -62,7 +62,7 @@ public class GossipPackageRegister implements PackageRegister {
         packageURLs.get(packageName).add(url);
         memberAddressURLs.computeIfAbsent(address.toString(), k -> new LinkedHashSet<>());
         memberAddressURLs.get(address.toString()).add(url);
-        Logger.info("package ".concat(packageName).concat(" service: ").concat(url.toString()).concat(" registered from ").concat(address.toString()));
+        Logger.info("package " + packageName + " service: " + url + " registered from " + address);
     }
 
     public void mergeMemberProtocolURLIterator(String packageName) {

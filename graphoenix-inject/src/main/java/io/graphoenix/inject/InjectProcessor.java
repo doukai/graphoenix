@@ -212,7 +212,7 @@ public class InjectProcessor extends AbstractProcessor {
         ClassOrInterfaceDeclaration componentProxyClassDeclaration = new ClassOrInterfaceDeclaration()
                 .addModifier(Modifier.Keyword.PUBLIC)
                 .addExtendedType(componentClassDeclaration.getNameAsString())
-                .setName(componentClassDeclaration.getNameAsString().concat("Proxy"))
+                .setName(componentClassDeclaration.getNameAsString() + "Proxy")
                 .addAnnotation(new NormalAnnotationExpr().addPair("value", new StringLiteralExpr(getClass().getName())).setName(Generated.class.getSimpleName()));
 
         componentClassDeclaration.getConstructors().forEach(
@@ -859,7 +859,7 @@ public class InjectProcessor extends AbstractProcessor {
                             ClassOrInterfaceDeclaration classOrInterfaceDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit);
                             ClassOrInterfaceDeclaration moduleClassDeclaration = new ClassOrInterfaceDeclaration()
                                     .setPublic(true)
-                                    .setName(classOrInterfaceDeclaration.getNameAsString().concat("Module"))
+                                    .setName(classOrInterfaceDeclaration.getNameAsString() + "Module")
                                     .addAnnotation(Module.class)
                                     .addAnnotation(new NormalAnnotationExpr().addPair("value", new StringLiteralExpr(getClass().getName())).setName(Generated.class.getSimpleName()));
 
@@ -1220,7 +1220,7 @@ public class InjectProcessor extends AbstractProcessor {
 
         ClassOrInterfaceDeclaration moduleContextInterfaceDeclaration = new ClassOrInterfaceDeclaration()
                 .setPublic(true)
-                .setName(moduleClassDeclaration.getNameAsString().concat("_Context"))
+                .setName(moduleClassDeclaration.getNameAsString() + "_Context")
                 .addAnnotation(
                         new SingleMemberAnnotationExpr()
                                 .setMemberValue(new ClassExpr().setType(ModuleContext.class))
@@ -1243,11 +1243,11 @@ public class InjectProcessor extends AbstractProcessor {
                     ClassOrInterfaceDeclaration componentProxyComponentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentProxyComponentCompilationUnit);
                     Optional<String> packageNameOptional = componentProxyComponentCompilationUnit.getPackageDeclaration().map(NodeWithName::getNameAsString);
 
-                    String packagePrefix = packageNameOptional.map(name -> name.concat(".")).orElse("");
-                    String variablePrefix = packageNameOptional.map(name -> name.replaceAll("\\.", "_")).map(name -> name.concat("_")).orElse("");
+                    String packagePrefix = packageNameOptional.map(name -> name + ".").orElse("");
+                    String variablePrefix = packageNameOptional.map(name -> name.replaceAll("\\.", "_")).map(name -> name + "_").orElse("");
 
-                    String daggerClassName = packagePrefix.concat("Dagger").concat(componentProxyComponentClassDeclaration.getNameAsString());
-                    String daggerVariableName = variablePrefix.concat("dagger").concat(componentProxyComponentClassDeclaration.getNameAsString());
+                    String daggerClassName = packagePrefix + "Dagger" + componentProxyComponentClassDeclaration.getNameAsString();
+                    String daggerVariableName = variablePrefix + "dagger" + componentProxyComponentClassDeclaration.getNameAsString();
 
                     ClassOrInterfaceType componentType = componentProxyComponentClassDeclaration.getMembers().stream()
                             .filter(BodyDeclaration::isMethodDeclaration)
@@ -1276,7 +1276,7 @@ public class InjectProcessor extends AbstractProcessor {
                     blockStmt.addStatement(new VariableDeclarationExpr()
                             .addVariable(
                                     new VariableDeclarator()
-                                            .setType(packagePrefix.concat(componentProxyComponentClassDeclaration.getNameAsString()))
+                                            .setType(packagePrefix + componentProxyComponentClassDeclaration.getNameAsString())
                                             .setName(daggerVariableName)
                                             .setInitializer(
                                                     new MethodCallExpr()

@@ -273,7 +273,7 @@ public class GrpcRequestHandlerBuilder {
                 .flatMap(fieldDefinitionContext -> {
                             if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                                 if (level <= layers) {
-                                    return Stream.of(fieldDefinitionContext.name().getText().concat(buildSelectionSet(fieldDefinitionContext.type(), level + 1, layers)));
+                                    return Stream.of(fieldDefinitionContext.name().getText() + buildSelectionSet(fieldDefinitionContext.type(), level + 1, layers));
                                 } else {
                                     return Stream.empty();
                                 }

@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
+import static io.graphoenix.spi.constant.Hammurabi.LIST_SUFFIX;
 import static jakarta.json.JsonValue.NULL;
 
 public abstract class QueryDataLoader {
@@ -100,7 +101,7 @@ public abstract class QueryDataLoader {
                                                                                         .filter(fieldEntry -> fieldEntry.getValue().keySet().size() > 0)
                                                                                         .map(fieldEntry ->
                                                                                                 new Field()
-                                                                                                        .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
+                                                                                                        .setName(typeToLowerCamelName(typeEntry.getKey()) + LIST_SUFFIX)
                                                                                                         .setAlias(getQueryFieldAlias(typeEntry.getKey(), fieldEntry.getKey()))
                                                                                                         .addArgument(
                                                                                                                 fieldEntry.getKey(),
@@ -233,9 +234,9 @@ public abstract class QueryDataLoader {
                     value.forEach((tuple3) -> {
                                 JsonValue jsonValue = tuple3._2().getValue(jsonObject);
                                 if (jsonValue.getValueType().equals(JsonValue.ValueType.ARRAY)) {
-                                    patchBuilder.add(key.concat("/").concat(tuple3._1()), tuple3._2().getValue(jsonObject).asJsonArray().stream().map(item -> item.asJsonObject().get(tuple3._3())).collect(JsonCollectors.toJsonArray()));
+                                    patchBuilder.add(key + "/" + tuple3._1(), tuple3._2().getValue(jsonObject).asJsonArray().stream().map(item -> item.asJsonObject().get(tuple3._3())).collect(JsonCollectors.toJsonArray()));
                                 } else {
-                                    patchBuilder.add(key.concat("/").concat(tuple3._1()), tuple3._2().getValue(jsonObject).asJsonObject().get(tuple3._3()));
+                                    patchBuilder.add(key + "/" + tuple3._1(), tuple3._2().getValue(jsonObject).asJsonObject().get(tuple3._3()));
                                 }
                             }
                     )
@@ -244,7 +245,7 @@ public abstract class QueryDataLoader {
         }
         if (!removeFiledMap.isEmpty()) {
             removeFiledMap.forEach((key, value) ->
-                    value.forEach((filedName) -> patchBuilder.remove(key.concat("/").concat(filedName)))
+                    value.forEach((filedName) -> patchBuilder.remove(key + "/" + filedName))
             );
             removeFiledMap.clear();
         }
@@ -293,12 +294,12 @@ public abstract class QueryDataLoader {
     }
 
     private String getQueryFieldAlias(String typeName, String fieldName) {
-        return typeName.concat("_").concat(fieldName);
+        return typeName + "_" + fieldName;
     }
 
     private String typeToLowerCamelName(String fieldTypeName) {
         if (fieldTypeName.startsWith(INTROSPECTION_PREFIX)) {
-            return INTROSPECTION_PREFIX.concat(typeToLowerCamelName(fieldTypeName.replaceFirst(INTROSPECTION_PREFIX, "")));
+            return INTROSPECTION_PREFIX + typeToLowerCamelName(fieldTypeName.replaceFirst(INTROSPECTION_PREFIX, ""));
         } else {
             return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, fieldTypeName);
         }

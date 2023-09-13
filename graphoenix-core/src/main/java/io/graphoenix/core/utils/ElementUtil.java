@@ -129,11 +129,11 @@ public enum ElementUtil {
 
     public String getOperationNameFromExecutableElement(ExecutableElement executableElement, int index) {
         TypeElement typeElement = (TypeElement) executableElement.getEnclosingElement();
-        return typeElement.getQualifiedName().toString().replaceAll("\\.", "_")
-                .concat("_")
-                .concat(executableElement.getSimpleName().toString())
-                .concat("_")
-                .concat(String.valueOf(index));
+        return typeElement.getQualifiedName().toString().replaceAll("\\.", "_") +
+                "_" +
+                executableElement.getSimpleName().toString() +
+                "_" +
+                index;
     }
 
     public Optional<String> getSourceNameFromExecutableElement(ExecutableElement executableElement) {
@@ -174,7 +174,7 @@ public enum ElementUtil {
         String typeMirrorName = getTypeMirrorName(executableElement.getReturnType(), types);
         if (typeMirrorName.equals(Flux.class.getCanonicalName())) {
             typeMirror = ((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0);
-            return "[".concat(elementToTypeName(executableElement, typeMirror, types)).concat("]");
+            return "[" + elementToTypeName(executableElement, typeMirror, types) + "]";
         } else if (typeMirrorName.equals(Mono.class.getCanonicalName())) {
             typeMirror = ((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0);
             return elementToTypeName(executableElement, typeMirror, types);
@@ -192,7 +192,7 @@ public enum ElementUtil {
         String typeMirrorName = getTypeMirrorName(variableElement.asType(), types);
         if (typeMirrorName.equals(Flux.class.getCanonicalName())) {
             typeMirror = ((DeclaredType) variableElement.asType()).getTypeArguments().get(0);
-            return "[".concat(elementToTypeName(variableElement, typeMirror, types)).concat("]");
+            return "[" + elementToTypeName(variableElement, typeMirror, types) + "]";
         } else if (typeMirrorName.equals(Mono.class.getCanonicalName())) {
             typeMirror = ((DeclaredType) variableElement.asType()).getTypeArguments().get(0);
             return elementToTypeName(variableElement, typeMirror, types);
@@ -244,13 +244,13 @@ public enum ElementUtil {
         } else if (typeMirrorName.equals(Collection.class.getCanonicalName()) ||
                 typeMirrorName.equals(List.class.getCanonicalName()) ||
                 typeMirrorName.equals(Set.class.getCanonicalName())) {
-            typeName = "[".concat(elementToTypeName(element, ((DeclaredType) typeMirror).getTypeArguments().get(0), types)).concat("]");
+            typeName = "[" + elementToTypeName(element, ((DeclaredType) typeMirror).getTypeArguments().get(0), types) + "]";
         } else {
             typeName = getNameFromElement(types.asElement(typeMirror));
         }
 
         if (element.getAnnotation(NonNull.class) != null || typeMirror.getKind().isPrimitive()) {
-            return typeName.concat("!");
+            return typeName + "!";
         } else {
             return typeName;
         }
@@ -307,9 +307,9 @@ public enum ElementUtil {
                 typeMirrorName.equals(Set.class.getCanonicalName())) {
 
             if (element.getKind().equals(ElementKind.METHOD)) {
-                typeName = "[".concat(elementToInputTypeName(element, ((DeclaredType) ((ExecutableElement) element).getReturnType()).getTypeArguments().get(0), types)).concat("]");
+                typeName = "[" + elementToInputTypeName(element, ((DeclaredType) ((ExecutableElement) element).getReturnType()).getTypeArguments().get(0), types) + "]";
             } else if (element.getKind().equals(ElementKind.FIELD) || element.getKind().equals(ElementKind.PARAMETER)) {
-                typeName = "[".concat(elementToInputTypeName(element, ((DeclaredType) element.asType()).getTypeArguments().get(0), types)).concat("]");
+                typeName = "[" + elementToInputTypeName(element, ((DeclaredType) element.asType()).getTypeArguments().get(0), types) + "]";
             } else {
                 throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeMirrorName));
             }
@@ -317,12 +317,12 @@ public enum ElementUtil {
             if (typeMirrorName.endsWith(INPUT_SUFFIX)) {
                 typeName = getNameFromElement(types.asElement(typeMirror));
             } else {
-                typeName = getNameFromElement(types.asElement(typeMirror)).concat(INPUT_SUFFIX);
+                typeName = getNameFromElement(types.asElement(typeMirror)) + INPUT_SUFFIX;
             }
         }
 
         if (element.getAnnotation(NonNull.class) != null || typeMirror.getKind().isPrimitive()) {
-            return typeName.concat("!");
+            return typeName + "!";
         } else {
             return typeName;
         }

@@ -515,7 +515,7 @@ message IntroDirectiveLocationsOrderBy {
     optional io.graphoenix.core.grpc.Sort create_group_id = 11;
     optional io.graphoenix.core.grpc.Sort intro_typename = 12;
 }
-message IntroSchemaQueryTypeArguments {
+message Query___schema_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional IntroTypeExpression types = 2;
     optional IntroTypeExpression query_type = 3;
@@ -537,7 +537,7 @@ message IntroSchemaQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 19;
     repeated IntroSchemaExpression exs = 20;
 }
-message IntroSchemaListQueryTypeArguments {
+message Query___schemaList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional IntroTypeExpression types = 2;
     optional IntroTypeExpression query_type = 3;
@@ -566,7 +566,7 @@ message IntroSchemaListQueryTypeArguments {
     optional string after = 26;
     optional string before = 27;
 }
-message IntroSchemaConnectionQueryTypeArguments {
+message Query___schemaConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional IntroTypeExpression types = 2;
     optional IntroTypeExpression query_type = 3;
@@ -595,7 +595,7 @@ message IntroSchemaConnectionQueryTypeArguments {
     optional string after = 26;
     optional string before = 27;
 }
-message IntroTypeQueryTypeArguments {
+message Query___type_Arguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
     optional IntroSchemaExpression of_schema = 2;
     optional io.graphoenix.core.grpc.IntroTypeKindExpression kind = 3;
@@ -622,7 +622,7 @@ message IntroTypeQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 24;
     repeated IntroTypeExpression exs = 25;
 }
-message IntroTypeListQueryTypeArguments {
+message Query___typeList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
     optional IntroSchemaExpression of_schema = 2;
     optional io.graphoenix.core.grpc.IntroTypeKindExpression kind = 3;
@@ -656,7 +656,7 @@ message IntroTypeListQueryTypeArguments {
     optional string after = 31;
     optional string before = 32;
 }
-message IntroTypeConnectionQueryTypeArguments {
+message Query___typeConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
     optional IntroSchemaExpression of_schema = 2;
     optional io.graphoenix.core.grpc.IntroTypeKindExpression kind = 3;
@@ -690,7 +690,7 @@ message IntroTypeConnectionQueryTypeArguments {
     optional string after = 31;
     optional string before = 32;
 }
-message IntroFieldQueryTypeArguments {
+message Query___field_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -712,7 +712,7 @@ message IntroFieldQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 19;
     repeated IntroFieldExpression exs = 20;
 }
-message IntroFieldListQueryTypeArguments {
+message Query___fieldList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -741,7 +741,7 @@ message IntroFieldListQueryTypeArguments {
     optional string after = 26;
     optional string before = 27;
 }
-message IntroFieldConnectionQueryTypeArguments {
+message Query___fieldConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -770,7 +770,7 @@ message IntroFieldConnectionQueryTypeArguments {
     optional string after = 26;
     optional string before = 27;
 }
-message IntroInputValueQueryTypeArguments {
+message Query___inputValue_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -793,7 +793,7 @@ message IntroInputValueQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 20;
     repeated IntroInputValueExpression exs = 21;
 }
-message IntroInputValueListQueryTypeArguments {
+message Query___inputValueList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -823,7 +823,7 @@ message IntroInputValueListQueryTypeArguments {
     optional string after = 27;
     optional string before = 28;
 }
-message IntroInputValueConnectionQueryTypeArguments {
+message Query___inputValueConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -853,7 +853,7 @@ message IntroInputValueConnectionQueryTypeArguments {
     optional string after = 27;
     optional string before = 28;
 }
-message IntroEnumValueQueryTypeArguments {
+message Query___enumValue_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -872,7 +872,7 @@ message IntroEnumValueQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 16;
     repeated IntroEnumValueExpression exs = 17;
 }
-message IntroEnumValueListQueryTypeArguments {
+message Query___enumValueList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -898,7 +898,7 @@ message IntroEnumValueListQueryTypeArguments {
     optional string after = 23;
     optional string before = 24;
 }
-message IntroEnumValueConnectionQueryTypeArguments {
+message Query___enumValueConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -924,7 +924,7 @@ message IntroEnumValueConnectionQueryTypeArguments {
     optional string after = 23;
     optional string before = 24;
 }
-message IntroDirectiveQueryTypeArguments {
+message Query___directive_Arguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
     optional IntroSchemaExpression of_schema = 2;
     optional io.graphoenix.core.grpc.StringExpression description = 3;
@@ -945,7 +945,7 @@ message IntroDirectiveQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 18;
     repeated IntroDirectiveExpression exs = 19;
 }
-message IntroDirectiveListQueryTypeArguments {
+message Query___directiveList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
     optional IntroSchemaExpression of_schema = 2;
     optional io.graphoenix.core.grpc.StringExpression description = 3;
@@ -973,7 +973,7 @@ message IntroDirectiveListQueryTypeArguments {
     optional string after = 25;
     optional string before = 26;
 }
-message IntroDirectiveConnectionQueryTypeArguments {
+message Query___directiveConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
     optional IntroSchemaExpression of_schema = 2;
     optional io.graphoenix.core.grpc.StringExpression description = 3;
@@ -1001,7 +1001,7 @@ message IntroDirectiveConnectionQueryTypeArguments {
     optional string after = 25;
     optional string before = 26;
 }
-message IntroTypeInterfacesQueryTypeArguments {
+message Query___typeInterfaces_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
     optional IntroTypeExpression type_name_type = 3;
@@ -1019,7 +1019,7 @@ message IntroTypeInterfacesQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated IntroTypeInterfacesExpression exs = 16;
 }
-message IntroTypeInterfacesListQueryTypeArguments {
+message Query___typeInterfacesList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
     optional IntroTypeExpression type_name_type = 3;
@@ -1044,7 +1044,7 @@ message IntroTypeInterfacesListQueryTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message IntroTypeInterfacesConnectionQueryTypeArguments {
+message Query___typeInterfacesConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
     optional IntroTypeExpression type_name_type = 3;
@@ -1069,7 +1069,7 @@ message IntroTypeInterfacesConnectionQueryTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message IntroTypePossibleTypesQueryTypeArguments {
+message Query___typePossibleTypes_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
     optional IntroTypeExpression type_name_type = 3;
@@ -1087,7 +1087,7 @@ message IntroTypePossibleTypesQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated IntroTypePossibleTypesExpression exs = 16;
 }
-message IntroTypePossibleTypesListQueryTypeArguments {
+message Query___typePossibleTypesList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
     optional IntroTypeExpression type_name_type = 3;
@@ -1112,7 +1112,7 @@ message IntroTypePossibleTypesListQueryTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message IntroTypePossibleTypesConnectionQueryTypeArguments {
+message Query___typePossibleTypesConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
     optional IntroTypeExpression type_name_type = 3;
@@ -1137,7 +1137,7 @@ message IntroTypePossibleTypesConnectionQueryTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message IntroDirectiveLocationsQueryTypeArguments {
+message Query___directiveLocations_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression directive_name = 2;
     optional IntroDirectiveExpression directive_name_type = 3;
@@ -1154,7 +1154,7 @@ message IntroDirectiveLocationsQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 14;
     repeated IntroDirectiveLocationsExpression exs = 15;
 }
-message IntroDirectiveLocationsListQueryTypeArguments {
+message Query___directiveLocationsList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression directive_name = 2;
     optional IntroDirectiveExpression directive_name_type = 3;
@@ -1178,7 +1178,7 @@ message IntroDirectiveLocationsListQueryTypeArguments {
     optional string after = 21;
     optional string before = 22;
 }
-message IntroDirectiveLocationsConnectionQueryTypeArguments {
+message Query___directiveLocationsConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression directive_name = 2;
     optional IntroDirectiveExpression directive_name_type = 3;
@@ -1202,7 +1202,7 @@ message IntroDirectiveLocationsConnectionQueryTypeArguments {
     optional string after = 21;
     optional string before = 22;
 }
-message IntroSchemaMutationTypeArguments {
+message Mutation___schema_Arguments {
     optional string id = 1;
     repeated IntroTypeInput types = 2;
     optional IntroTypeInput query_type = 3;
@@ -1223,7 +1223,7 @@ message IntroSchemaMutationTypeArguments {
     optional string subscription_type_name = 18;
     optional IntroSchemaExpression where = 19;
 }
-message IntroSchemaListMutationTypeArguments {
+message Mutation___schemaList_Arguments {
     optional string id = 1;
     repeated IntroTypeInput types = 2;
     optional IntroTypeInput query_type = 3;
@@ -1245,7 +1245,7 @@ message IntroSchemaListMutationTypeArguments {
     repeated IntroSchemaInput list = 19;
     optional IntroSchemaExpression where = 20;
 }
-message IntroTypeMutationTypeArguments {
+message Mutation___type_Arguments {
     optional string name = 1;
     optional IntroSchemaInput of_schema = 2;
     optional io.graphoenix.core.grpc.IntroTypeKind kind = 3;
@@ -1271,7 +1271,7 @@ message IntroTypeMutationTypeArguments {
     repeated IntroTypePossibleTypesInput intro_type_possible_types = 23;
     optional IntroTypeExpression where = 24;
 }
-message IntroTypeListMutationTypeArguments {
+message Mutation___typeList_Arguments {
     optional string name = 1;
     optional IntroSchemaInput of_schema = 2;
     optional io.graphoenix.core.grpc.IntroTypeKind kind = 3;
@@ -1298,7 +1298,7 @@ message IntroTypeListMutationTypeArguments {
     repeated IntroTypeInput list = 24;
     optional IntroTypeExpression where = 25;
 }
-message IntroFieldMutationTypeArguments {
+message Mutation___field_Arguments {
     optional string id = 1;
     optional string name = 2;
     optional IntroTypeInput of_type = 3;
@@ -1319,7 +1319,7 @@ message IntroFieldMutationTypeArguments {
     optional string type_name = 18;
     optional IntroFieldExpression where = 19;
 }
-message IntroFieldListMutationTypeArguments {
+message Mutation___fieldList_Arguments {
     optional string id = 1;
     optional string name = 2;
     optional IntroTypeInput of_type = 3;
@@ -1341,7 +1341,7 @@ message IntroFieldListMutationTypeArguments {
     repeated IntroFieldInput list = 19;
     optional IntroFieldExpression where = 20;
 }
-message IntroInputValueMutationTypeArguments {
+message Mutation___inputValue_Arguments {
     optional string id = 1;
     optional string name = 2;
     optional IntroTypeInput of_type = 3;
@@ -1363,7 +1363,7 @@ message IntroInputValueMutationTypeArguments {
     optional string type_name = 19;
     optional IntroInputValueExpression where = 20;
 }
-message IntroInputValueListMutationTypeArguments {
+message Mutation___inputValueList_Arguments {
     optional string id = 1;
     optional string name = 2;
     optional IntroTypeInput of_type = 3;
@@ -1386,7 +1386,7 @@ message IntroInputValueListMutationTypeArguments {
     repeated IntroInputValueInput list = 20;
     optional IntroInputValueExpression where = 21;
 }
-message IntroEnumValueMutationTypeArguments {
+message Mutation___enumValue_Arguments {
     optional string id = 1;
     optional string name = 2;
     optional IntroTypeInput of_type = 3;
@@ -1404,7 +1404,7 @@ message IntroEnumValueMutationTypeArguments {
     optional string of_type_name = 15;
     optional IntroEnumValueExpression where = 16;
 }
-message IntroEnumValueListMutationTypeArguments {
+message Mutation___enumValueList_Arguments {
     optional string id = 1;
     optional string name = 2;
     optional IntroTypeInput of_type = 3;
@@ -1423,7 +1423,7 @@ message IntroEnumValueListMutationTypeArguments {
     repeated IntroEnumValueInput list = 16;
     optional IntroEnumValueExpression where = 17;
 }
-message IntroDirectiveMutationTypeArguments {
+message Mutation___directive_Arguments {
     optional string name = 1;
     optional IntroSchemaInput of_schema = 2;
     optional string description = 3;
@@ -1443,7 +1443,7 @@ message IntroDirectiveMutationTypeArguments {
     repeated IntroDirectiveLocationsInput intro_directive_locations = 17;
     optional IntroDirectiveExpression where = 18;
 }
-message IntroDirectiveListMutationTypeArguments {
+message Mutation___directiveList_Arguments {
     optional string name = 1;
     optional IntroSchemaInput of_schema = 2;
     optional string description = 3;
@@ -1464,7 +1464,7 @@ message IntroDirectiveListMutationTypeArguments {
     repeated IntroDirectiveInput list = 18;
     optional IntroDirectiveExpression where = 19;
 }
-message IntroTypeInterfacesMutationTypeArguments {
+message Mutation___typeInterfaces_Arguments {
     optional string id = 1;
     optional string type_name = 2;
     optional IntroTypeInput type_name_type = 3;
@@ -1481,7 +1481,7 @@ message IntroTypeInterfacesMutationTypeArguments {
     optional string intro_typename = 14;
     optional IntroTypeInterfacesExpression where = 15;
 }
-message IntroTypeInterfacesListMutationTypeArguments {
+message Mutation___typeInterfacesList_Arguments {
     optional string id = 1;
     optional string type_name = 2;
     optional IntroTypeInput type_name_type = 3;
@@ -1499,7 +1499,7 @@ message IntroTypeInterfacesListMutationTypeArguments {
     repeated IntroTypeInterfacesInput list = 15;
     optional IntroTypeInterfacesExpression where = 16;
 }
-message IntroTypePossibleTypesMutationTypeArguments {
+message Mutation___typePossibleTypes_Arguments {
     optional string id = 1;
     optional string type_name = 2;
     optional IntroTypeInput type_name_type = 3;
@@ -1516,7 +1516,7 @@ message IntroTypePossibleTypesMutationTypeArguments {
     optional string intro_typename = 14;
     optional IntroTypePossibleTypesExpression where = 15;
 }
-message IntroTypePossibleTypesListMutationTypeArguments {
+message Mutation___typePossibleTypesList_Arguments {
     optional string id = 1;
     optional string type_name = 2;
     optional IntroTypeInput type_name_type = 3;
@@ -1534,7 +1534,7 @@ message IntroTypePossibleTypesListMutationTypeArguments {
     repeated IntroTypePossibleTypesInput list = 15;
     optional IntroTypePossibleTypesExpression where = 16;
 }
-message IntroDirectiveLocationsMutationTypeArguments {
+message Mutation___directiveLocations_Arguments {
     optional string id = 1;
     optional string directive_name = 2;
     optional IntroDirectiveInput directive_name_type = 3;
@@ -1550,7 +1550,7 @@ message IntroDirectiveLocationsMutationTypeArguments {
     optional string intro_typename = 13;
     optional IntroDirectiveLocationsExpression where = 14;
 }
-message IntroDirectiveLocationsListMutationTypeArguments {
+message Mutation___directiveLocationsList_Arguments {
     optional string id = 1;
     optional string directive_name = 2;
     optional IntroDirectiveInput directive_name_type = 3;
@@ -1567,7 +1567,7 @@ message IntroDirectiveLocationsListMutationTypeArguments {
     repeated IntroDirectiveLocationsInput list = 14;
     optional IntroDirectiveLocationsExpression where = 15;
 }
-message IntroSchemaSubscriptionTypeArguments {
+message Subscription___schema_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional IntroTypeExpression types = 2;
     optional IntroTypeExpression query_type = 3;
@@ -1589,7 +1589,7 @@ message IntroSchemaSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 19;
     repeated IntroSchemaExpression exs = 20;
 }
-message IntroSchemaListSubscriptionTypeArguments {
+message Subscription___schemaList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional IntroTypeExpression types = 2;
     optional IntroTypeExpression query_type = 3;
@@ -1618,7 +1618,7 @@ message IntroSchemaListSubscriptionTypeArguments {
     optional string after = 26;
     optional string before = 27;
 }
-message IntroSchemaConnectionSubscriptionTypeArguments {
+message Subscription___schemaConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional IntroTypeExpression types = 2;
     optional IntroTypeExpression query_type = 3;
@@ -1647,7 +1647,7 @@ message IntroSchemaConnectionSubscriptionTypeArguments {
     optional string after = 26;
     optional string before = 27;
 }
-message IntroTypeSubscriptionTypeArguments {
+message Subscription___type_Arguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
     optional IntroSchemaExpression of_schema = 2;
     optional io.graphoenix.core.grpc.IntroTypeKindExpression kind = 3;
@@ -1674,7 +1674,7 @@ message IntroTypeSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 24;
     repeated IntroTypeExpression exs = 25;
 }
-message IntroTypeListSubscriptionTypeArguments {
+message Subscription___typeList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
     optional IntroSchemaExpression of_schema = 2;
     optional io.graphoenix.core.grpc.IntroTypeKindExpression kind = 3;
@@ -1708,7 +1708,7 @@ message IntroTypeListSubscriptionTypeArguments {
     optional string after = 31;
     optional string before = 32;
 }
-message IntroTypeConnectionSubscriptionTypeArguments {
+message Subscription___typeConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
     optional IntroSchemaExpression of_schema = 2;
     optional io.graphoenix.core.grpc.IntroTypeKindExpression kind = 3;
@@ -1742,7 +1742,7 @@ message IntroTypeConnectionSubscriptionTypeArguments {
     optional string after = 31;
     optional string before = 32;
 }
-message IntroFieldSubscriptionTypeArguments {
+message Subscription___field_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -1764,7 +1764,7 @@ message IntroFieldSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 19;
     repeated IntroFieldExpression exs = 20;
 }
-message IntroFieldListSubscriptionTypeArguments {
+message Subscription___fieldList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -1793,7 +1793,7 @@ message IntroFieldListSubscriptionTypeArguments {
     optional string after = 26;
     optional string before = 27;
 }
-message IntroFieldConnectionSubscriptionTypeArguments {
+message Subscription___fieldConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -1822,7 +1822,7 @@ message IntroFieldConnectionSubscriptionTypeArguments {
     optional string after = 26;
     optional string before = 27;
 }
-message IntroInputValueSubscriptionTypeArguments {
+message Subscription___inputValue_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -1845,7 +1845,7 @@ message IntroInputValueSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 20;
     repeated IntroInputValueExpression exs = 21;
 }
-message IntroInputValueListSubscriptionTypeArguments {
+message Subscription___inputValueList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -1875,7 +1875,7 @@ message IntroInputValueListSubscriptionTypeArguments {
     optional string after = 27;
     optional string before = 28;
 }
-message IntroInputValueConnectionSubscriptionTypeArguments {
+message Subscription___inputValueConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -1905,7 +1905,7 @@ message IntroInputValueConnectionSubscriptionTypeArguments {
     optional string after = 27;
     optional string before = 28;
 }
-message IntroEnumValueSubscriptionTypeArguments {
+message Subscription___enumValue_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -1924,7 +1924,7 @@ message IntroEnumValueSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 16;
     repeated IntroEnumValueExpression exs = 17;
 }
-message IntroEnumValueListSubscriptionTypeArguments {
+message Subscription___enumValueList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -1950,7 +1950,7 @@ message IntroEnumValueListSubscriptionTypeArguments {
     optional string after = 23;
     optional string before = 24;
 }
-message IntroEnumValueConnectionSubscriptionTypeArguments {
+message Subscription___enumValueConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional IntroTypeExpression of_type = 3;
@@ -1976,7 +1976,7 @@ message IntroEnumValueConnectionSubscriptionTypeArguments {
     optional string after = 23;
     optional string before = 24;
 }
-message IntroDirectiveSubscriptionTypeArguments {
+message Subscription___directive_Arguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
     optional IntroSchemaExpression of_schema = 2;
     optional io.graphoenix.core.grpc.StringExpression description = 3;
@@ -1997,7 +1997,7 @@ message IntroDirectiveSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 18;
     repeated IntroDirectiveExpression exs = 19;
 }
-message IntroDirectiveListSubscriptionTypeArguments {
+message Subscription___directiveList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
     optional IntroSchemaExpression of_schema = 2;
     optional io.graphoenix.core.grpc.StringExpression description = 3;
@@ -2025,7 +2025,7 @@ message IntroDirectiveListSubscriptionTypeArguments {
     optional string after = 25;
     optional string before = 26;
 }
-message IntroDirectiveConnectionSubscriptionTypeArguments {
+message Subscription___directiveConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
     optional IntroSchemaExpression of_schema = 2;
     optional io.graphoenix.core.grpc.StringExpression description = 3;
@@ -2053,7 +2053,7 @@ message IntroDirectiveConnectionSubscriptionTypeArguments {
     optional string after = 25;
     optional string before = 26;
 }
-message IntroTypeInterfacesSubscriptionTypeArguments {
+message Subscription___typeInterfaces_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
     optional IntroTypeExpression type_name_type = 3;
@@ -2071,7 +2071,7 @@ message IntroTypeInterfacesSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated IntroTypeInterfacesExpression exs = 16;
 }
-message IntroTypeInterfacesListSubscriptionTypeArguments {
+message Subscription___typeInterfacesList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
     optional IntroTypeExpression type_name_type = 3;
@@ -2096,7 +2096,7 @@ message IntroTypeInterfacesListSubscriptionTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message IntroTypeInterfacesConnectionSubscriptionTypeArguments {
+message Subscription___typeInterfacesConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
     optional IntroTypeExpression type_name_type = 3;
@@ -2121,7 +2121,7 @@ message IntroTypeInterfacesConnectionSubscriptionTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message IntroTypePossibleTypesSubscriptionTypeArguments {
+message Subscription___typePossibleTypes_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
     optional IntroTypeExpression type_name_type = 3;
@@ -2139,7 +2139,7 @@ message IntroTypePossibleTypesSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated IntroTypePossibleTypesExpression exs = 16;
 }
-message IntroTypePossibleTypesListSubscriptionTypeArguments {
+message Subscription___typePossibleTypesList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
     optional IntroTypeExpression type_name_type = 3;
@@ -2164,7 +2164,7 @@ message IntroTypePossibleTypesListSubscriptionTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message IntroTypePossibleTypesConnectionSubscriptionTypeArguments {
+message Subscription___typePossibleTypesConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression type_name = 2;
     optional IntroTypeExpression type_name_type = 3;
@@ -2189,7 +2189,7 @@ message IntroTypePossibleTypesConnectionSubscriptionTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message IntroDirectiveLocationsSubscriptionTypeArguments {
+message Subscription___directiveLocations_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression directive_name = 2;
     optional IntroDirectiveExpression directive_name_type = 3;
@@ -2206,7 +2206,7 @@ message IntroDirectiveLocationsSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 14;
     repeated IntroDirectiveLocationsExpression exs = 15;
 }
-message IntroDirectiveLocationsListSubscriptionTypeArguments {
+message Subscription___directiveLocationsList_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression directive_name = 2;
     optional IntroDirectiveExpression directive_name_type = 3;
@@ -2230,7 +2230,7 @@ message IntroDirectiveLocationsListSubscriptionTypeArguments {
     optional string after = 21;
     optional string before = 22;
 }
-message IntroDirectiveLocationsConnectionSubscriptionTypeArguments {
+message Subscription___directiveLocationsConnection_Arguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression directive_name = 2;
     optional IntroDirectiveExpression directive_name_type = 3;

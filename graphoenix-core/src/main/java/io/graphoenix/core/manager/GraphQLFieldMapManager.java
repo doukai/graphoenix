@@ -18,6 +18,7 @@ import java.util.Optional;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TO_FIELD_NOT_EXIST;
+import static io.graphoenix.spi.constant.Hammurabi.META_INTERFACE_NAME;
 
 @ApplicationScoped
 public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
@@ -69,7 +70,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                             objectTypeDefinitionContext.name().getText(),
                                                             DOCUMENT_UTIL.getStringValue(fromArgument.get().valueWithVariable().StringValue())
                                                     ).or(() ->
-                                                            manager.getInterface("Meta").stream()
+                                                            manager.getInterface(META_INTERFACE_NAME).stream()
                                                                     .flatMap(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                                                                     .filter(metaFieldDefinitionContext -> metaFieldDefinitionContext.name().getText().equals(DOCUMENT_UTIL.getStringValue(fromArgument.get().valueWithVariable().StringValue())))
                                                                     .findFirst()
@@ -127,7 +128,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                                 DOCUMENT_UTIL.getStringValue(withTypeArgument.get().valueWithVariable().StringValue()),
                                                                 DOCUMENT_UTIL.getStringValue(withFromArgument.get().valueWithVariable().StringValue())
                                                         ).or(() ->
-                                                                manager.getInterface("Meta").stream()
+                                                                manager.getInterface(META_INTERFACE_NAME).stream()
                                                                         .flatMap(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                                                                         .filter(metaFieldDefinitionContext -> metaFieldDefinitionContext.name().getText().equals(DOCUMENT_UTIL.getStringValue(withFromArgument.get().valueWithVariable().StringValue())))
                                                                         .findFirst()
@@ -141,7 +142,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                                 DOCUMENT_UTIL.getStringValue(withTypeArgument.get().valueWithVariable().StringValue()),
                                                                 DOCUMENT_UTIL.getStringValue(withToArgument.get().valueWithVariable().StringValue())
                                                         ).or(() ->
-                                                                manager.getInterface("Meta").stream()
+                                                                manager.getInterface(META_INTERFACE_NAME).stream()
                                                                         .flatMap(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                                                                         .filter(metaFieldDefinitionContext -> metaFieldDefinitionContext.name().getText().equals(DOCUMENT_UTIL.getStringValue(withToArgument.get().valueWithVariable().StringValue())))
                                                                         .findFirst()
@@ -187,7 +188,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                     manager.getFieldTypeName(fieldDefinitionContext.type()),
                     DOCUMENT_UTIL.getStringValue(toArgument.get().valueWithVariable().StringValue())
             ).or(() ->
-                    manager.getInterface("Meta").stream()
+                    manager.getInterface(META_INTERFACE_NAME).stream()
                             .flatMap(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                             .filter(metaFieldDefinitionContext -> metaFieldDefinitionContext.name().getText().equals(DOCUMENT_UTIL.getStringValue(toArgument.get().valueWithVariable().StringValue())))
                             .findFirst()

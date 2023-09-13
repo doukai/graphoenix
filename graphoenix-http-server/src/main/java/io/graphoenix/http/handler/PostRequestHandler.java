@@ -135,7 +135,7 @@ public class PostRequestHandler extends BaseHandler {
                             byteBuf -> true
                     );
         } else {
-            IllegalArgumentException illegalArgumentException = new IllegalArgumentException("unsupported content-type: ".concat(contentType));
+            IllegalArgumentException illegalArgumentException = new IllegalArgumentException("unsupported content-type: " + contentType);
             Logger.error(illegalArgumentException);
             return response
                     .addHeader(CONTENT_TYPE, MimeType.Application.JSON)

@@ -431,15 +431,15 @@ public class ProtobufFileBuilder {
         return manager.getQueryOperationTypeName()
                 .flatMap(manager::getObject)
                 .map(objectTypeDefinitionContext ->
-                        new Service().setName(objectTypeDefinitionContext.name().getText().concat("Service"))
+                        new Service().setName(objectTypeDefinitionContext.name().getText() + "Service")
                                 .setRpcs(
                                         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                                                 .filter(packageManager::isOwnPackage)
                                                 .map(fieldDefinitionContext ->
                                                         new Rpc()
                                                                 .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
-                                                                .setMessageType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
-                                                                .setReturnType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
+                                                                .setMessageType("Query" + getServiceRpcName(fieldDefinitionContext.name().getText()) + "Request")
+                                                                .setReturnType("Query" + getServiceRpcName(fieldDefinitionContext.name().getText()) + "Response")
                                                 )
                                                 .collect(Collectors.toList())
                                 )
@@ -450,15 +450,15 @@ public class ProtobufFileBuilder {
         return manager.getMutationOperationTypeName()
                 .flatMap(manager::getObject)
                 .map(objectTypeDefinitionContext ->
-                        new Service().setName(objectTypeDefinitionContext.name().getText().concat("Service"))
+                        new Service().setName(objectTypeDefinitionContext.name().getText() + "Service")
                                 .setRpcs(
                                         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                                                 .filter(packageManager::isOwnPackage)
                                                 .map(fieldDefinitionContext ->
                                                         new Rpc()
                                                                 .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
-                                                                .setMessageType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
-                                                                .setReturnType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
+                                                                .setMessageType("Mutation" + getServiceRpcName(fieldDefinitionContext.name().getText()) + "Request")
+                                                                .setReturnType("Mutation" + getServiceRpcName(fieldDefinitionContext.name().getText()) + "Response")
                                                 )
                                                 .collect(Collectors.toList())
                                 )
@@ -482,7 +482,7 @@ public class ProtobufFileBuilder {
                 .filter(packageManager::isOwnPackage)
                 .map(fieldDefinitionContext ->
                         new Message()
-                                .setName("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
+                                .setName("Query" + getServiceRpcName(fieldDefinitionContext.name().getText()) + "Request")
                                 .setFields(
                                         Stream.concat(
                                                 Stream.of(new Field().setName("selection_set").setOptional(true).setType("string").setNumber(1), new Field().setName("arguments").setOptional(true).setType("string").setNumber(2)),
@@ -510,7 +510,7 @@ public class ProtobufFileBuilder {
                 .filter(packageManager::isOwnPackage)
                 .map(fieldDefinitionContext ->
                         new Message()
-                                .setName("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
+                                .setName("Query" + getServiceRpcName(fieldDefinitionContext.name().getText()) + "Response")
                                 .addField(
                                         new Field()
                                                 .setName(getMessageFiledName(fieldDefinitionContext.name().getText()))
@@ -529,7 +529,7 @@ public class ProtobufFileBuilder {
                 .filter(packageManager::isOwnPackage)
                 .map(fieldDefinitionContext ->
                         new Message()
-                                .setName("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
+                                .setName("Mutation" + getServiceRpcName(fieldDefinitionContext.name().getText()) + "Request")
                                 .setFields(
                                         Stream.concat(
                                                 Stream.of(
@@ -559,7 +559,7 @@ public class ProtobufFileBuilder {
                 .filter(packageManager::isOwnPackage)
                 .map(fieldDefinitionContext ->
                         new Message()
-                                .setName("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
+                                .setName("Mutation" + getServiceRpcName(fieldDefinitionContext.name().getText()) + "Response")
                                 .addField(
                                         new Field()
                                                 .setName(getMessageFiledName(fieldDefinitionContext.name().getText()))
@@ -592,9 +592,9 @@ public class ProtobufFileBuilder {
                                 .mapToObj(index ->
                                         new EnumField()
                                                 .setName(
-                                                        enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().get(index).enumValue().enumValueName().getText()
-                                                                .concat("_")
-                                                                .concat(getEnumFieldName(enumTypeDefinitionContext.name().getText()))
+                                                        enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().get(index).enumValue().enumValueName().getText() +
+                                                                "_" +
+                                                                getEnumFieldName(enumTypeDefinitionContext.name().getText())
                                                 )
                                                 .setNumber(index)
                                 )
@@ -683,22 +683,22 @@ public class ProtobufFileBuilder {
         } else if (manager.isEnum(fieldTypeName)) {
             return manager.getEnum(fieldTypeName)
                     .filter(packageManager::isNotOwnPackage)
-                    .flatMap(enumTypeDefinitionContext -> manager.getGrpcPackageName(enumTypeDefinitionContext).map(packageName -> packageName.concat(".").concat(getName(fieldTypeName))))
+                    .flatMap(enumTypeDefinitionContext -> manager.getGrpcPackageName(enumTypeDefinitionContext).map(packageName -> packageName + "." + getName(fieldTypeName)))
                     .orElseGet(() -> getName(fieldTypeName));
         } else if (manager.isObject(fieldTypeName)) {
             return manager.getObject(fieldTypeName)
                     .filter(packageManager::isNotOwnPackage)
-                    .flatMap(objectTypeDefinitionContext -> manager.getGrpcPackageName(objectTypeDefinitionContext).map(packageName -> packageName.concat(".").concat(getName(fieldTypeName))))
+                    .flatMap(objectTypeDefinitionContext -> manager.getGrpcPackageName(objectTypeDefinitionContext).map(packageName -> packageName + "." + getName(fieldTypeName)))
                     .orElseGet(() -> getName(fieldTypeName));
         } else if (manager.isInterface(fieldTypeName)) {
             return manager.getInterface(fieldTypeName)
                     .filter(packageManager::isNotOwnPackage)
-                    .flatMap(interfaceTypeDefinitionContext -> manager.getGrpcPackageName(interfaceTypeDefinitionContext).map(packageName -> packageName.concat(".").concat(getName(fieldTypeName))))
+                    .flatMap(interfaceTypeDefinitionContext -> manager.getGrpcPackageName(interfaceTypeDefinitionContext).map(packageName -> packageName + "." + getName(fieldTypeName)))
                     .orElseGet(() -> getName(fieldTypeName));
         } else if (manager.isInputObject(fieldTypeName)) {
             return manager.getInputObject(fieldTypeName)
                     .filter(packageManager::isNotOwnPackage)
-                    .flatMap(inputObjectTypeDefinitionContext -> manager.getGrpcPackageName(inputObjectTypeDefinitionContext).map(packageName -> packageName.concat(".").concat(getName(fieldTypeName))))
+                    .flatMap(inputObjectTypeDefinitionContext -> manager.getGrpcPackageName(inputObjectTypeDefinitionContext).map(packageName -> packageName + "." + getName(fieldTypeName)))
                     .orElseGet(() -> getName(fieldTypeName));
         } else {
             throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
@@ -714,31 +714,31 @@ public class ProtobufFileBuilder {
 
     public String getMessageFiledName(String fieldName) {
         if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
-            return "intro_".concat(getMessageFiledName(fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));
+            return "intro_" + getMessageFiledName(fieldName.replaceFirst(INTROSPECTION_PREFIX, ""));
         }
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
     }
 
     public String getServiceRpcName(String fieldName) {
         if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
-            return "Intro".concat(getServiceRpcName(fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));
+            return "Intro" + getServiceRpcName(fieldName.replaceFirst(INTROSPECTION_PREFIX, ""));
         }
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName);
     }
 
     public String getEnumFieldName(String fieldName) {
         if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
-            return "INTRO_".concat(getEnumFieldName(fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));
+            return "INTRO_" + getEnumFieldName(fieldName.replaceFirst(INTROSPECTION_PREFIX, ""));
         }
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, fieldName);
     }
 
     public String getPath(String protoName) {
-        return graphQLConfig.getPackageName().replaceAll("\\.", "/").concat("/").concat(protoName);
+        return graphQLConfig.getPackageName().replaceAll("\\.", "/") + "/" + protoName;
     }
 
     public String getPath(String packageName, String protoName) {
-        return packageName.replaceAll("\\.", "/").concat("/").concat(protoName);
+        return packageName.replaceAll("\\.", "/") + "/" + protoName;
     }
 
     private Stream<Import> getImportPath(GraphqlParser.FieldsDefinitionContext fieldsDefinitionContext) {

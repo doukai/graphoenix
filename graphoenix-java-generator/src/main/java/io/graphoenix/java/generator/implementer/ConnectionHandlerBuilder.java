@@ -138,7 +138,7 @@ public class ConnectionHandlerBuilder {
                     .addStatement("$T jsonArray = connection.asJsonObject().get(selectionName).asJsonArray()", ClassName.get(JsonArray.class))
                     .addStatement("$T.range(0, jsonArray.size()).forEach(index -> $L(jsonPatchBuilder, path + \"/\" + selectionName + \"/\" + index, jsonArray.get(index), $S, selectionContext))",
                             ClassName.get(IntStream.class),
-                            getObjectMethodName(typeName.concat(EDGE_SUFFIX)),
+                            getObjectMethodName(typeName + EDGE_SUFFIX),
                             objectTypeDefinitionContext.name().getText()
                     )
                     .endControlFlow()

@@ -587,13 +587,13 @@ message QueryCreateGroupIdRequest {
     optional string selection_set = 1;
     optional string arguments = 2;
 }
-message QueryMetaInfoRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-}
 message QueryLoginRequest {
     optional string selection_set = 1;
     optional string arguments = 2;
-    optional string login = 3;
-    optional string password = 4;
+    string login = 3;
+    string password = 4;
+}
+message QueryMetaInfoRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
 }

@@ -29,10 +29,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
-import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 public abstract class MutationDataLoader {
 
@@ -145,7 +142,7 @@ public abstract class MutationDataLoader {
                                                                         .filter(typeEntry -> typeEntry.getValue().size() > 0)
                                                                         .map(typeEntry ->
                                                                                 new Field()
-                                                                                        .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
+                                                                                        .setName(typeToLowerCamelName(typeEntry.getKey()) + LIST_SUFFIX)
                                                                                         .addArgument(
                                                                                                 LIST_INPUT_NAME,
                                                                                                 typeEntry.getValue().values()
@@ -171,7 +168,7 @@ public abstract class MutationDataLoader {
                                                                 .map(selectionEntry ->
                                                                         new Field()
                                                                                 .setName(typeToLowerCamelName(typeEntry.getKey()))
-                                                                                .setAlias(typeToLowerCamelName(typeEntry.getKey()).concat("_").concat(selectionEntry.getKey()))
+                                                                                .setAlias(typeToLowerCamelName(typeEntry.getKey()) + "_" + selectionEntry.getKey())
                                                                                 .addArgument(
                                                                                         DEPRECATED_FIELD_NAME,
                                                                                         true
@@ -218,7 +215,7 @@ public abstract class MutationDataLoader {
                                                 .filter(typeEntry -> typeEntry.getValue().size() > 0)
                                                 .map(typeEntry ->
                                                         new Field()
-                                                                .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
+                                                                .setName(typeToLowerCamelName(typeEntry.getKey()) + LIST_SUFFIX)
                                                                 .addArgument(
                                                                         manager.getObjectTypeIDFieldName(typeEntry.getKey()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST)),
                                                                         new ObjectValueWithVariable(Map.of("in", typeEntry.getValue()))
@@ -240,7 +237,7 @@ public abstract class MutationDataLoader {
                                                                 .map(whereEntry ->
                                                                         new Field()
                                                                                 .setAlias(whereEntry.getKey())
-                                                                                .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
+                                                                                .setName(typeToLowerCamelName(typeEntry.getKey()) + LIST_SUFFIX)
                                                                                 .addArgument(
                                                                                         WHERE_INPUT_NAME,
                                                                                         whereEntry.getValue()
@@ -282,7 +279,7 @@ public abstract class MutationDataLoader {
                                                 .stream()
                                                 .map(typeName ->
                                                         new Field()
-                                                                .setName(typeToLowerCamelName(typeName).concat("List"))
+                                                                .setName(typeToLowerCamelName(typeName) + LIST_SUFFIX)
                                                                 .addArgument(
                                                                         LIST_INPUT_NAME,
                                                                         Stream.concat(
@@ -299,18 +296,18 @@ public abstract class MutationDataLoader {
 
     private Stream<JsonValue> getUpdateJsonArray(String typeName, JsonObject data) {
         String idFieldName = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST));
-        String selectionName = typeToLowerCamelName(typeName).concat("List");
+        String selectionName = typeToLowerCamelName(typeName) + LIST_SUFFIX;
         return io.vavr.collection.Stream.ofAll(
-                        Stream.concat(
-                                Stream.of(data)
-                                        .filter(jsonObject ->
-                                                data.containsKey(selectionName) &&
-                                                        data.get(selectionName).getValueType().equals(JsonValue.ValueType.ARRAY) &&
-                                                        data.get(selectionName).asJsonArray().size() > 0)
-                                        .flatMap(jsonObject -> jsonObject.get(selectionName).asJsonArray().stream()),
-                                getUpdateWhereJsonArray(typeName, data)
-                        ).collect(Collectors.toList())
-                )
+                Stream.concat(
+                        Stream.of(data)
+                                .filter(jsonObject ->
+                                        data.containsKey(selectionName) &&
+                                                data.get(selectionName).getValueType().equals(JsonValue.ValueType.ARRAY) &&
+                                                data.get(selectionName).asJsonArray().size() > 0)
+                                .flatMap(jsonObject -> jsonObject.get(selectionName).asJsonArray().stream()),
+                        getUpdateWhereJsonArray(typeName, data)
+                ).collect(Collectors.toList())
+        )
                 .distinctBy(jsonValue -> jsonValue.asJsonObject().get(idFieldName).toString())
                 .toJavaStream();
     }
@@ -422,7 +419,7 @@ public abstract class MutationDataLoader {
                                                         if (typeMap != null && !typeMap.isEmpty()) {
                                                             if (resultMap.containsKey(packageName) && resultMap.get(packageName).containsKey(protocolName)) {
                                                                 JsonObject data = resultMap.get(packageName).get(protocolName).asJsonObject();
-                                                                JsonValue fieldValue = data.get(typeToLowerCamelName(typeName).concat("List"));
+                                                                JsonValue fieldValue = data.get(typeToLowerCamelName(typeName) + LIST_SUFFIX);
                                                                 if (fieldValue != null && fieldValue.getValueType().equals(JsonValue.ValueType.ARRAY)) {
                                                                     JsonArray jsonArray = fieldValue.asJsonArray();
                                                                     IntStream.range(0, jsonArray.size())
@@ -458,13 +455,13 @@ public abstract class MutationDataLoader {
         JsonPatchBuilder patchBuilder = jsonProvider.createPatchBuilder();
         if (!addFiledMap.isEmpty()) {
             addFiledMap.forEach((key, value) ->
-                    value.forEach((tuple2) -> patchBuilder.add(key.concat("/").concat(tuple2._1()), tuple2._2()))
+                    value.forEach((tuple2) -> patchBuilder.add(key + "/" + tuple2._1(), tuple2._2()))
             );
             addFiledMap.clear();
         }
         if (!removeFiledMap.isEmpty()) {
             removeFiledMap.forEach((key, value) ->
-                    value.forEach((filedName) -> patchBuilder.remove(key.concat("/").concat(filedName)))
+                    value.forEach((filedName) -> patchBuilder.remove(key + "/" + filedName))
             );
             removeFiledMap.clear();
         }
@@ -473,7 +470,7 @@ public abstract class MutationDataLoader {
 
     private String typeToLowerCamelName(String fieldTypeName) {
         if (fieldTypeName.startsWith(INTROSPECTION_PREFIX)) {
-            return INTROSPECTION_PREFIX.concat(typeToLowerCamelName(fieldTypeName.replaceFirst(INTROSPECTION_PREFIX, "")));
+            return INTROSPECTION_PREFIX + typeToLowerCamelName(fieldTypeName.replaceFirst(INTROSPECTION_PREFIX, ""));
         } else {
             return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, fieldTypeName);
         }

@@ -132,7 +132,7 @@ public class GrpcFetchHandlerBuilder {
                 .forEach(packageName ->
                         builder.addField(
                                 FieldSpec.builder(
-                                        ClassName.get(packageName.concat(".grpc"), "ReactorGraphQLServiceGrpc", "ReactorGraphQLServiceStub"),
+                                        ClassName.get(packageName + ".grpc", "ReactorGraphQLServiceGrpc", "ReactorGraphQLServiceStub"),
                                         grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
                                         Modifier.PRIVATE,
                                         Modifier.FINAL
@@ -155,13 +155,13 @@ public class GrpcFetchHandlerBuilder {
                 .forEach(packageName ->
                         builder.addStatement("this.$L = $T.newReactorStub(channelManagerProvider.get().getChannel($S))",
                                 grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
-                                ClassName.get(packageName.concat(".grpc"), "ReactorGraphQLServiceGrpc"),
+                                ClassName.get(packageName + ".grpc", "ReactorGraphQLServiceGrpc"),
                                 packageName
                         ).addStatement("this.operationMap.put($S, ($T graphql) -> this.$L.operation($T.newBuilder().setRequest(graphql).build()).map(response -> response.getResponse()))",
                                 packageName,
                                 ClassName.get(String.class),
                                 grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
-                                ClassName.get(packageName.concat(".grpc"), "GraphQLRequest")
+                                ClassName.get(packageName + ".grpc", "GraphQLRequest")
                         )
                 );
         return builder.build();

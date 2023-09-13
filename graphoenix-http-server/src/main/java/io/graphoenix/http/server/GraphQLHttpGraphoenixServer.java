@@ -53,7 +53,7 @@ public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
                 .doOnConnection(connection -> connection.addHandlerLast("cors", new CorsHandler(corsConfig)))
                 .route(httpServerRoutes ->
                         httpServerRoutes
-                                .get(httpServerConfig.getSchemaContextPath().concat("/{").concat(SCHEMA_PARAM_NAME).concat("}"), schemaRequestHandler::handle)
+                                .get(httpServerConfig.getSchemaContextPath() + "/{" + SCHEMA_PARAM_NAME + "}", schemaRequestHandler::handle)
                                 .get(httpServerConfig.getGraphqlContextPath(), getRequestHandler::handle)
                                 .post(httpServerConfig.getGraphqlContextPath(), postRequestHandler::handle)
                 )

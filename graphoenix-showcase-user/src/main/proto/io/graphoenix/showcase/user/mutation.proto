@@ -12,7 +12,7 @@ import "io/graphoenix/showcase/user/input_objects.proto";
 import "io/graphoenix/showcase/user/mutation_requests.proto";
 import "io/graphoenix/showcase/user/mutation_responses.proto";
 
-service MutationTypeService {
+service MutationService {
     rpc User (MutationUserRequest) returns (MutationUserResponse);
     rpc UserList (MutationUserListRequest) returns (MutationUserListResponse);
     rpc UserProfile (MutationUserProfileRequest) returns (MutationUserProfileResponse);

@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.LIST_SUFFIX;
 
 @ApplicationScoped
 public class SelectionFilterBuilder {
@@ -230,7 +231,7 @@ public class SelectionFilterBuilder {
 
     private MethodSpec buildListTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
-        String listTypeParameterName = typeParameterName.concat("List");
+        String listTypeParameterName = typeParameterName + LIST_SUFFIX;
         ClassName typeClassName = TYPE_NAME_UTIL.toClassName(packageManager.getClassName(objectTypeDefinitionContext));
         MethodSpec.Builder builder = MethodSpec.methodBuilder(listTypeParameterName)
                 .addModifiers(Modifier.PUBLIC)

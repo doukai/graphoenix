@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.SOURCE)
 @Directive("rolesAllowed")
-@Target({ElementType.TYPE,ElementType.FIELD})
+@Target({ElementType.FIELD,ElementType.TYPE})
 public @interface RolesAllowed {
   String[] roles();
 }
