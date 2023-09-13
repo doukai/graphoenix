@@ -372,6 +372,8 @@ public interface IGraphQLDocumentManager {
     Optional<GraphqlParser.FieldDefinitionContext> getFieldDefinitionFromInputValueDefinition(GraphqlParser.TypeContext typeContext,
                                                                                               GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext);
 
+    Optional<GraphqlParser.FieldDefinitionContext> getFieldDefinitionFromInputValueDefinition(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext);
+
     Optional<GraphqlParser.ValueContext> getDefaultValueFromInputValueDefinition(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext);
 
     Optional<GraphqlParser.ArgumentContext> getIDArgument(GraphqlParser.TypeContext typeContext,

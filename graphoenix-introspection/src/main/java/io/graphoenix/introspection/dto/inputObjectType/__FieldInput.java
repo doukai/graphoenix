@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @CompiledJson
 @Input
@@ -26,10 +25,8 @@ public class __FieldInput implements MetaInput {
 
   private String description;
 
-  @NonNull
   private Collection<__InputValueInput> args;
 
-  @NonNull
   private __TypeInput type;
 
   private String deprecationReason;
@@ -56,6 +53,8 @@ public class __FieldInput implements MetaInput {
   private String ofTypeName;
 
   private String typeName;
+
+  private __FieldExpression where;
 
   public String getId() {
     return this.id;
@@ -199,5 +198,13 @@ public class __FieldInput implements MetaInput {
 
   public void setTypeName(String typeName) {
     this.typeName = typeName;
+  }
+
+  public __FieldExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__FieldExpression where) {
+    this.where = where;
   }
 }

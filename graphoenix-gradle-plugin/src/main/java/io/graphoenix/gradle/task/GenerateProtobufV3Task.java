@@ -46,6 +46,7 @@ public class GenerateProtobufV3Task extends BaseTask {
                 mapper.registerFieldMaps();
             }
             registerInvoke();
+            documentBuilder.buildInvokeDocument();
             if (Files.notExists(protoPath)) {
                 Files.createDirectories(protoPath);
             }

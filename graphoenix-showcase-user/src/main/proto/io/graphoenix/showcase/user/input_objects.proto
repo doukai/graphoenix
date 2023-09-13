@@ -39,9 +39,9 @@ message UserExpression {
 }
 message UserInput {
     optional string id = 1;
-    string login = 2;
-    string password = 3;
-    string name = 4;
+    optional string login = 2;
+    optional string password = 3;
+    optional string name = 4;
     optional int32 age = 5;
     optional bool disabled = 6;
     optional Sex sex = 7;
@@ -61,6 +61,7 @@ message UserInput {
     optional int32 organization_id = 21;
     repeated UserRoleInput user_role = 22;
     repeated UserMobileNumbersInput user_mobile_numbers = 23;
+    optional UserExpression where = 24;
 }
 message UserOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -114,6 +115,7 @@ message UserProfileInput {
     optional string create_group_id = 12;
     optional string intro_typename = 13;
     optional int32 user_id = 14;
+    optional UserProfileExpression where = 15;
 }
 message UserProfileOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -151,7 +153,7 @@ message RoleExpression {
 }
 message RoleInput {
     optional string id = 1;
-    string name = 2;
+    optional string name = 2;
     repeated RoleType type = 3;
     repeated UserInput users = 4;
     optional bool is_deprecated = 5;
@@ -165,6 +167,7 @@ message RoleInput {
     optional string intro_typename = 13;
     repeated RoleRoleTypeInput role_role_type = 14;
     repeated UserRoleInput user_role = 15;
+    optional RoleExpression where = 16;
 }
 message RoleOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -199,7 +202,7 @@ message OrganizationExpression {
 }
 message OrganizationInput {
     optional string id = 1;
-    string name = 2;
+    optional string name = 2;
     optional OrganizationInput above = 3;
     repeated UserInput users = 4;
     optional bool is_deprecated = 5;
@@ -212,6 +215,7 @@ message OrganizationInput {
     optional string create_group_id = 12;
     optional string intro_typename = 13;
     optional int32 above_id = 14;
+    optional OrganizationExpression where = 15;
 }
 message OrganizationOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -260,6 +264,7 @@ message UserRoleInput {
     optional google.protobuf.Timestamp update_time = 12;
     optional string create_group_id = 13;
     optional string intro_typename = 14;
+    optional UserRoleExpression where = 15;
 }
 message UserRoleOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -306,6 +311,7 @@ message UserMobileNumbersInput {
     optional google.protobuf.Timestamp update_time = 11;
     optional string create_group_id = 12;
     optional string intro_typename = 13;
+    optional UserMobileNumbersExpression where = 14;
 }
 message UserMobileNumbersOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -352,6 +358,7 @@ message RoleRoleTypeInput {
     optional google.protobuf.Timestamp update_time = 11;
     optional string create_group_id = 12;
     optional string intro_typename = 13;
+    optional RoleRoleTypeExpression where = 14;
 }
 message RoleRoleTypeOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -1637,4 +1644,8 @@ message RoleRoleTypeConnectionSubscriptionTypeArguments {
     optional int32 offset = 20;
     optional string after = 21;
     optional string before = 22;
+}
+message QueryType_login {
+    optional string login = 1;
+    optional string password = 2;
 }

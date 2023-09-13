@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @CompiledJson
 @Input
@@ -21,10 +20,8 @@ import org.eclipse.microprofile.graphql.NonNull;
 public class RoleInput implements MetaInput {
   private String id;
 
-  @NonNull
   private String name;
 
-  @NonNull
   private Collection<RoleType> type;
 
   private Collection<UserInput> users;
@@ -51,6 +48,8 @@ public class RoleInput implements MetaInput {
   private Collection<RoleRoleTypeInput> roleRoleType;
 
   private Collection<UserRoleInput> userRole;
+
+  private RoleExpression where;
 
   public String getId() {
     return this.id;
@@ -170,5 +169,13 @@ public class RoleInput implements MetaInput {
 
   public void setUserRole(Collection<UserRoleInput> userRole) {
     this.userRole = userRole;
+  }
+
+  public RoleExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(RoleExpression where) {
+    this.where = where;
   }
 }

@@ -47,6 +47,8 @@ public class __EnumValueInput implements MetaInput {
 
   private String ofTypeName;
 
+  private __EnumValueExpression where;
+
   public String getId() {
     return this.id;
   }
@@ -165,5 +167,13 @@ public class __EnumValueInput implements MetaInput {
 
   public void setOfTypeName(String ofTypeName) {
     this.ofTypeName = ofTypeName;
+  }
+
+  public __EnumValueExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__EnumValueExpression where) {
+    this.where = where;
   }
 }

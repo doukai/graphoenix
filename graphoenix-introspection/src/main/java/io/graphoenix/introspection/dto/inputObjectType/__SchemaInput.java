@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @CompiledJson
 @Input
@@ -20,17 +19,14 @@ import org.eclipse.microprofile.graphql.NonNull;
 public class __SchemaInput implements MetaInput {
   private String id;
 
-  @NonNull
   private Collection<__TypeInput> types;
 
-  @NonNull
   private __TypeInput queryType;
 
   private __TypeInput mutationType;
 
   private __TypeInput subscriptionType;
 
-  @NonNull
   private Collection<__DirectiveInput> directives;
 
   private Boolean isDeprecated;
@@ -57,6 +53,8 @@ public class __SchemaInput implements MetaInput {
   private String mutationTypeName;
 
   private String subscriptionTypeName;
+
+  private __SchemaExpression where;
 
   public String getId() {
     return this.id;
@@ -200,5 +198,13 @@ public class __SchemaInput implements MetaInput {
 
   public void setSubscriptionTypeName(String subscriptionTypeName) {
     this.subscriptionTypeName = subscriptionTypeName;
+  }
+
+  public __SchemaExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__SchemaExpression where) {
+    this.where = where;
   }
 }

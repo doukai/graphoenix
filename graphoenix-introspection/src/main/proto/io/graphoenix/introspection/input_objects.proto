@@ -35,7 +35,7 @@ message IntroSchemaExpression {
 message IntroSchemaInput {
     optional string id = 1;
     repeated IntroTypeInput types = 2;
-    IntroTypeInput query_type = 3;
+    optional IntroTypeInput query_type = 3;
     optional IntroTypeInput mutation_type = 4;
     optional IntroTypeInput subscription_type = 5;
     repeated IntroDirectiveInput directives = 6;
@@ -51,6 +51,7 @@ message IntroSchemaInput {
     optional string query_type_name = 16;
     optional string mutation_type_name = 17;
     optional string subscription_type_name = 18;
+    optional IntroSchemaExpression where = 19;
 }
 message IntroSchemaOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -95,9 +96,9 @@ message IntroTypeExpression {
     repeated IntroTypeExpression exs = 25;
 }
 message IntroTypeInput {
-    string name = 1;
+    optional string name = 1;
     optional IntroSchemaInput of_schema = 2;
-    io.graphoenix.core.grpc.IntroTypeKind kind = 3;
+    optional io.graphoenix.core.grpc.IntroTypeKind kind = 3;
     optional string description = 4;
     repeated IntroFieldInput fields = 5;
     repeated IntroTypeInput interfaces = 6;
@@ -118,6 +119,7 @@ message IntroTypeInput {
     optional string of_type_name = 21;
     repeated IntroTypeInterfacesInput intro_type_interfaces = 22;
     repeated IntroTypePossibleTypesInput intro_type_possible_types = 23;
+    optional IntroTypeExpression where = 24;
 }
 message IntroTypeOrderBy {
     optional io.graphoenix.core.grpc.Sort name = 1;
@@ -163,7 +165,7 @@ message IntroFieldInput {
     optional IntroTypeInput of_type = 3;
     optional string description = 4;
     repeated IntroInputValueInput args = 5;
-    IntroTypeInput type = 6;
+    optional IntroTypeInput type = 6;
     optional string deprecation_reason = 7;
     optional bool is_deprecated = 8;
     optional int32 version = 9;
@@ -176,6 +178,7 @@ message IntroFieldInput {
     optional string intro_typename = 16;
     optional string of_type_name = 17;
     optional string type_name = 18;
+    optional IntroFieldExpression where = 19;
 }
 message IntroFieldOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -224,7 +227,7 @@ message IntroInputValueInput {
     optional int32 field_id = 4;
     optional string directive_name = 5;
     optional string description = 6;
-    IntroTypeInput type = 7;
+    optional IntroTypeInput type = 7;
     optional string default_value = 8;
     optional bool is_deprecated = 9;
     optional int32 version = 10;
@@ -237,6 +240,7 @@ message IntroInputValueInput {
     optional string intro_typename = 17;
     optional string of_type_name = 18;
     optional string type_name = 19;
+    optional IntroInputValueExpression where = 20;
 }
 message IntroInputValueOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -292,6 +296,7 @@ message IntroEnumValueInput {
     optional string create_group_id = 13;
     optional string intro_typename = 14;
     optional string of_type_name = 15;
+    optional IntroEnumValueExpression where = 16;
 }
 message IntroEnumValueOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -331,12 +336,12 @@ message IntroDirectiveExpression {
     repeated IntroDirectiveExpression exs = 19;
 }
 message IntroDirectiveInput {
-    string name = 1;
+    optional string name = 1;
     optional IntroSchemaInput of_schema = 2;
     optional string description = 3;
     repeated io.graphoenix.core.grpc.IntroDirectiveLocation locations = 4;
     repeated IntroInputValueInput args = 5;
-    bool is_repeatable = 6;
+    optional bool is_repeatable = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;
     optional int32 realm_id = 9;
@@ -348,6 +353,7 @@ message IntroDirectiveInput {
     optional string intro_typename = 15;
     optional int32 schema_id = 16;
     repeated IntroDirectiveLocationsInput intro_directive_locations = 17;
+    optional IntroDirectiveExpression where = 18;
 }
 message IntroDirectiveOrderBy {
     optional io.graphoenix.core.grpc.Sort name = 1;
@@ -397,6 +403,7 @@ message IntroTypeInterfacesInput {
     optional google.protobuf.Timestamp update_time = 12;
     optional string create_group_id = 13;
     optional string intro_typename = 14;
+    optional IntroTypeInterfacesExpression where = 15;
 }
 message IntroTypeInterfacesOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -445,6 +452,7 @@ message IntroTypePossibleTypesInput {
     optional google.protobuf.Timestamp update_time = 12;
     optional string create_group_id = 13;
     optional string intro_typename = 14;
+    optional IntroTypePossibleTypesExpression where = 15;
 }
 message IntroTypePossibleTypesOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -491,6 +499,7 @@ message IntroDirectiveLocationsInput {
     optional google.protobuf.Timestamp update_time = 11;
     optional string create_group_id = 12;
     optional string intro_typename = 13;
+    optional IntroDirectiveLocationsExpression where = 14;
 }
 message IntroDirectiveLocationsOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;

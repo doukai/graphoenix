@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @CompiledJson
 @Input
@@ -20,7 +19,6 @@ import org.eclipse.microprofile.graphql.NonNull;
 public class OrganizationInput implements MetaInput {
   private String id;
 
-  @NonNull
   private String name;
 
   private OrganizationInput above;
@@ -47,6 +45,8 @@ public class OrganizationInput implements MetaInput {
   private String __typename;
 
   private Integer aboveId;
+
+  private OrganizationExpression where;
 
   public String getId() {
     return this.id;
@@ -158,5 +158,13 @@ public class OrganizationInput implements MetaInput {
 
   public void setAboveId(Integer aboveId) {
     this.aboveId = aboveId;
+  }
+
+  public OrganizationExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(OrganizationExpression where) {
+    this.where = where;
   }
 }

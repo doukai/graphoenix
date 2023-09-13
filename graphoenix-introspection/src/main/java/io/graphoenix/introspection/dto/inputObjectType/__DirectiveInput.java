@@ -12,27 +12,22 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @CompiledJson
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
 public class __DirectiveInput implements MetaInput {
-  @NonNull
   private String name;
 
   private __SchemaInput ofSchema;
 
   private String description;
 
-  @NonNull
   private Collection<__DirectiveLocation> locations;
 
-  @NonNull
   private Collection<__InputValueInput> args;
 
-  @NonNull
   private Boolean isRepeatable;
 
   private Boolean isDeprecated;
@@ -57,6 +52,8 @@ public class __DirectiveInput implements MetaInput {
   private Integer schemaId;
 
   private Collection<__DirectiveLocationsInput> __directiveLocations;
+
+  private __DirectiveExpression where;
 
   public String getName() {
     return this.name;
@@ -192,5 +189,13 @@ public class __DirectiveInput implements MetaInput {
 
   public void set__directiveLocations(Collection<__DirectiveLocationsInput> __directiveLocations) {
     this.__directiveLocations = __directiveLocations;
+  }
+
+  public __DirectiveExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__DirectiveExpression where) {
+    this.where = where;
   }
 }

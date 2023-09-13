@@ -58,6 +58,7 @@ public class PackageProcessor extends BaseProcessor {
                 mapper.registerFieldMaps();
             }
             registerElements(roundEnv);
+            documentBuilder.buildInvokeDocument();
             registerOperations(roundEnv);
             FileObject packageGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/" + graphQLConfig.getPackageName() + ".gql");
             Writer writer = packageGraphQL.openWriter();

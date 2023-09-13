@@ -4,8 +4,6 @@ import com.google.auto.service.AutoService;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
-import io.graphoenix.core.error.GraphQLErrorType;
-import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.core.schema.JsonSchemaTranslator;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
@@ -23,7 +21,6 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -89,117 +86,21 @@ public class ApplicationProcessor extends BaseProcessor {
             writer.close();
 
             List<GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinitionContextList = manager.getInputObjects().collect(Collectors.toList());
-
             for (GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext : inputObjectTypeDefinitionContextList) {
-                FileObject schema = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/".concat(inputObjectTypeDefinitionContext.name().getText()));
-                writer = schema.openWriter();
-                writer.write(jsonSchemaTranslator.objectToJsonSchemaString(inputObjectTypeDefinitionContext));
-                writer.close();
-            }
-
-            List<GraphqlParser.OperationTypeDefinitionContext> operationTypeDefinitionContextList = manager.getOperationTypeDefinition().collect(Collectors.toList());
-
-            for (GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext : operationTypeDefinitionContextList) {
-                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(operationTypeDefinitionContext.typeName().name().getText())
-                        .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.TYPE_NOT_EXIST.bind(operationTypeDefinitionContext.typeName().name().getText())));
-                FileObject schema = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/".concat(objectTypeDefinitionContext.name().getText()));
-                writer = schema.openWriter();
-                writer.write(jsonSchemaTranslator.operationObjectToJsonSchemaString(operationTypeDefinitionContext));
-                writer.close();
-            }
-
-            List<Map.Entry<GraphqlParser.ObjectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext>> mutationTypeFieldDefinitionContextList = manager.getOperationTypeDefinition()
-                    .filter(operationTypeDefinitionContext -> operationTypeDefinitionContext.operationType().MUTATION() != null)
-                    .flatMap(operationTypeDefinitionContext -> manager.getObject(operationTypeDefinitionContext.typeName().name().getText()).stream())
-                    .flatMap(objectTypeDefinitionContext ->
-                            objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                    .filter(fieldDefinitionContext -> fieldDefinitionContext.argumentsDefinition() != null)
-                                    .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(objectTypeDefinitionContext, fieldDefinitionContext))
-                    )
-                    .collect(Collectors.toList());
-
-            for (Map.Entry<GraphqlParser.ObjectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext> entry : mutationTypeFieldDefinitionContextList) {
-                if (manager.isInvokeField(entry.getValue())) {
-                    FileObject schema = filer.createResource(
-                            StandardLocation.CLASS_OUTPUT,
-                            "",
-                            "META-INF/schema/"
-                                    .concat(entry.getKey().name().getText())
-                                    .concat("_")
-                                    .concat(entry.getValue().name().getText())
-                    );
+                for (Map.Entry<String, String> resultEntry : jsonSchemaTranslator.objectToJsonSchemaStringStream(inputObjectTypeDefinitionContext).collect(Collectors.toList())) {
+                    FileObject schema = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/" + resultEntry.getKey());
                     writer = schema.openWriter();
-                    writer.write(jsonSchemaTranslator.operationObjectFieldArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
+                    writer.write(resultEntry.getValue());
                     writer.close();
-                } else {
-                    FileObject schema = filer.createResource(
-                            StandardLocation.CLASS_OUTPUT,
-                            "",
-                            "META-INF/schema/"
-                                    .concat(entry.getKey().name().getText())
-                                    .concat("_")
-                                    .concat(entry.getValue().name().getText())
-                                    .concat("_")
-                                    .concat("update")
-                                    .concat("_")
-                                    .concat("where")
-                    );
-                    writer = schema.openWriter();
-                    writer.write(jsonSchemaTranslator.operationObjectFieldUpdateByWhereArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
-                    writer.close();
-                    if (manager.fieldTypeIsList(entry.getValue().type())) {
-                        schema = filer.createResource(
-                                StandardLocation.CLASS_OUTPUT,
-                                "",
-                                "META-INF/schema/"
-                                        .concat(entry.getKey().name().getText())
-                                        .concat("_")
-                                        .concat(entry.getValue().name().getText())
-                        );
-                        writer = schema.openWriter();
-                        writer.write(jsonSchemaTranslator.operationObjectFieldListArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
-                        writer.close();
-                    } else {
-                        schema = filer.createResource(
-                                StandardLocation.CLASS_OUTPUT,
-                                "",
-                                "META-INF/schema/"
-                                        .concat(entry.getKey().name().getText())
-                                        .concat("_")
-                                        .concat(entry.getValue().name().getText())
-                                        .concat("_")
-                                        .concat("update")
-                                        .concat("_")
-                                        .concat("id")
-                        );
-                        writer = schema.openWriter();
-                        writer.write(jsonSchemaTranslator.operationObjectFieldUpdateByIdArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
-                        writer.close();
-                    }
                 }
             }
 
-            List<Map.Entry<GraphqlParser.ObjectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext>> queryTypeFieldDefinitionContextList = manager.getOperationTypeDefinition()
-                    .filter(operationTypeDefinitionContext -> operationTypeDefinitionContext.operationType().MUTATION() == null)
-                    .flatMap(operationTypeDefinitionContext -> manager.getObject(operationTypeDefinitionContext.typeName().name().getText()).stream())
-                    .flatMap(objectTypeDefinitionContext ->
-                            objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                    .filter(fieldDefinitionContext -> fieldDefinitionContext.argumentsDefinition() != null)
-                                    .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(objectTypeDefinitionContext, fieldDefinitionContext))
-                    )
-                    .collect(Collectors.toList());
-
-            for (Map.Entry<GraphqlParser.ObjectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext> entry : queryTypeFieldDefinitionContextList) {
-                FileObject schema = filer.createResource(
-                        StandardLocation.CLASS_OUTPUT,
-                        "",
-                        "META-INF/schema/"
-                                .concat(entry.getKey().name().getText())
-                                .concat("_")
-                                .concat(entry.getValue().name().getText())
-                );
+            List<GraphqlParser.OperationTypeDefinitionContext> operationTypeDefinitionContextList = manager.getOperationTypeDefinition().collect(Collectors.toList());
+            for (GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext : operationTypeDefinitionContextList) {
+                Map.Entry<String, String> resultEntry = jsonSchemaTranslator.operationObjectToJsonSchemaString(operationTypeDefinitionContext);
+                FileObject schema = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/" + resultEntry.getKey());
                 writer = schema.openWriter();
-                writer.write(jsonSchemaTranslator.operationObjectFieldArgumentsToJsonSchemaString(entry.getKey(), entry.getValue()));
+                writer.write(resultEntry.getValue());
                 writer.close();
             }
 

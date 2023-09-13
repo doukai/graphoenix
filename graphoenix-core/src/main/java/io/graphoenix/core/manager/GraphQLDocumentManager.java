@@ -8,7 +8,6 @@ import io.graphoenix.core.document.InterfaceType;
 import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.*;
-import io.graphoenix.spi.constant.Hammurabi;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -34,7 +33,6 @@ import static io.graphoenix.core.utils.FilerUtil.FILER_UTIL;
 import static io.graphoenix.core.utils.NameUtil.NAME_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DATA_TYPE_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.DELETE_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.FETCH_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MAP_DIRECTIVE_NAME;
@@ -43,7 +41,6 @@ import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.PACKAGE_INFO_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.SUBSCRIPTION_TYPE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.UPDATE_DIRECTIVE_NAME;
 
 @ApplicationScoped
 public class GraphQLDocumentManager implements IGraphQLDocumentManager {
@@ -1538,6 +1535,12 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     @Override
     public Optional<GraphqlParser.FieldDefinitionContext> getFieldDefinitionFromInputValueDefinition(GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         return graphQLFieldManager.getFieldDefinitions(getFieldTypeName(typeContext))
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
+    }
+
+    @Override
+    public Optional<GraphqlParser.FieldDefinitionContext> getFieldDefinitionFromInputValueDefinition(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return graphQLFieldManager.getFieldDefinitions(objectTypeDefinitionContext.name().getText())
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
     }
 

@@ -44,6 +44,8 @@ public class __DirectiveLocationsInput implements MetaInput {
   @DefaultValue("\"__DirectiveLocations\"")
   private String __typename;
 
+  private __DirectiveLocationsExpression where;
+
   public String getId() {
     return this.id;
   }
@@ -146,5 +148,13 @@ public class __DirectiveLocationsInput implements MetaInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public __DirectiveLocationsExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__DirectiveLocationsExpression where) {
+    this.where = where;
   }
 }

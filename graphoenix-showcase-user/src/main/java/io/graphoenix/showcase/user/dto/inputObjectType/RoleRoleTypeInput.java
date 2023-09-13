@@ -44,6 +44,8 @@ public class RoleRoleTypeInput implements MetaInput {
   @DefaultValue("\"RoleRoleType\"")
   private String __typename;
 
+  private RoleRoleTypeExpression where;
+
   public String getId() {
     return this.id;
   }
@@ -146,5 +148,13 @@ public class RoleRoleTypeInput implements MetaInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public RoleRoleTypeExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(RoleRoleTypeExpression where) {
+    this.where = where;
   }
 }

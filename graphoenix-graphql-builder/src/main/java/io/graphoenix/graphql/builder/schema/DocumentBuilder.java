@@ -170,6 +170,12 @@ public class DocumentBuilder {
         return document;
     }
 
+    public void buildInvokeDocument() {
+        buildQueryTypeInvokeFieldArguments().forEach(inputObjectType -> manager.mergeDocument(inputObjectType.toString()));
+        buildMutationTypeInvokeFieldsArguments().forEach(inputObjectType -> manager.mergeDocument(inputObjectType.toString()));
+        buildSubscriptionTypeInvokeFieldsArguments().forEach(inputObjectType -> manager.mergeDocument(inputObjectType.toString()));
+    }
+
     public Document getDocument() {
         Document document = new Document()
                 .addDefinitions(manager.getScalars().map(ScalarType::new).collect(Collectors.toCollection(LinkedHashSet::new)))
@@ -743,6 +749,17 @@ public class DocumentBuilder {
                 );
     }
 
+    public Stream<InputObjectType> buildQueryTypeInvokeFieldArguments() {
+        return manager.getQueryOperationTypeName().flatMap(manager::getObject).stream()
+                .flatMap(objectTypeDefinitionContext ->
+                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isInvokeField)
+                                .filter(fieldDefinitionContext -> fieldDefinitionContext.argumentsDefinition() != null)
+                                .map(fieldDefinitionContext -> buildSchemaTypeInvokeFieldArguments(objectTypeDefinitionContext, fieldDefinitionContext))
+                );
+    }
+
     public List<Field> buildSubscriptionTypeFields(boolean isPackage) {
         return manager.getObjects()
                 .filter(objectTypeDefinitionContext -> !isPackage || packageManager.isOwnPackage(objectTypeDefinitionContext))
@@ -769,6 +786,17 @@ public class DocumentBuilder {
                                 buildSchemaTypeFieldListArguments(objectTypeDefinitionContext, InputType.SUBSCRIPTION_ARGUMENTS),
                                 buildSchemaTypeFieldConnectionArguments(objectTypeDefinitionContext, InputType.SUBSCRIPTION_ARGUMENTS)
                         )
+                );
+    }
+
+    public Stream<InputObjectType> buildSubscriptionTypeInvokeFieldsArguments() {
+        return manager.getSubscriptionOperationTypeName().flatMap(manager::getObject).stream()
+                .flatMap(objectTypeDefinitionContext ->
+                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isInvokeField)
+                                .filter(fieldDefinitionContext -> fieldDefinitionContext.argumentsDefinition() != null)
+                                .map(fieldDefinitionContext -> buildSchemaTypeInvokeFieldArguments(objectTypeDefinitionContext, fieldDefinitionContext))
                 );
     }
 
@@ -799,6 +827,17 @@ public class DocumentBuilder {
                 );
     }
 
+    public Stream<InputObjectType> buildMutationTypeInvokeFieldsArguments() {
+        return manager.getMutationOperationTypeName().flatMap(manager::getObject).stream()
+                .flatMap(objectTypeDefinitionContext ->
+                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                .filter(packageManager::isOwnPackage)
+                                .filter(manager::isInvokeField)
+                                .filter(fieldDefinitionContext -> fieldDefinitionContext.argumentsDefinition() != null)
+                                .map(fieldDefinitionContext -> buildSchemaTypeInvokeFieldArguments(objectTypeDefinitionContext, fieldDefinitionContext))
+                );
+    }
+
     public Field buildSchemaTypeField(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
         Field field = new Field()
                 .setName(getSchemaFieldName(objectTypeDefinitionContext))
@@ -825,9 +864,23 @@ public class DocumentBuilder {
         return field;
     }
 
+    public InputObjectType buildSchemaTypeInvokeFieldArguments(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return new InputObjectType()
+                .setName(objectTypeDefinitionContext.name().getText() + "_" + fieldDefinitionContext.name().getText() + "_" + ARGUMENTS_SUFFIX)
+                .addInputValues(
+                        fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                                .map(InputValue::new)
+                                .collect(Collectors.toList())
+                )
+                .addDirective(
+                        new io.graphoenix.core.operation.Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                .addArgument("packageName", graphQLConfig.getPackageName())
+                                .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
+                );
+    }
+
     public InputObjectType buildSchemaTypeFieldArguments(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
         InputObjectType inputObjectType = new InputObjectType()
-                .setName(getSchemaFieldName(objectTypeDefinitionContext))
                 .addInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
                 .addDirective(
                         new io.graphoenix.core.operation.Directive(PACKAGE_INFO_DIRECTIVE_NAME)
@@ -836,19 +889,19 @@ public class DocumentBuilder {
                 );
         if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
             String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
-            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + queryTypeName + inputType)
+            inputObjectType.setName(queryTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "_" + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
         } else if (inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
             String subscriptionTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIBE_TYPE_NOT_EXIST));
-            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + subscriptionTypeName + inputType)
+            inputObjectType.setName(subscriptionTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "_" + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
         } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
             String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
-            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + mutationTypeName + inputType)
+            inputObjectType.setName(mutationTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "_" + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaInput"))))
                     .addInputValue(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
         }
@@ -912,7 +965,7 @@ public class DocumentBuilder {
 
         if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
             String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
-            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + "List" + queryTypeName + inputType)
+            inputObjectType.setName(queryTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "List_" + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
                     .addInputValue(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.ORDER_BY))
                     .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
@@ -931,7 +984,7 @@ public class DocumentBuilder {
                     );
         } else if (inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
             String subscriptionTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIPTION_TYPE_NAME));
-            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + "List" + subscriptionTypeName + inputType)
+            inputObjectType.setName(subscriptionTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "List_" + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
                     .addInputValue(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.ORDER_BY))
                     .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
@@ -950,7 +1003,7 @@ public class DocumentBuilder {
                     );
         } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
             String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
-            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + "List" + mutationTypeName + inputType)
+            inputObjectType.setName(mutationTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "List_" + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaInput"))))
                     .addInputValue(new InputValue().setName(LIST_INPUT_NAME).setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.INPUT))))
                     .addInputValue(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
@@ -1019,7 +1072,7 @@ public class DocumentBuilder {
 
         if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
             String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
-            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + "Connection" + queryTypeName + inputType)
+            inputObjectType.setName(queryTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "Connection_" + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
@@ -1036,7 +1089,7 @@ public class DocumentBuilder {
                     );
         } else if (inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
             String subscriptionTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIPTION_TYPE_NAME));
-            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + "Connection" + subscriptionTypeName + inputType)
+            inputObjectType.setName(subscriptionTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "Connection_" + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
@@ -1121,23 +1174,14 @@ public class DocumentBuilder {
                 return new InputValue().setName("__typename").setType("String").setDefaultValue(objectTypeDefinitionContext.name().getText());
             }
             String argumentTypeName;
-            switch (fieldTypeName) {
-                case "Boolean":
-                case "ID":
-                case "String":
-                case "Date":
-                case "Time":
-                case "DateTime":
-                case "Timestamp":
-                case "Int":
-                case "BigInteger":
-                case "Float":
-                case "BigDecimal":
-                    argumentTypeName = fieldTypeName;
-                    break;
-                default:
-                    argumentTypeName = fieldTypeName + InputType.INPUT;
-                    break;
+            if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
+                argumentTypeName = fieldTypeName;
+            } else {
+                argumentTypeName = fieldTypeName + InputType.INPUT;
+            }
+            boolean isList = manager.fieldTypeIsList(fieldDefinitionContext.type());
+            if (isList) {
+                argumentTypeName = "[" + argumentTypeName + "]";
             }
             InputValue inputValue = new InputValue().setName(fieldDefinitionContext.name().getText()).setType(argumentTypeName);
             Optional.ofNullable(fieldDefinitionContext.directives())

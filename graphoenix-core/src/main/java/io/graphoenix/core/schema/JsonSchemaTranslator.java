@@ -12,13 +12,22 @@ import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 
 import java.io.StringWriter;
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.INPUT_OBJECT_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static io.graphoenix.core.utils.NameUtil.NAME_UTIL;
 import static io.graphoenix.core.utils.ValidationUtil.VALIDATION_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.*;
+import static io.graphoenix.spi.constant.Hammurabi.ARGUMENTS_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.SUBSCRIPTION_TYPE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
 import static jakarta.json.JsonValue.TRUE;
 
 @ApplicationScoped
@@ -33,61 +42,116 @@ public class JsonSchemaTranslator {
         this.jsonProvider = jsonProvider;
     }
 
-    public String objectToJsonSchemaString(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        StringWriter stringWriter = new StringWriter();
-        jsonProvider.createWriter(stringWriter).write(inputObjectToJsonSchema(inputObjectTypeDefinitionContext));
-        return stringWriter.toString();
+    public Stream<Map.Entry<String, String>> objectToJsonSchemaStringStream(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return inputObjectToJsonSchema(inputObjectTypeDefinitionContext)
+                .map(jsonValue -> {
+                            StringWriter stringWriter = new StringWriter();
+                            jsonProvider.createWriter(stringWriter).write(jsonValue);
+                            return new AbstractMap.SimpleEntry<>(jsonValue.asJsonObject().getString("$id").substring(1), stringWriter.toString());
+                        }
+                );
     }
 
-    public String operationObjectToJsonSchemaString(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext) {
+    public Map.Entry<String, String> operationObjectToJsonSchemaString(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext) {
+        JsonValue jsonValue = operationObjectToJsonSchema(operationTypeDefinitionContext);
         StringWriter stringWriter = new StringWriter();
-        jsonProvider.createWriter(stringWriter).write(operationObjectToJsonSchema(operationTypeDefinitionContext));
-        return stringWriter.toString();
+        jsonProvider.createWriter(stringWriter).write(jsonValue);
+        return new AbstractMap.SimpleEntry<>(jsonValue.asJsonObject().getString("$id").substring(1), stringWriter.toString());
     }
 
-    public String operationObjectFieldArgumentsToJsonSchemaString(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        StringWriter stringWriter = new StringWriter();
-        jsonProvider.createWriter(stringWriter).write(operationObjectFieldArgumentsToJsonSchema(objectTypeDefinitionContext, fieldDefinitionContext));
-        return stringWriter.toString();
-    }
+    public Stream<JsonValue> inputObjectToJsonSchema(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        String mutationTypeName = manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME);
+        if (inputObjectTypeDefinitionContext.name().getText().endsWith(INPUT_SUFFIX)) {
+            JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                    .map(this::buildValidation)
+                    .orElseGet(jsonProvider::createObjectBuilder)
+                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText() + "_update"))
+                    .add("type", jsonProvider.createValue("object"))
+                    .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
+                    .add("additionalProperties", TRUE)
+                    .add("required", buildRequired(inputObjectTypeDefinitionContext));
 
-    public String operationObjectFieldUpdateByIdArgumentsToJsonSchemaString(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        StringWriter stringWriter = new StringWriter();
-        jsonProvider.createWriter(stringWriter).write(operationObjectFieldUpdateByIdArgumentsToJsonSchema(objectTypeDefinitionContext, fieldDefinitionContext));
-        return stringWriter.toString();
-    }
+            String objectName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(INPUT_SUFFIX));
+            GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectName)));
+            JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                    .map(this::buildValidation)
+                    .orElseGet(jsonProvider::createObjectBuilder)
+                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
+                    .add("type", jsonProvider.createValue("object"))
+                    .add("properties", inputObjectToInsertProperties(inputObjectTypeDefinitionContext, objectTypeDefinitionContext))
+                    .add("additionalProperties", TRUE)
+                    .add("required", buildRequired(objectTypeDefinitionContext));
+            return Stream.of(updateBuilder.build(), builder.build());
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith("List" + mutationTypeName + ARGUMENTS_SUFFIX)) {
+            JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                    .map(this::buildValidation)
+                    .orElseGet(jsonProvider::createObjectBuilder)
+                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText() + "_update"))
+                    .add("type", jsonProvider.createValue("object"))
+                    .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
+                    .add("additionalProperties", TRUE)
+                    .add("required", buildRequired(inputObjectTypeDefinitionContext));
 
-    public String operationObjectFieldUpdateByWhereArgumentsToJsonSchemaString(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        StringWriter stringWriter = new StringWriter();
-        jsonProvider.createWriter(stringWriter).write(operationObjectFieldUpdateByWhereArgumentsToJsonSchema(objectTypeDefinitionContext, fieldDefinitionContext));
-        return stringWriter.toString();
-    }
+            JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                    .map(this::buildValidation)
+                    .orElseGet(jsonProvider::createObjectBuilder)
+                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
+                    .add("type", jsonProvider.createValue("object"))
+                    .add("properties", inputObjectToListProperties(inputObjectTypeDefinitionContext))
+                    .add("additionalProperties", TRUE)
+                    .add("required", jsonProvider.createArrayBuilder().add(LIST_INPUT_NAME));
+            return Stream.of(updateBuilder.build(), builder.build());
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(mutationTypeName + ARGUMENTS_SUFFIX)) {
+            JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                    .map(this::buildValidation)
+                    .orElseGet(jsonProvider::createObjectBuilder)
+                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText() + "_update"))
+                    .add("type", jsonProvider.createValue("object"))
+                    .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
+                    .add("additionalProperties", TRUE)
+                    .add("required", buildRequired(inputObjectTypeDefinitionContext));
 
-    public String operationObjectFieldListArgumentsToJsonSchemaString(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        StringWriter stringWriter = new StringWriter();
-        jsonProvider.createWriter(stringWriter).write(operationObjectFieldListArgumentsToJsonSchema(objectTypeDefinitionContext, fieldDefinitionContext));
-        return stringWriter.toString();
-    }
-
-    public JsonValue inputObjectToJsonSchema(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        JsonObjectBuilder jsonSchemaBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
-                .map(this::buildValidation)
-                .orElseGet(jsonProvider::createObjectBuilder);
-
-        JsonObjectBuilder builder = jsonSchemaBuilder.add("$id", jsonProvider.createValue("#".concat(inputObjectTypeDefinitionContext.name().getText())))
-                .add("type", jsonProvider.createValue("object"))
-                .add("properties", inputObjectToProperties(inputObjectTypeDefinitionContext))
-                .add("additionalProperties", TRUE)
-                .add("required", buildRequired(inputObjectTypeDefinitionContext));
-        return builder.build();
+            String objectName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(mutationTypeName + ARGUMENTS_SUFFIX));
+            GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectName)));
+            JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                    .map(this::buildValidation)
+                    .orElseGet(jsonProvider::createObjectBuilder)
+                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
+                    .add("type", jsonProvider.createValue("object"))
+                    .add("properties", inputObjectToInsertProperties(inputObjectTypeDefinitionContext, objectTypeDefinitionContext))
+                    .add("additionalProperties", TRUE)
+                    .add("required", buildRequired(objectTypeDefinitionContext));
+            return Stream.of(updateBuilder.build(), builder.build());
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(ARGUMENTS_SUFFIX)) {
+            JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                    .map(this::buildValidation)
+                    .orElseGet(jsonProvider::createObjectBuilder)
+                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
+                    .add("type", jsonProvider.createValue("object"))
+                    .add("properties", inputObjectToProperties(inputObjectTypeDefinitionContext))
+                    .add("additionalProperties", TRUE)
+                    .add("required", buildRequired(inputObjectTypeDefinitionContext));
+            return Stream.of(builder.build());
+        } else {
+            JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                    .map(this::buildValidation)
+                    .orElseGet(jsonProvider::createObjectBuilder)
+                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
+                    .add("type", jsonProvider.createValue("object"))
+                    .add("properties", inputObjectToProperties(inputObjectTypeDefinitionContext))
+                    .add("additionalProperties", TRUE)
+                    .add("required", buildRequired(inputObjectTypeDefinitionContext));
+            return Stream.of(builder.build());
+        }
     }
 
     public JsonValue operationObjectToJsonSchema(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext) {
-        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(operationTypeDefinitionContext.typeName().name().getText())
+        String operationTypeName = operationTypeDefinitionContext.typeName().name().getText();
+        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(operationTypeName)
                 .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.TYPE_NOT_EXIST.bind(operationTypeDefinitionContext.typeName().name().getText())));
         JsonObjectBuilder jsonSchemaBuilder = jsonProvider.createObjectBuilder();
 
-        JsonObjectBuilder builder = jsonSchemaBuilder.add("$id", jsonProvider.createValue("#".concat(objectTypeDefinitionContext.name().getText())))
+        JsonObjectBuilder builder = jsonSchemaBuilder.add("$id", jsonProvider.createValue("#" + objectTypeDefinitionContext.name().getText()))
                 .add("type", jsonProvider.createValue("object"))
                 .add("additionalProperties", TRUE);
 
@@ -95,175 +159,42 @@ public class JsonSchemaTranslator {
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.argumentsDefinition() != null)
                 .forEach(fieldDefinitionContext -> {
-                            if (operationTypeDefinitionContext.operationType().MUTATION() != null && manager.isNotInvokeField(fieldDefinitionContext)) {
-                                JsonArrayBuilder jsonArrayBuilder = jsonProvider.createArrayBuilder()
-                                        .add(jsonProvider.createObjectBuilder()
-                                                .add("$ref",
-                                                        manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input"
-                                                )
-                                        )
-                                        .add(jsonProvider.createObjectBuilder()
-                                                .add("$ref",
-                                                        objectTypeDefinitionContext.name().getText()
-                                                                .concat("_")
-                                                                .concat(fieldDefinitionContext.name().getText())
-                                                                .concat("_")
-                                                                .concat("update")
-                                                                .concat("_")
-                                                                .concat("id")
-                                                )
-                                        )
-                                        .add(jsonProvider.createObjectBuilder()
-                                                .add("$ref",
-                                                        objectTypeDefinitionContext.name().getText()
-                                                                .concat("_")
-                                                                .concat(fieldDefinitionContext.name().getText())
-                                                                .concat("_")
-                                                                .concat("update")
-                                                                .concat("_")
-                                                                .concat(WHERE_INPUT_NAME)
-                                                )
-                                        );
-                                if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                                    jsonArrayBuilder
-                                            .add(jsonProvider.createObjectBuilder()
-                                                    .add("$ref",
-                                                            objectTypeDefinitionContext.name().getText()
-                                                                    .concat("_")
-                                                                    .concat(fieldDefinitionContext.name().getText())
-                                                    )
-                                            );
-                                }
-                                propertiesBuilder.add(
-                                        fieldDefinitionContext.name().getText(),
-                                        buildNullableType(
-                                                jsonProvider.createObjectBuilder().add("anyOf", jsonArrayBuilder)
-                                        )
-                                );
-                            } else {
+                            if (manager.isInvokeField(fieldDefinitionContext)) {
                                 propertiesBuilder.add(
                                         fieldDefinitionContext.name().getText(),
                                         buildNullableType(
                                                 jsonProvider.createObjectBuilder()
-                                                        .add("$ref",
-                                                                objectTypeDefinitionContext.name().getText()
-                                                                        .concat("_")
-                                                                        .concat(fieldDefinitionContext.name().getText())
-                                                        )
+                                                        .add("$ref", operationTypeName + "_" + fieldDefinitionContext.name().getText() + "_" + ARGUMENTS_SUFFIX)
                                         )
                                 );
+                            } else {
+                                if (operationTypeDefinitionContext.operationType().MUTATION() != null) {
+                                    JsonArrayBuilder jsonArrayBuilder = jsonProvider.createArrayBuilder()
+                                            .add(jsonProvider.createObjectBuilder()
+                                                    .add("$ref", operationTypeName + "_" + fieldDefinitionContext.name().getText() + "_" + ARGUMENTS_SUFFIX)
+                                            )
+                                            .add(jsonProvider.createObjectBuilder()
+                                                    .add("$ref", operationTypeName + "_" + fieldDefinitionContext.name().getText() + "_" + ARGUMENTS_SUFFIX + "_update")
+                                            );
+                                    propertiesBuilder.add(
+                                            fieldDefinitionContext.name().getText(),
+                                            buildNullableType(
+                                                    jsonProvider.createObjectBuilder().add("anyOf", jsonArrayBuilder)
+                                            )
+                                    );
+                                } else {
+                                    propertiesBuilder.add(
+                                            fieldDefinitionContext.name().getText(),
+                                            buildNullableType(
+                                                    jsonProvider.createObjectBuilder()
+                                                            .add("$ref", operationTypeName + "_" + fieldDefinitionContext.name().getText() + "_" + ARGUMENTS_SUFFIX)
+                                            )
+                                    );
+                                }
                             }
                         }
                 );
         builder.add("properties", propertiesBuilder);
-        return builder.build();
-    }
-
-    public JsonValue operationObjectFieldArgumentsToJsonSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        JsonObjectBuilder jsonSchemaBuilder = VALIDATION_UTIL.getValidationDirectiveContext(fieldDefinitionContext.directives())
-                .map(this::buildValidation)
-                .orElseGet(jsonProvider::createObjectBuilder);
-
-        JsonObjectBuilder builder = jsonSchemaBuilder
-                .add("$id",
-                        jsonProvider.createValue(
-                                "#".concat(objectTypeDefinitionContext.name().getText())
-                                        .concat("_")
-                                        .concat(fieldDefinitionContext.name().getText())
-                        )
-                )
-                .add("type", jsonProvider.createValue("object"))
-                .add("properties", fieldArgumentsToProperties(fieldDefinitionContext))
-                .add("additionalProperties", TRUE);
-        if (fieldDefinitionContext.argumentsDefinition() != null) {
-            builder.add("required", buildRequired(fieldDefinitionContext.argumentsDefinition()));
-        }
-        return builder.build();
-    }
-
-    public JsonValue operationObjectFieldUpdateByIdArgumentsToJsonSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        JsonObjectBuilder jsonSchemaBuilder = VALIDATION_UTIL.getValidationDirectiveContext(fieldDefinitionContext.directives())
-                .map(this::buildValidation)
-                .orElseGet(jsonProvider::createObjectBuilder);
-
-        JsonObjectBuilder builder = jsonSchemaBuilder
-                .add("$id",
-                        jsonProvider.createValue(
-                                "#".concat(objectTypeDefinitionContext.name().getText())
-                                        .concat("_")
-                                        .concat(fieldDefinitionContext.name().getText())
-                                        .concat("_")
-                                        .concat("update")
-                                        .concat("_")
-                                        .concat("id")
-                        )
-                )
-                .add("type", jsonProvider.createValue("object"))
-                .add("properties",
-                        fieldArgumentsToUpdateByIdProperties(
-                                manager.getInputObject(manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input")
-                                        .orElseThrow(() -> new GraphQLErrors(INPUT_OBJECT_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input")))
-                        )
-                )
-                .add("additionalProperties", TRUE);
-
-        JsonArrayBuilder requiredArrayBuilder = jsonProvider.createArrayBuilder();
-        fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                .filter(inputValueDefinitionContext -> manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("ID"))
-                .findFirst()
-                .ifPresent(inputValueDefinitionContext ->
-                        requiredArrayBuilder.add(inputValueDefinitionContext.name().getText())
-                );
-        requiredArrayBuilder.add(UPDATE_DIRECTIVE_NAME);
-        builder.add("required", requiredArrayBuilder);
-        return builder.build();
-    }
-
-    public JsonValue operationObjectFieldUpdateByWhereArgumentsToJsonSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        JsonObjectBuilder jsonSchemaBuilder = VALIDATION_UTIL.getValidationDirectiveContext(fieldDefinitionContext.directives())
-                .map(this::buildValidation)
-                .orElseGet(jsonProvider::createObjectBuilder);
-
-        JsonObjectBuilder builder = jsonSchemaBuilder
-                .add("$id",
-                        jsonProvider.createValue(
-                                "#".concat(objectTypeDefinitionContext.name().getText())
-                                        .concat("_")
-                                        .concat(fieldDefinitionContext.name().getText())
-                                        .concat("_")
-                                        .concat("update")
-                                        .concat("_")
-                                        .concat(WHERE_INPUT_NAME)
-                        )
-                )
-                .add("type", jsonProvider.createValue("object"))
-                .add("properties",
-                        fieldArgumentsToUpdateByWhereProperties(
-                                manager.getInputObject(manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input")
-                                        .orElseThrow(() -> new GraphQLErrors(INPUT_OBJECT_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input")))
-                        )
-                )
-                .add("additionalProperties", TRUE)
-                .add("required", jsonProvider.createArrayBuilder().add(WHERE_INPUT_NAME).add(UPDATE_DIRECTIVE_NAME));
-        return builder.build();
-    }
-
-    public JsonValue operationObjectFieldListArgumentsToJsonSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        JsonObjectBuilder jsonSchemaBuilder = VALIDATION_UTIL.getValidationDirectiveContext(fieldDefinitionContext.directives())
-                .map(this::buildValidation)
-                .orElseGet(jsonProvider::createObjectBuilder);
-        JsonObjectBuilder builder = jsonSchemaBuilder
-                .add("$id",
-                        jsonProvider.createValue(
-                                "#".concat(objectTypeDefinitionContext.name().getText())
-                                        .concat("_")
-                                        .concat(fieldDefinitionContext.name().getText())
-                        )
-                )
-                .add("type", jsonProvider.createValue("object"))
-                .add("properties", fieldArgumentsToListProperties(fieldDefinitionContext.argumentsDefinition()))
-                .add("additionalProperties", TRUE)
-                .add("required", jsonProvider.createArrayBuilder().add(LIST_INPUT_NAME));
         return builder.build();
     }
 
@@ -283,44 +214,26 @@ public class JsonSchemaTranslator {
         return requiredBuilder;
     }
 
-    protected JsonObjectBuilder fieldArgumentsToProperties(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    protected JsonArrayBuilder buildRequired(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        JsonArrayBuilder requiredBuilder = jsonProvider.createArrayBuilder();
+        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                .filter(inputValueDefinitionContext -> inputValueDefinitionContext.type().nonNullType() != null)
+                .forEach(inputValueDefinitionContext -> requiredBuilder.add(inputValueDefinitionContext.name().getText()));
+        return requiredBuilder;
+    }
+
+    protected JsonObjectBuilder inputObjectToProperties(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
-        Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
-                .flatMap(argumentsDefinitionContext -> argumentsDefinitionContext.inputValueDefinition().stream())
+        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
                 .forEach(inputValueDefinitionContext ->
                         propertiesBuilder.add(inputValueDefinitionContext.name().getText(), fieldToProperty(inputValueDefinitionContext.type(), VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives()).orElse(null)))
                 );
         return propertiesBuilder;
     }
 
-    protected JsonObjectBuilder fieldArgumentsToUpdateByIdProperties(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+    protected JsonObjectBuilder inputObjectToUpdateProperties(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
-        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
-                .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(LIST_INPUT_NAME))
-                .forEach(inputValueDefinitionContext -> {
-                            if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("ID")) {
-                                JsonObjectBuilder propertyBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives())
-                                        .map(this::buildValidation)
-                                        .orElseGet(jsonProvider::createObjectBuilder);
-                                if (inputValueDefinitionContext.type().nonNullType() != null) {
-                                    propertiesBuilder.add(inputValueDefinitionContext.name().getText(), buildType(inputValueDefinitionContext.type().nonNullType().typeName(), propertyBuilder));
-                                } else {
-                                    propertiesBuilder.add(inputValueDefinitionContext.name().getText(), buildType(inputValueDefinitionContext.type().typeName(), propertyBuilder));
-                                }
-                            } else {
-                                propertiesBuilder.add(inputValueDefinitionContext.name().getText(), fieldToProperty(inputValueDefinitionContext.type(), VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives()).orElse(null)));
-                            }
-                        }
-                );
-        propertiesBuilder.add("update", jsonProvider.createObjectBuilder().add("const", true));
-        return propertiesBuilder;
-    }
-
-    protected JsonObjectBuilder fieldArgumentsToUpdateByWhereProperties(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
-        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
-                .filter(inputValueDefinitionContext -> !manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("ID"))
-                .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(LIST_INPUT_NAME))
+        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
                 .forEach(inputValueDefinitionContext -> {
                             if (WHERE_INPUT_NAME.equals(inputValueDefinitionContext.name().getText())) {
                                 JsonObjectBuilder propertyBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives())
@@ -336,13 +249,12 @@ public class JsonSchemaTranslator {
                             }
                         }
                 );
-        propertiesBuilder.add("update", jsonProvider.createObjectBuilder().add("const", true));
         return propertiesBuilder;
     }
 
-    protected JsonObjectBuilder fieldArgumentsToListProperties(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext) {
+    protected JsonObjectBuilder inputObjectToListProperties(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
-        argumentsDefinitionContext.inputValueDefinition().stream()
+        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(LIST_INPUT_NAME))
                 .forEach(inputValueDefinitionContext ->
                         propertiesBuilder.add(inputValueDefinitionContext.name().getText(), fieldToProperty(inputValueDefinitionContext.type(), VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives()).orElse(null)))
@@ -350,11 +262,18 @@ public class JsonSchemaTranslator {
         return propertiesBuilder;
     }
 
-    protected JsonObjectBuilder inputObjectToProperties(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+    protected JsonObjectBuilder inputObjectToInsertProperties(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext, GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
-        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
-                .forEach(inputValueDefinitionContext ->
-                        propertiesBuilder.add(inputValueDefinitionContext.name().getText(), fieldToProperty(inputValueDefinitionContext.type(), VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives()).orElse(null)))
+        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(WHERE_INPUT_NAME))
+                .forEach(inputValueDefinitionContext -> {
+                            Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionFromInputValueDefinition = manager.getFieldDefinitionFromInputValueDefinition(objectTypeDefinitionContext, inputValueDefinitionContext);
+                            if (fieldDefinitionFromInputValueDefinition.isPresent()) {
+                                propertiesBuilder.add(fieldDefinitionFromInputValueDefinition.get().name().getText(), fieldToProperty(fieldDefinitionFromInputValueDefinition.get().type(), VALIDATION_UTIL.getValidationDirectiveContext(fieldDefinitionFromInputValueDefinition.get().directives()).orElse(null)));
+                            } else {
+                                propertiesBuilder.add(inputValueDefinitionContext.name().getText(), fieldToProperty(inputValueDefinitionContext.type(), VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives()).orElse(null)));
+                            }
+                        }
                 );
         return propertiesBuilder;
     }
@@ -447,7 +366,23 @@ public class JsonSchemaTranslator {
                             }
                     );
         } else if (manager.isInputObject(fieldTypeName)) {
-            jsonObjectBuilder.add("$ref", jsonProvider.createValue(fieldTypeName));
+            if (fieldTypeName.endsWith(INPUT_SUFFIX)) {
+                jsonObjectBuilder
+                        .add("anyOf",
+                                jsonProvider.createArrayBuilder()
+                                        .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue(fieldTypeName)))
+                                        .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue(fieldTypeName + "_update")))
+                        );
+            } else {
+                jsonObjectBuilder.add("$ref", jsonProvider.createValue(fieldTypeName));
+            }
+        } else if (manager.isObject(fieldTypeName)) {
+            jsonObjectBuilder
+                    .add("anyOf",
+                            jsonProvider.createArrayBuilder()
+                                    .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue(fieldTypeName + INPUT_SUFFIX)))
+                                    .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue(fieldTypeName + INPUT_SUFFIX + "_update")))
+                    );
         }
         return jsonObjectBuilder;
     }

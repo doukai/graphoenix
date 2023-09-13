@@ -12,19 +12,16 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @CompiledJson
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
 public class __TypeInput implements MetaInput {
-  @NonNull
   private String name;
 
   private __SchemaInput ofSchema;
 
-  @NonNull
   private __TypeKind kind;
 
   private String description;
@@ -67,6 +64,8 @@ public class __TypeInput implements MetaInput {
   private Collection<__TypeInterfacesInput> __typeInterfaces;
 
   private Collection<__TypePossibleTypesInput> __typePossibleTypes;
+
+  private __TypeExpression where;
 
   public String getName() {
     return this.name;
@@ -250,5 +249,13 @@ public class __TypeInput implements MetaInput {
 
   public void set__typePossibleTypes(Collection<__TypePossibleTypesInput> __typePossibleTypes) {
     this.__typePossibleTypes = __typePossibleTypes;
+  }
+
+  public __TypeExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__TypeExpression where) {
+    this.where = where;
   }
 }

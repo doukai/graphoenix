@@ -20,11 +20,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.*;
+import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.SUBSCRIBE_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.MutationType.UPDATE;
+import static io.graphoenix.spi.constant.Hammurabi.ARGUMENTS_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
-import static jakarta.json.JsonValue.*;
+import static jakarta.json.JsonValue.FALSE;
+import static jakarta.json.JsonValue.NULL;
+import static jakarta.json.JsonValue.TRUE;
 
 @ApplicationScoped
 public class JsonSchemaValidator {
@@ -49,20 +54,9 @@ public class JsonSchemaValidator {
     }
 
     public void validateOperation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        String operationTypeName;
-        if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
-            operationTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
-        } else if (operationDefinitionContext.operationType().SUBSCRIPTION() != null) {
-            operationTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIBE_TYPE_NOT_EXIST));
-        } else if (operationDefinitionContext.operationType().MUTATION() != null) {
-            operationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
-        } else {
-            throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
-        }
-
         Set<ValidationMessage> messageSet = operationDefinitionContext.selectionSet().selection().stream()
                 .filter(selectionContext -> selectionContext.field().arguments() != null)
-                .flatMap(selectionContext -> validateSelection(operationTypeName, selectionContext))
+                .flatMap(selectionContext -> validateSelection(operationDefinitionContext, selectionContext))
                 .collect(Collectors.toSet());
 
         if (messageSet.size() > 0) {
@@ -72,18 +66,25 @@ public class JsonSchemaValidator {
         }
     }
 
-    protected Stream<ValidationMessage> validateSelection(String operationTypeName, GraphqlParser.SelectionContext selectionContext) {
-        boolean isUpdate = manager.getMutationType(selectionContext).equals(UPDATE);
+    protected Stream<ValidationMessage> validateSelection(GraphqlParser.OperationDefinitionContext operationDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
         JsonValue jsonValue = argumentsToJsonElement(selectionContext.field().arguments());
-        String schemaName = operationTypeName + "_" + selectionContext.field().name().getText();
+        String schemaName;
         try {
-            if (isUpdate) {
-                if (jsonValue.asJsonObject().containsKey(WHERE_INPUT_NAME)) {
-                    schemaName += "_update_where";
+            if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
+                String operationTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
+                schemaName = operationTypeName + "_" + selectionContext.field().name().getText() + "_" + ARGUMENTS_SUFFIX;
+            } else if (operationDefinitionContext.operationType().SUBSCRIPTION() != null) {
+                String operationTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIBE_TYPE_NOT_EXIST));
+                schemaName = operationTypeName + "_" + selectionContext.field().name().getText() + "_" + ARGUMENTS_SUFFIX;
+            } else if (operationDefinitionContext.operationType().MUTATION() != null) {
+                String operationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
+                if (selectionContext.field().arguments().argument().stream().anyMatch(argumentContext -> argumentContext.name().getText().equals(WHERE_INPUT_NAME))) {
+                    schemaName = operationTypeName + "_" + selectionContext.field().name().getText() + "_" + ARGUMENTS_SUFFIX + "_update";
                 } else {
-                    schemaName += "_update_id";
+                    schemaName = operationTypeName + "_" + selectionContext.field().name().getText() + "_" + ARGUMENTS_SUFFIX;
                 }
-                return validate(schemaName, jsonProvider.createObjectBuilder(jsonValue.asJsonObject()).add("update", true).build().toString()).stream();
+            } else {
+                throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
             }
             return validate(schemaName, jsonValue.toString()).stream();
         } catch (JsonProcessingException e) {

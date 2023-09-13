@@ -45,6 +45,8 @@ public class __TypeInterfacesInput implements MetaInput {
   @DefaultValue("\"__TypeInterfaces\"")
   private String __typename;
 
+  private __TypeInterfacesExpression where;
+
   public String getId() {
     return this.id;
   }
@@ -155,5 +157,13 @@ public class __TypeInterfacesInput implements MetaInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public __TypeInterfacesExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__TypeInterfacesExpression where) {
+    this.where = where;
   }
 }

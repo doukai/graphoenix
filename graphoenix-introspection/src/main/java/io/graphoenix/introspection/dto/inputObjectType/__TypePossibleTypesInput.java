@@ -45,6 +45,8 @@ public class __TypePossibleTypesInput implements MetaInput {
   @DefaultValue("\"__TypePossibleTypes\"")
   private String __typename;
 
+  private __TypePossibleTypesExpression where;
+
   public String getId() {
     return this.id;
   }
@@ -155,5 +157,13 @@ public class __TypePossibleTypesInput implements MetaInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public __TypePossibleTypesExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(__TypePossibleTypesExpression where) {
+    this.where = where;
   }
 }

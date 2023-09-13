@@ -38,6 +38,7 @@ public class GenerateGraphQLSourceTask extends BaseTask {
                 mapper.registerFieldMaps();
             }
             registerInvoke();
+            documentBuilder.buildInvokeDocument();
             javaFileBuilder.writeToPath(new File(javaPath));
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);

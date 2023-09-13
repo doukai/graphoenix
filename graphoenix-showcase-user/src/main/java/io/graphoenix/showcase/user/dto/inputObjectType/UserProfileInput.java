@@ -45,6 +45,8 @@ public class UserProfileInput implements MetaInput {
 
   private Integer userId;
 
+  private UserProfileExpression where;
+
   public String getId() {
     return this.id;
   }
@@ -155,5 +157,13 @@ public class UserProfileInput implements MetaInput {
 
   public void setUserId(Integer userId) {
     this.userId = userId;
+  }
+
+  public UserProfileExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(UserProfileExpression where) {
+    this.where = where;
   }
 }
