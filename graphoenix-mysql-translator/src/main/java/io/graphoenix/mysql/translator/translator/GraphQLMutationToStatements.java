@@ -174,7 +174,9 @@ public class GraphQLMutationToStatements {
 
         Stream<Statement> insertStatementStream = argumentsToInsertStatementStream(fieldDefinitionContext, argumentsContext);
 
-        Expression idValueExpression = manager.getIDArgument(fieldDefinitionContext.type(), argumentsContext).flatMap(dbValueUtil::createIdValueExpression).orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, 0, 0));
+        Expression idValueExpression = manager.getIDArgument(fieldDefinitionContext.type(), argumentsContext).flatMap(dbValueUtil::createIdValueExpression)
+                .or(() -> manager.getIDObjectFieldWithVariableFromWhere(fieldDefinitionContext.type(), argumentsContext).flatMap(dbValueUtil::createIdValueExpression))
+                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, 0, 0));
 
         Stream<Statement> objectInsertStatementStream = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText())))
@@ -211,18 +213,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                        objectDefaultValueToStatementStream(
-                                                                                fieldDefinitionContext,
-                                                                                idValueExpression,
-                                                                                subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
-                                                                                inputValueDefinitionContext,
-                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                                0,
-                                                                                0
-                                                                        )
+                                                                objectDefaultValueToStatementStream(
+                                                                        fieldDefinitionContext,
+                                                                        idValueExpression,
+                                                                        subFieldDefinitionContext,
+                                                                        inputObjectTypeDefinitionContext,
+                                                                        inputValueDefinitionContext,
+                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                        0,
+                                                                        0
                                                                 )
+                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -335,11 +337,10 @@ public class GraphQLMutationToStatements {
         return Stream.concat(insertStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream)));
     }
 
-    protected Stream<Statement> objectValueWithVariableToInsertStatementStream(
-            GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-            GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
-            GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext,
-            int index) {
+    protected Stream<Statement> objectValueWithVariableToInsertStatementStream(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                               GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
+                                                                               GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext,
+                                                                               int index) {
 
         if (objectValueWithVariableContext == null) {
             return Stream.empty();
@@ -347,7 +348,9 @@ public class GraphQLMutationToStatements {
 
         Optional<GraphqlParser.ObjectFieldWithVariableContext> objectIdFieldWithVariableContext = manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), objectValueWithVariableContext);
 
-        Expression idValueExpression = objectIdFieldWithVariableContext.flatMap(dbValueUtil::createIdValueExpression).orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, 0, index));
+        Expression idValueExpression = objectIdFieldWithVariableContext.flatMap(dbValueUtil::createIdValueExpression)
+                .or(() -> manager.getIDObjectFieldWithVariableFromWhere(fieldDefinitionContext.type(), objectValueWithVariableContext).flatMap(dbValueUtil::createIdValueExpression))
+                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, 0, index));
 
         Stream<Statement> insertStatementStream = objectValueWithVariableToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinitionContext, objectValueWithVariableContext, 0, index);
 
@@ -527,7 +530,9 @@ public class GraphQLMutationToStatements {
 
         Optional<GraphqlParser.ObjectFieldWithVariableContext> objectIdFieldWithVariableContext = manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), objectValueWithVariableContext);
 
-        Expression idValueExpression = objectIdFieldWithVariableContext.flatMap(dbValueUtil::createIdValueExpression).orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index));
+        Expression idValueExpression = objectIdFieldWithVariableContext.flatMap(dbValueUtil::createIdValueExpression)
+                .or(() -> manager.getIDObjectFieldWithVariableFromWhere(fieldDefinitionContext.type(), objectValueWithVariableContext).flatMap(dbValueUtil::createIdValueExpression))
+                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index));
 
         Stream<Statement> insertStatementStream = objectValueWithVariableToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinitionContext, objectValueWithVariableContext, level, index);
 
@@ -715,7 +720,9 @@ public class GraphQLMutationToStatements {
 
         Optional<GraphqlParser.ObjectFieldContext> objectIdFieldContext = manager.getIDObjectField(fieldDefinitionContext.type(), objectValueContext);
 
-        Expression idValueExpression = objectIdFieldContext.flatMap(dbValueUtil::createIdValueExpression).orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index));
+        Expression idValueExpression = objectIdFieldContext.flatMap(dbValueUtil::createIdValueExpression)
+                .or(() -> manager.getIDObjectFieldFromWhere(fieldDefinitionContext.type(), objectValueContext).flatMap(dbValueUtil::createIdValueExpression))
+                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index));
 
         Stream<Statement> insertStatementStream = objectValueToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinitionContext, objectValueContext, level, index);
 

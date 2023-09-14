@@ -31,16 +31,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.utils.FilerUtil.FILER_UTIL;
 import static io.graphoenix.core.utils.NameUtil.NAME_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.DATA_TYPE_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.FETCH_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.MAP_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.MERGE_TO_LIST_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.PACKAGE_INFO_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.SUBSCRIPTION_TYPE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class GraphQLDocumentManager implements IGraphQLDocumentManager {
@@ -1568,6 +1559,26 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public Optional<GraphqlParser.ObjectFieldWithVariableContext> getIDObjectFieldWithVariableFromWhere(GraphqlParser.TypeContext typeContext, GraphqlParser.ArgumentsContext argumentsContext) {
+        if (argumentsContext == null) {
+            return Optional.empty();
+        }
+        Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = getObjectTypeIDFieldDefinition(getFieldTypeName(typeContext));
+        return idFieldDefinition
+                .flatMap(fieldDefinitionContext ->
+                        argumentsContext.argument().stream()
+                                .filter(argumentContext -> argumentContext.name().getText().equals(WHERE_INPUT_NAME))
+                                .filter(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable() != null)
+                                .flatMap(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(fieldDefinitionContext.name().getText()))
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable() != null)
+                                .flatMap(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("val"))
+                                .findFirst()
+                );
+    }
+
+    @Override
     public Optional<GraphqlParser.ObjectFieldWithVariableContext> getIDObjectFieldWithVariable(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
         if (objectValueWithVariableContext == null) {
             return Optional.empty();
@@ -1578,6 +1589,26 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                         objectValueWithVariableContext.objectFieldWithVariable().stream()
                                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().NullValue() == null)
                                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(fieldDefinitionContext.name().getText()))
+                                .findFirst()
+                );
+    }
+
+    @Override
+    public Optional<GraphqlParser.ObjectFieldWithVariableContext> getIDObjectFieldWithVariableFromWhere(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        if (objectValueWithVariableContext == null) {
+            return Optional.empty();
+        }
+        Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = getObjectTypeIDFieldDefinition(getFieldTypeName(typeContext));
+        return idFieldDefinition
+                .flatMap(fieldDefinitionContext ->
+                        objectValueWithVariableContext.objectFieldWithVariable().stream()
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(WHERE_INPUT_NAME))
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable() != null)
+                                .flatMap(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(fieldDefinitionContext.name().getText()))
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable() != null)
+                                .flatMap(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("val"))
                                 .findFirst()
                 );
     }
@@ -1609,6 +1640,26 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                         objectValueContext.objectField().stream()
                                 .filter(objectFieldContext -> objectFieldContext.value().NullValue() == null)
                                 .filter(objectFieldContext -> objectFieldContext.name().getText().equals(fieldDefinitionContext.name().getText()))
+                                .findFirst()
+                );
+    }
+
+    @Override
+    public Optional<GraphqlParser.ObjectFieldContext> getIDObjectFieldFromWhere(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueContext objectValueContext) {
+        if (objectValueContext == null) {
+            return Optional.empty();
+        }
+        Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = getObjectTypeIDFieldDefinition(getFieldTypeName(typeContext));
+        return idFieldDefinition
+                .flatMap(fieldDefinitionContext ->
+                        objectValueContext.objectField().stream()
+                                .filter(objectFieldContext -> objectFieldContext.name().getText().equals(WHERE_INPUT_NAME))
+                                .filter(objectFieldContext -> objectFieldContext.value().objectValue() != null)
+                                .flatMap(objectFieldContext -> objectFieldContext.value().objectValue().objectField().stream())
+                                .filter(objectFieldContext -> objectFieldContext.name().getText().equals(fieldDefinitionContext.name().getText()))
+                                .filter(objectFieldContext -> objectFieldContext.value().objectValue() != null)
+                                .flatMap(objectFieldContext -> objectFieldContext.value().objectValue().objectField().stream())
+                                .filter(objectFieldContext -> objectFieldContext.name().getText().equals("val"))
                                 .findFirst()
                 );
     }

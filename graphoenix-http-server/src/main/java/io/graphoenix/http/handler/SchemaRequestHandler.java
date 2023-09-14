@@ -1,6 +1,5 @@
 package io.graphoenix.http.handler;
 
-import com.google.common.base.CaseFormat;
 import io.graphoenix.core.schema.JsonSchemaManager;
 import io.graphoenix.http.codec.MimeType;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -31,7 +30,7 @@ public class SchemaRequestHandler {
     public Publisher<Void> handle(HttpServerRequest request, HttpServerResponse response) {
         return response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                 .sendString(
-                        Mono.just(jsonSchemaManager.getJsonSchema(CaseFormat.LOWER_HYPHEN.to(CaseFormat.UPPER_CAMEL, Objects.requireNonNull(request.param(SCHEMA_PARAM_NAME)))))
+                        Mono.just(jsonSchemaManager.getJsonSchema(Objects.requireNonNull(request.param(SCHEMA_PARAM_NAME))))
                                 .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
                                 .onErrorResume(throwable -> {
                                             Logger.error(throwable);

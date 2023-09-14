@@ -379,13 +379,19 @@ public interface IGraphQLDocumentManager {
     Optional<GraphqlParser.ArgumentContext> getIDArgument(GraphqlParser.TypeContext typeContext,
                                                           GraphqlParser.ArgumentsContext argumentsContext);
 
+    Optional<GraphqlParser.ObjectFieldWithVariableContext> getIDObjectFieldWithVariableFromWhere(GraphqlParser.TypeContext typeContext, GraphqlParser.ArgumentsContext argumentsContext);
+
     Optional<GraphqlParser.ObjectFieldWithVariableContext> getIDObjectFieldWithVariable(GraphqlParser.TypeContext typeContext,
                                                                                         GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext);
+
+    Optional<GraphqlParser.ObjectFieldWithVariableContext> getIDObjectFieldWithVariableFromWhere(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext);
 
     Optional<GraphqlParser.ObjectFieldWithVariableContext> getIsDeprecatedObjectFieldWithVariable(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext);
 
     Optional<GraphqlParser.ObjectFieldContext> getIDObjectField(GraphqlParser.TypeContext typeContext,
                                                                 GraphqlParser.ObjectValueContext objectValueContext);
+
+    Optional<GraphqlParser.ObjectFieldContext> getIDObjectFieldFromWhere(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueContext objectValueContext);
 
     String getFieldTypeName(GraphqlParser.TypeContext typeContext);
 
