@@ -384,7 +384,7 @@ message RoleTypeExpression {
     optional RoleType val = 2;
     repeated RoleType in = 3;
 }
-message Query_user_Arguments {
+message UserQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression login = 2;
     optional io.graphoenix.core.grpc.StringExpression password = 3;
@@ -411,7 +411,7 @@ message Query_user_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 24;
     repeated UserExpression exs = 25;
 }
-message Query_userList_Arguments {
+message UserListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression login = 2;
     optional io.graphoenix.core.grpc.StringExpression password = 3;
@@ -445,7 +445,7 @@ message Query_userList_Arguments {
     optional string after = 31;
     optional string before = 32;
 }
-message Query_userConnection_Arguments {
+message UserConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression login = 2;
     optional io.graphoenix.core.grpc.StringExpression password = 3;
@@ -479,7 +479,7 @@ message Query_userConnection_Arguments {
     optional string after = 31;
     optional string before = 32;
 }
-message Query_userProfile_Arguments {
+message UserProfileQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional UserExpression user = 2;
     optional io.graphoenix.core.grpc.StringExpression email = 3;
@@ -497,7 +497,7 @@ message Query_userProfile_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated UserProfileExpression exs = 16;
 }
-message Query_userProfileList_Arguments {
+message UserProfileListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional UserExpression user = 2;
     optional io.graphoenix.core.grpc.StringExpression email = 3;
@@ -522,7 +522,7 @@ message Query_userProfileList_Arguments {
     optional string after = 22;
     optional string before = 23;
 }
-message Query_userProfileConnection_Arguments {
+message UserProfileConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional UserExpression user = 2;
     optional io.graphoenix.core.grpc.StringExpression email = 3;
@@ -547,7 +547,7 @@ message Query_userProfileConnection_Arguments {
     optional string after = 22;
     optional string before = 23;
 }
-message Query_role_Arguments {
+message RoleQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional RoleTypeExpression type = 3;
@@ -566,7 +566,7 @@ message Query_role_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 16;
     repeated RoleExpression exs = 17;
 }
-message Query_roleList_Arguments {
+message RoleListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional RoleTypeExpression type = 3;
@@ -592,7 +592,7 @@ message Query_roleList_Arguments {
     optional string after = 23;
     optional string before = 24;
 }
-message Query_roleConnection_Arguments {
+message RoleConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional RoleTypeExpression type = 3;
@@ -618,7 +618,7 @@ message Query_roleConnection_Arguments {
     optional string after = 23;
     optional string before = 24;
 }
-message Query_organization_Arguments {
+message OrganizationQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional OrganizationExpression above = 3;
@@ -636,7 +636,7 @@ message Query_organization_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated OrganizationExpression exs = 16;
 }
-message Query_organizationList_Arguments {
+message OrganizationListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional OrganizationExpression above = 3;
@@ -661,7 +661,7 @@ message Query_organizationList_Arguments {
     optional string after = 22;
     optional string before = 23;
 }
-message Query_organizationConnection_Arguments {
+message OrganizationConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional OrganizationExpression above = 3;
@@ -686,7 +686,7 @@ message Query_organizationConnection_Arguments {
     optional string after = 22;
     optional string before = 23;
 }
-message Query_userRole_Arguments {
+message UserRoleQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression user_id = 2;
     optional UserExpression user_id_type = 3;
@@ -704,7 +704,7 @@ message Query_userRole_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated UserRoleExpression exs = 16;
 }
-message Query_userRoleList_Arguments {
+message UserRoleListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression user_id = 2;
     optional UserExpression user_id_type = 3;
@@ -729,7 +729,7 @@ message Query_userRoleList_Arguments {
     optional string after = 22;
     optional string before = 23;
 }
-message Query_userRoleConnection_Arguments {
+message UserRoleConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression user_id = 2;
     optional UserExpression user_id_type = 3;
@@ -754,7 +754,7 @@ message Query_userRoleConnection_Arguments {
     optional string after = 22;
     optional string before = 23;
 }
-message Query_userMobileNumbers_Arguments {
+message UserMobileNumbersQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression user_id = 2;
     optional UserExpression user_id_type = 3;
@@ -771,7 +771,7 @@ message Query_userMobileNumbers_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 14;
     repeated UserMobileNumbersExpression exs = 15;
 }
-message Query_userMobileNumbersList_Arguments {
+message UserMobileNumbersListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression user_id = 2;
     optional UserExpression user_id_type = 3;
@@ -795,7 +795,7 @@ message Query_userMobileNumbersList_Arguments {
     optional string after = 21;
     optional string before = 22;
 }
-message Query_userMobileNumbersConnection_Arguments {
+message UserMobileNumbersConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression user_id = 2;
     optional UserExpression user_id_type = 3;
@@ -819,7 +819,7 @@ message Query_userMobileNumbersConnection_Arguments {
     optional string after = 21;
     optional string before = 22;
 }
-message Query_roleRoleType_Arguments {
+message RoleRoleTypeQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression role_id = 2;
     optional RoleExpression role_id_type = 3;
@@ -836,7 +836,7 @@ message Query_roleRoleType_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 14;
     repeated RoleRoleTypeExpression exs = 15;
 }
-message Query_roleRoleTypeList_Arguments {
+message RoleRoleTypeListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression role_id = 2;
     optional RoleExpression role_id_type = 3;
@@ -860,7 +860,7 @@ message Query_roleRoleTypeList_Arguments {
     optional string after = 21;
     optional string before = 22;
 }
-message Query_roleRoleTypeConnection_Arguments {
+message RoleRoleTypeConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression role_id = 2;
     optional RoleExpression role_id_type = 3;
@@ -884,7 +884,7 @@ message Query_roleRoleTypeConnection_Arguments {
     optional string after = 21;
     optional string before = 22;
 }
-message Mutation_user_Arguments {
+message UserMutationArguments {
     optional string id = 1;
     optional string login = 2;
     optional string password = 3;
@@ -910,7 +910,7 @@ message Mutation_user_Arguments {
     repeated UserMobileNumbersInput user_mobile_numbers = 23;
     optional UserExpression where = 24;
 }
-message Mutation_userList_Arguments {
+message UserListMutationArguments {
     optional string id = 1;
     optional string login = 2;
     optional string password = 3;
@@ -937,7 +937,7 @@ message Mutation_userList_Arguments {
     repeated UserInput list = 24;
     optional UserExpression where = 25;
 }
-message Mutation_userProfile_Arguments {
+message UserProfileMutationArguments {
     optional string id = 1;
     optional UserInput user = 2;
     optional string email = 3;
@@ -954,7 +954,7 @@ message Mutation_userProfile_Arguments {
     optional int32 user_id = 14;
     optional UserProfileExpression where = 15;
 }
-message Mutation_userProfileList_Arguments {
+message UserProfileListMutationArguments {
     optional string id = 1;
     optional UserInput user = 2;
     optional string email = 3;
@@ -972,7 +972,7 @@ message Mutation_userProfileList_Arguments {
     repeated UserProfileInput list = 15;
     optional UserProfileExpression where = 16;
 }
-message Mutation_role_Arguments {
+message RoleMutationArguments {
     optional string id = 1;
     optional string name = 2;
     repeated RoleType type = 3;
@@ -990,7 +990,7 @@ message Mutation_role_Arguments {
     repeated UserRoleInput user_role = 15;
     optional RoleExpression where = 16;
 }
-message Mutation_roleList_Arguments {
+message RoleListMutationArguments {
     optional string id = 1;
     optional string name = 2;
     repeated RoleType type = 3;
@@ -1009,7 +1009,7 @@ message Mutation_roleList_Arguments {
     repeated RoleInput list = 16;
     optional RoleExpression where = 17;
 }
-message Mutation_organization_Arguments {
+message OrganizationMutationArguments {
     optional string id = 1;
     optional string name = 2;
     optional OrganizationInput above = 3;
@@ -1026,7 +1026,7 @@ message Mutation_organization_Arguments {
     optional int32 above_id = 14;
     optional OrganizationExpression where = 15;
 }
-message Mutation_organizationList_Arguments {
+message OrganizationListMutationArguments {
     optional string id = 1;
     optional string name = 2;
     optional OrganizationInput above = 3;
@@ -1044,7 +1044,7 @@ message Mutation_organizationList_Arguments {
     repeated OrganizationInput list = 15;
     optional OrganizationExpression where = 16;
 }
-message Mutation_userRole_Arguments {
+message UserRoleMutationArguments {
     optional string id = 1;
     optional int32 user_id = 2;
     optional UserInput user_id_type = 3;
@@ -1061,7 +1061,7 @@ message Mutation_userRole_Arguments {
     optional string intro_typename = 14;
     optional UserRoleExpression where = 15;
 }
-message Mutation_userRoleList_Arguments {
+message UserRoleListMutationArguments {
     optional string id = 1;
     optional int32 user_id = 2;
     optional UserInput user_id_type = 3;
@@ -1079,7 +1079,7 @@ message Mutation_userRoleList_Arguments {
     repeated UserRoleInput list = 15;
     optional UserRoleExpression where = 16;
 }
-message Mutation_userMobileNumbers_Arguments {
+message UserMobileNumbersMutationArguments {
     optional string id = 1;
     optional int32 user_id = 2;
     optional UserInput user_id_type = 3;
@@ -1095,7 +1095,7 @@ message Mutation_userMobileNumbers_Arguments {
     optional string intro_typename = 13;
     optional UserMobileNumbersExpression where = 14;
 }
-message Mutation_userMobileNumbersList_Arguments {
+message UserMobileNumbersListMutationArguments {
     optional string id = 1;
     optional int32 user_id = 2;
     optional UserInput user_id_type = 3;
@@ -1112,7 +1112,7 @@ message Mutation_userMobileNumbersList_Arguments {
     repeated UserMobileNumbersInput list = 14;
     optional UserMobileNumbersExpression where = 15;
 }
-message Mutation_roleRoleType_Arguments {
+message RoleRoleTypeMutationArguments {
     optional string id = 1;
     optional int32 role_id = 2;
     optional RoleInput role_id_type = 3;
@@ -1128,7 +1128,7 @@ message Mutation_roleRoleType_Arguments {
     optional string intro_typename = 13;
     optional RoleRoleTypeExpression where = 14;
 }
-message Mutation_roleRoleTypeList_Arguments {
+message RoleRoleTypeListMutationArguments {
     optional string id = 1;
     optional int32 role_id = 2;
     optional RoleInput role_id_type = 3;
@@ -1145,7 +1145,7 @@ message Mutation_roleRoleTypeList_Arguments {
     repeated RoleRoleTypeInput list = 14;
     optional RoleRoleTypeExpression where = 15;
 }
-message Subscription_user_Arguments {
+message UserSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression login = 2;
     optional io.graphoenix.core.grpc.StringExpression password = 3;
@@ -1172,7 +1172,7 @@ message Subscription_user_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 24;
     repeated UserExpression exs = 25;
 }
-message Subscription_userList_Arguments {
+message UserListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression login = 2;
     optional io.graphoenix.core.grpc.StringExpression password = 3;
@@ -1206,7 +1206,7 @@ message Subscription_userList_Arguments {
     optional string after = 31;
     optional string before = 32;
 }
-message Subscription_userConnection_Arguments {
+message UserConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression login = 2;
     optional io.graphoenix.core.grpc.StringExpression password = 3;
@@ -1240,7 +1240,7 @@ message Subscription_userConnection_Arguments {
     optional string after = 31;
     optional string before = 32;
 }
-message Subscription_userProfile_Arguments {
+message UserProfileSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional UserExpression user = 2;
     optional io.graphoenix.core.grpc.StringExpression email = 3;
@@ -1258,7 +1258,7 @@ message Subscription_userProfile_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated UserProfileExpression exs = 16;
 }
-message Subscription_userProfileList_Arguments {
+message UserProfileListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional UserExpression user = 2;
     optional io.graphoenix.core.grpc.StringExpression email = 3;
@@ -1283,7 +1283,7 @@ message Subscription_userProfileList_Arguments {
     optional string after = 22;
     optional string before = 23;
 }
-message Subscription_userProfileConnection_Arguments {
+message UserProfileConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional UserExpression user = 2;
     optional io.graphoenix.core.grpc.StringExpression email = 3;
@@ -1308,7 +1308,7 @@ message Subscription_userProfileConnection_Arguments {
     optional string after = 22;
     optional string before = 23;
 }
-message Subscription_role_Arguments {
+message RoleSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional RoleTypeExpression type = 3;
@@ -1327,7 +1327,7 @@ message Subscription_role_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 16;
     repeated RoleExpression exs = 17;
 }
-message Subscription_roleList_Arguments {
+message RoleListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional RoleTypeExpression type = 3;
@@ -1353,7 +1353,7 @@ message Subscription_roleList_Arguments {
     optional string after = 23;
     optional string before = 24;
 }
-message Subscription_roleConnection_Arguments {
+message RoleConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional RoleTypeExpression type = 3;
@@ -1379,7 +1379,7 @@ message Subscription_roleConnection_Arguments {
     optional string after = 23;
     optional string before = 24;
 }
-message Subscription_organization_Arguments {
+message OrganizationSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional OrganizationExpression above = 3;
@@ -1397,7 +1397,7 @@ message Subscription_organization_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated OrganizationExpression exs = 16;
 }
-message Subscription_organizationList_Arguments {
+message OrganizationListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional OrganizationExpression above = 3;
@@ -1422,7 +1422,7 @@ message Subscription_organizationList_Arguments {
     optional string after = 22;
     optional string before = 23;
 }
-message Subscription_organizationConnection_Arguments {
+message OrganizationConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional OrganizationExpression above = 3;
@@ -1447,7 +1447,7 @@ message Subscription_organizationConnection_Arguments {
     optional string after = 22;
     optional string before = 23;
 }
-message Subscription_userRole_Arguments {
+message UserRoleSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression user_id = 2;
     optional UserExpression user_id_type = 3;
@@ -1465,7 +1465,7 @@ message Subscription_userRole_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated UserRoleExpression exs = 16;
 }
-message Subscription_userRoleList_Arguments {
+message UserRoleListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression user_id = 2;
     optional UserExpression user_id_type = 3;
@@ -1490,7 +1490,7 @@ message Subscription_userRoleList_Arguments {
     optional string after = 22;
     optional string before = 23;
 }
-message Subscription_userRoleConnection_Arguments {
+message UserRoleConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression user_id = 2;
     optional UserExpression user_id_type = 3;
@@ -1515,7 +1515,7 @@ message Subscription_userRoleConnection_Arguments {
     optional string after = 22;
     optional string before = 23;
 }
-message Subscription_userMobileNumbers_Arguments {
+message UserMobileNumbersSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression user_id = 2;
     optional UserExpression user_id_type = 3;
@@ -1532,7 +1532,7 @@ message Subscription_userMobileNumbers_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 14;
     repeated UserMobileNumbersExpression exs = 15;
 }
-message Subscription_userMobileNumbersList_Arguments {
+message UserMobileNumbersListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression user_id = 2;
     optional UserExpression user_id_type = 3;
@@ -1556,7 +1556,7 @@ message Subscription_userMobileNumbersList_Arguments {
     optional string after = 21;
     optional string before = 22;
 }
-message Subscription_userMobileNumbersConnection_Arguments {
+message UserMobileNumbersConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression user_id = 2;
     optional UserExpression user_id_type = 3;
@@ -1580,7 +1580,7 @@ message Subscription_userMobileNumbersConnection_Arguments {
     optional string after = 21;
     optional string before = 22;
 }
-message Subscription_roleRoleType_Arguments {
+message RoleRoleTypeSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression role_id = 2;
     optional RoleExpression role_id_type = 3;
@@ -1597,7 +1597,7 @@ message Subscription_roleRoleType_Arguments {
     optional io.graphoenix.core.grpc.Conditional cond = 14;
     repeated RoleRoleTypeExpression exs = 15;
 }
-message Subscription_roleRoleTypeList_Arguments {
+message RoleRoleTypeListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression role_id = 2;
     optional RoleExpression role_id_type = 3;
@@ -1621,7 +1621,7 @@ message Subscription_roleRoleTypeList_Arguments {
     optional string after = 21;
     optional string before = 22;
 }
-message Subscription_roleRoleTypeConnection_Arguments {
+message RoleRoleTypeConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression role_id = 2;
     optional RoleExpression role_id_type = 3;

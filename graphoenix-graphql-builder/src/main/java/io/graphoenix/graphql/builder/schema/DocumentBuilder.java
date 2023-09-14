@@ -736,13 +736,16 @@ public class DocumentBuilder {
     }
 
     public Stream<InputObjectType> buildQueryTypeFieldArguments() {
-        return manager.getQueryOperationTypeName().flatMap(manager::getObject).stream()
+        return manager.getObjects()
+                .filter(packageManager::isOwnPackage)
+                .filter(manager::isNotOperationType)
+                .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
-                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                .filter(packageManager::isOwnPackage)
-                                .filter(manager::isNotInvokeField)
-                                .filter(fieldDefinitionContext -> fieldDefinitionContext.argumentsDefinition() != null)
-                                .map(fieldDefinitionContext -> buildSchemaTypeInvokeFieldArguments(objectTypeDefinitionContext, fieldDefinitionContext))
+                        Stream.of(
+                                buildSchemaTypeFieldArguments(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS),
+                                buildSchemaTypeFieldListArguments(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS),
+                                buildSchemaTypeFieldConnectionArguments(objectTypeDefinitionContext, InputType.QUERY_ARGUMENTS)
+                        )
                 );
     }
 
@@ -773,13 +776,16 @@ public class DocumentBuilder {
     }
 
     public Stream<InputObjectType> buildSubscriptionTypeFieldsArguments() {
-        return manager.getSubscriptionOperationTypeName().flatMap(manager::getObject).stream()
+        return manager.getObjects()
+                .filter(packageManager::isOwnPackage)
+                .filter(manager::isNotOperationType)
+                .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
-                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                .filter(packageManager::isOwnPackage)
-                                .filter(manager::isNotInvokeField)
-                                .filter(fieldDefinitionContext -> fieldDefinitionContext.argumentsDefinition() != null)
-                                .map(fieldDefinitionContext -> buildSchemaTypeInvokeFieldArguments(objectTypeDefinitionContext, fieldDefinitionContext))
+                        Stream.of(
+                                buildSchemaTypeFieldArguments(objectTypeDefinitionContext, InputType.SUBSCRIPTION_ARGUMENTS),
+                                buildSchemaTypeFieldListArguments(objectTypeDefinitionContext, InputType.SUBSCRIPTION_ARGUMENTS),
+                                buildSchemaTypeFieldConnectionArguments(objectTypeDefinitionContext, InputType.SUBSCRIPTION_ARGUMENTS)
+                        )
                 );
     }
 
@@ -809,13 +815,15 @@ public class DocumentBuilder {
     }
 
     public Stream<InputObjectType> buildMutationTypeFieldsArguments() {
-        return manager.getMutationOperationTypeName().flatMap(manager::getObject).stream()
+        return manager.getObjects()
+                .filter(packageManager::isOwnPackage)
+                .filter(manager::isNotOperationType)
+                .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
-                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                .filter(packageManager::isOwnPackage)
-                                .filter(manager::isNotInvokeField)
-                                .filter(fieldDefinitionContext -> fieldDefinitionContext.argumentsDefinition() != null)
-                                .map(fieldDefinitionContext -> buildSchemaTypeInvokeFieldArguments(objectTypeDefinitionContext, fieldDefinitionContext))
+                        Stream.of(
+                                buildSchemaTypeFieldArguments(objectTypeDefinitionContext, InputType.MUTATION_ARGUMENTS),
+                                buildSchemaTypeFieldListArguments(objectTypeDefinitionContext, InputType.MUTATION_ARGUMENTS)
+                        )
                 );
     }
 
@@ -881,19 +889,19 @@ public class DocumentBuilder {
                 );
         if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
             String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
-            inputObjectType.setName(queryTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "_" + inputType)
+            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + queryTypeName + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
         } else if (inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
             String subscriptionTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIBE_TYPE_NOT_EXIST));
-            inputObjectType.setName(subscriptionTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "_" + inputType)
+            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + subscriptionTypeName + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
         } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
             String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
-            inputObjectType.setName(mutationTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "_" + inputType)
+            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + mutationTypeName + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaInput"))))
                     .addInputValue(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
         }
@@ -957,7 +965,7 @@ public class DocumentBuilder {
 
         if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
             String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
-            inputObjectType.setName(queryTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "List_" + inputType)
+            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + LIST_SUFFIX + queryTypeName + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
                     .addInputValue(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.ORDER_BY))
                     .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
@@ -976,7 +984,7 @@ public class DocumentBuilder {
                     );
         } else if (inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
             String subscriptionTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIPTION_TYPE_NAME));
-            inputObjectType.setName(subscriptionTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "List_" + inputType)
+            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + LIST_SUFFIX + subscriptionTypeName + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
                     .addInputValue(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.ORDER_BY))
                     .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
@@ -995,7 +1003,7 @@ public class DocumentBuilder {
                     );
         } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
             String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
-            inputObjectType.setName(mutationTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "List_" + inputType)
+            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + LIST_SUFFIX + mutationTypeName + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaInput"))))
                     .addInputValue(new InputValue().setName(LIST_INPUT_NAME).setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.INPUT))))
                     .addInputValue(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
@@ -1064,7 +1072,7 @@ public class DocumentBuilder {
 
         if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
             String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
-            inputObjectType.setName(queryTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "Connection_" + inputType)
+            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + CONNECTION_SUFFIX + queryTypeName + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
@@ -1081,7 +1089,7 @@ public class DocumentBuilder {
                     );
         } else if (inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
             String subscriptionTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIPTION_TYPE_NAME));
-            inputObjectType.setName(subscriptionTypeName + "_" + getSchemaFieldName(objectTypeDefinitionContext) + "Connection_" + inputType)
+            inputObjectType.setName(objectTypeDefinitionContext.name().getText() + CONNECTION_SUFFIX + subscriptionTypeName + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))

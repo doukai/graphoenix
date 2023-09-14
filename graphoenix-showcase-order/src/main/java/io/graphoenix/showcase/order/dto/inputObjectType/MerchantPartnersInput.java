@@ -46,6 +46,8 @@ public class MerchantPartnersInput implements MetaInput {
   @DefaultValue("\"MerchantPartners\"")
   private String __typename;
 
+  private MerchantPartnersExpression where;
+
   public String getId() {
     return this.id;
   }
@@ -156,5 +158,13 @@ public class MerchantPartnersInput implements MetaInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public MerchantPartnersExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(MerchantPartnersExpression where) {
+    this.where = where;
   }
 }

@@ -11,7 +11,6 @@ import java.lang.String;
 import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @CompiledJson
 @Input
@@ -20,10 +19,8 @@ import org.eclipse.microprofile.graphql.NonNull;
 public class ProductInput implements MetaInput {
   private String id;
 
-  @NonNull
   private String name;
 
-  @NonNull
   private Float price;
 
   private Boolean isDeprecated;
@@ -44,6 +41,8 @@ public class ProductInput implements MetaInput {
 
   @DefaultValue("\"Product\"")
   private String __typename;
+
+  private ProductExpression where;
 
   public String getId() {
     return this.id;
@@ -139,5 +138,13 @@ public class ProductInput implements MetaInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public ProductExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(ProductExpression where) {
+    this.where = where;
   }
 }

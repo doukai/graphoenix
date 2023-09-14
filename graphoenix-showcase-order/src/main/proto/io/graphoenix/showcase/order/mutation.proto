@@ -12,7 +12,7 @@ import "io/graphoenix/showcase/order/input_objects.proto";
 import "io/graphoenix/showcase/order/mutation_requests.proto";
 import "io/graphoenix/showcase/order/mutation_responses.proto";
 
-service MutationTypeService {
+service MutationService {
     rpc IsDeprecated (MutationIsDeprecatedRequest) returns (MutationIsDeprecatedResponse);
     rpc Version (MutationVersionRequest) returns (MutationVersionResponse);
     rpc RealmId (MutationRealmIdRequest) returns (MutationRealmIdResponse);

@@ -4,7 +4,7 @@ import io.graphoenix.core.dto.inputObjectType.MetaInput;
 import io.graphoenix.core.dto.interfaceType.Meta;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.showcase.user.dao.UserOperationDAO;
-import io.graphoenix.showcase.user.dto.inputObjectType.Query_userList_Arguments;
+import io.graphoenix.showcase.user.dto.inputObjectType.UserListQueryArguments;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.GraphQLApi;
@@ -36,11 +36,11 @@ public class UserApi {
                 );
     }
 
-    public Mono<Query_userList_Arguments> userTest(@Source Query_userList_Arguments query_userList_arguments) {
+    public Mono<UserListQueryArguments> userTest(@Source UserListQueryArguments userListQueryArguments) {
         return Mono.empty();
     }
 
-    public Mono<Query_userList_Arguments> userTest2(@Source Query_userList_Arguments query_userList_arguments) {
+    public Mono<UserListQueryArguments> userTest2(@Source UserListQueryArguments userListQueryArguments) {
         return Mono.empty();
     }
 

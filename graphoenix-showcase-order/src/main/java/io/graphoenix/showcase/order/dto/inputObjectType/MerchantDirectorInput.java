@@ -46,6 +46,8 @@ public class MerchantDirectorInput implements MetaInput {
   @DefaultValue("\"MerchantDirector\"")
   private String __typename;
 
+  private MerchantDirectorExpression where;
+
   public String getId() {
     return this.id;
   }
@@ -156,5 +158,13 @@ public class MerchantDirectorInput implements MetaInput {
 
   public void set__typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public MerchantDirectorExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(MerchantDirectorExpression where) {
+    this.where = where;
   }
 }

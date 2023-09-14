@@ -17,7 +17,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static io.graphoenix.core.utils.NameUtil.NAME_UTIL;
 import static io.graphoenix.core.utils.ValidationUtil.VALIDATION_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.*;
 import static jakarta.json.JsonValue.TRUE;
@@ -53,10 +55,11 @@ public class JsonSchemaTranslator {
 
     public Stream<JsonValue> inputObjectToJsonSchema(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         String mutationTypeName = manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME);
+        String queryTypeName = manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME);
+        String subscriptionTypeName = manager.getSubscriptionOperationTypeName().orElse(SUBSCRIPTION_TYPE_NAME);
         if (inputObjectTypeDefinitionContext.name().getText().endsWith(INPUT_SUFFIX)) {
-            String objectName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(INPUT_SUFFIX));
-            Optional<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContext = manager.getObject(objectName);
-            if (objectTypeDefinitionContext.isPresent()) {
+            String objectTypeName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(INPUT_SUFFIX));
+            if (manager.isObject(objectTypeName)) {
                 JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
                         .map(this::buildValidation)
                         .orElseGet(jsonProvider::createObjectBuilder)
@@ -64,58 +67,121 @@ public class JsonSchemaTranslator {
                         .add("type", jsonProvider.createValue("object"))
                         .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
                         .add("additionalProperties", TRUE)
-                        .add("required", buildRequired(inputObjectTypeDefinitionContext));
+                        .add("required", jsonProvider.createArrayBuilder().add(WHERE_INPUT_NAME));
 
+                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectTypeName)));
                 JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
                         .map(this::buildValidation)
                         .orElseGet(jsonProvider::createObjectBuilder)
                         .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
                         .add("type", jsonProvider.createValue("object"))
-                        .add("properties", inputObjectToInsertProperties(inputObjectTypeDefinitionContext, objectTypeDefinitionContext.get()))
+                        .add("properties", inputObjectToInsertProperties(inputObjectTypeDefinitionContext, objectTypeDefinitionContext))
                         .add("additionalProperties", TRUE)
-                        .add("required", buildRequired(objectTypeDefinitionContext.get()));
+                        .add("required", buildRequired(objectTypeDefinitionContext));
                 return Stream.of(updateBuilder.build(), builder.build());
             }
-        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith("_" + ARGUMENTS_SUFFIX)) {
-            String[] inputNameParts = inputObjectTypeDefinitionContext.name().getText().split("_");
-            if (inputNameParts.length == 3 && inputNameParts[0].equals(mutationTypeName)) {
-                Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = manager.getField(inputNameParts[0], inputNameParts[1]);
-                if (fieldDefinitionContext.isPresent()) {
-                    String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.get().type());
-                    boolean fieldTypeIsList = manager.fieldTypeIsList(fieldDefinitionContext.get().type());
-                    Optional<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContext = manager.getObject(fieldTypeName);
-                    if (objectTypeDefinitionContext.isPresent()) {
-                        JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
-                                .map(this::buildValidation)
-                                .orElseGet(jsonProvider::createObjectBuilder)
-                                .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText() + "_update"))
-                                .add("type", jsonProvider.createValue("object"))
-                                .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
-                                .add("additionalProperties", TRUE)
-                                .add("required", buildRequired(inputObjectTypeDefinitionContext));
-                        JsonObjectBuilder builder;
-                        if (fieldTypeIsList) {
-                            builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
-                                    .map(this::buildValidation)
-                                    .orElseGet(jsonProvider::createObjectBuilder)
-                                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
-                                    .add("type", jsonProvider.createValue("object"))
-                                    .add("properties", inputObjectToListProperties(inputObjectTypeDefinitionContext))
-                                    .add("additionalProperties", TRUE)
-                                    .add("required", jsonProvider.createArrayBuilder().add(LIST_INPUT_NAME));
-                        } else {
-                            builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
-                                    .map(this::buildValidation)
-                                    .orElseGet(jsonProvider::createObjectBuilder)
-                                    .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText()))
-                                    .add("type", jsonProvider.createValue("object"))
-                                    .add("properties", inputObjectToInsertProperties(inputObjectTypeDefinitionContext, objectTypeDefinitionContext.get()))
-                                    .add("additionalProperties", TRUE)
-                                    .add("required", buildRequired(objectTypeDefinitionContext.get()));
-                        }
-                        return Stream.of(updateBuilder.build(), builder.build());
-                    }
-                }
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(LIST_SUFFIX + mutationTypeName + ARGUMENTS_SUFFIX)) {
+            String objectTypeName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(LIST_SUFFIX + mutationTypeName + ARGUMENTS_SUFFIX));
+            if (manager.isObject(objectTypeName)) {
+                String schemaName = mutationTypeName + "_" + NAME_UTIL.getSchemaFieldName(objectTypeName) + LIST_SUFFIX + "_" + ARGUMENTS_SUFFIX;
+                JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                        .map(this::buildValidation)
+                        .orElseGet(jsonProvider::createObjectBuilder)
+                        .add("$id", jsonProvider.createValue("#" + schemaName + "_update"))
+                        .add("type", jsonProvider.createValue("object"))
+                        .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
+                        .add("additionalProperties", TRUE)
+                        .add("required", jsonProvider.createArrayBuilder().add(WHERE_INPUT_NAME));
+
+                JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                        .map(this::buildValidation)
+                        .orElseGet(jsonProvider::createObjectBuilder)
+                        .add("$id", jsonProvider.createValue("#" + schemaName))
+                        .add("type", jsonProvider.createValue("object"))
+                        .add("properties", inputObjectToListProperties(inputObjectTypeDefinitionContext))
+                        .add("additionalProperties", TRUE)
+                        .add("required", jsonProvider.createArrayBuilder().add(LIST_INPUT_NAME));
+                return Stream.of(updateBuilder.build(), builder.build());
+            }
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(mutationTypeName + ARGUMENTS_SUFFIX)) {
+            String objectTypeName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(mutationTypeName + ARGUMENTS_SUFFIX));
+            if (manager.isObject(objectTypeName)) {
+                String schemaName = mutationTypeName + "_" + NAME_UTIL.getSchemaFieldName(objectTypeName) + "_" + ARGUMENTS_SUFFIX;
+                JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                        .map(this::buildValidation)
+                        .orElseGet(jsonProvider::createObjectBuilder)
+                        .add("$id", jsonProvider.createValue("#" + schemaName + "_update"))
+                        .add("type", jsonProvider.createValue("object"))
+                        .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
+                        .add("additionalProperties", TRUE)
+                        .add("required", jsonProvider.createArrayBuilder().add(WHERE_INPUT_NAME));
+
+                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectTypeName)));
+                JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                        .map(this::buildValidation)
+                        .orElseGet(jsonProvider::createObjectBuilder)
+                        .add("$id", jsonProvider.createValue("#" + schemaName))
+                        .add("type", jsonProvider.createValue("object"))
+                        .add("properties", inputObjectToInsertProperties(inputObjectTypeDefinitionContext, objectTypeDefinitionContext))
+                        .add("additionalProperties", TRUE)
+                        .add("required", buildRequired(objectTypeDefinitionContext));
+                return Stream.of(updateBuilder.build(), builder.build());
+            }
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(LIST_SUFFIX + queryTypeName + ARGUMENTS_SUFFIX)) {
+            String objectTypeName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(LIST_SUFFIX + queryTypeName + ARGUMENTS_SUFFIX));
+            if (manager.isObject(objectTypeName)) {
+                String schemaName = queryTypeName + "_" + NAME_UTIL.getSchemaFieldName(objectTypeName) + LIST_SUFFIX + "_" + ARGUMENTS_SUFFIX;
+                JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                        .map(this::buildValidation)
+                        .orElseGet(jsonProvider::createObjectBuilder)
+                        .add("$id", jsonProvider.createValue("#" + schemaName))
+                        .add("type", jsonProvider.createValue("object"))
+                        .add("properties", inputObjectToProperties(inputObjectTypeDefinitionContext))
+                        .add("additionalProperties", TRUE)
+                        .add("required", buildRequired(inputObjectTypeDefinitionContext));
+                return Stream.of(builder.build());
+            }
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(queryTypeName + ARGUMENTS_SUFFIX)) {
+            String objectTypeName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(queryTypeName + ARGUMENTS_SUFFIX));
+            if (manager.isObject(objectTypeName)) {
+                String schemaName = queryTypeName + "_" + NAME_UTIL.getSchemaFieldName(objectTypeName) + "_" + ARGUMENTS_SUFFIX;
+                JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                        .map(this::buildValidation)
+                        .orElseGet(jsonProvider::createObjectBuilder)
+                        .add("$id", jsonProvider.createValue("#" + schemaName))
+                        .add("type", jsonProvider.createValue("object"))
+                        .add("properties", inputObjectToProperties(inputObjectTypeDefinitionContext))
+                        .add("additionalProperties", TRUE)
+                        .add("required", buildRequired(inputObjectTypeDefinitionContext));
+                return Stream.of(builder.build());
+            }
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(LIST_SUFFIX + subscriptionTypeName + ARGUMENTS_SUFFIX)) {
+            String objectTypeName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(LIST_SUFFIX + subscriptionTypeName + ARGUMENTS_SUFFIX));
+            if (manager.isObject(objectTypeName)) {
+                String schemaName = subscriptionTypeName + "_" + NAME_UTIL.getSchemaFieldName(objectTypeName) + LIST_SUFFIX + "_" + ARGUMENTS_SUFFIX;
+                JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                        .map(this::buildValidation)
+                        .orElseGet(jsonProvider::createObjectBuilder)
+                        .add("$id", jsonProvider.createValue("#" + schemaName))
+                        .add("type", jsonProvider.createValue("object"))
+                        .add("properties", inputObjectToProperties(inputObjectTypeDefinitionContext))
+                        .add("additionalProperties", TRUE)
+                        .add("required", buildRequired(inputObjectTypeDefinitionContext));
+                return Stream.of(builder.build());
+            }
+        } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(subscriptionTypeName + ARGUMENTS_SUFFIX)) {
+            String objectTypeName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(subscriptionTypeName + ARGUMENTS_SUFFIX));
+            if (manager.isObject(objectTypeName)) {
+                String schemaName = subscriptionTypeName + "_" + NAME_UTIL.getSchemaFieldName(objectTypeName) + "_" + ARGUMENTS_SUFFIX;
+                JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
+                        .map(this::buildValidation)
+                        .orElseGet(jsonProvider::createObjectBuilder)
+                        .add("$id", jsonProvider.createValue("#" + schemaName))
+                        .add("type", jsonProvider.createValue("object"))
+                        .add("properties", inputObjectToProperties(inputObjectTypeDefinitionContext))
+                        .add("additionalProperties", TRUE)
+                        .add("required", buildRequired(inputObjectTypeDefinitionContext));
+                return Stream.of(builder.build());
             }
         }
         JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())

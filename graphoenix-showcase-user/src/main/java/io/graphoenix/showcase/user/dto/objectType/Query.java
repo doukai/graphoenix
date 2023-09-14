@@ -75,9 +75,9 @@ public class Query implements Meta {
 
   private String createGroupId;
 
-  private String login;
-
   private String metaInfo;
+
+  private String login;
 
   public User getUser() {
     return this.user;
@@ -328,19 +328,19 @@ public class Query implements Meta {
     this.createGroupId = createGroupId;
   }
 
-  public String getLogin() {
-    return this.login;
-  }
-
-  public void setLogin(String login) {
-    this.login = login;
-  }
-
   public String getMetaInfo() {
     return this.metaInfo;
   }
 
   public void setMetaInfo(String metaInfo) {
     this.metaInfo = metaInfo;
+  }
+
+  public String getLogin() {
+    return this.login;
+  }
+
+  public void setLogin(String login) {
+    this.login = login;
   }
 }

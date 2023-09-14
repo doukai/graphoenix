@@ -50,6 +50,8 @@ import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.java.generator.utils.TypeUtil.TYPE_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
 import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
 import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 
@@ -91,7 +93,7 @@ public class GrpcServiceImplementer {
                 .forEach((packageName, fieldDefinitionContextList) -> {
                             try {
                                 this.buildTypeServiceImplClass(packageName, QUERY, fieldDefinitionContextList).writeTo(filer);
-                                Logger.info("{}.GrpcQueryTypeServiceImpl build success", packageName);
+                                Logger.info("{}.Grpc" + manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME) + "ServiceImpl build success", packageName);
                             } catch (IOException e) {
                                 Logger.error(e);
                             }
@@ -116,7 +118,7 @@ public class GrpcServiceImplementer {
                 .forEach((packageName, fieldDefinitionContextList) -> {
                             try {
                                 this.buildTypeServiceImplClass(packageName, MUTATION, fieldDefinitionContextList).writeTo(filer);
-                                Logger.info("{}.GrpcMutationTypeServiceImpl build success", packageName);
+                                Logger.info("{}.Grpc" + manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME) + "ServiceImpl build success", packageName);
                             } catch (IOException e) {
                                 Logger.error(e);
                             }
@@ -195,8 +197,8 @@ public class GrpcServiceImplementer {
                                 .returns(Server.class)
                                 .addStatement("return $T.forPort(grpcServerConfig.getPort()).addService(new $T()).addService(new $T()).addService(new $T()).build()",
                                         ClassName.get(ServerBuilder.class),
-                                        ClassName.get(grpcPackageName, "GrpcQueryTypeServiceImpl"),
-                                        ClassName.get(grpcPackageName, "GrpcMutationTypeServiceImpl"),
+                                        ClassName.get(grpcPackageName, "Grpc" + manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME) + "ServiceImpl"),
+                                        ClassName.get(grpcPackageName, "Grpc" + manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME) + "ServiceImpl"),
                                         ClassName.get(grpcPackageName, "GrpcGraphQLServiceImpl")
                                 )
                                 .build()
@@ -212,15 +214,15 @@ public class GrpcServiceImplementer {
         String requestHandlerName;
         switch (operationType) {
             case QUERY:
-                className = "GrpcQueryTypeServiceImpl";
-                superClassName = "ReactorQueryTypeServiceGrpc";
-                serviceName = "QueryTypeServiceImplBase";
+                className = "Grpc" + manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME) + "ServiceImpl";
+                superClassName = "Reactor" + manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME) + "ServiceGrpc";
+                serviceName = manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME) + "ServiceImplBase";
                 requestHandlerName = "GrpcQueryRequestHandler";
                 break;
             case MUTATION:
-                className = "GrpcMutationTypeServiceImpl";
-                superClassName = "ReactorMutationTypeServiceGrpc";
-                serviceName = "MutationTypeServiceImplBase";
+                className = "Grpc" + manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME) + "ServiceImpl";
+                superClassName = "Reactor" + manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME) + "ServiceGrpc";
+                serviceName = manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME) + "ServiceImplBase";
                 requestHandlerName = "GrpcMutationRequestHandler";
                 break;
             default:

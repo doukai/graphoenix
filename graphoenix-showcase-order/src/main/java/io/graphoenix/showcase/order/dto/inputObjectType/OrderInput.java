@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @CompiledJson
 @Input
@@ -21,7 +20,6 @@ import org.eclipse.microprofile.graphql.NonNull;
 public class OrderInput implements MetaInput {
   private String id;
 
-  @NonNull
   private String number;
 
   private UserInput buyer;
@@ -48,6 +46,8 @@ public class OrderInput implements MetaInput {
   private String __typename;
 
   private Integer buyerId;
+
+  private OrderExpression where;
 
   public String getId() {
     return this.id;
@@ -159,5 +159,13 @@ public class OrderInput implements MetaInput {
 
   public void setBuyerId(Integer buyerId) {
     this.buyerId = buyerId;
+  }
+
+  public OrderExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(OrderExpression where) {
+    this.where = where;
   }
 }

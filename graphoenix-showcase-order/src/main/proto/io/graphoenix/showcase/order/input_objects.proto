@@ -31,7 +31,7 @@ message OrderExpression {
 }
 message OrderInput {
     optional string id = 1;
-    string number = 2;
+    optional string number = 2;
     optional io.graphoenix.showcase.user.grpc.UserInput buyer = 3;
     repeated GoodInput goods = 4;
     optional bool is_deprecated = 5;
@@ -44,6 +44,7 @@ message OrderInput {
     optional string create_group_id = 12;
     optional string intro_typename = 13;
     optional int32 buyer_id = 14;
+    optional OrderExpression where = 15;
 }
 message OrderOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -82,10 +83,10 @@ message GoodExpression {
 }
 message GoodInput {
     optional string id = 1;
-    int32 quantity = 2;
-    OrderInput order = 3;
-    ProductInput product = 4;
-    MerchantInput merchant = 5;
+    optional int32 quantity = 2;
+    optional OrderInput order = 3;
+    optional ProductInput product = 4;
+    optional MerchantInput merchant = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional int32 realm_id = 8;
@@ -98,6 +99,7 @@ message GoodInput {
     optional int32 order_id = 15;
     optional int32 product_id = 16;
     optional int32 merchant_id = 17;
+    optional GoodExpression where = 18;
 }
 message GoodOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -133,8 +135,8 @@ message ProductExpression {
 }
 message ProductInput {
     optional string id = 1;
-    string name = 2;
-    float price = 3;
+    optional string name = 2;
+    optional float price = 3;
     optional bool is_deprecated = 4;
     optional int32 version = 5;
     optional int32 realm_id = 6;
@@ -144,6 +146,7 @@ message ProductInput {
     optional google.protobuf.Timestamp update_time = 10;
     optional string create_group_id = 11;
     optional string intro_typename = 12;
+    optional ProductExpression where = 13;
 }
 message ProductOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -183,11 +186,11 @@ message MerchantExpression {
 }
 message MerchantInput {
     optional string id = 1;
-    string name = 2;
+    optional string name = 2;
     optional io.graphoenix.showcase.user.grpc.OrganizationInput organization = 3;
     repeated io.graphoenix.showcase.user.grpc.UserInput customer_services = 4;
     repeated io.graphoenix.showcase.user.grpc.OrganizationInput partners = 5;
-    io.graphoenix.showcase.user.grpc.UserInput director = 6;
+    optional io.graphoenix.showcase.user.grpc.UserInput director = 6;
     optional bool is_deprecated = 7;
     optional int32 version = 8;
     optional int32 realm_id = 9;
@@ -200,6 +203,7 @@ message MerchantInput {
     optional int32 organization_id = 16;
     repeated MerchantPartnersInput merchant_partners = 17;
     optional MerchantDirectorInput merchant_director = 18;
+    optional MerchantExpression where = 19;
 }
 message MerchantOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -248,6 +252,7 @@ message MerchantPartnersInput {
     optional google.protobuf.Timestamp update_time = 12;
     optional string create_group_id = 13;
     optional string intro_typename = 14;
+    optional MerchantPartnersExpression where = 15;
 }
 message MerchantPartnersOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -296,6 +301,7 @@ message MerchantDirectorInput {
     optional google.protobuf.Timestamp update_time = 12;
     optional string create_group_id = 13;
     optional string intro_typename = 14;
+    optional MerchantDirectorExpression where = 15;
 }
 message MerchantDirectorOrderBy {
     optional io.graphoenix.core.grpc.Sort id = 1;
@@ -311,7 +317,7 @@ message MerchantDirectorOrderBy {
     optional io.graphoenix.core.grpc.Sort create_group_id = 11;
     optional io.graphoenix.core.grpc.Sort intro_typename = 12;
 }
-message OrderQueryTypeArguments {
+message OrderQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression number = 2;
     optional io.graphoenix.showcase.user.grpc.UserExpression buyer = 3;
@@ -329,7 +335,7 @@ message OrderQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated OrderExpression exs = 16;
 }
-message OrderListQueryTypeArguments {
+message OrderListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression number = 2;
     optional io.graphoenix.showcase.user.grpc.UserExpression buyer = 3;
@@ -354,7 +360,7 @@ message OrderListQueryTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message OrderConnectionQueryTypeArguments {
+message OrderConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression number = 2;
     optional io.graphoenix.showcase.user.grpc.UserExpression buyer = 3;
@@ -379,7 +385,7 @@ message OrderConnectionQueryTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message GoodQueryTypeArguments {
+message GoodQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression quantity = 2;
     optional OrderExpression order = 3;
@@ -400,7 +406,7 @@ message GoodQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 18;
     repeated GoodExpression exs = 19;
 }
-message GoodListQueryTypeArguments {
+message GoodListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression quantity = 2;
     optional OrderExpression order = 3;
@@ -428,7 +434,7 @@ message GoodListQueryTypeArguments {
     optional string after = 25;
     optional string before = 26;
 }
-message GoodConnectionQueryTypeArguments {
+message GoodConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression quantity = 2;
     optional OrderExpression order = 3;
@@ -456,7 +462,7 @@ message GoodConnectionQueryTypeArguments {
     optional string after = 25;
     optional string before = 26;
 }
-message ProductQueryTypeArguments {
+message ProductQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional io.graphoenix.core.grpc.FloatExpression price = 3;
@@ -472,7 +478,7 @@ message ProductQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 13;
     repeated ProductExpression exs = 14;
 }
-message ProductListQueryTypeArguments {
+message ProductListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional io.graphoenix.core.grpc.FloatExpression price = 3;
@@ -495,7 +501,7 @@ message ProductListQueryTypeArguments {
     optional string after = 20;
     optional string before = 21;
 }
-message ProductConnectionQueryTypeArguments {
+message ProductConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional io.graphoenix.core.grpc.FloatExpression price = 3;
@@ -518,7 +524,7 @@ message ProductConnectionQueryTypeArguments {
     optional string after = 20;
     optional string before = 21;
 }
-message MerchantQueryTypeArguments {
+message MerchantQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization = 3;
@@ -540,7 +546,7 @@ message MerchantQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 19;
     repeated MerchantExpression exs = 20;
 }
-message MerchantListQueryTypeArguments {
+message MerchantListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization = 3;
@@ -569,7 +575,7 @@ message MerchantListQueryTypeArguments {
     optional string after = 26;
     optional string before = 27;
 }
-message MerchantConnectionQueryTypeArguments {
+message MerchantConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization = 3;
@@ -598,7 +604,7 @@ message MerchantConnectionQueryTypeArguments {
     optional string after = 26;
     optional string before = 27;
 }
-message MerchantPartnersQueryTypeArguments {
+message MerchantPartnersQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
     optional MerchantExpression merchant_id_type = 3;
@@ -616,7 +622,7 @@ message MerchantPartnersQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated MerchantPartnersExpression exs = 16;
 }
-message MerchantPartnersListQueryTypeArguments {
+message MerchantPartnersListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
     optional MerchantExpression merchant_id_type = 3;
@@ -641,7 +647,7 @@ message MerchantPartnersListQueryTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message MerchantPartnersConnectionQueryTypeArguments {
+message MerchantPartnersConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
     optional MerchantExpression merchant_id_type = 3;
@@ -666,7 +672,7 @@ message MerchantPartnersConnectionQueryTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message MerchantDirectorQueryTypeArguments {
+message MerchantDirectorQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
     optional MerchantExpression merchant_id_type = 3;
@@ -684,7 +690,7 @@ message MerchantDirectorQueryTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated MerchantDirectorExpression exs = 16;
 }
-message MerchantDirectorListQueryTypeArguments {
+message MerchantDirectorListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
     optional MerchantExpression merchant_id_type = 3;
@@ -709,7 +715,7 @@ message MerchantDirectorListQueryTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message MerchantDirectorConnectionQueryTypeArguments {
+message MerchantDirectorConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
     optional MerchantExpression merchant_id_type = 3;
@@ -734,7 +740,7 @@ message MerchantDirectorConnectionQueryTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message OrderMutationTypeArguments {
+message OrderMutationArguments {
     optional string id = 1;
     optional string number = 2;
     optional io.graphoenix.showcase.user.grpc.UserInput buyer = 3;
@@ -751,7 +757,7 @@ message OrderMutationTypeArguments {
     optional int32 buyer_id = 14;
     optional OrderExpression where = 15;
 }
-message OrderListMutationTypeArguments {
+message OrderListMutationArguments {
     optional string id = 1;
     optional string number = 2;
     optional io.graphoenix.showcase.user.grpc.UserInput buyer = 3;
@@ -769,7 +775,7 @@ message OrderListMutationTypeArguments {
     repeated OrderInput list = 15;
     optional OrderExpression where = 16;
 }
-message GoodMutationTypeArguments {
+message GoodMutationArguments {
     optional string id = 1;
     optional int32 quantity = 2;
     optional OrderInput order = 3;
@@ -789,7 +795,7 @@ message GoodMutationTypeArguments {
     optional int32 merchant_id = 17;
     optional GoodExpression where = 18;
 }
-message GoodListMutationTypeArguments {
+message GoodListMutationArguments {
     optional string id = 1;
     optional int32 quantity = 2;
     optional OrderInput order = 3;
@@ -810,7 +816,7 @@ message GoodListMutationTypeArguments {
     repeated GoodInput list = 18;
     optional GoodExpression where = 19;
 }
-message ProductMutationTypeArguments {
+message ProductMutationArguments {
     optional string id = 1;
     optional string name = 2;
     optional float price = 3;
@@ -825,7 +831,7 @@ message ProductMutationTypeArguments {
     optional string intro_typename = 12;
     optional ProductExpression where = 13;
 }
-message ProductListMutationTypeArguments {
+message ProductListMutationArguments {
     optional string id = 1;
     optional string name = 2;
     optional float price = 3;
@@ -841,7 +847,7 @@ message ProductListMutationTypeArguments {
     repeated ProductInput list = 13;
     optional ProductExpression where = 14;
 }
-message MerchantMutationTypeArguments {
+message MerchantMutationArguments {
     optional string id = 1;
     optional string name = 2;
     optional io.graphoenix.showcase.user.grpc.OrganizationInput organization = 3;
@@ -862,7 +868,7 @@ message MerchantMutationTypeArguments {
     optional MerchantDirectorInput merchant_director = 18;
     optional MerchantExpression where = 19;
 }
-message MerchantListMutationTypeArguments {
+message MerchantListMutationArguments {
     optional string id = 1;
     optional string name = 2;
     optional io.graphoenix.showcase.user.grpc.OrganizationInput organization = 3;
@@ -884,7 +890,7 @@ message MerchantListMutationTypeArguments {
     repeated MerchantInput list = 19;
     optional MerchantExpression where = 20;
 }
-message MerchantPartnersMutationTypeArguments {
+message MerchantPartnersMutationArguments {
     optional string id = 1;
     optional int32 merchant_id = 2;
     optional MerchantInput merchant_id_type = 3;
@@ -901,7 +907,7 @@ message MerchantPartnersMutationTypeArguments {
     optional string intro_typename = 14;
     optional MerchantPartnersExpression where = 15;
 }
-message MerchantPartnersListMutationTypeArguments {
+message MerchantPartnersListMutationArguments {
     optional string id = 1;
     optional int32 merchant_id = 2;
     optional MerchantInput merchant_id_type = 3;
@@ -919,7 +925,7 @@ message MerchantPartnersListMutationTypeArguments {
     repeated MerchantPartnersInput list = 15;
     optional MerchantPartnersExpression where = 16;
 }
-message MerchantDirectorMutationTypeArguments {
+message MerchantDirectorMutationArguments {
     optional string id = 1;
     optional int32 merchant_id = 2;
     optional MerchantInput merchant_id_type = 3;
@@ -936,7 +942,7 @@ message MerchantDirectorMutationTypeArguments {
     optional string intro_typename = 14;
     optional MerchantDirectorExpression where = 15;
 }
-message MerchantDirectorListMutationTypeArguments {
+message MerchantDirectorListMutationArguments {
     optional string id = 1;
     optional int32 merchant_id = 2;
     optional MerchantInput merchant_id_type = 3;
@@ -954,7 +960,7 @@ message MerchantDirectorListMutationTypeArguments {
     repeated MerchantDirectorInput list = 15;
     optional MerchantDirectorExpression where = 16;
 }
-message OrderSubscriptionTypeArguments {
+message OrderSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression number = 2;
     optional io.graphoenix.showcase.user.grpc.UserExpression buyer = 3;
@@ -972,7 +978,7 @@ message OrderSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated OrderExpression exs = 16;
 }
-message OrderListSubscriptionTypeArguments {
+message OrderListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression number = 2;
     optional io.graphoenix.showcase.user.grpc.UserExpression buyer = 3;
@@ -997,7 +1003,7 @@ message OrderListSubscriptionTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message OrderConnectionSubscriptionTypeArguments {
+message OrderConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression number = 2;
     optional io.graphoenix.showcase.user.grpc.UserExpression buyer = 3;
@@ -1022,7 +1028,7 @@ message OrderConnectionSubscriptionTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message GoodSubscriptionTypeArguments {
+message GoodSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression quantity = 2;
     optional OrderExpression order = 3;
@@ -1043,7 +1049,7 @@ message GoodSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 18;
     repeated GoodExpression exs = 19;
 }
-message GoodListSubscriptionTypeArguments {
+message GoodListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression quantity = 2;
     optional OrderExpression order = 3;
@@ -1071,7 +1077,7 @@ message GoodListSubscriptionTypeArguments {
     optional string after = 25;
     optional string before = 26;
 }
-message GoodConnectionSubscriptionTypeArguments {
+message GoodConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression quantity = 2;
     optional OrderExpression order = 3;
@@ -1099,7 +1105,7 @@ message GoodConnectionSubscriptionTypeArguments {
     optional string after = 25;
     optional string before = 26;
 }
-message ProductSubscriptionTypeArguments {
+message ProductSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional io.graphoenix.core.grpc.FloatExpression price = 3;
@@ -1115,7 +1121,7 @@ message ProductSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 13;
     repeated ProductExpression exs = 14;
 }
-message ProductListSubscriptionTypeArguments {
+message ProductListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional io.graphoenix.core.grpc.FloatExpression price = 3;
@@ -1138,7 +1144,7 @@ message ProductListSubscriptionTypeArguments {
     optional string after = 20;
     optional string before = 21;
 }
-message ProductConnectionSubscriptionTypeArguments {
+message ProductConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional io.graphoenix.core.grpc.FloatExpression price = 3;
@@ -1161,7 +1167,7 @@ message ProductConnectionSubscriptionTypeArguments {
     optional string after = 20;
     optional string before = 21;
 }
-message MerchantSubscriptionTypeArguments {
+message MerchantSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization = 3;
@@ -1183,7 +1189,7 @@ message MerchantSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 19;
     repeated MerchantExpression exs = 20;
 }
-message MerchantListSubscriptionTypeArguments {
+message MerchantListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization = 3;
@@ -1212,7 +1218,7 @@ message MerchantListSubscriptionTypeArguments {
     optional string after = 26;
     optional string before = 27;
 }
-message MerchantConnectionSubscriptionTypeArguments {
+message MerchantConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.StringExpression name = 2;
     optional io.graphoenix.showcase.user.grpc.OrganizationExpression organization = 3;
@@ -1241,7 +1247,7 @@ message MerchantConnectionSubscriptionTypeArguments {
     optional string after = 26;
     optional string before = 27;
 }
-message MerchantPartnersSubscriptionTypeArguments {
+message MerchantPartnersSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
     optional MerchantExpression merchant_id_type = 3;
@@ -1259,7 +1265,7 @@ message MerchantPartnersSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated MerchantPartnersExpression exs = 16;
 }
-message MerchantPartnersListSubscriptionTypeArguments {
+message MerchantPartnersListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
     optional MerchantExpression merchant_id_type = 3;
@@ -1284,7 +1290,7 @@ message MerchantPartnersListSubscriptionTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message MerchantPartnersConnectionSubscriptionTypeArguments {
+message MerchantPartnersConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
     optional MerchantExpression merchant_id_type = 3;
@@ -1309,7 +1315,7 @@ message MerchantPartnersConnectionSubscriptionTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message MerchantDirectorSubscriptionTypeArguments {
+message MerchantDirectorSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
     optional MerchantExpression merchant_id_type = 3;
@@ -1327,7 +1333,7 @@ message MerchantDirectorSubscriptionTypeArguments {
     optional io.graphoenix.core.grpc.Conditional cond = 15;
     repeated MerchantDirectorExpression exs = 16;
 }
-message MerchantDirectorListSubscriptionTypeArguments {
+message MerchantDirectorListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
     optional MerchantExpression merchant_id_type = 3;
@@ -1352,7 +1358,7 @@ message MerchantDirectorListSubscriptionTypeArguments {
     optional string after = 22;
     optional string before = 23;
 }
-message MerchantDirectorConnectionSubscriptionTypeArguments {
+message MerchantDirectorConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
     optional io.graphoenix.core.grpc.IntExpression merchant_id = 2;
     optional MerchantExpression merchant_id_type = 3;

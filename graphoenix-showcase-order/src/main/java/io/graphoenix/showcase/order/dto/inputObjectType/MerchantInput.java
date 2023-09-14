@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @CompiledJson
 @Input
@@ -22,7 +21,6 @@ import org.eclipse.microprofile.graphql.NonNull;
 public class MerchantInput implements MetaInput {
   private String id;
 
-  @NonNull
   private String name;
 
   private OrganizationInput organization;
@@ -31,7 +29,6 @@ public class MerchantInput implements MetaInput {
 
   private Collection<OrganizationInput> partners;
 
-  @NonNull
   private UserInput director;
 
   private Boolean isDeprecated;
@@ -58,6 +55,8 @@ public class MerchantInput implements MetaInput {
   private Collection<MerchantPartnersInput> merchantPartners;
 
   private MerchantDirectorInput merchantDirector;
+
+  private MerchantExpression where;
 
   public String getId() {
     return this.id;
@@ -201,5 +200,13 @@ public class MerchantInput implements MetaInput {
 
   public void setMerchantDirector(MerchantDirectorInput merchantDirector) {
     this.merchantDirector = merchantDirector;
+  }
+
+  public MerchantExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(MerchantExpression where) {
+    this.where = where;
   }
 }

@@ -10,7 +10,6 @@ import java.lang.String;
 import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @CompiledJson
 @Input
@@ -19,16 +18,12 @@ import org.eclipse.microprofile.graphql.NonNull;
 public class GoodInput implements MetaInput {
   private String id;
 
-  @NonNull
   private Integer quantity;
 
-  @NonNull
   private OrderInput order;
 
-  @NonNull
   private ProductInput product;
 
-  @NonNull
   private MerchantInput merchant;
 
   private Boolean isDeprecated;
@@ -55,6 +50,8 @@ public class GoodInput implements MetaInput {
   private Integer productId;
 
   private Integer merchantId;
+
+  private GoodExpression where;
 
   public String getId() {
     return this.id;
@@ -190,5 +187,13 @@ public class GoodInput implements MetaInput {
 
   public void setMerchantId(Integer merchantId) {
     this.merchantId = merchantId;
+  }
+
+  public GoodExpression getWhere() {
+    return this.where;
+  }
+
+  public void setWhere(GoodExpression where) {
+    this.where = where;
   }
 }
