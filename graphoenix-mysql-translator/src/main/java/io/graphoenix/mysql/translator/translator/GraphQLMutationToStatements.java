@@ -211,18 +211,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                objectDefaultValueToStatementStream(
-                                                                        fieldDefinitionContext,
-                                                                        idValueExpression,
-                                                                        subFieldDefinitionContext,
-                                                                        inputObjectTypeDefinitionContext,
-                                                                        inputValueDefinitionContext,
-                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                        0,
-                                                                        0
+                                                                        objectDefaultValueToStatementStream(
+                                                                                fieldDefinitionContext,
+                                                                                idValueExpression,
+                                                                                subFieldDefinitionContext,
+                                                                                inputObjectTypeDefinitionContext,
+                                                                                inputValueDefinitionContext,
+                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                0,
+                                                                                0
+                                                                        )
                                                                 )
-                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -1855,9 +1855,8 @@ public class GraphQLMutationToStatements {
                                                     List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
                                                     GraphqlParser.ArgumentsContext argumentsContext) {
 
-        GraphqlParser.ArgumentContext idArgument = manager.getIDArgument(typeContext, argumentsContext)
-                .orElseThrow(() -> new GraphQLErrors(ID_ARGUMENT_NOT_EXIST.bind(argumentsContext.getText())));
-        if (argumentsContext == null || argumentsContext.argument().stream().allMatch(argumentContext -> argumentContext.name().getText().equals(idArgument.name().getText()))) {
+        Optional<GraphqlParser.ArgumentContext> idArgument = manager.getIDArgument(typeContext, argumentsContext);
+        if (argumentsContext == null || idArgument.isPresent() && argumentsContext.argument().stream().allMatch(argumentContext -> argumentContext.name().getText().equals(idArgument.get().name().getText()))) {
             return Optional.empty();
         }
         List<Column> columnList = inputValueDefinitionContextList.stream()
@@ -1898,18 +1897,17 @@ public class GraphQLMutationToStatements {
                                                     List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
                                                     GraphqlParser.ArgumentsContext argumentsContext,
                                                     Expression where) {
-        GraphqlParser.ArgumentContext idArgument = manager.getIDArgument(typeContext, argumentsContext)
-                .orElseThrow(() -> new GraphQLErrors(ID_ARGUMENT_NOT_EXIST.bind(argumentsContext.getText())));
-        if (argumentsContext == null || argumentsContext.argument().stream().allMatch(argumentContext -> argumentContext.name().getText().equals(idArgument.name().getText()))) {
+        Optional<GraphqlParser.ArgumentContext> idArgument = manager.getIDArgument(typeContext, argumentsContext);
+        if (argumentsContext == null || idArgument.isPresent() && argumentsContext.argument().stream().allMatch(argumentContext -> argumentContext.name().getText().equals(idArgument.get().name().getText()))) {
             return Optional.empty();
         }
         String fieldTypeName = manager.getFieldTypeName(typeContext);
-        if (where == null) {
-            Column idColumn = dbNameUtil.fieldToColumn(table, idArgument);
+        if (where == null && idArgument.isPresent()) {
+            Column idColumn = dbNameUtil.fieldToColumn(table, idArgument.get());
             Expression idValue = argumentToDBValue(
-                    manager.getField(fieldTypeName, idArgument.name().getText())
-                            .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(fieldTypeName, idArgument.name().getText()))),
-                    idArgument
+                    manager.getField(fieldTypeName, idArgument.get().name().getText())
+                            .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(fieldTypeName, idArgument.get().name().getText()))),
+                    idArgument.get()
             );
 
             List<UpdateSet> updateSetList = inputValueDefinitionContextList.stream()
@@ -1921,7 +1919,7 @@ public class GraphQLMutationToStatements {
                                     .flatMap(fieldDefinitionContext -> manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext))
                                     .stream()
                     )
-                    .filter(argumentContext -> !argumentContext.name().getText().equals(idArgument.name().getText()))
+                    .filter(argumentContext -> !argumentContext.name().getText().equals(idArgument.get().name().getText()))
                     .filter(argumentContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(argumentContext.name().getText())))
                     .map(argumentContext ->
                             new UpdateSet(
@@ -1972,9 +1970,8 @@ public class GraphQLMutationToStatements {
                                                                   GraphqlParser.TypeContext typeContext,
                                                                   List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
                                                                   GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        GraphqlParser.ObjectFieldWithVariableContext idObjectFieldWithVariable = manager.getIDObjectFieldWithVariable(typeContext, objectValueWithVariableContext)
-                .orElseThrow(() -> new GraphQLErrors(ID_ARGUMENT_NOT_EXIST.bind(objectValueWithVariableContext.getText())));
-        if (objectValueWithVariableContext == null || objectValueWithVariableContext.objectFieldWithVariable().stream().allMatch(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(idObjectFieldWithVariable.name().getText()))) {
+        Optional<GraphqlParser.ObjectFieldWithVariableContext> idObjectFieldWithVariable = manager.getIDObjectFieldWithVariable(typeContext, objectValueWithVariableContext);
+        if (objectValueWithVariableContext == null || idObjectFieldWithVariable.isPresent() && objectValueWithVariableContext.objectFieldWithVariable().stream().allMatch(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(idObjectFieldWithVariable.get().name().getText()))) {
             return Optional.empty();
         }
         List<Column> columnList = inputValueDefinitionContextList.stream()
@@ -2015,18 +2012,17 @@ public class GraphQLMutationToStatements {
                                                                   List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
                                                                   GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext,
                                                                   Expression where) {
-        GraphqlParser.ObjectFieldWithVariableContext idObjectFieldWithVariable = manager.getIDObjectFieldWithVariable(typeContext, objectValueWithVariableContext)
-                .orElseThrow(() -> new GraphQLErrors(ID_ARGUMENT_NOT_EXIST.bind(objectValueWithVariableContext.getText())));
-        if (objectValueWithVariableContext == null || objectValueWithVariableContext.objectFieldWithVariable().stream().allMatch(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(idObjectFieldWithVariable.name().getText()))) {
+        Optional<GraphqlParser.ObjectFieldWithVariableContext> idObjectFieldWithVariable = manager.getIDObjectFieldWithVariable(typeContext, objectValueWithVariableContext);
+        if (objectValueWithVariableContext == null || idObjectFieldWithVariable.isPresent() && objectValueWithVariableContext.objectFieldWithVariable().stream().allMatch(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(idObjectFieldWithVariable.get().name().getText()))) {
             return Optional.empty();
         }
         String fieldTypeName = manager.getFieldTypeName(typeContext);
-        if (where == null) {
-            Column idColumn = dbNameUtil.fieldToColumn(table, idObjectFieldWithVariable);
+        if (where == null && idObjectFieldWithVariable.isPresent()) {
+            Column idColumn = dbNameUtil.fieldToColumn(table, idObjectFieldWithVariable.get());
             Expression idValue = objectFieldWithVariableToDBValue(
-                    manager.getField(fieldTypeName, idObjectFieldWithVariable.name().getText())
-                            .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(fieldTypeName, idObjectFieldWithVariable.name().getText()))),
-                    idObjectFieldWithVariable
+                    manager.getField(fieldTypeName, idObjectFieldWithVariable.get().name().getText())
+                            .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(fieldTypeName, idObjectFieldWithVariable.get().name().getText()))),
+                    idObjectFieldWithVariable.get()
             );
 
             List<UpdateSet> updateSetList = inputValueDefinitionContextList.stream()
@@ -2038,7 +2034,7 @@ public class GraphQLMutationToStatements {
                                     .flatMap(fieldDefinitionContext -> manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext))
                                     .stream()
                     )
-                    .filter(objectFieldWithVariableContext -> !objectFieldWithVariableContext.name().getText().equals(idObjectFieldWithVariable.name().getText()))
+                    .filter(objectFieldWithVariableContext -> !objectFieldWithVariableContext.name().getText().equals(idObjectFieldWithVariable.get().name().getText()))
                     .filter(objectFieldWithVariableContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(objectFieldWithVariableContext.name().getText())))
                     .map(objectFieldWithVariableContext ->
                             new UpdateSet(
@@ -2089,9 +2085,8 @@ public class GraphQLMutationToStatements {
                                                       GraphqlParser.TypeContext typeContext,
                                                       List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
                                                       GraphqlParser.ObjectValueContext objectValueContext) {
-        GraphqlParser.ObjectFieldContext idObjectField = manager.getIDObjectField(typeContext, objectValueContext)
-                .orElseThrow(() -> new GraphQLErrors(ID_ARGUMENT_NOT_EXIST.bind(objectValueContext.getText())));
-        if (objectValueContext == null || objectValueContext.objectField().stream().allMatch(objectFieldContext -> objectFieldContext.name().getText().equals(idObjectField.name().getText()))) {
+        Optional<GraphqlParser.ObjectFieldContext> idObjectField = manager.getIDObjectField(typeContext, objectValueContext);
+        if (objectValueContext == null || idObjectField.isPresent() && objectValueContext.objectField().stream().allMatch(objectFieldContext -> objectFieldContext.name().getText().equals(idObjectField.get().name().getText()))) {
             return Optional.empty();
         }
         List<Column> columnList = inputValueDefinitionContextList.stream()
@@ -2132,18 +2127,17 @@ public class GraphQLMutationToStatements {
                                                       List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
                                                       GraphqlParser.ObjectValueContext objectValueContext,
                                                       Expression where) {
-        GraphqlParser.ObjectFieldContext idObjectField = manager.getIDObjectField(typeContext, objectValueContext)
-                .orElseThrow(() -> new GraphQLErrors(ID_ARGUMENT_NOT_EXIST.bind(objectValueContext.getText())));
-        if (objectValueContext == null || objectValueContext.objectField().stream().allMatch(objectFieldContext -> objectFieldContext.name().getText().equals(idObjectField.name().getText()))) {
+        Optional<GraphqlParser.ObjectFieldContext> idObjectField = manager.getIDObjectField(typeContext, objectValueContext);
+        if (objectValueContext == null || idObjectField.isPresent() && objectValueContext.objectField().stream().allMatch(objectFieldContext -> objectFieldContext.name().getText().equals(idObjectField.get().name().getText()))) {
             return Optional.empty();
         }
         String fieldTypeName = manager.getFieldTypeName(typeContext);
-        if (where == null) {
-            Column idColumn = dbNameUtil.fieldToColumn(table, idObjectField);
+        if (where == null && idObjectField.isPresent()) {
+            Column idColumn = dbNameUtil.fieldToColumn(table, idObjectField.get());
             Expression idValue = objectFieldToDBValue(
-                    manager.getField(fieldTypeName, idObjectField.name().getText())
-                            .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(fieldTypeName, idObjectField.name().getText()))),
-                    idObjectField
+                    manager.getField(fieldTypeName, idObjectField.get().name().getText())
+                            .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(fieldTypeName, idObjectField.get().name().getText()))),
+                    idObjectField.get()
             );
 
             List<UpdateSet> updateSetList = inputValueDefinitionContextList.stream()
@@ -2155,7 +2149,7 @@ public class GraphQLMutationToStatements {
                                     .flatMap(fieldDefinitionContext -> manager.getObjectFieldFromInputValueDefinition(objectValueContext, inputValueDefinitionContext))
                                     .stream()
                     )
-                    .filter(objectFieldContext -> !objectFieldContext.name().getText().equals(idObjectField.name().getText()))
+                    .filter(objectFieldContext -> !objectFieldContext.name().getText().equals(idObjectField.get().name().getText()))
                     .filter(objectFieldContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(objectFieldContext.name().getText())))
                     .map(objectFieldContext ->
                             new UpdateSet(
