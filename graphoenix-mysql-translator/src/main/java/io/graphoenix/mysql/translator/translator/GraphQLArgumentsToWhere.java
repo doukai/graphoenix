@@ -427,7 +427,6 @@ public class GraphQLArgumentsToWhere {
                                                                                  int level) {
         Optional<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(typeContext));
         if (objectTypeDefinitionContext.isPresent()) {
-
             Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = manager.getFieldDefinitionFromInputValueDefinition(typeContext, inputValueDefinitionContext);
             if (fieldDefinitionContext.isPresent()) {
                 String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.get().type());
@@ -933,13 +932,6 @@ public class GraphQLArgumentsToWhere {
                 .map(argumentContext -> Boolean.parseBoolean(argumentContext.valueWithVariable().BooleanValue().getText()))
                 .orElse(false);
 
-        fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                .filter(fieldInputValueDefinitionContext ->
-                        manager.isEnum(fieldInputValueDefinitionContext.type().getText()) && manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator"))
-                .findFirst()
-                .flatMap(fieldInputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(argumentsContext, fieldInputValueDefinitionContext))
-                .map(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().enumValue());
-
         Optional<GraphqlParser.EnumValueContext> operatorEnumValueContext = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                 .filter(fieldInputValueDefinitionContext ->
                         manager.isEnum(fieldInputValueDefinitionContext.type().getText()) && manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator"))
@@ -1058,7 +1050,6 @@ public class GraphQLArgumentsToWhere {
         Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinition = manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()));
 
         if (inputObjectTypeDefinition.isPresent()) {
-
             boolean skipNull = valueContext.objectValue().objectField().stream()
                     .filter(fieldContext -> fieldContext.name().getText().equals("skipNull"))
                     .findFirst()
