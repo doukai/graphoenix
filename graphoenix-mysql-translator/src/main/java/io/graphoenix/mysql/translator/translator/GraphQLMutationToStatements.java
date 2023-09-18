@@ -213,18 +213,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                        objectDefaultValueToStatementStream(
-                                                                                fieldDefinitionContext,
-                                                                                idValueExpression,
-                                                                                subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
-                                                                                inputValueDefinitionContext,
-                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                                0,
-                                                                                0
-                                                                        )
+                                                                objectDefaultValueToStatementStream(
+                                                                        fieldDefinitionContext,
+                                                                        idValueExpression,
+                                                                        subFieldDefinitionContext,
+                                                                        inputObjectTypeDefinitionContext,
+                                                                        inputValueDefinitionContext,
+                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                        0,
+                                                                        0
                                                                 )
+                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -923,6 +923,7 @@ public class GraphQLMutationToStatements {
                         IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
                                 .mapToObj(index ->
                                         manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())
+                                                .or(() -> manager.getIDObjectFieldWithVariableFromWhere(fieldDefinitionContext.type(), arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable()))
                                                 .flatMap(dbValueUtil::createIdValueExpression)
                                                 .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index))
                                 )
@@ -954,7 +955,11 @@ public class GraphQLMutationToStatements {
         List<GraphqlParser.ValueWithVariableContext> idValueWithVariableList = Stream.ofNullable(arrayValueWithVariableContext.valueWithVariable())
                 .flatMap(Collection::stream)
                 .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
-                .flatMap(valueWithVariableContext -> manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable()).stream())
+                .flatMap(valueWithVariableContext ->
+                        manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable())
+                                .or(() -> manager.getIDObjectFieldWithVariableFromWhere(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable()))
+                                .stream()
+                )
                 .map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable)
                 .collect(Collectors.toList());
 
@@ -970,6 +975,7 @@ public class GraphQLMutationToStatements {
                 .filter((valueWithVariableContext -> manager.getIsDeprecatedObjectFieldWithVariable(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable()).isPresent()))
                 .map(valueWithVariableContext ->
                         manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable())
+                                .or(() -> manager.getIDObjectFieldWithVariableFromWhere(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable()))
                                 .orElseThrow(() -> new GraphQLErrors(ID_ARGUMENT_NOT_EXIST.bind(valueWithVariableContext.objectValueWithVariable().getText())))
                 )
                 .map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable)
