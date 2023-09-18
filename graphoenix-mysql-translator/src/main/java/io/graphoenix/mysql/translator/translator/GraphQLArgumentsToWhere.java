@@ -1626,17 +1626,18 @@ public class GraphQLArgumentsToWhere {
                                                 fieldDefinitionContext.type(),
                                                 inputValueDefinitionContext,
                                                 argumentContext.valueWithVariable().objectValueWithVariable(),
-                                                1
+                                                0
                                         )
                                 )
                 );
     }
 
     protected Optional<Expression> objectValueWithVariableToWhereExpression(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                            GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
                                                                             GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext,
                                                                             int level) {
 
-        return fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+        return inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(WHERE_INPUT_NAME))
                 .findFirst()
                 .flatMap(inputValueDefinitionContext ->
@@ -1658,10 +1659,11 @@ public class GraphQLArgumentsToWhere {
     }
 
     protected Optional<Expression> objectValueWithVariableToWhereExpression(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                            GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
                                                                             GraphqlParser.ObjectValueContext objectValueContext,
                                                                             int level) {
 
-        return fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+        return inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(WHERE_INPUT_NAME))
                 .findFirst()
                 .flatMap(inputValueDefinitionContext ->

@@ -213,18 +213,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                objectDefaultValueToStatementStream(
-                                                                        fieldDefinitionContext,
-                                                                        idValueExpression,
-                                                                        subFieldDefinitionContext,
-                                                                        inputObjectTypeDefinitionContext,
-                                                                        inputValueDefinitionContext,
-                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                        0,
-                                                                        0
+                                                                        objectDefaultValueToStatementStream(
+                                                                                fieldDefinitionContext,
+                                                                                idValueExpression,
+                                                                                subFieldDefinitionContext,
+                                                                                inputObjectTypeDefinitionContext,
+                                                                                inputValueDefinitionContext,
+                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                0,
+                                                                                0
+                                                                        )
                                                                 )
-                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -1787,7 +1787,7 @@ public class GraphQLMutationToStatements {
         Optional<Expression> whereExpression = graphQLArgumentsToWhere.objectValueWithVariableToWhereExpression(fieldDefinitionContext, argumentsContext);
         Optional<Statement> statement;
         if (whereExpression.isPresent()) {
-            statement = argumentsToUpdate(dbNameUtil.typeToTable(manager.getFieldTypeName(fieldDefinitionContext.type()), 1), fieldDefinitionContext.type(), fieldList, argumentsContext, whereExpression.get());
+            statement = argumentsToUpdate(dbNameUtil.typeToTable(manager.getFieldTypeName(fieldDefinitionContext.type()), 0), fieldDefinitionContext.type(), fieldList, argumentsContext, whereExpression.get());
         } else {
             statement = argumentsToInsert(table, fieldDefinitionContext.type(), fieldList, argumentsContext);
         }
@@ -1813,10 +1813,10 @@ public class GraphQLMutationToStatements {
                 .collect(Collectors.toList());
 
 
-        Optional<Expression> whereExpression = graphQLArgumentsToWhere.objectValueWithVariableToWhereExpression(fieldDefinitionContext, objectValueWithVariableContext, level);
+        Optional<Expression> whereExpression = graphQLArgumentsToWhere.objectValueWithVariableToWhereExpression(fieldDefinitionContext, inputObjectTypeDefinitionContext, objectValueWithVariableContext, level);
         Optional<Statement> statement;
         if (whereExpression.isPresent()) {
-            statement = objectValueWithVariableToUpdate(dbNameUtil.typeToTable(manager.getFieldTypeName(fieldDefinitionContext.type()), 1), fieldDefinitionContext.type(), fieldList, objectValueWithVariableContext, whereExpression.get());
+            statement = objectValueWithVariableToUpdate(dbNameUtil.typeToTable(manager.getFieldTypeName(fieldDefinitionContext.type()), level), fieldDefinitionContext.type(), fieldList, objectValueWithVariableContext, whereExpression.get());
         } else {
             statement = objectValueWithVariableToInsert(table, fieldDefinitionContext.type(), fieldList, objectValueWithVariableContext);
         }
@@ -1841,11 +1841,11 @@ public class GraphQLMutationToStatements {
                 .filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
                 .collect(Collectors.toList());
 
-        Optional<Expression> whereExpression = graphQLArgumentsToWhere.objectValueWithVariableToWhereExpression(fieldDefinitionContext, objectValueContext, level);
+        Optional<Expression> whereExpression = graphQLArgumentsToWhere.objectValueWithVariableToWhereExpression(fieldDefinitionContext, inputObjectTypeDefinitionContext, objectValueContext, level);
 
         Optional<Statement> statement;
         if (whereExpression.isPresent()) {
-            statement = objectValueToUpdate(dbNameUtil.typeToTable(manager.getFieldTypeName(fieldDefinitionContext.type()), 1), fieldDefinitionContext.type(), fieldList, objectValueContext, whereExpression.get());
+            statement = objectValueToUpdate(dbNameUtil.typeToTable(manager.getFieldTypeName(fieldDefinitionContext.type()), level), fieldDefinitionContext.type(), fieldList, objectValueContext, whereExpression.get());
         } else {
             statement = objectValueToInsert(table, fieldDefinitionContext.type(), fieldList, objectValueContext);
         }
