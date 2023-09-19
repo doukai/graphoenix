@@ -811,20 +811,26 @@ public class GraphQLArgumentsToWhere {
 
     private boolean isOrConditional(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
         if (isConditional(inputValueDefinitionContext)) {
-            return conditionalIsOr(valueWithVariableContext.enumValue());
+            return conditionalIsOr(valueWithVariableContext);
         }
         return false;
     }
 
     private boolean isOrConditional(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ValueContext valueContext) {
         if (isConditional(inputValueDefinitionContext)) {
-            return conditionalIsOr(valueContext.enumValue());
+            return conditionalIsOr(valueContext);
         }
         return false;
     }
 
-    private boolean conditionalIsOr(GraphqlParser.EnumValueContext enumValueContext) {
-        return enumValueContext != null && enumValueContext.enumValueName().getText().equals("OR");
+    private boolean conditionalIsOr(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        return valueWithVariableContext.enumValue() != null && valueWithVariableContext.enumValue().enumValueName().getText().equals("OR") ||
+                valueWithVariableContext.StringValue() != null && valueWithVariableContext.StringValue().getText().equals("\"OR\"");
+    }
+
+    private boolean conditionalIsOr(GraphqlParser.ValueContext valueContext) {
+        return valueContext.enumValue() != null && valueContext.enumValue().enumValueName().getText().equals("OR") ||
+                valueContext.StringValue() != null && valueContext.StringValue().getText().equals("\"OR\"");
     }
 
     private boolean isConditional(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
