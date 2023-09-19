@@ -126,10 +126,22 @@ public class ReactorGrpcServiceImplementer {
                         }
                 );
 
-
-        String packageName = graphQLConfig.getPackageName();
-        this.buildGraphQLServiceImplClass(packageName).writeTo(filer);
-        Logger.info("{}.ReactorGrpcGraphQLServiceImpl build success", packageName);
+        manager.getQueryOperationTypeName()
+                .flatMap(manager::getObject)
+                .stream()
+                .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(packageManager::isLocalPackage)
+                .map(fieldDefinitionContext -> manager.getPackageName(fieldDefinitionContext).orElseGet(graphQLConfig::getPackageName))
+                .distinct()
+                .forEach(packageName -> {
+                            try {
+                                this.buildGraphQLServiceImplClass(packageName).writeTo(filer);
+                                Logger.info("{}.ReactorGrpcGraphQLServiceImpl build success", packageName);
+                            } catch (IOException e) {
+                                Logger.error(e);
+                            }
+                        }
+                );
     }
 
     private JavaFile buildTypeServiceImplClass(String packageName, OperationType operationType, List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList) {

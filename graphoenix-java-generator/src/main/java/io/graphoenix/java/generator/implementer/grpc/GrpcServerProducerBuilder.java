@@ -6,6 +6,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -25,22 +26,33 @@ import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
 public class GrpcServerProducerBuilder {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public GrpcServerProducerBuilder(IGraphQLDocumentManager manager, GraphQLConfig graphQLConfig) {
+    public GrpcServerProducerBuilder(IGraphQLDocumentManager manager, PackageManager packageManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.graphQLConfig = graphQLConfig;
     }
 
     public void writeToFiler(Filer filer) throws IOException {
-        try {
-            String packageName = graphQLConfig.getPackageName();
-            this.buildGrpcServerProducerClass(packageName).writeTo(filer);
-            Logger.info("{}.GrpcServerProducer build success", packageName);
-        } catch (IOException e) {
-            Logger.error(e);
-        }
+        manager.getQueryOperationTypeName()
+                .flatMap(manager::getObject)
+                .stream()
+                .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(packageManager::isLocalPackage)
+                .map(fieldDefinitionContext -> manager.getPackageName(fieldDefinitionContext).orElseGet(graphQLConfig::getPackageName))
+                .distinct()
+                .forEach(packageName -> {
+                            try {
+                                this.buildGrpcServerProducerClass(packageName).writeTo(filer);
+                                Logger.info("{}.GrpcServerProducer build success", packageName);
+                            } catch (IOException e) {
+                                Logger.error(e);
+                            }
+                        }
+                );
     }
 
     private JavaFile buildGrpcServerProducerClass(String packageName) {
