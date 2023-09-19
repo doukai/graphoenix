@@ -17,6 +17,8 @@ public class Field {
 
     private Integer number;
 
+    private String description;
+
     private List<Option> options;
 
     public Boolean getOptional() {
@@ -67,6 +69,15 @@ public class Field {
 
     public Field setNumber(Integer number) {
         this.number = number;
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Field setDescription(String description) {
+        this.description = description;
         return this;
     }
 

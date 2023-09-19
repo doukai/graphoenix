@@ -1,6 +1,11 @@
 import "Rpc.stg"
 import "Option.stg"
 serviceDefinition(service) ::= <<
+<if(service.description)>
+/**
+* <service.description>
+*/
+<endif>
 service <service.name> {
     <if(service.options)><service.options:{option|<optionDefinition(option)>};separator="\n"><endif>
     <service.rpcs:{rpc|<rpcDefinition(rpc)>};separator="\n">

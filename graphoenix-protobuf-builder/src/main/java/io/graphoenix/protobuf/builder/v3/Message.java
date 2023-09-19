@@ -12,6 +12,8 @@ public class Message {
 
     private List<Field> fields;
 
+    private String description;
+
     private List<Option> options;
 
     public String getName() {
@@ -37,6 +39,15 @@ public class Message {
             this.fields = new ArrayList<>();
         }
         this.fields.add(field);
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Message setDescription(String description) {
+        this.description = description;
         return this;
     }
 

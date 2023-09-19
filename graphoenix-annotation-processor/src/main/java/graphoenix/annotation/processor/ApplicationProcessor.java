@@ -67,6 +67,8 @@ public class ApplicationProcessor extends BaseProcessor {
         GrpcObjectHandlerBuilder grpcObjectHandlerBuilder = BeanContext.get(GrpcObjectHandlerBuilder.class);
         GrpcRequestHandlerBuilder grpcRequestHandlerBuilder = BeanContext.get(GrpcRequestHandlerBuilder.class);
         GrpcServiceImplementer grpcServiceImplementer = BeanContext.get(GrpcServiceImplementer.class);
+        ReactorGrpcServiceImplementer reactorGrpcServiceImplementer = BeanContext.get(ReactorGrpcServiceImplementer.class);
+        GrpcServerProducerBuilder grpcServerProducerBuilder = BeanContext.get(GrpcServerProducerBuilder.class);
         GrpcFetchHandlerBuilder grpcFetchHandlerBuilder = BeanContext.get(GrpcFetchHandlerBuilder.class);
         roundInit(roundEnv);
 
@@ -122,6 +124,8 @@ public class ApplicationProcessor extends BaseProcessor {
             grpcObjectHandlerBuilder.writeToFiler(filer);
             grpcRequestHandlerBuilder.writeToFiler(filer);
             grpcServiceImplementer.writeToFiler(filer);
+            reactorGrpcServiceImplementer.writeToFiler(filer);
+            grpcServerProducerBuilder.writeToFiler(filer);
             grpcFetchHandlerBuilder.writeToFiler(filer);
 
         } catch (IOException | URISyntaxException e) {

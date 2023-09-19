@@ -1,6 +1,11 @@
 import "Field.stg"
 import "Option.stg"
 messageDefinition(message) ::= <<
+<if(message.description)>
+/**
+* <message.description>
+*/
+<endif>
 message <message.name> {
     <if(message.options)><message.options:{option|<optionDefinition(option)>};separator="\n"><endif>
     <message.fields:{field|<fieldDefinition(field)>};separator="\n">

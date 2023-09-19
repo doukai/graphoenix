@@ -394,7 +394,7 @@ public abstract class MutationDataLoader {
 
     protected Mono<Void> fetch(String packageName, String protocol) {
         return build(packageName, protocol)
-                .flatMap(operation -> BeanContext.get(FetchHandler.class, protocol).operation(packageName, operation.toString()))
+                .flatMap(operation -> BeanContext.get(FetchHandler.class, protocol).request(packageName, operation.toString()))
                 .flatMap(response -> Mono.fromRunnable(() -> addResult(packageName, protocol, response)));
     }
 

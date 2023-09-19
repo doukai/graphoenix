@@ -1,6 +1,11 @@
 import "EnumField.stg"
 import "Option.stg"
 enumDefinition(enum) ::= <<
+<if(enum.description)>
+/**
+* <enum.description>
+*/
+<endif>
 enum <enum.name> {
     <if(enum.options)><enum.options:{option|<optionDefinition(option)>};separator="\n"><endif>
     <enum.fields:{field|<enumFieldDefinition(field)>};separator="\n">

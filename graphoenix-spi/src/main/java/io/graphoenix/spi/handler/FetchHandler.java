@@ -4,5 +4,5 @@ import reactor.core.publisher.Mono;
 
 public interface FetchHandler {
 
-    Mono<String> operation(String packageName, String graphql);
+    Mono<String> request(String packageName, String graphql);
 }

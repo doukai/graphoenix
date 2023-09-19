@@ -11,6 +11,8 @@ public class EnumField {
 
     private Integer number;
 
+    private String description;
+
     private List<Option> options;
 
     public String getName() {
@@ -28,6 +30,15 @@ public class EnumField {
 
     public EnumField setNumber(Integer number) {
         this.number = number;
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public EnumField setDescription(String description) {
+        this.description = description;
         return this;
     }
 

@@ -1,4 +1,4 @@
 import "Option.stg"
 enumFieldDefinition(enumField) ::= <<
-<enumField.name> = <enumField.number><if(enumField.options)> [<enumField.options:{option|<optionDefinition(option)>};separator=", ">]<endif>;
+<enumField.name> = <enumField.number><if(enumField.options)> [<enumField.options:{option|<optionDefinition(option)>};separator=", ">]<endif>;<if(enumField.description)> /* <enumField.description> */<endif>
 >>

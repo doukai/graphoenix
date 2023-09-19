@@ -157,7 +157,7 @@ public class GrpcFetchHandlerBuilder {
                                 grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
                                 ClassName.get(packageName + ".grpc", "ReactorGraphQLServiceGrpc"),
                                 packageName
-                        ).addStatement("this.operationMap.put($S, ($T graphql) -> this.$L.operation($T.newBuilder().setRequest(graphql).build()).map(response -> response.getResponse()))",
+                        ).addStatement("this.operationMap.put($S, ($T graphql) -> this.$L.request($T.newBuilder().setRequest(graphql).build()).map(response -> response.getResponse()))",
                                 packageName,
                                 ClassName.get(String.class),
                                 grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
@@ -168,7 +168,7 @@ public class GrpcFetchHandlerBuilder {
     }
 
     private MethodSpec buildOperationMethod() {
-        return MethodSpec.methodBuilder("operation")
+        return MethodSpec.methodBuilder("request")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(String.class)))

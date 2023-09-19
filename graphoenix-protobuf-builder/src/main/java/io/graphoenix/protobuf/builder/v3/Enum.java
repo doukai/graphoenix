@@ -11,6 +11,8 @@ public class Enum {
 
     private List<EnumField> fields;
 
+    private String description;
+
     private List<Option> options;
 
     public String getName() {
@@ -28,6 +30,15 @@ public class Enum {
 
     public Enum setFields(List<EnumField> fields) {
         this.fields = fields;
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Enum setDescription(String description) {
+        this.description = description;
         return this;
     }
 

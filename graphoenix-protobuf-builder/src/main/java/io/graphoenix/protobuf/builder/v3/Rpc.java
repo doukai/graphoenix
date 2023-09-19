@@ -17,6 +17,8 @@ public class Rpc {
 
     private String returnType;
 
+    private String description;
+
     private List<Option> options;
 
     public String getName() {
@@ -61,6 +63,15 @@ public class Rpc {
 
     public Rpc setReturnType(String returnType) {
         this.returnType = returnType;
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Rpc setDescription(String description) {
+        this.description = description;
         return this;
     }
 

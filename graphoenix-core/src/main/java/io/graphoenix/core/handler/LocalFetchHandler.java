@@ -19,7 +19,7 @@ public class LocalFetchHandler implements FetchHandler {
     }
 
     @Override
-    public Mono<String> operation(String packageName, String graphql) {
+    public Mono<String> request(String packageName, String graphql) {
         return graphQLRequestHandler.handle(new GraphQLRequest(graphql));
     }
 }

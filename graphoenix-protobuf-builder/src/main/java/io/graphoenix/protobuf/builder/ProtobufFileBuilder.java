@@ -25,6 +25,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 
 @ApplicationScoped
@@ -440,9 +441,11 @@ public class ProtobufFileBuilder {
                                                                 .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
                                                                 .setMessageType("Query" + getServiceRpcName(fieldDefinitionContext.name().getText()) + "Request")
                                                                 .setReturnType("Query" + getServiceRpcName(fieldDefinitionContext.name().getText()) + "Response")
+                                                                .setDescription(Optional.ofNullable(fieldDefinitionContext.description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null))
                                                 )
                                                 .collect(Collectors.toList())
                                 )
+                                .setDescription(Optional.ofNullable(objectTypeDefinitionContext.description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null))
                 );
     }
 
@@ -459,9 +462,11 @@ public class ProtobufFileBuilder {
                                                                 .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
                                                                 .setMessageType("Mutation" + getServiceRpcName(fieldDefinitionContext.name().getText()) + "Request")
                                                                 .setReturnType("Mutation" + getServiceRpcName(fieldDefinitionContext.name().getText()) + "Response")
+                                                                .setDescription(Optional.ofNullable(fieldDefinitionContext.description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null))
                                                 )
                                                 .collect(Collectors.toList())
                                 )
+                                .setDescription(Optional.ofNullable(objectTypeDefinitionContext.description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null))
                 );
     }
 
@@ -469,7 +474,7 @@ public class ProtobufFileBuilder {
         return new Service().setName("GraphQLService")
                 .addRpc(
                         new Rpc()
-                                .setName("Operation")
+                                .setName("Request")
                                 .setMessageType("GraphQLRequest")
                                 .setReturnType("GraphQLResponse")
                 );
@@ -496,6 +501,7 @@ public class ProtobufFileBuilder {
                                                                                         .setOptional(argumentsDefinitionContext.inputValueDefinition().get(index).type().nonNullType() == null)
                                                                                         .setRepeated(manager.fieldTypeIsList(argumentsDefinitionContext.inputValueDefinition().get(index).type()))
                                                                                         .setNumber(index + 3)
+                                                                                        .setDescription(Optional.ofNullable(argumentsDefinitionContext.inputValueDefinition().get(index).description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null))
                                                                         )
                                                         )
                                         ).collect(Collectors.toList())
@@ -518,6 +524,7 @@ public class ProtobufFileBuilder {
                                                 .setOptional(fieldDefinitionContext.type().nonNullType() == null)
                                                 .setRepeated(manager.fieldTypeIsList(fieldDefinitionContext.type()))
                                                 .setNumber(1)
+
                                 )
                 );
     }
@@ -545,6 +552,7 @@ public class ProtobufFileBuilder {
                                                                                         .setOptional(argumentsDefinitionContext.inputValueDefinition().get(index).type().nonNullType() == null)
                                                                                         .setRepeated(manager.fieldTypeIsList(argumentsDefinitionContext.inputValueDefinition().get(index).type()))
                                                                                         .setNumber(index + 3)
+                                                                                        .setDescription(Optional.ofNullable(argumentsDefinitionContext.inputValueDefinition().get(index).description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null))
                                                                         )
                                                         )
                                         ).collect(Collectors.toList())
@@ -596,10 +604,12 @@ public class ProtobufFileBuilder {
                                                                 "_" +
                                                                 getEnumFieldName(enumTypeDefinitionContext.name().getText())
                                                 )
+                                                .setDescription(Optional.ofNullable(enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().get(index).description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null))
                                                 .setNumber(index)
                                 )
                                 .collect(Collectors.toList())
-                );
+                )
+                .setDescription(Optional.ofNullable(enumTypeDefinitionContext.description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null));
     }
 
     public Message buildMessage(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -613,10 +623,12 @@ public class ProtobufFileBuilder {
                                                 .setType(buildType(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type()))
                                                 .setOptional(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type().nonNullType() == null)
                                                 .setRepeated(manager.fieldTypeIsList(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type()))
+                                                .setDescription(Optional.ofNullable(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null))
                                                 .setNumber(index + 1)
                                 )
                                 .collect(Collectors.toList())
-                );
+                )
+                .setDescription(Optional.ofNullable(objectTypeDefinitionContext.description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null));
     }
 
     public Message buildMessage(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
@@ -630,10 +642,12 @@ public class ProtobufFileBuilder {
                                                 .setType(buildType(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type()))
                                                 .setOptional(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type().nonNullType() == null)
                                                 .setRepeated(manager.fieldTypeIsList(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type()))
+                                                .setDescription(Optional.ofNullable(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null))
                                                 .setNumber(index + 1)
                                 )
                                 .collect(Collectors.toList())
-                );
+                )
+                .setDescription(Optional.ofNullable(interfaceTypeDefinitionContext.description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null));
     }
 
     public Message buildMessage(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
@@ -647,10 +661,12 @@ public class ProtobufFileBuilder {
                                                 .setType(buildType(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().get(index).type()))
                                                 .setOptional(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().get(index).type().nonNullType() == null)
                                                 .setRepeated(manager.fieldTypeIsList(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().get(index).type()))
+                                                .setDescription(Optional.ofNullable(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().get(index).description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null))
                                                 .setNumber(index + 1)
                                 )
                                 .collect(Collectors.toList())
-                );
+                )
+                .setDescription(Optional.ofNullable(inputObjectTypeDefinitionContext.description()).map(descriptionContext -> DOCUMENT_UTIL.getStringValue(descriptionContext.StringValue())).orElse(null));
     }
 
     public String buildType(GraphqlParser.TypeContext typeContext) {
