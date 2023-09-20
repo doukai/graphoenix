@@ -2,6 +2,7 @@ package io.graphoenix.core.handler;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -89,6 +90,42 @@ public class OperationPreprocessor {
             }
         }
         return operationDefinitionContext;
+    }
+
+    public GraphqlParser.OperationDefinitionContext preprocessEnum(Operation operation) {
+        return preprocessEnum(DOCUMENT_UTIL.graphqlToOperation(operation.toString()));
+    }
+
+    public GraphqlParser.OperationDefinitionContext preprocessEnum(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext;
+        if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
+            objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
+        } else if (operationDefinitionContext.operationType().MUTATION() != null) {
+            objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
+        } else if (operationDefinitionContext.operationType().SUBSCRIPTION() != null) {
+            objectTypeDefinitionContext = manager.getSubscriptionOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(SUBSCRIBE_TYPE_NOT_EXIST));
+        } else {
+            throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
+        }
+
+        operationDefinitionContext.selectionSet().selection()
+                .forEach(selectionContext -> {
+                            GraphqlParser.FieldDefinitionContext fieldDefinitionContext = objectTypeDefinitionContext
+                                    .fieldsDefinition().fieldDefinition().stream()
+                                    .filter(subFieldDefinitionContext -> subFieldDefinitionContext.name().getText().equals(selectionContext.field().name().getText()))
+                                    .findFirst()
+                                    .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(objectTypeDefinitionContext.name().getText(), selectionContext.field().name().getText())));
+                            processSelectionEnum(fieldDefinitionContext, selectionContext);
+                        }
+                );
+        return operationDefinitionContext;
+    }
+
+    private void processSelectionEnum(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
+        if (selectionContext.field() != null && selectionContext.field().arguments() != null) {
+            selectionContext.field().arguments().argument()
+                    .forEach(argumentContext -> replaceEnumValue(getArgumentType(fieldDefinitionContext, argumentContext), argumentContext.valueWithVariable()));
+        }
     }
 
     private void processFragment(String typeName, GraphqlParser.SelectionSetContext selectionSetContext) {
@@ -184,8 +221,8 @@ public class OperationPreprocessor {
                     }
                     selectionContext.field().arguments().addChild((TerminalNode) right);
                 }
-                selectionContext.field().arguments().argument()
-                        .forEach(argumentContext -> replaceEnumValue(getArgumentType(fieldDefinitionContext, argumentContext), argumentContext.valueWithVariable()));
+//                selectionContext.field().arguments().argument()
+//                        .forEach(argumentContext -> replaceEnumValue(getArgumentType(fieldDefinitionContext, argumentContext), argumentContext.valueWithVariable()));
             }
             if (selectionContext.field().selectionSet() != null) {
                 selectionContext.field().selectionSet().selection()

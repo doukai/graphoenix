@@ -750,14 +750,16 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     public Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeIDFieldDefinition(String objectTypeName) {
         return graphQLFieldManager.getFieldDefinitions(objectTypeName)
                 .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
-                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals("ID")).findFirst();
+                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals("ID"))
+                .findFirst();
     }
 
     @Override
     public Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeIsDeprecatedFieldDefinition(String objectTypeName) {
         return graphQLFieldManager.getFieldDefinitions(objectTypeName)
                 .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
-                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals(DEPRECATED_FIELD_NAME)).findFirst();
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME))
+                .findFirst();
     }
 
     @Override

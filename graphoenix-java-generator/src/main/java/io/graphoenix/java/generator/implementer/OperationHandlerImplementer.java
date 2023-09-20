@@ -218,6 +218,14 @@ public class OperationHandlerImplementer {
                                 Modifier.FINAL
                         ).build()
                 )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationPreprocessor.class)),
+                                "operationPreprocessorProvider",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
                 .addMethod(buildDefaultOperationMethod(type))
                 .addMethod(buildOperationMethod(type))
                 .addMethod(buildConstructor(type))
@@ -438,6 +446,7 @@ public class OperationHandlerImplementer {
                                         List.of(
                                                 CodeBlock.of("return argumentsInvokeHandlerProvider.get().$L(operationDefinitionContext)", operationName),
                                                 CodeBlock.of(".map(operation -> fetchFieldProcessor.get().buildFetchFields(operation))"),
+                                                CodeBlock.of(".map(operationWithFetchFieldDefinitionContext -> operationPreprocessorProvider.get().preprocessEnum(operationWithFetchFieldDefinitionContext))"),
                                                 CodeBlock.builder()
                                                         .add(".flatMap(operationWithFetchFieldDefinitionContext ->\n")
                                                         .indent()
@@ -469,6 +478,7 @@ public class OperationHandlerImplementer {
                                                         .add(".flatMap(operation ->\n")
                                                         .indent()
                                                         .add("$T.just(fetchFieldProcessor.get().buildFetchFields(operation))\n", ClassName.get(Mono.class))
+                                                        .add(".map(operationWithFetchFieldDefinitionContext -> operationPreprocessorProvider.get().preprocessEnum(operationWithFetchFieldDefinitionContext))\n")
                                                         .add(".flatMap(operationWithFetchFieldDefinitionContext ->\n")
                                                         .indent()
                                                         .add("operationHandler.$L(operationWithFetchFieldDefinitionContext)\n", operationMethodName)
@@ -500,6 +510,7 @@ public class OperationHandlerImplementer {
                                                 CodeBlock.of("return argumentsInvokeHandlerProvider.get().$L(operationDefinitionContext)", operationName),
                                                 CodeBlock.of(".map(operation -> operationSubscriber.get().buildIDSelection(operation))"),
                                                 CodeBlock.of(".map(operation -> fetchFieldProcessor.get().buildFetchFields(operation))"),
+                                                CodeBlock.of(".map(operationWithFetchFieldDefinitionContext -> operationPreprocessorProvider.get().preprocessEnum(operationWithFetchFieldDefinitionContext))"),
                                                 CodeBlock.builder()
                                                         .add(".flatMap(operationWithFetchFieldDefinitionContext ->\n")
                                                         .indent()
@@ -663,6 +674,7 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(QueryDataLoader.class)), "queryDataLoader")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "QueryAfterHandler")), "queryHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)), "validator")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationPreprocessor.class)), "operationPreprocessorProvider")
                 .addStatement("this.graphQLConfig = graphQLConfig")
                 .addStatement("this.manager = manager")
                 .addStatement("this.fetchFieldProcessor = fetchFieldProcessor")
@@ -682,7 +694,8 @@ public class OperationHandlerImplementer {
                 .addStatement("this.argumentBuilder = argumentBuilder")
                 .addStatement("this.queryDataLoader = queryDataLoader")
                 .addStatement("this.queryHandler = queryHandler")
-                .addStatement("this.validator = validator");
+                .addStatement("this.validator = validator")
+                .addStatement("this.operationPreprocessorProvider = operationPreprocessorProvider");
 
         switch (type) {
             case QUERY:

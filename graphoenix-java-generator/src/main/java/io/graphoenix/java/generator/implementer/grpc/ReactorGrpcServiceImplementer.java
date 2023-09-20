@@ -15,6 +15,7 @@ import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.ArgumentBuilder;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
+import io.graphoenix.core.handler.OperationPreprocessor;
 import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.core.schema.JsonSchemaValidator;
 import io.graphoenix.core.utils.CodecUtil;
@@ -177,7 +178,7 @@ public class ReactorGrpcServiceImplementer {
                 throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
         }
 
-        TypeSpec.Builder builder = TypeSpec.classBuilder(className)
+        return TypeSpec.classBuilder(className)
                 .superclass(ClassName.get(grpcPackageName, superClassName, serviceName))
                 .addModifiers(Modifier.PUBLIC)
                 .addField(
@@ -214,6 +215,14 @@ public class ReactorGrpcServiceImplementer {
                 )
                 .addField(
                         FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "ArgumentsInvokeHandler")),
+                                "argumentsInvokeHandlerProvider",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")),
                                 "invokeHandler",
                                 Modifier.PRIVATE,
@@ -236,21 +245,26 @@ public class ReactorGrpcServiceImplementer {
                                 Modifier.FINAL
                         ).build()
                 )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)),
+                                "validator",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationPreprocessor.class)),
+                                "operationPreprocessorProvider",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
                 .addFields(buildInvokeFields(fieldDefinitionContextList))
                 .addMethod(buildConstructor(operationType, fieldDefinitionContextList))
-                .addMethods(buildTypeMethods(packageName, operationType, fieldDefinitionContextList));
-
-        if (operationType.equals(MUTATION)) {
-            builder.addField(
-                    FieldSpec.builder(
-                            ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)),
-                            "validator",
-                            Modifier.PRIVATE,
-                            Modifier.FINAL
-                    ).build()
-            );
-        }
-        return builder.build();
+                .addMethods(buildTypeMethods(packageName, operationType, fieldDefinitionContextList))
+                .build();
     }
 
     private MethodSpec buildConstructor(OperationType operationType, List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList) {
@@ -272,27 +286,19 @@ public class ReactorGrpcServiceImplementer {
                 .addStatement("this.inputObjectHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "GrpcInputObjectHandler"))
                 .addStatement("this.objectHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "GrpcObjectHandler"))
                 .addStatement("this.operationHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(OperationHandler.class))
+                .addStatement("this.argumentsInvokeHandlerProvider = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "ArgumentsInvokeHandler"))
                 .addStatement("this.invokeHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler"))
                 .addStatement("this.jsonb = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(Jsonb.class))
-                .addStatement("this.argumentBuilder = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(ArgumentBuilder.class));
+                .addStatement("this.argumentBuilder = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(ArgumentBuilder.class))
+                .addStatement("this.validator = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(JsonSchemaValidator.class))
+                .addStatement("this.operationPreprocessorProvider = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(OperationPreprocessor.class));
 
-        Stream<String> invokeClassNames = io.vavr.collection.Stream.ofAll(fieldDefinitionContextList)
+        io.vavr.collection.Stream.ofAll(fieldDefinitionContextList)
                 .filter(manager::isInvokeField)
                 .distinctBy(typeManager::getClassName)
                 .map(typeManager::getClassName)
-                .toJavaStream();
+                .forEach(className -> builder.addStatement("this.$L = $T.getProvider($T.class)", typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()), ClassName.get(BeanContext.class), TYPE_NAME_UTIL.toClassName(className)));
 
-        switch (operationType) {
-            case QUERY:
-                invokeClassNames.forEach(className -> builder.addStatement("this.$L = $T.getProvider($T.class)", typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()), ClassName.get(BeanContext.class), TYPE_NAME_UTIL.toClassName(className)));
-                break;
-            case MUTATION:
-                invokeClassNames.forEach(className -> builder.addStatement("this.$L = $T.getProvider($T.class)", typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()), ClassName.get(BeanContext.class), TYPE_NAME_UTIL.toClassName(className)));
-                builder.addStatement("this.validator = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(JsonSchemaValidator.class));
-                break;
-            default:
-                throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
-        }
         return builder.build();
     }
 
@@ -569,64 +575,37 @@ public class ReactorGrpcServiceImplementer {
                 } else {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
-                if (operationType.equals(MUTATION)) {
-                    codeBlock = CodeBlock.join(
-                            Streams.concat(
-                                    Stream.of(CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, grpcHandlerMethodName)),
-                                    Stream.of(CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class))),
-                                    Stream.of(CodeBlock.of(".doOnNext(validator.get()::validateOperation)")),
-                                    Stream.of(
-                                            CodeBlock.builder()
-                                                    .add(".flatMap(operationDefinitionContext -> \n")
-                                                    .indent()
-                                                    .add("operationHandler.get().$L(operationDefinitionContext)\n", operationMethodName)
-                                                    .add(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))\n", operationClass)
-                                                    .add(invokeCodeBlock)
-                                                    .unindent()
-                                                    .add("\n)")
-                                                    .build()
-                                    ),
-                                    wrapperCodeBlock.stream(),
-                                    Stream.of(
-                                            CodeBlock.of(".map($L -> $T.newBuilder().$L($L).build())",
-                                                    fieldDefinitionContext.name().getText(),
-                                                    ClassName.get(grpcPackageName, grpcResponseClassName),
-                                                    grpcFieldAddAllName,
-                                                    fieldDefinitionContext.name().getText()
-                                            )
-                                    )
-                            ).collect(Collectors.toList()),
-                            System.lineSeparator()
-                    );
-                } else {
-                    codeBlock = CodeBlock.join(
-                            Streams.concat(
-                                    Stream.of(CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, grpcHandlerMethodName)),
-                                    Stream.of(CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class))),
-                                    Stream.of(
-                                            CodeBlock.builder()
-                                                    .add(".flatMap(operationDefinitionContext -> \n")
-                                                    .indent()
-                                                    .add("operationHandler.get().$L(operationDefinitionContext)\n", operationMethodName)
-                                                    .add(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))\n", operationClass)
-                                                    .add(invokeCodeBlock)
-                                                    .unindent()
-                                                    .add("\n)")
-                                                    .build()
-                                    ),
-                                    wrapperCodeBlock.stream(),
-                                    Stream.of(
-                                            CodeBlock.of(".map($L -> $T.newBuilder().$L($L).build())",
-                                                    fieldDefinitionContext.name().getText(),
-                                                    ClassName.get(grpcPackageName, grpcResponseClassName),
-                                                    grpcFieldAddAllName,
-                                                    fieldDefinitionContext.name().getText()
-                                            )
-                                    )
-                            ).collect(Collectors.toList()),
-                            System.lineSeparator()
-                    );
-                }
+
+                codeBlock = CodeBlock.join(
+                        Streams.concat(
+                                Stream.of(CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, grpcHandlerMethodName)),
+                                Stream.of(CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class))),
+                                Stream.of(CodeBlock.of(".doOnNext(validator.get()::validateOperation)")),
+                                Stream.of(CodeBlock.of(".flatMap(operationDefinitionContext -> argumentsInvokeHandlerProvider.get().query(operationDefinitionContext))")),
+                                Stream.of(CodeBlock.of(".map(operation -> operationPreprocessorProvider.get().preprocessEnum(operation))")),
+                                Stream.of(
+                                        CodeBlock.builder()
+                                                .add(".flatMap(operationDefinitionContext -> \n")
+                                                .indent()
+                                                .add("operationHandler.get().$L(operationDefinitionContext)\n", operationMethodName)
+                                                .add(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))\n", operationClass)
+                                                .add(invokeCodeBlock)
+                                                .unindent()
+                                                .add("\n)")
+                                                .build()
+                                ),
+                                wrapperCodeBlock.stream(),
+                                Stream.of(
+                                        CodeBlock.of(".map($L -> $T.newBuilder().$L($L).build())",
+                                                fieldDefinitionContext.name().getText(),
+                                                ClassName.get(grpcPackageName, grpcResponseClassName),
+                                                grpcFieldAddAllName,
+                                                fieldDefinitionContext.name().getText()
+                                        )
+                                )
+                        ).collect(Collectors.toList()),
+                        System.lineSeparator()
+                );
             } else {
                 if (manager.isObject(fieldTypeName)) {
                     invokeCodeBlock = CodeBlock.of(".flatMap(operationType -> invokeHandler.get().$L(operationType.$L(), operationDefinitionContext.selectionSet().selection(0).field().selectionSet()))",
@@ -663,64 +642,37 @@ public class ReactorGrpcServiceImplementer {
                 } else {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
-                if (operationType.equals(MUTATION)) {
-                    codeBlock = CodeBlock.join(
-                            Streams.concat(
-                                    Stream.of(CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, grpcHandlerMethodName)),
-                                    Stream.of(CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class))),
-                                    Stream.of(CodeBlock.of(".doOnNext(validator.get()::validateOperation)")),
-                                    Stream.of(
-                                            CodeBlock.builder()
-                                                    .add(".flatMap(operationDefinitionContext -> \n")
-                                                    .indent()
-                                                    .add("operationHandler.get().$L(operationDefinitionContext)\n", operationMethodName)
-                                                    .add(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))\n", operationClass)
-                                                    .add(invokeCodeBlock)
-                                                    .unindent()
-                                                    .add("\n)")
-                                                    .build()
-                                    ),
-                                    wrapperCodeBlock.stream(),
-                                    Stream.of(
-                                            CodeBlock.of(".map($L -> $T.newBuilder().$L($L).build())",
-                                                    fieldDefinitionContext.name().getText(),
-                                                    ClassName.get(grpcPackageName, grpcResponseClassName),
-                                                    grpcFieldSetterName,
-                                                    fieldDefinitionContext.name().getText()
-                                            )
-                                    )
-                            ).collect(Collectors.toList()),
-                            System.lineSeparator()
-                    );
-                } else {
-                    codeBlock = CodeBlock.join(
-                            Streams.concat(
-                                    Stream.of(CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, grpcHandlerMethodName)),
-                                    Stream.of(CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class))),
-                                    Stream.of(
-                                            CodeBlock.builder()
-                                                    .add(".flatMap(operationDefinitionContext -> \n")
-                                                    .indent()
-                                                    .add("operationHandler.get().$L(operationDefinitionContext)\n", operationMethodName)
-                                                    .add(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))\n", operationClass)
-                                                    .add(invokeCodeBlock)
-                                                    .unindent()
-                                                    .add("\n)")
-                                                    .build()
-                                    ),
-                                    wrapperCodeBlock.stream(),
-                                    Stream.of(
-                                            CodeBlock.of(".map($L -> $T.newBuilder().$L($L).build())",
-                                                    fieldDefinitionContext.name().getText(),
-                                                    ClassName.get(grpcPackageName, grpcResponseClassName),
-                                                    grpcFieldSetterName,
-                                                    fieldDefinitionContext.name().getText()
-                                            )
-                                    )
-                            ).collect(Collectors.toList()),
-                            System.lineSeparator()
-                    );
-                }
+
+                codeBlock = CodeBlock.join(
+                        Streams.concat(
+                                Stream.of(CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, grpcHandlerMethodName)),
+                                Stream.of(CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class))),
+                                Stream.of(CodeBlock.of(".doOnNext(validator.get()::validateOperation)")),
+                                Stream.of(CodeBlock.of(".flatMap(operationDefinitionContext -> argumentsInvokeHandlerProvider.get().query(operationDefinitionContext))")),
+                                Stream.of(CodeBlock.of(".map(operation -> operationPreprocessorProvider.get().preprocessEnum(operation))")),
+                                Stream.of(
+                                        CodeBlock.builder()
+                                                .add(".flatMap(operationDefinitionContext -> \n")
+                                                .indent()
+                                                .add("operationHandler.get().$L(operationDefinitionContext)\n", operationMethodName)
+                                                .add(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))\n", operationClass)
+                                                .add(invokeCodeBlock)
+                                                .unindent()
+                                                .add("\n)")
+                                                .build()
+                                ),
+                                wrapperCodeBlock.stream(),
+                                Stream.of(
+                                        CodeBlock.of(".map($L -> $T.newBuilder().$L($L).build())",
+                                                fieldDefinitionContext.name().getText(),
+                                                ClassName.get(grpcPackageName, grpcResponseClassName),
+                                                grpcFieldSetterName,
+                                                fieldDefinitionContext.name().getText()
+                                        )
+                                )
+                        ).collect(Collectors.toList()),
+                        System.lineSeparator()
+                );
             }
         }
         return builder.addStatement(codeBlock).build();
