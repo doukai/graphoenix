@@ -361,7 +361,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
         if (objectValueWithVariableContext == null) {
             return Optional.empty();
         }
-        return getFromFieldDefinition(manager.getFieldTypeName(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
+        return getToFieldDefinition(manager.getFieldTypeName(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
                 .flatMap(toFieldDefinition ->
                         objectValueWithVariableContext.objectFieldWithVariable().stream()
                                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().NullValue() == null)
@@ -377,7 +377,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
         if (objectValueContext == null) {
             return Optional.empty();
         }
-        return getFromFieldDefinition(manager.getFieldTypeName(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
+        return getToFieldDefinition(manager.getFieldTypeName(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
                 .flatMap(toFieldDefinition ->
                         objectValueContext.objectField().stream()
                                 .filter(objectFieldContext -> objectFieldContext.value().NullValue() == null)
