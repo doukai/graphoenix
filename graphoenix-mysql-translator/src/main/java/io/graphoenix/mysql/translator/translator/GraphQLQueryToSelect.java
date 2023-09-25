@@ -189,17 +189,16 @@ public class GraphQLQueryToSelect {
                 .flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext).stream())
                 .findFirst();
 
+        Expression selectExpression;
         if (groupByArgument == null && groupByArgumentOptional.isPresent()) {
             plainSelect.setFromItem(new SubSelect()
                     .withSelectBody(objectSelectionToPlainSelect(parentTypeName, typeName, selectionContext, fieldDefinitionContext, selectionContextList, groupByArgumentOptional.get(), level))
                     .withAlias(new Alias(dbNameUtil.graphqlTypeNameToTableAliaName(typeName, level))));
+
+            selectExpression = dbNameUtil.fieldToColumn(typeName, GROUP_BY_INPUT_NAME, level);
         } else {
             plainSelect.setFromItem(table);
-        }
-        if (groupByArgument != null) {
-            plainSelect.addSelectItems(new AllColumns());
-        } else {
-            Function function = jsonObjectFunction(
+            selectExpression = jsonObjectFunction(
                     new ExpressionList(
                             selectionContextList.stream()
 //                                .flatMap(subSelectionContext -> manager.fragmentUnzip(typeName, subSelectionContext))
@@ -210,17 +209,40 @@ public class GraphQLQueryToSelect {
                                     .collect(Collectors.toList())
                     )
             );
-            if (fieldDefinitionContext != null && manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                function = jsonArrayAggFunction(new ExpressionList(function), typeName, selectionContext, fieldDefinitionContext, level);
-            }
-            SelectExpressionItem selectExpressionItem = new SelectExpressionItem(function);
-            if (manager.isQueryOperationType(typeName) || manager.isSubscriptionOperationType(typeName)) {
-                selectExpressionItem.setAlias(new Alias("`data`"));
-            } else if (manager.isMutationOperationType(typeName)) {
-                selectExpressionItem.setAlias(new Alias("`data`"));
-            }
-            plainSelect.setSelectItems(Collections.singletonList(selectExpressionItem));
         }
+
+        SelectExpressionItem selectExpressionItem = new SelectExpressionItem();
+        if (groupByArgument != null) {
+            selectExpressionItem.setAlias(new Alias(dbNameUtil.graphqlFieldNameToColumnName(GROUP_BY_INPUT_NAME)));
+            List<SelectExpressionItem> orderSelectColumnList = Stream.ofNullable(fieldDefinitionContext)
+                    .map(GraphqlParser.FieldDefinitionContext::argumentsDefinition)
+                    .flatMap(Stream::ofNullable)
+                    .flatMap(argumentsDefinitionContext -> argumentsDefinitionContext.inputValueDefinition().stream())
+                    .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(ORDER_BY_INPUT_NAME))
+                    .flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext).stream())
+                    .flatMap(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
+                    .map(objectFieldWithVariableContext -> dbNameUtil.fieldToColumn(typeName, objectFieldWithVariableContext, level))
+                    .map(SelectExpressionItem::new)
+                    .collect(Collectors.toList());
+            if (orderSelectColumnList.size() > 0) {
+                plainSelect.addSelectItems(orderSelectColumnList);
+            }
+            GraphqlParser.FieldDefinitionContext cursorFieldDefinitionContext = manager.getFieldByDirective(typeName, CURSOR_DIRECTIVE_NAME).findFirst()
+                    .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
+                    .orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
+            plainSelect.addSelectItems(new SelectExpressionItem(dbNameUtil.fieldToColumn(typeName, cursorFieldDefinitionContext, level)));
+        } else {
+            if (fieldDefinitionContext != null && manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                selectExpression = jsonArrayAggFunction(new ExpressionList(selectExpression), typeName, selectionContext, fieldDefinitionContext, level);
+            }
+        }
+        selectExpressionItem.setExpression(selectExpression);
+        if (manager.isQueryOperationType(typeName) || manager.isSubscriptionOperationType(typeName)) {
+            selectExpressionItem.setAlias(new Alias("`data`"));
+        } else if (manager.isMutationOperationType(typeName)) {
+            selectExpressionItem.setAlias(new Alias("`data`"));
+        }
+        plainSelect.addSelectItems(Collections.singletonList(selectExpressionItem));
 
         if (fieldDefinitionContext != null && !manager.isQueryOperationType(parentTypeName) && !manager.isSubscriptionOperationType(parentTypeName) && !manager.isMutationOperationType(parentTypeName) && !manager.isSubscriptionOperationType(parentTypeName)) {
             String fieldName = fieldDefinitionContext.name().getText();
