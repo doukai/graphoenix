@@ -10,6 +10,7 @@ import io.graphoenix.core.dto.inputObjectType.__DirectiveLocationExpression;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
+import java.lang.String;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
@@ -53,6 +54,8 @@ public class __DirectiveQueryArguments implements MetaExpression {
   private IntExpression schemaId;
 
   private __DirectiveLocationsExpression __directiveLocations;
+
+  private Collection<String> groupBy;
 
   @DefaultValue("AND")
   private Conditional cond;
@@ -193,6 +196,14 @@ public class __DirectiveQueryArguments implements MetaExpression {
 
   public void set__directiveLocations(__DirectiveLocationsExpression __directiveLocations) {
     this.__directiveLocations = __directiveLocations;
+  }
+
+  public Collection<String> getGroupBy() {
+    return this.groupBy;
+  }
+
+  public void setGroupBy(Collection<String> groupBy) {
+    this.groupBy = groupBy;
   }
 
   public Conditional getCond() {

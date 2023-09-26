@@ -534,8 +534,9 @@ message IntroSchemaQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression query_type_name = 16;
     optional io.graphoenix.core.grpc.StringExpression mutation_type_name = 17;
     optional io.graphoenix.core.grpc.StringExpression subscription_type_name = 18;
-    optional io.graphoenix.core.grpc.Conditional cond = 19;
-    repeated IntroSchemaExpression exs = 20;
+    repeated string group_by = 19;
+    optional io.graphoenix.core.grpc.Conditional cond = 20;
+    repeated IntroSchemaExpression exs = 21;
 }
 message IntroSchemaListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -619,8 +620,9 @@ message IntroTypeQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 21;
     optional IntroTypeInterfacesExpression intro_type_interfaces = 22;
     optional IntroTypePossibleTypesExpression intro_type_possible_types = 23;
-    optional io.graphoenix.core.grpc.Conditional cond = 24;
-    repeated IntroTypeExpression exs = 25;
+    repeated string group_by = 24;
+    optional io.graphoenix.core.grpc.Conditional cond = 25;
+    repeated IntroTypeExpression exs = 26;
 }
 message IntroTypeListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -709,8 +711,9 @@ message IntroFieldQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 16;
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 17;
     optional io.graphoenix.core.grpc.StringExpression type_name = 18;
-    optional io.graphoenix.core.grpc.Conditional cond = 19;
-    repeated IntroFieldExpression exs = 20;
+    repeated string group_by = 19;
+    optional io.graphoenix.core.grpc.Conditional cond = 20;
+    repeated IntroFieldExpression exs = 21;
 }
 message IntroFieldListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -790,8 +793,9 @@ message IntroInputValueQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 17;
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 18;
     optional io.graphoenix.core.grpc.StringExpression type_name = 19;
-    optional io.graphoenix.core.grpc.Conditional cond = 20;
-    repeated IntroInputValueExpression exs = 21;
+    repeated string group_by = 20;
+    optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated IntroInputValueExpression exs = 22;
 }
 message IntroInputValueListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -869,8 +873,9 @@ message IntroEnumValueQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 15;
-    optional io.graphoenix.core.grpc.Conditional cond = 16;
-    repeated IntroEnumValueExpression exs = 17;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated IntroEnumValueExpression exs = 18;
 }
 message IntroEnumValueListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -942,8 +947,9 @@ message IntroDirectiveQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
     optional io.graphoenix.core.grpc.IntExpression schema_id = 16;
     optional IntroDirectiveLocationsExpression intro_directive_locations = 17;
-    optional io.graphoenix.core.grpc.Conditional cond = 18;
-    repeated IntroDirectiveExpression exs = 19;
+    repeated string group_by = 18;
+    optional io.graphoenix.core.grpc.Conditional cond = 19;
+    repeated IntroDirectiveExpression exs = 20;
 }
 message IntroDirectiveListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -1016,8 +1022,9 @@ message IntroTypeInterfacesQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression update_time = 12;
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
-    optional io.graphoenix.core.grpc.Conditional cond = 15;
-    repeated IntroTypeInterfacesExpression exs = 16;
+    repeated string group_by = 15;
+    optional io.graphoenix.core.grpc.Conditional cond = 16;
+    repeated IntroTypeInterfacesExpression exs = 17;
 }
 message IntroTypeInterfacesListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1084,8 +1091,9 @@ message IntroTypePossibleTypesQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression update_time = 12;
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
-    optional io.graphoenix.core.grpc.Conditional cond = 15;
-    repeated IntroTypePossibleTypesExpression exs = 16;
+    repeated string group_by = 15;
+    optional io.graphoenix.core.grpc.Conditional cond = 16;
+    repeated IntroTypePossibleTypesExpression exs = 17;
 }
 message IntroTypePossibleTypesListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1151,8 +1159,9 @@ message IntroDirectiveLocationsQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression update_time = 11;
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 12;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 13;
-    optional io.graphoenix.core.grpc.Conditional cond = 14;
-    repeated IntroDirectiveLocationsExpression exs = 15;
+    repeated string group_by = 14;
+    optional io.graphoenix.core.grpc.Conditional cond = 15;
+    repeated IntroDirectiveLocationsExpression exs = 16;
 }
 message IntroDirectiveLocationsListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1586,8 +1595,9 @@ message IntroSchemaSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression query_type_name = 16;
     optional io.graphoenix.core.grpc.StringExpression mutation_type_name = 17;
     optional io.graphoenix.core.grpc.StringExpression subscription_type_name = 18;
-    optional io.graphoenix.core.grpc.Conditional cond = 19;
-    repeated IntroSchemaExpression exs = 20;
+    repeated string group_by = 19;
+    optional io.graphoenix.core.grpc.Conditional cond = 20;
+    repeated IntroSchemaExpression exs = 21;
 }
 message IntroSchemaListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1671,8 +1681,9 @@ message IntroTypeSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 21;
     optional IntroTypeInterfacesExpression intro_type_interfaces = 22;
     optional IntroTypePossibleTypesExpression intro_type_possible_types = 23;
-    optional io.graphoenix.core.grpc.Conditional cond = 24;
-    repeated IntroTypeExpression exs = 25;
+    repeated string group_by = 24;
+    optional io.graphoenix.core.grpc.Conditional cond = 25;
+    repeated IntroTypeExpression exs = 26;
 }
 message IntroTypeListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -1761,8 +1772,9 @@ message IntroFieldSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 16;
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 17;
     optional io.graphoenix.core.grpc.StringExpression type_name = 18;
-    optional io.graphoenix.core.grpc.Conditional cond = 19;
-    repeated IntroFieldExpression exs = 20;
+    repeated string group_by = 19;
+    optional io.graphoenix.core.grpc.Conditional cond = 20;
+    repeated IntroFieldExpression exs = 21;
 }
 message IntroFieldListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1842,8 +1854,9 @@ message IntroInputValueSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 17;
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 18;
     optional io.graphoenix.core.grpc.StringExpression type_name = 19;
-    optional io.graphoenix.core.grpc.Conditional cond = 20;
-    repeated IntroInputValueExpression exs = 21;
+    repeated string group_by = 20;
+    optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated IntroInputValueExpression exs = 22;
 }
 message IntroInputValueListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1921,8 +1934,9 @@ message IntroEnumValueSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 15;
-    optional io.graphoenix.core.grpc.Conditional cond = 16;
-    repeated IntroEnumValueExpression exs = 17;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated IntroEnumValueExpression exs = 18;
 }
 message IntroEnumValueListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1994,8 +2008,9 @@ message IntroDirectiveSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
     optional io.graphoenix.core.grpc.IntExpression schema_id = 16;
     optional IntroDirectiveLocationsExpression intro_directive_locations = 17;
-    optional io.graphoenix.core.grpc.Conditional cond = 18;
-    repeated IntroDirectiveExpression exs = 19;
+    repeated string group_by = 18;
+    optional io.graphoenix.core.grpc.Conditional cond = 19;
+    repeated IntroDirectiveExpression exs = 20;
 }
 message IntroDirectiveListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -2068,8 +2083,9 @@ message IntroTypeInterfacesSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression update_time = 12;
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
-    optional io.graphoenix.core.grpc.Conditional cond = 15;
-    repeated IntroTypeInterfacesExpression exs = 16;
+    repeated string group_by = 15;
+    optional io.graphoenix.core.grpc.Conditional cond = 16;
+    repeated IntroTypeInterfacesExpression exs = 17;
 }
 message IntroTypeInterfacesListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -2136,8 +2152,9 @@ message IntroTypePossibleTypesSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression update_time = 12;
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
-    optional io.graphoenix.core.grpc.Conditional cond = 15;
-    repeated IntroTypePossibleTypesExpression exs = 16;
+    repeated string group_by = 15;
+    optional io.graphoenix.core.grpc.Conditional cond = 16;
+    repeated IntroTypePossibleTypesExpression exs = 17;
 }
 message IntroTypePossibleTypesListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -2203,8 +2220,9 @@ message IntroDirectiveLocationsSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression update_time = 11;
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 12;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 13;
-    optional io.graphoenix.core.grpc.Conditional cond = 14;
-    repeated IntroDirectiveLocationsExpression exs = 15;
+    repeated string group_by = 14;
+    optional io.graphoenix.core.grpc.Conditional cond = 15;
+    repeated IntroDirectiveLocationsExpression exs = 16;
 }
 message IntroDirectiveLocationsListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;

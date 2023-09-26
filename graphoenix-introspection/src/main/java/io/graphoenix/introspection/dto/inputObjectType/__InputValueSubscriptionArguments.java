@@ -8,6 +8,7 @@ import io.graphoenix.core.dto.inputObjectType.StringExpression;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
+import java.lang.String;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
@@ -55,6 +56,8 @@ public class __InputValueSubscriptionArguments implements MetaExpression {
   private StringExpression ofTypeName;
 
   private StringExpression typeName;
+
+  private Collection<String> groupBy;
 
   @DefaultValue("AND")
   private Conditional cond;
@@ -211,6 +214,14 @@ public class __InputValueSubscriptionArguments implements MetaExpression {
 
   public void setTypeName(StringExpression typeName) {
     this.typeName = typeName;
+  }
+
+  public Collection<String> getGroupBy() {
+    return this.groupBy;
+  }
+
+  public void setGroupBy(Collection<String> groupBy) {
+    this.groupBy = groupBy;
   }
 
   public Conditional getCond() {
