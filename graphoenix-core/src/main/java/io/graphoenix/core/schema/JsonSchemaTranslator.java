@@ -60,16 +60,16 @@ public class JsonSchemaTranslator {
         if (inputObjectTypeDefinitionContext.name().getText().endsWith(INPUT_SUFFIX)) {
             String objectTypeName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(INPUT_SUFFIX));
             if (manager.isObject(objectTypeName)) {
+                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectTypeName)));
                 JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
                         .map(this::buildValidation)
                         .orElseGet(jsonProvider::createObjectBuilder)
                         .add("$id", jsonProvider.createValue("#" + inputObjectTypeDefinitionContext.name().getText() + "_update"))
                         .add("type", jsonProvider.createValue("object"))
-                        .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
+                        .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext, objectTypeDefinitionContext))
                         .add("additionalProperties", TRUE)
                         .add("required", jsonProvider.createArrayBuilder().add(WHERE_INPUT_NAME));
 
-                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectTypeName)));
                 JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
                         .map(this::buildValidation)
                         .orElseGet(jsonProvider::createObjectBuilder)
@@ -83,13 +83,14 @@ public class JsonSchemaTranslator {
         } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(LIST_SUFFIX + mutationTypeName + ARGUMENTS_SUFFIX)) {
             String objectTypeName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(LIST_SUFFIX + mutationTypeName + ARGUMENTS_SUFFIX));
             if (manager.isObject(objectTypeName)) {
+                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectTypeName)));
                 String schemaName = mutationTypeName + "_" + NAME_UTIL.getSchemaFieldName(objectTypeName) + LIST_SUFFIX + "_" + ARGUMENTS_SUFFIX;
                 JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
                         .map(this::buildValidation)
                         .orElseGet(jsonProvider::createObjectBuilder)
                         .add("$id", jsonProvider.createValue("#" + schemaName + "_update"))
                         .add("type", jsonProvider.createValue("object"))
-                        .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
+                        .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext, objectTypeDefinitionContext))
                         .add("additionalProperties", TRUE)
                         .add("required", jsonProvider.createArrayBuilder().add(WHERE_INPUT_NAME));
 
@@ -106,17 +107,17 @@ public class JsonSchemaTranslator {
         } else if (inputObjectTypeDefinitionContext.name().getText().endsWith(mutationTypeName + ARGUMENTS_SUFFIX)) {
             String objectTypeName = inputObjectTypeDefinitionContext.name().getText().substring(0, inputObjectTypeDefinitionContext.name().getText().lastIndexOf(mutationTypeName + ARGUMENTS_SUFFIX));
             if (manager.isObject(objectTypeName)) {
+                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectTypeName)));
                 String schemaName = mutationTypeName + "_" + NAME_UTIL.getSchemaFieldName(objectTypeName) + "_" + ARGUMENTS_SUFFIX;
                 JsonObjectBuilder updateBuilder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
                         .map(this::buildValidation)
                         .orElseGet(jsonProvider::createObjectBuilder)
                         .add("$id", jsonProvider.createValue("#" + schemaName + "_update"))
                         .add("type", jsonProvider.createValue("object"))
-                        .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext))
+                        .add("properties", inputObjectToUpdateProperties(inputObjectTypeDefinitionContext, objectTypeDefinitionContext))
                         .add("additionalProperties", TRUE)
                         .add("required", jsonProvider.createArrayBuilder().add(WHERE_INPUT_NAME));
 
-                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectTypeName)));
                 JsonObjectBuilder builder = VALIDATION_UTIL.getValidationDirectiveContext(inputObjectTypeDefinitionContext.directives())
                         .map(this::buildValidation)
                         .orElseGet(jsonProvider::createObjectBuilder)
@@ -281,7 +282,7 @@ public class JsonSchemaTranslator {
         return propertiesBuilder;
     }
 
-    protected JsonObjectBuilder inputObjectToUpdateProperties(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+    protected JsonObjectBuilder inputObjectToUpdateProperties(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext, GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
         inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(LIST_INPUT_NAME))
@@ -296,7 +297,13 @@ public class JsonSchemaTranslator {
                                     propertiesBuilder.add(inputValueDefinitionContext.name().getText(), buildType(inputValueDefinitionContext.type().typeName(), propertyBuilder));
                                 }
                             } else {
-                                propertiesBuilder.add(inputValueDefinitionContext.name().getText(), fieldToProperty(inputValueDefinitionContext.type(), VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives()).orElse(null)));
+
+                                Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionFromInputValueDefinition = manager.getFieldDefinitionFromInputValueDefinition(objectTypeDefinitionContext, inputValueDefinitionContext);
+                                if (fieldDefinitionFromInputValueDefinition.isPresent()) {
+                                    propertiesBuilder.add(fieldDefinitionFromInputValueDefinition.get().name().getText(), fieldToProperty(fieldDefinitionFromInputValueDefinition.get().type(), VALIDATION_UTIL.getValidationDirectiveContext(fieldDefinitionFromInputValueDefinition.get().directives()).orElse(null)));
+                                } else {
+                                    propertiesBuilder.add(inputValueDefinitionContext.name().getText(), fieldToProperty(inputValueDefinitionContext.type(), VALIDATION_UTIL.getValidationDirectiveContext(inputValueDefinitionContext.directives()).orElse(null)));
+                                }
                             }
                         }
                 );

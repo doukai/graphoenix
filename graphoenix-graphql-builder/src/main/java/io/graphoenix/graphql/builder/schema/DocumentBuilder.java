@@ -849,7 +849,8 @@ public class DocumentBuilder {
                                 .addArgument("grpcPackageName", graphQLConfig.getGrpcPackageName())
                 );
         if (inputType.equals(InputType.QUERY_ARGUMENTS) || inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
-            field.addArgument(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
+            field.addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
+                    .addArgument(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addArgument(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
         } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
             field.addArgument(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
@@ -891,12 +892,14 @@ public class DocumentBuilder {
             String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
             inputObjectType.setName(objectTypeDefinitionContext.name().getText() + queryTypeName + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
+                    .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
         } else if (inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
             String subscriptionTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIBE_TYPE_NOT_EXIST));
             inputObjectType.setName(objectTypeDefinitionContext.name().getText() + subscriptionTypeName + inputType)
                     .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
+                    .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
         } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
