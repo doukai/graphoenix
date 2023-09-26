@@ -191,11 +191,13 @@ public class GraphQLQueryToSelect {
 
         Expression selectExpression;
         if (groupByArgument == null && groupByArgumentOptional.isPresent()) {
-            plainSelect.setFromItem(new SubSelect()
-                    .withSelectBody(objectSelectionToPlainSelect(parentTypeName, typeName, selectionContext, fieldDefinitionContext, selectionContextList, groupByArgumentOptional.get(), level))
-                    .withAlias(new Alias(dbNameUtil.graphqlTypeNameToTableAliaName(typeName, level))));
+            plainSelect.setFromItem(
+                    new SubSelect()
+                            .withSelectBody(objectSelectionToPlainSelect(parentTypeName, typeName, selectionContext, fieldDefinitionContext, selectionContextList, groupByArgumentOptional.get(), level))
+                            .withAlias(new Alias(dbNameUtil.graphqlTypeNameToTableAliaName(typeName, level)))
+            );
 
-            selectExpression = dbNameUtil.fieldToColumn(typeName, GROUP_BY_INPUT_NAME, level);
+            selectExpression = jsonExtractFunction(dbNameUtil.fieldToColumn(typeName, GROUP_BY_INPUT_NAME, level), false);
         } else {
             plainSelect.setFromItem(table);
             selectExpression = jsonObjectFunction(
@@ -231,15 +233,23 @@ public class GraphQLQueryToSelect {
                     .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
                     .orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
             plainSelect.addSelectItems(new SelectExpressionItem(dbNameUtil.fieldToColumn(typeName, cursorFieldDefinitionContext, level)));
+
+            GroupByElement groupByElement = new GroupByElement()
+                    .withGroupByExpressions(
+                            groupByArgument.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
+                                    .filter(valueWithVariableContext -> valueWithVariableContext.StringValue() != null)
+                                    .map(valueWithVariableContext -> fieldToColumn(typeToTable(typeName, level), DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue())))
+                                    .collect(Collectors.toList())
+                    );
+
+            plainSelect.setGroupByElement(groupByElement.withUsingBrackets(false));
         } else {
             if (fieldDefinitionContext != null && manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                 selectExpression = jsonArrayAggFunction(new ExpressionList(selectExpression), typeName, selectionContext, fieldDefinitionContext, level);
             }
         }
         selectExpressionItem.setExpression(selectExpression);
-        if (manager.isQueryOperationType(typeName) || manager.isSubscriptionOperationType(typeName)) {
-            selectExpressionItem.setAlias(new Alias("`data`"));
-        } else if (manager.isMutationOperationType(typeName)) {
+        if (manager.isQueryOperationType(typeName)) {
             selectExpressionItem.setAlias(new Alias("`data`"));
         }
         plainSelect.addSelectItems(Collections.singletonList(selectExpressionItem));
@@ -301,17 +311,6 @@ public class GraphQLQueryToSelect {
                 }
                 throw graphQLErrors;
             }
-        }
-        if (groupByArgument != null) {
-            GroupByElement groupByElement = new GroupByElement()
-                    .withGroupByExpressions(
-                            groupByArgument.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
-                                    .filter(valueWithVariableContext -> valueWithVariableContext.StringValue() != null)
-                                    .map(valueWithVariableContext -> fieldToColumn(typeToTable(typeName, level), DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue())))
-                                    .collect(Collectors.toList())
-                    );
-
-            plainSelect.setGroupByElement(groupByElement.withUsingBrackets(false));
         }
         return plainSelect;
     }
