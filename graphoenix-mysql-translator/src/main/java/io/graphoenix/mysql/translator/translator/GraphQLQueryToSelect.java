@@ -190,7 +190,6 @@ public class GraphQLQueryToSelect {
                 .findFirst();
 
         Expression selectExpression;
-        boolean buildCursor = true;
         if (groupByArgument == null && groupByArgumentOptional.isPresent()) {
             plainSelect.setFromItem(
                     new SubSelect()
@@ -199,7 +198,6 @@ public class GraphQLQueryToSelect {
             );
 
             selectExpression = jsonExtractFunction(dbNameUtil.fieldToColumn(typeName, GROUP_BY_INPUT_NAME, level), false);
-            buildCursor = false;
         } else {
             plainSelect.setFromItem(table);
             selectExpression = jsonObjectFunction(
@@ -232,6 +230,20 @@ public class GraphQLQueryToSelect {
                 plainSelect.addSelectItems(orderSelectColumnList);
             }
 
+            manager.getFieldByDirective(typeName, CURSOR_DIRECTIVE_NAME)
+                    .findFirst()
+                    .ifPresent(cursorFieldDefinitionContext ->
+                            plainSelect.addSelectItems(
+                                    new SelectExpressionItem(
+                                            new Function()
+                                                    .withName("MIN")
+                                                    .withParameters(
+                                                            new ExpressionList(dbNameUtil.fieldToColumn(typeName, cursorFieldDefinitionContext, level))
+                                                    )
+                                    ).withAlias(new Alias(dbNameUtil.graphqlFieldNameToColumnName(cursorFieldDefinitionContext.name().getText())))
+                            )
+                    );
+
             GroupByElement groupByElement = new GroupByElement()
                     .withGroupByExpressions(
                             groupByArgument.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
@@ -243,7 +255,7 @@ public class GraphQLQueryToSelect {
             plainSelect.setGroupByElement(groupByElement.withUsingBrackets(false));
         } else {
             if (fieldDefinitionContext != null && manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                selectExpression = jsonArrayAggFunction(new ExpressionList(selectExpression), typeName, selectionContext, fieldDefinitionContext, buildCursor, level);
+                selectExpression = jsonArrayAggFunction(new ExpressionList(selectExpression), typeName, selectionContext, fieldDefinitionContext, level);
             }
         }
         selectExpressionItem.setExpression(selectExpression);
@@ -480,14 +492,10 @@ public class GraphQLQueryToSelect {
     }
 
     protected Function jsonArrayAggFunction(ExpressionList expressionList, String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level) {
-        return jsonArrayAggFunction(expressionList, typeName, selectionContext, fieldDefinitionContext, true, level);
-    }
-
-    protected Function jsonArrayAggFunction(ExpressionList expressionList, String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, boolean buildCursor, int level) {
         JsonArrayAggregateFunction jsonArrayAggregateFunction = new JsonArrayAggregateFunction();
         jsonArrayAggregateFunction.setName("JSON_ARRAYAGG");
         jsonArrayAggregateFunction.setParameters(expressionList);
-        buildSortArguments(jsonArrayAggregateFunction, typeName, fieldDefinitionContext, selectionContext, buildCursor, level);
+        buildSortArguments(jsonArrayAggregateFunction, typeName, fieldDefinitionContext, selectionContext, level);
         buildPageArguments(jsonArrayAggregateFunction, fieldDefinitionContext, selectionContext);
         return jsonArrayAggregateFunction;
     }
@@ -700,7 +708,7 @@ public class GraphQLQueryToSelect {
         }
     }
 
-    protected void buildSortArguments(JsonArrayAggregateFunction jsonArrayAggregateFunction, String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext, boolean buildCursor, int level) {
+    protected void buildSortArguments(JsonArrayAggregateFunction jsonArrayAggregateFunction, String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext, int level) {
         if (fieldDefinitionContext.argumentsDefinition() != null) {
             Table table = typeToTable(typeName, level);
 
@@ -746,7 +754,7 @@ public class GraphQLQueryToSelect {
                 }
             }
 
-            if (buildCursor && (jsonArrayAggregateFunction.getOrderByElements() == null || jsonArrayAggregateFunction.getOrderByElements().size() == 0)) {
+            if ((jsonArrayAggregateFunction.getOrderByElements() == null || jsonArrayAggregateFunction.getOrderByElements().size() == 0)) {
                 if (selectionContext.field().arguments() != null && selectionContext.field().arguments().argument().size() > 0) {
                     String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     Optional<GraphqlParser.ArgumentContext> lastArgument = selectionContext.field().arguments().argument().stream()
