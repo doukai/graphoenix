@@ -190,7 +190,7 @@ public class GraphQLQueryToSelect {
                 .findFirst();
 
         Expression selectExpression;
-        if (groupByArgument == null && groupByArgumentOptional.isPresent()) {
+        if (groupByArgument == null && groupByArgumentOptional.isPresent() && manager.fieldTypeIsList(fieldDefinitionContext.type())) {
             plainSelect.setFromItem(
                     new SubSelect()
                             .withSelectBody(objectSelectionToPlainSelect(parentTypeName, typeName, selectionContext, fieldDefinitionContext, selectionContextList, groupByArgumentOptional.get(), level))
@@ -215,34 +215,36 @@ public class GraphQLQueryToSelect {
 
         SelectExpressionItem selectExpressionItem = new SelectExpressionItem();
         if (groupByArgument != null) {
-            selectExpressionItem.setAlias(new Alias(dbNameUtil.graphqlFieldNameToColumnName(GROUP_BY_INPUT_NAME)));
-            List<SelectExpressionItem> orderSelectColumnList = Stream.ofNullable(fieldDefinitionContext)
-                    .map(GraphqlParser.FieldDefinitionContext::argumentsDefinition)
-                    .flatMap(Stream::ofNullable)
-                    .flatMap(argumentsDefinitionContext -> argumentsDefinitionContext.inputValueDefinition().stream())
-                    .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(ORDER_BY_INPUT_NAME))
-                    .flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext).stream())
-                    .flatMap(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
-                    .map(objectFieldWithVariableContext -> dbNameUtil.fieldToColumn(typeName, objectFieldWithVariableContext, level))
-                    .map(SelectExpressionItem::new)
-                    .collect(Collectors.toList());
-            if (orderSelectColumnList.size() > 0) {
-                plainSelect.addSelectItems(orderSelectColumnList);
-            }
 
-            manager.getFieldByDirective(typeName, CURSOR_DIRECTIVE_NAME)
-                    .findFirst()
-                    .ifPresent(cursorFieldDefinitionContext ->
-                            plainSelect.addSelectItems(
-                                    new SelectExpressionItem(
-                                            new Function()
-                                                    .withName("MIN")
-                                                    .withParameters(
-                                                            new ExpressionList(dbNameUtil.fieldToColumn(typeName, cursorFieldDefinitionContext, level))
-                                                    )
-                                    ).withAlias(new Alias(dbNameUtil.graphqlFieldNameToColumnName(cursorFieldDefinitionContext.name().getText())))
-                            )
-                    );
+            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                selectExpressionItem.setAlias(new Alias(dbNameUtil.graphqlFieldNameToColumnName(GROUP_BY_INPUT_NAME)));
+                List<SelectExpressionItem> orderSelectColumnList = Stream.ofNullable(fieldDefinitionContext)
+                        .map(GraphqlParser.FieldDefinitionContext::argumentsDefinition)
+                        .flatMap(Stream::ofNullable)
+                        .flatMap(argumentsDefinitionContext -> argumentsDefinitionContext.inputValueDefinition().stream())
+                        .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(ORDER_BY_INPUT_NAME))
+                        .flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext).stream())
+                        .flatMap(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
+                        .map(objectFieldWithVariableContext -> dbNameUtil.fieldToColumn(typeName, objectFieldWithVariableContext, level))
+                        .map(SelectExpressionItem::new)
+                        .collect(Collectors.toList());
+                if (orderSelectColumnList.size() > 0) {
+                    plainSelect.addSelectItems(orderSelectColumnList);
+                }
+
+                manager.getFieldByDirective(typeName, CURSOR_DIRECTIVE_NAME)
+                        .filter(cursorFieldDefinitionContext ->
+                                Stream.ofNullable(selectionContext.field().arguments())
+                                        .flatMap(argumentsContext -> argumentsContext.argument().stream())
+                                        .noneMatch(argumentContext -> argumentContext.name().getText().equals(cursorFieldDefinitionContext.name().getText()))
+                        )
+                        .findFirst()
+                        .ifPresent(cursorFieldDefinitionContext ->
+                                plainSelect.addSelectItems(
+                                        new SelectExpressionItem(dbNameUtil.fieldToColumn(typeName, cursorFieldDefinitionContext, level))
+                                )
+                        );
+            }
 
             GroupByElement groupByElement = new GroupByElement()
                     .withGroupByExpressions(
