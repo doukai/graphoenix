@@ -245,19 +245,33 @@ public class GraphQLQueryToSelect {
                 }
 
                 manager.getFieldByDirective(typeName, CURSOR_DIRECTIVE_NAME)
-                        .filter(cursorFieldDefinitionContext ->
-                                Stream.ofNullable(selectionContext.field().arguments())
-                                        .flatMap(argumentsContext -> argumentsContext.argument().stream())
-                                        .noneMatch(argumentContext -> argumentContext.name().getText().equals(cursorFieldDefinitionContext.name().getText()))
-                        )
                         .findFirst()
+                        .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
                         .ifPresent(cursorFieldDefinitionContext ->
                                 plainSelect.addSelectItems(
-                                        new SelectExpressionItem(dbNameUtil.fieldToColumn(typeName, cursorFieldDefinitionContext, level))
+                                        new SelectExpressionItem(
+                                                new Function()
+                                                        .withName("MIN")
+                                                        .withParameters(
+                                                                new ExpressionList(dbNameUtil.fieldToColumn(typeName, cursorFieldDefinitionContext, level))
+                                                        )
+                                        ).withAlias(new Alias(dbNameUtil.graphqlFieldNameToColumnName(cursorFieldDefinitionContext.name().getText())))
                                 )
                         );
             } else {
-                plainSelect.addSelectItems(new AllColumns());
+                manager.getObjectTypeIDFieldDefinition(typeName)
+                        .ifPresent(
+                                idFieldDefinitionContext ->
+                                        plainSelect.addSelectItems(
+                                                new SelectExpressionItem(
+                                                        new Function()
+                                                                .withName("MIN")
+                                                                .withParameters(
+                                                                        new ExpressionList(dbNameUtil.fieldToColumn(typeName, idFieldDefinitionContext, level))
+                                                                )
+                                                ).withAlias(new Alias(dbNameUtil.graphqlFieldNameToColumnName(idFieldDefinitionContext.name().getText())))
+                                        )
+                        );
             }
 
             GroupByElement groupByElement = new GroupByElement()
