@@ -190,14 +190,27 @@ public class GraphQLQueryToSelect {
                 .findFirst();
 
         Expression selectExpression;
-        if (groupByArgument == null && groupByArgumentOptional.isPresent() && manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+        if (groupByArgument == null && groupByArgumentOptional.isPresent()) {
             plainSelect.setFromItem(
                     new SubSelect()
                             .withSelectBody(objectSelectionToPlainSelect(parentTypeName, typeName, selectionContext, fieldDefinitionContext, selectionContextList, groupByArgumentOptional.get(), level))
                             .withAlias(new Alias(dbNameUtil.graphqlTypeNameToTableAliaName(typeName, level)))
             );
-
-            selectExpression = jsonExtractFunction(dbNameUtil.fieldToColumn(typeName, GROUP_BY_INPUT_NAME, level), false);
+            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                selectExpression = jsonExtractFunction(dbNameUtil.fieldToColumn(typeName, GROUP_BY_INPUT_NAME, level), false);
+            } else {
+                selectExpression = jsonObjectFunction(
+                        new ExpressionList(
+                                selectionContextList.stream()
+//                                .flatMap(subSelectionContext -> manager.fragmentUnzip(typeName, subSelectionContext))
+                                        .filter(subSelectionContext -> manager.getField(typeName, subSelectionContext.field().name().getText()).isPresent())
+                                        .filter(subSelectionContext -> manager.isNotFetchField(typeName, subSelectionContext.field().name().getText()))
+                                        .filter(subSelectionContext -> manager.isNotInvokeField(typeName, subSelectionContext.field().name().getText()))
+                                        .flatMap(subSelectionContext -> selectionToExpressionStream(typeName, selectionContextList, subSelectionContext, parentTypeName == null ? level - 1 : level, parentTypeName == null))
+                                        .collect(Collectors.toList())
+                        )
+                );
+            }
         } else {
             plainSelect.setFromItem(table);
             selectExpression = jsonObjectFunction(
@@ -215,7 +228,6 @@ public class GraphQLQueryToSelect {
 
         SelectExpressionItem selectExpressionItem = new SelectExpressionItem();
         if (groupByArgument != null) {
-
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                 selectExpressionItem.setAlias(new Alias(dbNameUtil.graphqlFieldNameToColumnName(GROUP_BY_INPUT_NAME)));
                 List<SelectExpressionItem> orderSelectColumnList = Stream.ofNullable(fieldDefinitionContext)
@@ -244,6 +256,8 @@ public class GraphQLQueryToSelect {
                                         new SelectExpressionItem(dbNameUtil.fieldToColumn(typeName, cursorFieldDefinitionContext, level))
                                 )
                         );
+            } else {
+                plainSelect.addSelectItems(new AllColumns());
             }
 
             GroupByElement groupByElement = new GroupByElement()
