@@ -209,12 +209,12 @@ public class GraphQLQueryToSelect {
                                     .filter(subSelectionContext -> manager.isNotInvokeField(typeName, subSelectionContext.field().name().getText()))
                                     .flatMap(subSelectionContext ->
                                             selectionToExpressionStream(
+                                                    parentTypeName,
                                                     typeName,
                                                     selectionContextList,
                                                     subSelectionContext,
-                                                    groupByArgument == null && groupByArgumentOptional.isPresent(),
-                                                    parentTypeName == null ? level - 1 : level,
-                                                    parentTypeName == null
+                                                    groupByArgumentOptional.isPresent(),
+                                                    level
                                             )
                                     )
                                     .collect(Collectors.toList())
@@ -339,9 +339,11 @@ public class GraphQLQueryToSelect {
         return plainSelect;
     }
 
-    protected Stream<Expression> selectionToExpressionStream(String typeName, List<GraphqlParser.SelectionContext> selectionContextList, GraphqlParser.SelectionContext selectionContext, boolean over, int level, boolean isOperation) {
+    protected Stream<Expression> selectionToExpressionStream(String parentTypeName, String typeName, List<GraphqlParser.SelectionContext> selectionContextList, GraphqlParser.SelectionContext selectionContext, boolean over, int level) {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getObjectFieldDefinition(typeName, selectionContext.field().name().getText())
                 .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText())));
+
+        boolean isOperation = parentTypeName == null;
 
         if (manager.isConnectionField(typeName, fieldDefinitionContext.name().getText())) {
             if (selectionContext.field().selectionSet() == null || selectionContext.field().selectionSet().selection().size() == 0) {
@@ -376,14 +378,14 @@ public class GraphQLQueryToSelect {
                                     .flatMap(connectionSelectionContext ->
                                             Stream.of(
                                                     fieldDefinitionToStringValueKey(connectionFieldDefinitionContext),
-                                                    jsonExtractFunction(objectSelectionToSubSelect(typeName, connectionFieldTypeName, connectionFieldDefinitionContext, connectionSelectionContext, level + 1), true)
+                                                    jsonExtractFunction(objectSelectionToSubSelect(typeName, connectionFieldTypeName, connectionFieldDefinitionContext, connectionSelectionContext, level + (isOperation ? 0 : 1)), true)
                                             )
                                     ),
                             buildConnectionTotalSelection(selectionContext, connectionAggFieldDefinitionContext).stream()
                                     .flatMap(aggSelectionContext ->
                                             Stream.of(
                                                     fieldDefinitionToStringValueKey(connectionAggFieldDefinitionContext),
-                                                    jsonExtractFunction(objectSelectionToSubSelect(typeName, connectionFieldTypeName, connectionAggFieldDefinitionContext, aggSelectionContext, level + 1), false)
+                                                    jsonExtractFunction(objectSelectionToSubSelect(typeName, connectionFieldTypeName, connectionAggFieldDefinitionContext, aggSelectionContext, level + (isOperation ? 0 : 1)), false)
                                             )
                                     )
                     );
@@ -402,7 +404,7 @@ public class GraphQLQueryToSelect {
             if (manager.isObject(fieldTypeName)) {
                 return Stream.of(
                         selectionKey,
-                        jsonExtractFunction(objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext, level + 1), manager.fieldTypeIsList(fieldDefinitionContext.type()))
+                        jsonExtractFunction(objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext, level + (isOperation ? 0 : 1)), manager.fieldTypeIsList(fieldDefinitionContext.type()))
                 );
             } else {
                 return Stream.of(
