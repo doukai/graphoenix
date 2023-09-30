@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.*;
+import static net.sf.jsqlparser.expression.AnalyticType.OVER;
 
 @ApplicationScoped
 public class GraphQLQueryToSelect {
@@ -190,27 +191,13 @@ public class GraphQLQueryToSelect {
                 .findFirst();
 
         Expression selectExpression;
-        if (groupByArgument == null && groupByArgumentOptional.isPresent()) {
+        if (groupByArgument == null && groupByArgumentOptional.isPresent() && manager.fieldTypeIsList(fieldDefinitionContext.type())) {
             plainSelect.setFromItem(
                     new SubSelect()
                             .withSelectBody(objectSelectionToPlainSelect(parentTypeName, typeName, selectionContext, fieldDefinitionContext, selectionContextList, groupByArgumentOptional.get(), level))
                             .withAlias(new Alias(dbNameUtil.graphqlTypeNameToTableAliaName(typeName, level)))
             );
-            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                selectExpression = jsonExtractFunction(dbNameUtil.fieldToColumn(typeName, GROUP_BY_INPUT_NAME, level), false);
-            } else {
-                selectExpression = jsonObjectFunction(
-                        new ExpressionList(
-                                selectionContextList.stream()
-//                                .flatMap(subSelectionContext -> manager.fragmentUnzip(typeName, subSelectionContext))
-                                        .filter(subSelectionContext -> manager.getField(typeName, subSelectionContext.field().name().getText()).isPresent())
-                                        .filter(subSelectionContext -> manager.isNotFetchField(typeName, subSelectionContext.field().name().getText()))
-                                        .filter(subSelectionContext -> manager.isNotInvokeField(typeName, subSelectionContext.field().name().getText()))
-                                        .flatMap(subSelectionContext -> selectionToExpressionStream(typeName, selectionContextList, subSelectionContext, parentTypeName == null ? level - 1 : level, parentTypeName == null))
-                                        .collect(Collectors.toList())
-                        )
-                );
-            }
+            selectExpression = jsonExtractFunction(dbNameUtil.fieldToColumn(typeName, GROUP_BY_INPUT_NAME, level), false);
         } else {
             plainSelect.setFromItem(table);
             selectExpression = jsonObjectFunction(
@@ -220,59 +207,57 @@ public class GraphQLQueryToSelect {
                                     .filter(subSelectionContext -> manager.getField(typeName, subSelectionContext.field().name().getText()).isPresent())
                                     .filter(subSelectionContext -> manager.isNotFetchField(typeName, subSelectionContext.field().name().getText()))
                                     .filter(subSelectionContext -> manager.isNotInvokeField(typeName, subSelectionContext.field().name().getText()))
-                                    .flatMap(subSelectionContext -> selectionToExpressionStream(typeName, selectionContextList, subSelectionContext, parentTypeName == null ? level - 1 : level, parentTypeName == null))
+                                    .flatMap(subSelectionContext ->
+                                            selectionToExpressionStream(
+                                                    typeName,
+                                                    selectionContextList,
+                                                    subSelectionContext,
+                                                    groupByArgument == null && groupByArgumentOptional.isPresent(),
+                                                    parentTypeName == null ? level - 1 : level,
+                                                    parentTypeName == null
+                                            )
+                                    )
                                     .collect(Collectors.toList())
                     )
             );
+
+            if (groupByArgumentOptional.isPresent()) {
+                GroupByElement groupByElement = new GroupByElement()
+                        .withGroupByExpressions(
+                                groupByArgumentOptional.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
+                                        .filter(valueWithVariableContext -> valueWithVariableContext.StringValue() != null)
+                                        .map(valueWithVariableContext -> fieldToColumn(typeToTable(typeName, level), DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue())))
+                                        .collect(Collectors.toList())
+                        );
+                plainSelect.setGroupByElement(groupByElement.withUsingBrackets(false));
+            }
         }
 
         SelectExpressionItem selectExpressionItem = new SelectExpressionItem();
         if (groupByArgument != null) {
-            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                selectExpressionItem.setAlias(new Alias(dbNameUtil.graphqlFieldNameToColumnName(GROUP_BY_INPUT_NAME)));
-                List<SelectExpressionItem> orderSelectColumnList = Stream.ofNullable(fieldDefinitionContext)
-                        .map(GraphqlParser.FieldDefinitionContext::argumentsDefinition)
-                        .flatMap(Stream::ofNullable)
-                        .flatMap(argumentsDefinitionContext -> argumentsDefinitionContext.inputValueDefinition().stream())
-                        .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(ORDER_BY_INPUT_NAME))
-                        .flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext).stream())
-                        .flatMap(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream())
-                        .map(objectFieldWithVariableContext -> dbNameUtil.fieldToColumn(typeName, objectFieldWithVariableContext, level))
-                        .map(SelectExpressionItem::new)
-                        .collect(Collectors.toList());
-                if (orderSelectColumnList.size() > 0) {
-                    plainSelect.addSelectItems(orderSelectColumnList);
-                }
+            selectExpressionItem.setAlias(new Alias(dbNameUtil.graphqlFieldNameToColumnName(GROUP_BY_INPUT_NAME)));
+            Optional<GraphqlParser.InputValueDefinitionContext> orderByInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                    .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(ORDER_BY_INPUT_NAME))
+                    .findFirst();
 
-                manager.getFieldByDirective(typeName, CURSOR_DIRECTIVE_NAME)
-                        .findFirst()
-                        .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
-                        .ifPresent(cursorFieldDefinitionContext ->
-                                plainSelect.addSelectItems(
-                                        new SelectExpressionItem(
-                                                new Function()
-                                                        .withName("MIN")
-                                                        .withParameters(
-                                                                new ExpressionList(dbNameUtil.fieldToColumn(typeName, cursorFieldDefinitionContext, level))
-                                                        )
-                                        ).withAlias(new Alias(dbNameUtil.graphqlFieldNameToColumnName(cursorFieldDefinitionContext.name().getText())))
+            Optional<GraphqlParser.ArgumentContext> orderBy = orderByInput.flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext));
+            orderBy.ifPresent(argumentContext -> {
+                        List<OrderByElement> orderByElementList = argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().enumValue() != null)
+                                .map(objectFieldWithVariableContext -> {
+                                            GraphqlParser.EnumValueContext enumValueContext = objectFieldWithVariableContext.valueWithVariable().enumValue();
+                                            OrderByElement orderByElement = new OrderByElement();
+                                            if (enumValueContext.enumValueName().getText().equals("DESC")) {
+                                                orderByElement.setAsc(false);
+                                            }
+                                            orderByElement.setExpression(fieldToColumn(table, objectFieldWithVariableContext));
+                                            return orderByElement;
+                                        }
                                 )
-                        );
-            } else {
-                manager.getObjectTypeIDFieldDefinition(typeName)
-                        .ifPresent(
-                                idFieldDefinitionContext ->
-                                        plainSelect.addSelectItems(
-                                                new SelectExpressionItem(
-                                                        new Function()
-                                                                .withName("MIN")
-                                                                .withParameters(
-                                                                        new ExpressionList(dbNameUtil.fieldToColumn(typeName, idFieldDefinitionContext, level))
-                                                                )
-                                                ).withAlias(new Alias(dbNameUtil.graphqlFieldNameToColumnName(idFieldDefinitionContext.name().getText())))
-                                        )
-                        );
-            }
+                                .collect(Collectors.toList());
+                        plainSelect.setOrderByElements(orderByElementList);
+                    }
+            );
 
             GroupByElement groupByElement = new GroupByElement()
                     .withGroupByExpressions(
@@ -281,11 +266,10 @@ public class GraphQLQueryToSelect {
                                     .map(valueWithVariableContext -> fieldToColumn(typeToTable(typeName, level), DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue())))
                                     .collect(Collectors.toList())
                     );
-
             plainSelect.setGroupByElement(groupByElement.withUsingBrackets(false));
         } else {
             if (fieldDefinitionContext != null && manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                selectExpression = jsonArrayAggFunction(new ExpressionList(selectExpression), typeName, selectionContext, fieldDefinitionContext, level);
+                selectExpression = jsonArrayAggFunction(new ExpressionList(selectExpression), typeName, selectionContext, fieldDefinitionContext, groupByArgumentOptional.isEmpty(), level);
             }
         }
         selectExpressionItem.setExpression(selectExpression);
@@ -355,7 +339,7 @@ public class GraphQLQueryToSelect {
         return plainSelect;
     }
 
-    protected Stream<Expression> selectionToExpressionStream(String typeName, List<GraphqlParser.SelectionContext> selectionContextList, GraphqlParser.SelectionContext selectionContext, int level, boolean isOperation) {
+    protected Stream<Expression> selectionToExpressionStream(String typeName, List<GraphqlParser.SelectionContext> selectionContextList, GraphqlParser.SelectionContext selectionContext, boolean over, int level, boolean isOperation) {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getObjectFieldDefinition(typeName, selectionContext.field().name().getText())
                 .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText())));
 
@@ -423,7 +407,7 @@ public class GraphQLQueryToSelect {
             } else {
                 return Stream.of(
                         selectionKey,
-                        fieldToExpression(typeName, fieldDefinitionContext, selectionContext, level)
+                        fieldToExpression(typeName, fieldDefinitionContext, selectionContext, over, level)
                 );
             }
         }
@@ -521,11 +505,13 @@ public class GraphQLQueryToSelect {
         return function;
     }
 
-    protected Function jsonArrayAggFunction(ExpressionList expressionList, String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level) {
+    protected Function jsonArrayAggFunction(ExpressionList expressionList, String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, boolean sort, int level) {
         JsonArrayAggregateFunction jsonArrayAggregateFunction = new JsonArrayAggregateFunction();
         jsonArrayAggregateFunction.setName("JSON_ARRAYAGG");
         jsonArrayAggregateFunction.setParameters(expressionList);
-        buildSortArguments(jsonArrayAggregateFunction, typeName, fieldDefinitionContext, selectionContext, level);
+        if (sort) {
+            buildSortArguments(jsonArrayAggregateFunction, typeName, fieldDefinitionContext, selectionContext, level);
+        }
         buildPageArguments(jsonArrayAggregateFunction, fieldDefinitionContext, selectionContext);
         return jsonArrayAggregateFunction;
     }
@@ -741,7 +727,6 @@ public class GraphQLQueryToSelect {
     protected void buildSortArguments(JsonArrayAggregateFunction jsonArrayAggregateFunction, String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext, int level) {
         if (fieldDefinitionContext.argumentsDefinition() != null) {
             Table table = typeToTable(typeName, level);
-
             if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                 Optional<GraphqlParser.InputValueDefinitionContext> orderByInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                         .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(ORDER_BY_INPUT_NAME))
@@ -802,7 +787,7 @@ public class GraphQLQueryToSelect {
         }
     }
 
-    protected Expression fieldToExpression(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext, int level) {
+    protected Expression fieldToExpression(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext, boolean over, int level) {
         Optional<GraphqlParser.FieldDefinitionContext> functionFieldDefinitionContext = Optional.empty();
         if (fieldDefinitionContext.directives() != null) {
             functionFieldDefinitionContext = fieldDefinitionContext.directives().directive().stream()
@@ -837,8 +822,7 @@ public class GraphQLQueryToSelect {
                     PlainSelect plainSelect = new PlainSelect();
                     Table withTable = typeToTable(mapWithObjectDefinition.get().name().getText(), level);
                     plainSelect.setFromItem(withTable);
-                    Function function;
-
+                    Expression function;
                     Optional<GraphqlParser.DirectiveContext> func = fieldDefinitionContext.directives().directive().stream()
                             .filter(directiveContext -> directiveContext.name().getText().equals(FUNC_DIRECTIVE_NAME))
                             .findFirst();
@@ -857,9 +841,17 @@ public class GraphQLQueryToSelect {
                                 .map(argumentContext -> argumentContext.valueWithVariable().StringValue());
 
                         if (name.isPresent() && field.isPresent()) {
-                            function = new Function();
-                            function.setName(functionEnumValueToFunctionName(name.get()));
-                            function.setParameters(new ExpressionList(scalarFieldToExpression(withTable, mapWithToFieldDefinition.get())));
+                            if (over) {
+                                function = new AnalyticExpression(
+                                        new Function()
+                                                .withName(functionEnumValueToFunctionName(name.get()))
+                                                .withParameters(new ExpressionList(scalarFieldToExpression(withTable, mapWithToFieldDefinition.get(), true)))
+                                ).withType(OVER);
+                            } else {
+                                function = new Function()
+                                        .withName(functionEnumValueToFunctionName(name.get()))
+                                        .withParameters(new ExpressionList(scalarFieldToExpression(withTable, mapWithToFieldDefinition.get(), true)));
+                            }
                         } else {
                             if (name.isEmpty()) {
                                 throw new GraphQLErrors(FUNC_NAME_NOT_EXIST.bind(func.get().getText()));
@@ -869,10 +861,11 @@ public class GraphQLQueryToSelect {
                         }
                     } else {
                         function = jsonArrayAggFunction(
-                                new ExpressionList(scalarFieldToExpression(withTable, mapWithToFieldDefinition.get())),
+                                new ExpressionList(scalarFieldToExpression(withTable, mapWithToFieldDefinition.get(), true)),
                                 mapWithObjectDefinition.get().name().getText(),
                                 selectionContext,
                                 mapWithToFieldDefinition.get(),
+                                true,
                                 level
                         );
                     }
@@ -940,9 +933,12 @@ public class GraphQLQueryToSelect {
                             .map(argumentContext -> argumentContext.valueWithVariable().StringValue());
 
                     if (name.isPresent() && field.isPresent()) {
-                        Function function = new Function();
-                        function.setName(functionEnumValueToFunctionName(name.get()));
-                        function.setParameters(new ExpressionList(scalarFieldToExpression(table, functionFieldDefinitionContext.get())));
+                        Function function = new Function()
+                                .withName(functionEnumValueToFunctionName(name.get()))
+                                .withParameters(new ExpressionList(scalarFieldToExpression(table, functionFieldDefinitionContext.get(), true)));
+                        if (over) {
+                            return new AnalyticExpression(function).withType(OVER);
+                        }
                         return function;
                     } else {
                         if (name.isEmpty()) {
@@ -953,25 +949,26 @@ public class GraphQLQueryToSelect {
                     }
                 }
             }
-            return scalarFieldToExpression(table, fieldDefinitionContext);
+            return scalarFieldToExpression(table, fieldDefinitionContext, false);
         }
     }
 
-    protected Expression scalarFieldToExpression(Table table, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    protected Expression scalarFieldToExpression(Table table, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, boolean inFunction) {
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        if (fieldTypeName.equals("ID")) {
-            Function function = new Function();
-            function.setName("CONVERT");
-            function.setParameters(new ExpressionList(Arrays.asList(fieldToColumn(table, fieldDefinitionContext), new HexValue("CHAR"))));
-            return function;
-        } else if (fieldTypeName.equals("Boolean")) {
-            Function function = new Function();
-            function.setName("IF");
-            function.setParameters(new ExpressionList(Arrays.asList(fieldToColumn(table, fieldDefinitionContext), new HexValue("TRUE"), new HexValue("FALSE"))));
-            return function;
-        } else {
-            return fieldToColumn(table, fieldDefinitionContext);
+        if (!inFunction) {
+            if (fieldTypeName.equals("ID")) {
+                Function function = new Function();
+                function.setName("CONVERT");
+                function.setParameters(new ExpressionList(Arrays.asList(fieldToColumn(table, fieldDefinitionContext), new HexValue("CHAR"))));
+                return function;
+            } else if (fieldTypeName.equals("Boolean")) {
+                Function function = new Function();
+                function.setName("IF");
+                function.setParameters(new ExpressionList(Arrays.asList(fieldToColumn(table, fieldDefinitionContext), new HexValue("TRUE"), new HexValue("FALSE"))));
+                return function;
+            }
         }
+        return fieldToColumn(table, fieldDefinitionContext);
     }
 
     protected String functionEnumValueToFunctionName(GraphqlParser.EnumValueContext enumValueContext) {
