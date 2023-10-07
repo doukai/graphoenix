@@ -18,6 +18,7 @@ import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NotExpression;
+import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
@@ -1213,21 +1214,21 @@ public class GraphQLArgumentsToWhere {
                             .collect(Collectors.toList())
             );
         } else {
+            List<Expression> expressionList =
+                    skipNull ?
+                            valueContext.arrayValue().value().stream()
+                                    .filter(item -> item.NullValue() == null)
+                                    .map(dbValueUtil::valueToDBValue)
+                                    .collect(Collectors.toList()) :
+                            valueContext.arrayValue().value().stream()
+                                    .map(dbValueUtil::valueToDBValue)
+                                    .collect(Collectors.toList());
             InExpression inExpression = new InExpression();
             inExpression.setLeftExpression(leftExpression);
             inExpression.setRightItemsList(
                     skipNull ?
-                            new ExpressionList(
-                                    valueContext.arrayValue().value().stream()
-                                            .filter(item -> item.NullValue() == null)
-                                            .map(dbValueUtil::valueToDBValue)
-                                            .collect(Collectors.toList())
-                            ) :
-                            new ExpressionList(
-                                    valueContext.arrayValue().value().stream()
-                                            .map(dbValueUtil::valueToDBValue)
-                                            .collect(Collectors.toList())
-                            )
+                            new ExpressionList(expressionList) :
+                            new ExpressionList(new NullValue())
             );
             if ("NIN".equals(enumValueContext.enumValueName().getText())) {
                 inExpression.setNot(true);
@@ -1323,19 +1324,19 @@ public class GraphQLArgumentsToWhere {
                 inExpression.setRightExpression(selectVariablesFromJsonArray(inputValueDefinitionContext, valueWithVariableContext));
                 return skipNull ? skipNullExpression(dbValueUtil.variableToJdbcNamedParameter(valueWithVariableContext.variable()), inExpression) : inExpression;
             } else {
-                inExpression.setRightItemsList(
+                List<Expression> expressionList =
                         skipNull ?
-                                new ExpressionList(
-                                        valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
-                                                .filter(item -> item.NullValue() == null)
-                                                .map(dbValueUtil::valueWithVariableToDBValue)
-                                                .collect(Collectors.toList())
-                                ) :
-                                new ExpressionList(
-                                        valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
-                                                .map(dbValueUtil::valueWithVariableToDBValue)
-                                                .collect(Collectors.toList())
-                                )
+                                valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
+                                        .filter(item -> item.NullValue() == null)
+                                        .map(dbValueUtil::valueWithVariableToDBValue)
+                                        .collect(Collectors.toList()) :
+                                valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
+                                        .map(dbValueUtil::valueWithVariableToDBValue)
+                                        .collect(Collectors.toList());
+                inExpression.setRightItemsList(
+                        expressionList.size() > 0 ?
+                                new ExpressionList(expressionList) :
+                                new ExpressionList(new NullValue())
                 );
                 return inExpression;
             }

@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.REQUEST_ID;
+import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
 import static reactor.rabbitmq.BindingSpecification.binding;
 import static reactor.rabbitmq.QueueSpecification.queue;
 
@@ -123,11 +124,21 @@ public class RabbitMQOperationSubscriber extends OperationSubscriber {
                             String selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText();
                             JsonValue selectionJsonValue = jsonValue.asJsonObject().get(selectionName);
                             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                                mutation.add("arguments", jsonProvider.createArrayBuilder(arguments.get(LIST_INPUT_NAME).asJsonArray()))
-                                        .add("mutation", jsonProvider.createArrayBuilder(selectionJsonValue.asJsonArray()));
+                                if (arguments.containsKey(WHERE_INPUT_NAME)) {
+                                    mutation.add("arguments", JsonValue.EMPTY_JSON_ARRAY)
+                                            .add("mutation", jsonProvider.createArrayBuilder(selectionJsonValue.asJsonArray()));
+                                } else {
+                                    mutation.add("arguments", jsonProvider.createArrayBuilder(arguments.get(LIST_INPUT_NAME).asJsonArray()))
+                                            .add("mutation", jsonProvider.createArrayBuilder(selectionJsonValue.asJsonArray()));
+                                }
                             } else {
-                                mutation.add("arguments", jsonProvider.createArrayBuilder().add(jsonProvider.createObjectBuilder(arguments.asJsonObject())))
-                                        .add("mutation", jsonProvider.createArrayBuilder().add(jsonProvider.createObjectBuilder(selectionJsonValue.asJsonObject())));
+                                if (arguments.containsKey(WHERE_INPUT_NAME)) {
+                                    mutation.add("arguments", JsonValue.EMPTY_JSON_ARRAY)
+                                            .add("mutation", jsonProvider.createArrayBuilder().add(jsonProvider.createObjectBuilder(selectionJsonValue.asJsonObject())));
+                                } else {
+                                    mutation.add("arguments", jsonProvider.createArrayBuilder().add(jsonProvider.createObjectBuilder(arguments.asJsonObject())))
+                                            .add("mutation", jsonProvider.createArrayBuilder().add(jsonProvider.createObjectBuilder(selectionJsonValue.asJsonObject())));
+                                }
                             }
                             return new OutboundMessage(
                                     SUBSCRIPTION_EXCHANGE_NAME,

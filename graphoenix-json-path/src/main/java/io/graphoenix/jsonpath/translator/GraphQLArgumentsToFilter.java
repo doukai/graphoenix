@@ -6,7 +6,6 @@ import io.graphoenix.jsonpath.expression.operators.*;
 import io.graphoenix.jsonpath.expression.Expression;
 import io.graphoenix.jsonpath.expression.MultiAndExpression;
 import io.graphoenix.jsonpath.expression.MultiOrExpression;
-import io.graphoenix.jsonpath.expression.operators.*;
 import io.graphoenix.jsonpath.utils.JsonValueUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
