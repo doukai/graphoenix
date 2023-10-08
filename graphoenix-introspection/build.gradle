@@ -1,13 +1,13 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        jcenter()
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
-    }
-}
+//buildscript {
+//    repositories {
+//        mavenLocal()
+//        jcenter()
+//        gradlePluginPortal()
+//    }
+//    dependencies {
+//        classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
+//    }
+//}
 
 plugins {
     id 'java'
@@ -17,15 +17,21 @@ plugins {
 compileJava.options.sourcepath = files('src/main/resources')
 
 apply plugin: 'maven'
-apply plugin: 'io.graphoenix'
+//apply plugin: 'io.graphoenix'
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.21.7"
+        // artifact = "com.google.protobuf:protoc:3.21.7"
+        // for apple m1, please add protoc_platform=osx-x86_64 in $HOME/.gradle/gradle.properties
+        if (project.hasProperty('protoc_platform')) {
+            artifact = "com.google.protobuf:protoc:3.21.7:${protoc_platform}"
+        } else {
+            artifact = "com.google.protobuf:protoc:3.21.7"
+        }
     }
     plugins {
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.52.1'
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.58.0'
         }
         reactor {
             artifact = "com.salesforce.servicelibs:reactor-grpc:1.2.3"
