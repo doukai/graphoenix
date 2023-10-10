@@ -45,7 +45,7 @@ public class TypesafeConfig implements Config {
     @Override
     public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
         if (config.hasPath(propertyName)) {
-            return Optional.of(ConfigBeanFactory.create(config.getConfig(propertyName), propertyType));
+            return Optional.of(getValue(propertyName, propertyType));
         }
         return Optional.empty();
     }

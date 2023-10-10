@@ -11,13 +11,11 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public enum ConfigUtil {
     CONFIG_UTIL;
@@ -50,25 +48,25 @@ public enum ConfigUtil {
         try {
             Path configPath = Paths.get(path);
             if (Files.exists(configPath)) {
-                Files.list(configPath)
+                List<Path> configFileList = Files.list(configPath)
                         .filter(filePath -> filePath.toString().endsWith(".conf") || filePath.toString().endsWith(".json") || filePath.toString().endsWith(".properties"))
-                        .forEach(filePath -> typesafeConfig.mergeConfig(ConfigFactory.parseFile(filePath.toFile())));
+                        .collect(Collectors.toList());
+                for (Path configFile : configFileList) {
+                    try {
+                        typesafeConfig.mergeConfig(ConfigFactory.parseFile(configFile.toFile()));
+                    } catch (ConfigException e) {
+                        Logger.warn(e);
+                    }
+                }
             }
         } catch (IOException e) {
             Logger.error(e);
-        } catch (ConfigException e) {
-            Logger.warn(e);
         }
         return typesafeConfig;
     }
 
     public <T> T getConfig(Class<T> tClass) {
-        try {
-            return typesafeConfig.getOptionalValue(tClass.getAnnotation(ConfigProperties.class).prefix(), tClass).orElse(tClass.getDeclaredConstructor().newInstance());
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            Logger.error(e);
-            return null;
-        }
+        return typesafeConfig.getValue(tClass.getAnnotation(ConfigProperties.class).prefix(), tClass);
     }
 
     public TypesafeConfig load(Filer filer) {
