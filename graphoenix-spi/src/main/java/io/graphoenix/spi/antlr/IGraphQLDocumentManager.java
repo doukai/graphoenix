@@ -401,11 +401,11 @@ public interface IGraphQLDocumentManager {
 
     Stream<GraphqlParser.DirectiveLocationContext> getDirectiveLocations(GraphqlParser.DirectiveLocationsContext directiveLocationsContext);
 
-    boolean isInputInterface(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+    boolean isInterface(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
 
-    boolean hasImplementInputs(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+    boolean hasImplements(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
 
-    Stream<GraphqlParser.InputObjectTypeDefinitionContext> getInputInterfaces(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+    Stream<GraphqlParser.InputObjectTypeDefinitionContext> getInterfaces(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
 
     void clearAll();
 }

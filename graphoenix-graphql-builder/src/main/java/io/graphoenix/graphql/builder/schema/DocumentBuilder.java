@@ -891,21 +891,66 @@ public class DocumentBuilder {
         if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
             String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
             inputObjectType.setName(objectTypeDefinitionContext.name().getText() + queryTypeName + inputType)
-                    .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
+                    .addDirective(
+                            new io.graphoenix.core.operation.Directive("implements")
+                                    .addArgument("interfaces",
+                                            new ArrayValueWithVariable(
+                                                    Stream.concat(
+                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                            .flatMap(manager::getInterfaces)
+                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                                    Stream.of(META_INTERFACE_NAME)
+                                                            )
+                                                            .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
+                                                            .distinct()
+                                                            .collect(Collectors.toList())
+                                            )
+                                    )
+                    )
                     .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
         } else if (inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
             String subscriptionTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIBE_TYPE_NOT_EXIST));
             inputObjectType.setName(objectTypeDefinitionContext.name().getText() + subscriptionTypeName + inputType)
-                    .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
+                    .addDirective(
+                            new io.graphoenix.core.operation.Directive("implements")
+                                    .addArgument("interfaces",
+                                            new ArrayValueWithVariable(
+                                                    Stream.concat(
+                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                            .flatMap(manager::getInterfaces)
+                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                                    Stream.of(META_INTERFACE_NAME)
+                                                            )
+                                                            .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
+                                                            .distinct()
+                                                            .collect(Collectors.toList())
+                                            )
+                                    )
+                    )
                     .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
         } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
             String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
             inputObjectType.setName(objectTypeDefinitionContext.name().getText() + mutationTypeName + inputType)
-                    .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaInput"))))
+                    .addDirective(
+                            new io.graphoenix.core.operation.Directive("implements")
+                                    .addArgument("interfaces",
+                                            new ArrayValueWithVariable(
+                                                    Stream.concat(
+                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                            .flatMap(manager::getInterfaces)
+                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                                    Stream.of(META_INTERFACE_NAME)
+                                                            )
+                                                            .map(interfaceName -> interfaceName.concat(INPUT_SUFFIX))
+                                                            .distinct()
+                                                            .collect(Collectors.toList())
+                                            )
+                                    )
+                    )
                     .addInputValue(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
         }
         Optional.ofNullable(objectTypeDefinitionContext.directives())
@@ -969,7 +1014,22 @@ public class DocumentBuilder {
         if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
             String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
             inputObjectType.setName(objectTypeDefinitionContext.name().getText() + LIST_SUFFIX + queryTypeName + inputType)
-                    .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
+                    .addDirective(
+                            new io.graphoenix.core.operation.Directive("implements")
+                                    .addArgument("interfaces",
+                                            new ArrayValueWithVariable(
+                                                    Stream.concat(
+                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                            .flatMap(manager::getInterfaces)
+                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                                    Stream.of(META_INTERFACE_NAME)
+                                                            )
+                                                            .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
+                                                            .distinct()
+                                                            .collect(Collectors.toList())
+                                            )
+                                    )
+                    )
                     .addInputValue(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.ORDER_BY))
                     .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
@@ -988,7 +1048,22 @@ public class DocumentBuilder {
         } else if (inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
             String subscriptionTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIPTION_TYPE_NAME));
             inputObjectType.setName(objectTypeDefinitionContext.name().getText() + LIST_SUFFIX + subscriptionTypeName + inputType)
-                    .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
+                    .addDirective(
+                            new io.graphoenix.core.operation.Directive("implements")
+                                    .addArgument("interfaces",
+                                            new ArrayValueWithVariable(
+                                                    Stream.concat(
+                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                            .flatMap(manager::getInterfaces)
+                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                                    Stream.of(META_INTERFACE_NAME)
+                                                            )
+                                                            .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
+                                                            .distinct()
+                                                            .collect(Collectors.toList())
+                                            )
+                                    )
+                    )
                     .addInputValue(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.ORDER_BY))
                     .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
@@ -1007,7 +1082,22 @@ public class DocumentBuilder {
         } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
             String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
             inputObjectType.setName(objectTypeDefinitionContext.name().getText() + LIST_SUFFIX + mutationTypeName + inputType)
-                    .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaInput"))))
+                    .addDirective(
+                            new io.graphoenix.core.operation.Directive("implements")
+                                    .addArgument("interfaces",
+                                            new ArrayValueWithVariable(
+                                                    Stream.concat(
+                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                            .flatMap(manager::getInterfaces)
+                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                                    Stream.of(META_INTERFACE_NAME)
+                                                            )
+                                                            .map(interfaceName -> interfaceName.concat(INPUT_SUFFIX))
+                                                            .distinct()
+                                                            .collect(Collectors.toList())
+                                            )
+                                    )
+                    )
                     .addInputValue(new InputValue().setName(LIST_INPUT_NAME).setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.INPUT))))
                     .addInputValue(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
         }
@@ -1076,7 +1166,22 @@ public class DocumentBuilder {
         if (inputType.equals(InputType.QUERY_ARGUMENTS)) {
             String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
             inputObjectType.setName(objectTypeDefinitionContext.name().getText() + CONNECTION_SUFFIX + queryTypeName + inputType)
-                    .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
+                    .addDirective(
+                            new io.graphoenix.core.operation.Directive("implements")
+                                    .addArgument("interfaces",
+                                            new ArrayValueWithVariable(
+                                                    Stream.concat(
+                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                            .flatMap(manager::getInterfaces)
+                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                                    Stream.of(META_INTERFACE_NAME)
+                                                            )
+                                                            .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
+                                                            .distinct()
+                                                            .collect(Collectors.toList())
+                                            )
+                                    )
+                    )
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
                     .addInputValue(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
@@ -1093,7 +1198,22 @@ public class DocumentBuilder {
         } else if (inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
             String subscriptionTypeName = manager.getSubscriptionOperationTypeName().orElseThrow(() -> new GraphQLErrors(SUBSCRIPTION_TYPE_NAME));
             inputObjectType.setName(objectTypeDefinitionContext.name().getText() + CONNECTION_SUFFIX + subscriptionTypeName + inputType)
-                    .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
+                    .addDirective(
+                            new io.graphoenix.core.operation.Directive("implements")
+                                    .addArgument("interfaces",
+                                            new ArrayValueWithVariable(
+                                                    Stream.concat(
+                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                            .flatMap(manager::getInterfaces)
+                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                                    Stream.of(META_INTERFACE_NAME)
+                                                            )
+                                                            .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
+                                                            .distinct()
+                                                            .collect(Collectors.toList())
+                                            )
+                                    )
+                    )
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
                     .addInputValue(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
@@ -1149,7 +1269,7 @@ public class DocumentBuilder {
                     .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                     .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                     .filter(fieldDefinitionContext -> manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                    .map(fieldDefinitionContext -> fieldToArgument(objectTypeDefinitionContext, fieldDefinitionContext, inputType))
+                    .map(fieldDefinitionContext -> fieldToArgument(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext, inputType))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         } else {
             return (isArguments ?
@@ -1165,16 +1285,16 @@ public class DocumentBuilder {
                     .filter(manager::isNotConnectionField)
                     .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
                     .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
-                    .map(fieldDefinitionContext -> fieldToArgument(objectTypeDefinitionContext, fieldDefinitionContext, inputType))
+                    .map(fieldDefinitionContext -> fieldToArgument(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext, inputType))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
     }
 
-    public InputValue fieldToArgument(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, InputType inputType) {
+    public InputValue fieldToArgument(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, InputType inputType) {
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         if (inputType.equals(InputType.INPUT) || inputType.equals(InputType.MUTATION_ARGUMENTS)) {
             if (fieldDefinitionContext.name().getText().equals("__typename")) {
-                return new InputValue().setName("__typename").setType("String").setDefaultValue(objectTypeDefinitionContext.name().getText());
+                return new InputValue().setName("__typename").setType("String").setDefaultValue(typeName);
             }
             String argumentTypeName;
             if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
@@ -1242,6 +1362,14 @@ public class DocumentBuilder {
                                         objectToOrderBy(objectTypeDefinitionContext)
                                 )
                         ),
+                manager.getInterfaces()
+                        .filter(packageManager::isOwnPackage)
+                        .flatMap(interfaceTypeDefinitionContext ->
+                                Stream.of(
+                                        interfaceToExpression(interfaceTypeDefinitionContext),
+                                        interfaceToInput(interfaceTypeDefinitionContext)
+                                )
+                        ),
                 manager.getEnums()
                         .filter(packageManager::isOwnPackage)
                         .map(this::enumToExpression)
@@ -1264,12 +1392,65 @@ public class DocumentBuilder {
 
     public InputObjectType objectToInput(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         InputObjectType inputObjectType = new InputObjectType()
-                .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaInput"))))
+                .addDirective(
+                        new io.graphoenix.core.operation.Directive("implements")
+                                .addArgument("interfaces",
+                                        new ArrayValueWithVariable(
+                                                Stream.concat(
+                                                                Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                        .flatMap(manager::getInterfaces)
+                                                                        .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                                Stream.of(META_INTERFACE_NAME)
+                                                        )
+                                                        .map(interfaceName -> interfaceName.concat(INPUT_SUFFIX))
+                                                        .distinct()
+                                                        .collect(Collectors.toList())
+                                        )
+                                )
+                )
                 .setName(objectTypeDefinitionContext.name().getText() + InputType.INPUT)
                 .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.INPUT))
                 .addInputValue(new InputValue(WHERE_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION));
 
         Optional.ofNullable(objectTypeDefinitionContext.directives())
+                .flatMap(directivesContext ->
+                        directivesContext.directive().stream()
+                                .filter(directiveContext -> directiveContext.name().getText().equals(VALIDATION_DIRECTIVE_NAME)).findFirst()
+                )
+                .ifPresent(directiveContext -> inputObjectType.addDirective(new io.graphoenix.core.operation.Directive(directiveContext)));
+
+        return inputObjectType;
+    }
+
+    public InputObjectType interfaceToInput(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        InputObjectType inputObjectType = new InputObjectType()
+                .addDirective(new io.graphoenix.core.operation.Directive("interface"))
+                .addDirective(
+                        new io.graphoenix.core.operation.Directive("implements")
+                                .addArgument("interfaces",
+                                        new ArrayValueWithVariable(
+                                                Stream.ofNullable(interfaceTypeDefinitionContext.implementsInterfaces())
+                                                        .flatMap(manager::getInterfaces)
+                                                        .map(implementInterfaceTypeDefinitionContext -> implementInterfaceTypeDefinitionContext.name().getText())
+                                                        .map(interfaceName -> interfaceName.concat(INPUT_SUFFIX))
+                                                        .collect(Collectors.toList())
+                                        )
+                                )
+                )
+                .setName(interfaceTypeDefinitionContext.name().getText() + InputType.INPUT)
+                .setInputValues(
+                        interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                .filter(manager::isNotInvokeField)
+//                    .filter(manager::isNotFetchField)
+                                .filter(manager::isNotFunctionField)
+                                .filter(manager::isNotConnectionField)
+                                .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
+                                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                                .map(fieldDefinitionContext -> fieldToArgument(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, InputType.INPUT))
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
+                );
+
+        Optional.ofNullable(interfaceTypeDefinitionContext.directives())
                 .flatMap(directivesContext ->
                         directivesContext.directive().stream()
                                 .filter(directiveContext -> directiveContext.name().getText().equals(VALIDATION_DIRECTIVE_NAME)).findFirst()
@@ -1309,11 +1490,55 @@ public class DocumentBuilder {
 
     public InputObjectType objectToExpression(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return new InputObjectType()
-                .addDirective(new io.graphoenix.core.operation.Directive("implementInputs").addArgument("inputs", new ArrayValueWithVariable(Collections.singleton("MetaExpression"))))
+                .addDirective(
+                        new io.graphoenix.core.operation.Directive("implements")
+                                .addArgument("interfaces",
+                                        new ArrayValueWithVariable(
+                                                Stream.concat(
+                                                                Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                        .flatMap(manager::getInterfaces)
+                                                                        .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                                Stream.of(META_INTERFACE_NAME)
+                                                        )
+                                                        .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
+                                                        .distinct()
+                                                        .collect(Collectors.toList())
+                                        )
+                                )
+                )
                 .setName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION)
                 .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.EXPRESSION))
                 .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                 .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
+    }
+
+    public InputObjectType interfaceToExpression(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return new InputObjectType()
+                .addDirective(new io.graphoenix.core.operation.Directive("interface"))
+                .addDirective(
+                        new io.graphoenix.core.operation.Directive("implements")
+                                .addArgument("interfaces",
+                                        new ArrayValueWithVariable(
+                                                Stream.ofNullable(interfaceTypeDefinitionContext.implementsInterfaces())
+                                                        .flatMap(manager::getInterfaces)
+                                                        .map(implementInterfaceTypeDefinitionContext -> implementInterfaceTypeDefinitionContext.name().getText())
+                                                        .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
+                                                        .collect(Collectors.toList())
+                                        )
+                                )
+                )
+                .setName(interfaceTypeDefinitionContext.name().getText() + InputType.EXPRESSION)
+                .setInputValues(
+                        interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                .filter(manager::isNotInvokeField)
+//                    .filter(manager::isNotFetchField)
+                                .filter(manager::isNotFunctionField)
+                                .filter(manager::isNotConnectionField)
+                                .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
+                                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                                .map(fieldDefinitionContext -> fieldToArgument(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, InputType.EXPRESSION))
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
+                );
     }
 
     public InputObjectType enumToExpression(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {

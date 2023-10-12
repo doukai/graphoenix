@@ -2,6 +2,7 @@ package io.graphoenix.core.dto.inputObjectType;
 
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
+import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
 import java.time.LocalDateTime;
@@ -38,4 +39,8 @@ public interface MetaInput {
   String getCreateGroupId();
 
   void setCreateGroupId(String createGroupId);
+
+  Boolean getIsDeprecated();
+
+  void setIsDeprecated(Boolean isDeprecated);
 }

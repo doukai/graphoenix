@@ -10,6 +10,7 @@ import io.graphoenix.showcase.user.dto.inputObjectType.UserExpression;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
+import java.lang.String;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
@@ -55,6 +56,8 @@ public class MerchantSubscriptionArguments implements MetaExpression {
   private MerchantPartnersExpression merchantPartners;
 
   private MerchantDirectorExpression merchantDirector;
+
+  private Collection<String> groupBy;
 
   @DefaultValue("AND")
   private Conditional cond;
@@ -203,6 +206,14 @@ public class MerchantSubscriptionArguments implements MetaExpression {
 
   public void setMerchantDirector(MerchantDirectorExpression merchantDirector) {
     this.merchantDirector = merchantDirector;
+  }
+
+  public Collection<String> getGroupBy() {
+    return this.groupBy;
+  }
+
+  public void setGroupBy(Collection<String> groupBy) {
+    this.groupBy = groupBy;
   }
 
   public Conditional getCond() {

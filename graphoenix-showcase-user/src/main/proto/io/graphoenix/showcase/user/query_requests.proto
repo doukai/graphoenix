@@ -39,8 +39,9 @@ message QueryUserRequest {
     optional io.graphoenix.core.grpc.IntExpression organization_id = 23;
     optional UserRoleExpression user_role = 24;
     optional UserMobileNumbersExpression user_mobile_numbers = 25;
-    optional io.graphoenix.core.grpc.Conditional cond = 26;
-    repeated UserExpression exs = 27;
+    repeated string group_by = 26;
+    optional io.graphoenix.core.grpc.Conditional cond = 27;
+    repeated UserExpression exs = 28;
 }
 message QueryUserListRequest {
     optional string selection_set = 1;
@@ -131,8 +132,9 @@ message QueryUserProfileRequest {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 14;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
     optional io.graphoenix.core.grpc.IntExpression user_id = 16;
-    optional io.graphoenix.core.grpc.Conditional cond = 17;
-    repeated UserProfileExpression exs = 18;
+    repeated string group_by = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated UserProfileExpression exs = 19;
 }
 message QueryUserProfileListRequest {
     optional string selection_set = 1;
@@ -206,8 +208,9 @@ message QueryRoleRequest {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
     optional RoleRoleTypeExpression role_role_type = 16;
     optional UserRoleExpression user_role = 17;
-    optional io.graphoenix.core.grpc.Conditional cond = 18;
-    repeated RoleExpression exs = 19;
+    repeated string group_by = 18;
+    optional io.graphoenix.core.grpc.Conditional cond = 19;
+    repeated RoleExpression exs = 20;
 }
 message QueryRoleListRequest {
     optional string selection_set = 1;
@@ -282,8 +285,9 @@ message QueryOrganizationRequest {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 14;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
     optional io.graphoenix.core.grpc.IntExpression above_id = 16;
-    optional io.graphoenix.core.grpc.Conditional cond = 17;
-    repeated OrganizationExpression exs = 18;
+    repeated string group_by = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated OrganizationExpression exs = 19;
 }
 message QueryOrganizationListRequest {
     optional string selection_set = 1;
@@ -356,8 +360,9 @@ message QueryUserRoleRequest {
     optional io.graphoenix.core.grpc.StringExpression update_time = 14;
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 15;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 16;
-    optional io.graphoenix.core.grpc.Conditional cond = 17;
-    repeated UserRoleExpression exs = 18;
+    repeated string group_by = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated UserRoleExpression exs = 19;
 }
 message QueryUserRoleListRequest {
     optional string selection_set = 1;
@@ -429,8 +434,9 @@ message QueryUserMobileNumbersRequest {
     optional io.graphoenix.core.grpc.StringExpression update_time = 13;
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 14;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
-    optional io.graphoenix.core.grpc.Conditional cond = 16;
-    repeated UserMobileNumbersExpression exs = 17;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated UserMobileNumbersExpression exs = 18;
 }
 message QueryUserMobileNumbersListRequest {
     optional string selection_set = 1;
@@ -500,8 +506,9 @@ message QueryRoleRoleTypeRequest {
     optional io.graphoenix.core.grpc.StringExpression update_time = 13;
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 14;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
-    optional io.graphoenix.core.grpc.Conditional cond = 16;
-    repeated RoleRoleTypeExpression exs = 17;
+    repeated string group_by = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated RoleRoleTypeExpression exs = 18;
 }
 message QueryRoleRoleTypeListRequest {
     optional string selection_set = 1;
@@ -587,13 +594,13 @@ message QueryCreateGroupIdRequest {
     optional string selection_set = 1;
     optional string arguments = 2;
 }
-message QueryLoginRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    string login = 3;
-    string password = 4;
-}
 message QueryMetaInfoRequest {
     optional string selection_set = 1;
     optional string arguments = 2;
+}
+message QueryLoginRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string login = 3;
+    optional string password = 4;
 }

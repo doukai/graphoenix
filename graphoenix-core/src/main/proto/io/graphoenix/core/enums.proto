@@ -33,12 +33,12 @@ enum Sort {
     ASC_SORT = 0;
     DESC_SORT = 1;
 }
-enum Function {
-    COUNT_FUNCTION = 0;
-    MAX_FUNCTION = 1;
-    MIN_FUNCTION = 2;
-    SUM_FUNCTION = 3;
-    AVG_FUNCTION = 4;
+enum Func {
+    COUNT_FUNC = 0;
+    MAX_FUNC = 1;
+    MIN_FUNC = 2;
+    SUM_FUNC = 3;
+    AVG_FUNC = 4;
 }
 enum Protocol {
     LOCAL_PROTOCOL = 0;

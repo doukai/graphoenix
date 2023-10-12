@@ -14,8 +14,8 @@ import java.lang.annotation.Target;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
-@Directive("implementInputs")
+@Directive("implements")
 @Target({ElementType.TYPE})
-public @interface ImplementInputs {
-  String[] inputs();
+public @interface Implements {
+  String[] interfaces();
 }

@@ -2,6 +2,7 @@ package io.graphoenix.core.dto.inputObjectType;
 
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
+import java.lang.Boolean;
 import org.eclipse.microprofile.graphql.Input;
 
 @Input
@@ -31,4 +32,12 @@ public interface MetaExpression {
   StringExpression getCreateGroupId();
 
   void setCreateGroupId(StringExpression createGroupId);
+
+  Boolean getIncludeDeprecated();
+
+  void setIncludeDeprecated(Boolean includeDeprecated);
+
+  IntExpression getVersion();
+
+  void setVersion(IntExpression version);
 }

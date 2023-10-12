@@ -10,7 +10,7 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class MapWith {
+public class With {
   private String type;
 
   private String from;

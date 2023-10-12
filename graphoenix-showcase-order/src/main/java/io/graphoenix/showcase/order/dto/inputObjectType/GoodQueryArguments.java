@@ -8,6 +8,7 @@ import io.graphoenix.core.dto.inputObjectType.StringExpression;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
+import java.lang.String;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
@@ -51,6 +52,8 @@ public class GoodQueryArguments implements MetaExpression {
   private IntExpression productId;
 
   private IntExpression merchantId;
+
+  private Collection<String> groupBy;
 
   @DefaultValue("AND")
   private Conditional cond;
@@ -191,6 +194,14 @@ public class GoodQueryArguments implements MetaExpression {
 
   public void setMerchantId(IntExpression merchantId) {
     this.merchantId = merchantId;
+  }
+
+  public Collection<String> getGroupBy() {
+    return this.groupBy;
+  }
+
+  public void setGroupBy(Collection<String> groupBy) {
+    this.groupBy = groupBy;
   }
 
   public Conditional getCond() {

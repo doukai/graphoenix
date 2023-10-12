@@ -134,7 +134,7 @@ public class TypeSpecBuilder {
     }
 
     public TypeSpec buildClass(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        boolean isInputInterface = manager.isInputInterface(inputObjectTypeDefinitionContext);
+        boolean isInputInterface = manager.isInterface(inputObjectTypeDefinitionContext);
         TypeSpec.Builder builder;
         if (isInputInterface) {
             builder = TypeSpec.interfaceBuilder(inputObjectTypeDefinitionContext.name().getText());
@@ -158,9 +158,9 @@ public class TypeSpecBuilder {
                             }
                         }
                 );
-        if (manager.hasImplementInputs(inputObjectTypeDefinitionContext)) {
+        if (manager.hasImplements(inputObjectTypeDefinitionContext)) {
             builder.addSuperinterfaces(
-                    manager.getInputInterfaces(inputObjectTypeDefinitionContext)
+                    manager.getInterfaces(inputObjectTypeDefinitionContext)
                             .map(interfaceTypeDefinitionContext -> TYPE_NAME_UTIL.toClassName(packageManager.getClassName(interfaceTypeDefinitionContext)))
                             .collect(Collectors.toList())
             );

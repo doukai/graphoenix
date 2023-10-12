@@ -88,7 +88,7 @@ public class ApplicationProcessor extends BaseProcessor {
             writer.close();
 
             List<GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinitionContextList = manager.getInputObjects()
-                    .filter(inputObjectTypeDefinitionContext -> !manager.isInputInterface(inputObjectTypeDefinitionContext))
+                    .filter(inputObjectTypeDefinitionContext -> !manager.isInterface(inputObjectTypeDefinitionContext))
                     .collect(Collectors.toList());
             for (GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext : inputObjectTypeDefinitionContextList) {
                 for (Map.Entry<String, String> resultEntry : jsonSchemaTranslator.objectToJsonSchemaStringStream(inputObjectTypeDefinitionContext).collect(Collectors.toList())) {

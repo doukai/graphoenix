@@ -64,8 +64,8 @@ public class GraphQLInputObjectManager implements IGraphQLInputObjectManager {
             return Stream.empty();
         }
         return directivesContext.directive().stream()
-                .filter(directiveContext -> directiveContext.name().getText().equals("implementInputs"))
-                .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("inputs")))
+                .filter(directiveContext -> directiveContext.name().getText().equals("implements"))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("interfaces")))
                 .flatMap(argumentContext -> argumentContext.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream())
                 .map(valueWithVariableContext -> DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue()));
     }

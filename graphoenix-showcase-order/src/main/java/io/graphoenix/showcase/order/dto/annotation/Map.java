@@ -1,6 +1,6 @@
 package io.graphoenix.showcase.order.dto.annotation;
 
-import io.graphoenix.core.dto.annotation.MapWith;
+import io.graphoenix.core.dto.annotation.With;
 import io.graphoenix.spi.annotation.Directive;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 public @interface Map {
   String from();
 
-  MapWith with();
+  With with();
 
   String to();
 

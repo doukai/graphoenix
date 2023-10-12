@@ -14,6 +14,6 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.SOURCE)
 @Directive("permitAll")
-@Target({ElementType.FIELD,ElementType.TYPE})
+@Target({ElementType.TYPE,ElementType.FIELD})
 public @interface PermitAll {
 }

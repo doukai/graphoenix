@@ -1,6 +1,6 @@
 package io.graphoenix.introspection.dto.annotation;
 
-import io.graphoenix.core.dto.annotation.MapWith;
+import io.graphoenix.core.dto.annotation.With;
 import io.graphoenix.core.dto.enumType.Protocol;
 import io.graphoenix.spi.annotation.Directive;
 import io.graphoenix.spi.annotation.Ignore;
@@ -23,7 +23,7 @@ public @interface Fetch {
 
   String from();
 
-  MapWith with();
+  With with();
 
   String to();
 

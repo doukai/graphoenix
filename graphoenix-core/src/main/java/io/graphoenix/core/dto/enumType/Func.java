@@ -7,7 +7,7 @@ import org.eclipse.microprofile.graphql.Enum;
 @Enum
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public enum Function {
+public enum Func {
   COUNT,
 
   MAX,

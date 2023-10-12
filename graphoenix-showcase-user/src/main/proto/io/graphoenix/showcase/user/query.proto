@@ -42,6 +42,6 @@ service QueryService {
     rpc UpdateUserId (QueryUpdateUserIdRequest) returns (QueryUpdateUserIdResponse);
     rpc UpdateTime (QueryUpdateTimeRequest) returns (QueryUpdateTimeResponse);
     rpc CreateGroupId (QueryCreateGroupIdRequest) returns (QueryCreateGroupIdResponse);
-    rpc Login (QueryLoginRequest) returns (QueryLoginResponse);
     rpc MetaInfo (QueryMetaInfoRequest) returns (QueryMetaInfoResponse);
+    rpc Login (QueryLoginRequest) returns (QueryLoginResponse);
 }

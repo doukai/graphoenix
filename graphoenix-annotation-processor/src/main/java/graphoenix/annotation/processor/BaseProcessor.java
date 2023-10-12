@@ -221,7 +221,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                         typeUtils.asElement(variableElement.asType()).getAnnotation(Input.class) != null
                                         )
                                         .map(variableElement -> typeUtils.asElement(variableElement.asType()).getSimpleName().toString())
-                                        .filter(inputName -> manager.getInputObject(inputName).isEmpty() || !manager.isInputInterface(manager.getInputObject(inputName).get()))
+                                        .filter(inputName -> manager.getInputObject(inputName).isEmpty() || !manager.isInterface(manager.getInputObject(inputName).get()))
                                         .map(inputName ->
                                                 manager.getInputObject(inputName)
                                                         .map(inputObjectTypeDefinitionContext ->
@@ -269,7 +269,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                         )
                                         .map(variableElement -> typeUtils.asElement(variableElement.asType()).getSimpleName().toString())
                                         .flatMap(inputName -> manager.getInputObject(inputName).stream())
-                                        .filter(manager::isInputInterface)
+                                        .filter(manager::isInterface)
                                         .flatMap(inputObjectTypeDefinitionContext -> manager.getImplementsInputObjectTypeDefinition(inputObjectTypeDefinitionContext.name().getText()))
                                         .map(inputObjectTypeDefinitionContext -> documentBuilder.buildInputObjectType(inputObjectTypeDefinitionContext))
                                         .forEach(inputObjectType -> {

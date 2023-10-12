@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
 public @interface Map {
   String from();
 
-  MapWith with();
+  With with();
 
   String to();
 

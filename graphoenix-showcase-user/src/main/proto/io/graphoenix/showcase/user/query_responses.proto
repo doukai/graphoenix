@@ -100,9 +100,9 @@ message QueryUpdateTimeResponse {
 message QueryCreateGroupIdResponse {
     optional string create_group_id = 1;
 }
-message QueryLoginResponse {
-    optional string login = 1;
-}
 message QueryMetaInfoResponse {
     optional string meta_info = 1;
+}
+message QueryLoginResponse {
+    optional string login = 1;
 }

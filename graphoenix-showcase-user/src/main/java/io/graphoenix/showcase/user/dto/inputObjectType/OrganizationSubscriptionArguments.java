@@ -8,6 +8,7 @@ import io.graphoenix.core.dto.inputObjectType.StringExpression;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
+import java.lang.String;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
@@ -45,6 +46,8 @@ public class OrganizationSubscriptionArguments implements MetaExpression {
   private StringExpression __typename;
 
   private IntExpression aboveId;
+
+  private Collection<String> groupBy;
 
   @DefaultValue("AND")
   private Conditional cond;
@@ -161,6 +164,14 @@ public class OrganizationSubscriptionArguments implements MetaExpression {
 
   public void setAboveId(IntExpression aboveId) {
     this.aboveId = aboveId;
+  }
+
+  public Collection<String> getGroupBy() {
+    return this.groupBy;
+  }
+
+  public void setGroupBy(Collection<String> groupBy) {
+    this.groupBy = groupBy;
   }
 
   public Conditional getCond() {

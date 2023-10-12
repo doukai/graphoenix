@@ -22,7 +22,7 @@ public @interface Fetch {
 
   String from();
 
-  MapWith with();
+  With with();
 
   String to();
 

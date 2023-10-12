@@ -41,7 +41,7 @@ enum Sort {
     DESC
 }
 
-enum Function {
+enum Func {
     COUNT
     MAX
     MIN
@@ -99,25 +99,6 @@ interface Meta {
     createGroupId: String
 }
 
-input MetaInput @inputInterface {
-    version: Int
-    realmId: Int
-    createUserId: String
-    createTime: Timestamp
-    updateUserId: String
-    updateTime: Timestamp
-    createGroupId: String
-}
-
-input MetaExpression @inputInterface {
-    realmId: IntExpression
-    createUserId: StringExpression
-    createTime: StringExpression
-    updateUserId: StringExpression
-    updateTime: StringExpression
-    createGroupId: StringExpression
-}
-
 type PageInfo @containerType {
     hasNextPage: Boolean!
     hasPreviousPage: Boolean!
@@ -160,7 +141,7 @@ input FloatExpression {
     skipNull: Boolean = false
 }
 
-input MapWith {
+input With {
     type: String
     from: String
     to: String
@@ -190,7 +171,7 @@ directive @dataType(
 
 directive @map(
     from: String!
-    with: MapWith
+    with: With
     to: String
     anchor: Boolean
 ) on FIELD_DEFINITION
@@ -198,7 +179,7 @@ directive @map(
 directive @fetch(
     protocol: Protocol
     from: String!
-    with: MapWith
+    with: With
     to: String
     anchor: Boolean
 ) on FIELD_DEFINITION
@@ -216,7 +197,7 @@ directive @invokes(
 
 directive @cursor on FIELD_DEFINITION
 
-directive @func(name: Function field: String) on FIELD_DEFINITION
+directive @func(name: Func field: String) on FIELD_DEFINITION
 
 directive @containerType on OBJECT
 
@@ -225,8 +206,6 @@ directive @classInfo(className: String! exists: Boolean annotationName: String g
 directive @packageInfo(packageName: String! grpcPackageName: String) on OBJECT | FIELD_DEFINITION | QUERY | MUTATION | SUBSCRIPTION
 
 directive @connection(field: String agg: String) on FIELD_DEFINITION
-
-directive @update(if: Boolean = false) on FIELD
 
 directive @delete(if: Boolean = false) on FIELD
 
@@ -240,6 +219,6 @@ directive @denyAll on FIELD | OBJECT
 
 directive @rolesAllowed(roles: [String]) on FIELD | OBJECT
 
-directive @implementInputs(inputs: [String!]) on INPUT_OBJECT
+directive @implements(interfaces: [String!]) on OBJECT | INPUT_OBJECT
 
-directive @inputInterface on INPUT_OBJECT
+directive @interface on OBJECT | INPUT_OBJECT

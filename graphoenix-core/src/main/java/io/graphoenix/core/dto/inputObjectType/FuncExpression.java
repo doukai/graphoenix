@@ -1,7 +1,7 @@
 package io.graphoenix.core.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.core.dto.enumType.Function;
+import io.graphoenix.core.dto.enumType.Func;
 import io.graphoenix.core.dto.enumType.Operator;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
@@ -13,13 +13,13 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class FunctionExpression {
+public class FuncExpression {
   @DefaultValue("EQ")
   private Operator opr;
 
-  private Function val;
+  private Func val;
 
-  private Collection<Function> in;
+  private Collection<Func> in;
 
   public Operator getOpr() {
     return this.opr;
@@ -29,19 +29,19 @@ public class FunctionExpression {
     this.opr = opr;
   }
 
-  public Function getVal() {
+  public Func getVal() {
     return this.val;
   }
 
-  public void setVal(Function val) {
+  public void setVal(Func val) {
     this.val = val;
   }
 
-  public Collection<Function> getIn() {
+  public Collection<Func> getIn() {
     return this.in;
   }
 
-  public void setIn(Collection<Function> in) {
+  public void setIn(Collection<Func> in) {
     this.in = in;
   }
 }

@@ -1,4 +1,4 @@
-package io.graphoenix.showcase.order.dto.annotation;
+package io.graphoenix.introspection.dto.annotation;
 
 import io.graphoenix.spi.annotation.Directive;
 import io.graphoenix.spi.annotation.Ignore;
@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
-@Directive("inputInterface")
+@Directive("interface")
 @Target({ElementType.TYPE})
-public @interface InputInterface {
+public @interface Interface {
 }

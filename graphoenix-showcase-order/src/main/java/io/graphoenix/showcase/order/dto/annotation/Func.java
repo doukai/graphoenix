@@ -1,6 +1,5 @@
 package io.graphoenix.showcase.order.dto.annotation;
 
-import io.graphoenix.core.dto.enumType.Function;
 import io.graphoenix.spi.annotation.Directive;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
@@ -18,7 +17,7 @@ import java.lang.annotation.Target;
 @Directive("func")
 @Target({ElementType.FIELD})
 public @interface Func {
-  Function name();
+  io.graphoenix.core.dto.enumType.Func name();
 
   String field();
 }
