@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_VALUE;
+import static javax.lang.model.element.ElementKind.ENUM_CONSTANT;
+import static javax.lang.model.element.ElementKind.PARAMETER;
 
 public interface ValueWithVariable extends JsonValue {
 
@@ -86,7 +88,13 @@ public interface ValueWithVariable extends JsonValue {
         } else if (value instanceof GraphqlParser.ValueWithVariableContext) {
             return of((GraphqlParser.ValueWithVariableContext) value);
         } else if (value instanceof VariableElement) {
-            return new Variable(((VariableElement) value).getSimpleName().toString());
+            if (((VariableElement) value).getKind().equals(PARAMETER)) {
+                return new Variable(((VariableElement) value).getSimpleName().toString());
+            } else if (((VariableElement) value).getKind().equals(ENUM_CONSTANT)) {
+                return new EnumValue(value.toString());
+            } else {
+                return of(((VariableElement) value).getConstantValue());
+            }
         } else if (value instanceof Boolean) {
             return new BooleanValue((Boolean) value);
         } else if (value instanceof Integer || value instanceof Short || value instanceof Byte || value instanceof BigInteger) {
