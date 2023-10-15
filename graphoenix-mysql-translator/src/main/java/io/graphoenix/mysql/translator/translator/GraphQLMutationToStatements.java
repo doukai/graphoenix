@@ -214,18 +214,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                        objectDefaultValueToStatementStream(
-                                                                                fieldDefinitionContext,
-                                                                                idValueExpression,
-                                                                                subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
-                                                                                inputValueDefinitionContext,
-                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                                0,
-                                                                                0
-                                                                        )
+                                                                objectDefaultValueToStatementStream(
+                                                                        fieldDefinitionContext,
+                                                                        idValueExpression,
+                                                                        subFieldDefinitionContext,
+                                                                        inputObjectTypeDefinitionContext,
+                                                                        inputValueDefinitionContext,
+                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                        0,
+                                                                        0
                                                                 )
+                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -2394,13 +2394,12 @@ public class GraphQLMutationToStatements {
                                             List<Column> columnList,
                                             Select select,
                                             boolean useDuplicate) {
-        Insert insert = new Insert();
-        insert.setTable(table);
-        insert.setColumns(columnList);
-        insert.setSelect(select);
+        Insert insert = new Insert()
+                .withTable(table)
+                .withColumns(columnList)
+                .withUseValues(false)
+                .withSelect(select);
         if (useDuplicate && columnList.size() > 0) {
-            insert.setUseDuplicate(true);
-            insert.setDuplicateUpdateColumns(columnList);
             List<Expression> values = columnList.stream()
                     .map(column -> {
                                 Function function = new Function();
@@ -2410,7 +2409,9 @@ public class GraphQLMutationToStatements {
                             }
                     )
                     .collect(Collectors.toList());
-            insert.setDuplicateUpdateExpressionList(values);
+            insert.withUseDuplicate(true)
+                    .withDuplicateUpdateColumns(columnList)
+                    .withDuplicateUpdateExpressionList(values);
         }
         return insert;
     }
