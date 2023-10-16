@@ -20,6 +20,8 @@ public class Invoke {
 
   private String returnClassName;
 
+  private Collection<String> thrownTypes;
+
   public String getClassName() {
     return this.className;
   }
@@ -50,5 +52,13 @@ public class Invoke {
 
   public void setReturnClassName(String returnClassName) {
     this.returnClassName = returnClassName;
+  }
+
+  public Collection<String> getThrownTypes() {
+    return this.thrownTypes;
+  }
+
+  public void setThrownTypes(Collection<String> thrownTypes) {
+    this.thrownTypes = thrownTypes;
   }
 }

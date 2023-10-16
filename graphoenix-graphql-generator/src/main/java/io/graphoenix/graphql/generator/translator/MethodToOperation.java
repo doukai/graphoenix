@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
@@ -84,6 +85,12 @@ public class MethodToOperation {
                                         )
                                 )
                                 .addArgument("returnClassName", executableElement.getReturnType().toString())
+                                .addArgument("thrownTypes",
+                                        Stream.ofNullable(executableElement.getThrownTypes())
+                                                .flatMap(Collection::stream)
+                                                .map(typeMirror -> ELEMENT_UTIL.getTypeMirrorName(typeMirror, typeUtils))
+                                                .collect(Collectors.toList())
+                                )
                 )
                 .addDirective(
                         new Directive(PACKAGE_INFO_DIRECTIVE_NAME)

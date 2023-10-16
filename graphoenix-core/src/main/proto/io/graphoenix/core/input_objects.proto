@@ -48,6 +48,7 @@ message Invoke {
     optional string method_name = 2;
     repeated InvokeParameter parameters = 3;
     optional string return_class_name = 4;
+    repeated string thrown_types = 5;
 }
 message InvokeParameter {
     optional string class_name = 1;

@@ -357,4 +357,22 @@ public class TypeManager {
                 .findFirst()
                 .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("returnClassName")));
     }
+
+    public List<String> getThrownTypes(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return Stream.ofNullable(operationDefinitionContext.directives())
+                .flatMap(this::getThrownTypes)
+                .collect(Collectors.toList());
+    }
+
+    public Stream<String> getThrownTypes(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals(INVOKE_DIRECTIVE_NAME))
+                .flatMap(directiveContext ->
+                        directiveContext.arguments().argument().stream()
+                                .filter(argumentContext -> argumentContext.name().getText().equals("thrownTypes"))
+                                .filter(argumentContext -> argumentContext.valueWithVariable().arrayValueWithVariable() != null)
+                                .flatMap(argumentContext -> argumentContext.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream())
+                )
+                .map(valueWithVariableContext -> DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue()));
+    }
 }

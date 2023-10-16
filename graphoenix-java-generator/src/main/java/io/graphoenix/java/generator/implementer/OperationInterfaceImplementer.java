@@ -230,8 +230,9 @@ public class OperationInterfaceImplementer {
                 )
                 .returns(typeName);
 
+        CodeBlock codeBlock;
         if (parameters.size() == 0) {
-            builder.addStatement(getCodeBlock(operationDefinitionContext, CodeBlock.of("new $T<>()", ClassName.get(java.util.HashMap.class))));
+            codeBlock = getCodeBlock(operationDefinitionContext, CodeBlock.of("new $T<>()", ClassName.get(java.util.HashMap.class)));
         } else {
             CodeBlock mapOf = CodeBlock.of(
                     "$T.of($L).toJavaMap()",
@@ -241,7 +242,17 @@ public class OperationInterfaceImplementer {
                             ", "
                     )
             );
-            builder.addStatement(getCodeBlock(operationDefinitionContext, mapOf));
+            codeBlock = getCodeBlock(operationDefinitionContext, mapOf);
+        }
+        List<String> thrownTypes = typeManager.getThrownTypes(operationDefinitionContext);
+        if (thrownTypes == null || thrownTypes.size() == 0) {
+            builder.beginControlFlow("try")
+                    .addStatement(codeBlock)
+                    .nextControlFlow("catch($T e)", Exception.class)
+                    .addStatement("throw new $T(e)", GraphQLErrors.class)
+                    .endControlFlow();
+        } else {
+            builder.addStatement(codeBlock);
         }
         return builder.build();
     }

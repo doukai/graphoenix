@@ -20,4 +20,6 @@ public @interface Invoke {
   String methodName();
 
   String returnClassName();
+
+  String[] thrownTypes();
 }

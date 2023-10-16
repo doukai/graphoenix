@@ -153,6 +153,7 @@ input Invoke @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageNam
     methodName: String
     parameters: [InvokeParameter]
     returnClassName: String
+    thrownTypes: [String]
 }
 input InvokeParameter @packageInfo(grpcPackageName: "io.graphoenix.core.grpc", packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.InvokeParameter", annotationName: "io.graphoenix.core.dto.annotation.InvokeParameter", grpcClassName: "io.graphoenix.core.dto.inputObjectType.grpc.InvokeParameter") {
     name: String
