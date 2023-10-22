@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static io.graphoenix.r2dbc.connector.utils.ResultUtil.RESULT_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.TRANSACTION_ID;
+import static io.graphoenix.spi.constant.Hammurabi.TRANSACTION_TYPE;
+import static io.graphoenix.spi.constant.Hammurabi.TransactionType.IN_TRANSACTION;
 
 @ApplicationScoped
 public class QueryExecutor {
@@ -31,8 +34,10 @@ public class QueryExecutor {
     }
 
     public Mono<String> executeQuery(String sql, Map<String, Object> parameters) {
-        return this.connectionMonoProvider.get()
-                .flatMap(connection -> {
+        return Mono
+                .usingWhen(
+                        connectionMonoProvider.get(),
+                        connection -> {
                             Logger.info("execute select:\r\n{}", sql);
                             Logger.info("sql parameters:\r\n{}", parameters);
                             Statement statement = connection.createStatement(sql);
@@ -40,7 +45,10 @@ public class QueryExecutor {
                                 parameters.forEach(statement::bind);
                             }
                             return Mono.from(statement.execute());
-                        }
+                        },
+                        connection -> Mono.deferContextual(contextView -> Mono.just(contextView.hasKey(TRANSACTION_ID) && contextView.hasKey(TRANSACTION_TYPE) && contextView.get(TRANSACTION_TYPE).equals(IN_TRANSACTION)))
+                                .filter(inTransaction -> !inTransaction)
+                                .flatMap(inTransaction -> Mono.from(connection.close()))
                 )
                 .flatMap(RESULT_UTIL::getJsonStringFromResult);
     }
@@ -50,22 +58,27 @@ public class QueryExecutor {
     }
 
     public Flux<Tuple2<String, String>> executeQuery(Stream<Tuple2<String, String>> sqlStream, Map<String, Object> parameters) {
-        return this.connectionMonoProvider.get()
-                .flatMapMany(connection ->
-                        Flux.fromStream(sqlStream)
-                                .flatMap(tuple2 -> {
-                                            String sql = tuple2._2();
-                                            Logger.info("execute select:\r\n{}", sql);
-                                            Logger.info("sql parameters:\r\n{}", parameters);
-                                            Statement statement = connection.createStatement(sql);
-                                            if (parameters != null) {
-                                                parameters.forEach(statement::bind);
-                                            }
-                                            return Mono.from(statement.execute())
-                                                    .flatMap(RESULT_UTIL::getJsonStringFromResult)
-                                                    .map(jsonString -> Tuple.of(tuple2._1(), jsonString));
-                                        }
-                                )
+        return Flux
+                .usingWhen(
+                        connectionMonoProvider.get(),
+                        connection ->
+                                Flux.fromStream(sqlStream)
+                                        .flatMap(tuple2 -> {
+                                                    String sql = tuple2._2();
+                                                    Logger.info("execute select:\r\n{}", sql);
+                                                    Logger.info("sql parameters:\r\n{}", parameters);
+                                                    Statement statement = connection.createStatement(sql);
+                                                    if (parameters != null) {
+                                                        parameters.forEach(statement::bind);
+                                                    }
+                                                    return Mono.from(statement.execute())
+                                                            .flatMap(RESULT_UTIL::getJsonStringFromResult)
+                                                            .map(jsonString -> Tuple.of(tuple2._1(), jsonString));
+                                                }
+                                        ),
+                        connection -> Mono.deferContextual(contextView -> Mono.just(contextView.hasKey(TRANSACTION_ID) && contextView.hasKey(TRANSACTION_TYPE) && contextView.get(TRANSACTION_TYPE).equals(IN_TRANSACTION)))
+                                .filter(inTransaction -> !inTransaction)
+                                .flatMap(inTransaction -> Mono.from(connection.close()))
                 );
     }
 }

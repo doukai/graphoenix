@@ -35,10 +35,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
-import net.sf.jsqlparser.statement.select.AllColumns;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 import net.sf.jsqlparser.util.cnfexpression.MultiOrExpression;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -1710,7 +1707,6 @@ public class GraphQLArgumentsToWhere {
         if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent()) {
             Table parentTable = dbNameUtil.typeToTable(objectTypeDefinitionContext, level - 1);
             EqualsTo idEqualsTo = new EqualsTo();
-            idEqualsTo.setLeftExpression(dbNameUtil.fieldToColumn(table, toFieldDefinition.get()));
             boolean mapWithType = mapper.mapWithType(parentTypeName, fieldName);
 
             if (mapWithType) {
@@ -1720,16 +1716,20 @@ public class GraphQLArgumentsToWhere {
 
                 if (mapWithObjectDefinition.isPresent() && mapWithFromFieldDefinition.isPresent() && mapWithToFieldDefinition.isPresent()) {
                     Table withTable = dbNameUtil.typeToTable(mapWithObjectDefinition.get(), level);
-                    SubSelect selectWithTable = new SubSelect();
-                    PlainSelect subPlainSelect = new PlainSelect();
-                    subPlainSelect.addSelectItems(new SelectExpressionItem(dbNameUtil.fieldToColumn(withTable, mapWithToFieldDefinition.get())));
-                    EqualsTo equalsWithTableColumn = new EqualsTo();
-                    equalsWithTableColumn.setLeftExpression(dbNameUtil.fieldToColumn(withTable, mapWithFromFieldDefinition.get()));
-                    equalsWithTableColumn.setRightExpression(dbNameUtil.fieldToColumn(parentTable, fromFieldDefinition.get()));
-                    subPlainSelect.setWhere(equalsWithTableColumn);
-                    subPlainSelect.setFromItem(withTable);
-                    selectWithTable.setSelectBody(subPlainSelect);
-                    idEqualsTo.setRightExpression(selectWithTable);
+
+                    Join join = new Join();
+                    join.setLeft(true);
+                    join.setRightItem(withTable);
+                    EqualsTo joinEqualsTo = new EqualsTo();
+                    joinEqualsTo.setLeftExpression(dbNameUtil.fieldToColumn(withTable, mapWithToFieldDefinition.get()));
+                    joinEqualsTo.setRightExpression(dbNameUtil.fieldToColumn(table, toFieldDefinition.get()));
+
+                    IsNullExpression isNotDeprecated = new IsNullExpression();
+                    isNotDeprecated.setLeftExpression(dbNameUtil.fieldToColumn(withTable, DEPRECATED_FIELD_NAME));
+                    join.addOnExpression(new MultiAndExpression(Arrays.asList(joinEqualsTo, isNotDeprecated)));
+                    body.addJoins(join);
+
+                    idEqualsTo.setLeftExpression(dbNameUtil.fieldToColumn(withTable, mapWithFromFieldDefinition.get()));
                 } else {
                     GraphQLErrors graphQLErrors = new GraphQLErrors();
                     if (mapWithObjectDefinition.isEmpty()) {
@@ -1744,8 +1744,9 @@ public class GraphQLArgumentsToWhere {
                     throw graphQLErrors;
                 }
             } else {
-                idEqualsTo.setRightExpression(dbNameUtil.fieldToColumn(parentTable, fromFieldDefinition.get()));
+                idEqualsTo.setLeftExpression(dbNameUtil.fieldToColumn(table, toFieldDefinition.get()));
             }
+            idEqualsTo.setRightExpression(dbNameUtil.fieldToColumn(parentTable, fromFieldDefinition.get()));
             body.setWhere(idEqualsTo);
         } else {
             GraphQLErrors graphQLErrors = new GraphQLErrors();
