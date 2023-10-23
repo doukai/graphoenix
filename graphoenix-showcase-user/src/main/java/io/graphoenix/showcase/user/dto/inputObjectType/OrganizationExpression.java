@@ -46,6 +46,9 @@ public class OrganizationExpression implements MetaExpression {
 
   private IntExpression aboveId;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -161,6 +164,14 @@ public class OrganizationExpression implements MetaExpression {
 
   public void setAboveId(IntExpression aboveId) {
     this.aboveId = aboveId;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {

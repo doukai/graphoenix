@@ -48,6 +48,9 @@ public class __EnumValueExpression implements MetaExpression {
 
   private StringExpression ofTypeName;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -171,6 +174,14 @@ public class __EnumValueExpression implements MetaExpression {
 
   public void setOfTypeName(StringExpression ofTypeName) {
     this.ofTypeName = ofTypeName;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {

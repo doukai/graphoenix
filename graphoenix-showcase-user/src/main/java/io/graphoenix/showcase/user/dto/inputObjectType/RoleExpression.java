@@ -48,6 +48,9 @@ public class RoleExpression implements MetaExpression {
 
   private UserRoleExpression userRole;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -171,6 +174,14 @@ public class RoleExpression implements MetaExpression {
 
   public void setUserRole(UserRoleExpression userRole) {
     this.userRole = userRole;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {

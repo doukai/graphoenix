@@ -65,6 +65,9 @@ public class __TypeExpression implements MetaExpression {
 
   private __TypePossibleTypesExpression __typePossibleTypes;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -252,6 +255,14 @@ public class __TypeExpression implements MetaExpression {
 
   public void set__typePossibleTypes(__TypePossibleTypesExpression __typePossibleTypes) {
     this.__typePossibleTypes = __typePossibleTypes;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {

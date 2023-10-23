@@ -54,6 +54,9 @@ public class __SchemaExpression implements MetaExpression {
 
   private StringExpression subscriptionTypeName;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -201,6 +204,14 @@ public class __SchemaExpression implements MetaExpression {
 
   public void setSubscriptionTypeName(StringExpression subscriptionTypeName) {
     this.subscriptionTypeName = subscriptionTypeName;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {

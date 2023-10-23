@@ -850,6 +850,7 @@ public class DocumentBuilder {
                 );
         if (inputType.equals(InputType.QUERY_ARGUMENTS) || inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
             field.addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
+                    .addArgument(new InputValue().setName(NOT_INPUT_NAME).setType("Boolean").setDefaultValue("false"))
                     .addArgument(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addArgument(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
         } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
@@ -908,6 +909,7 @@ public class DocumentBuilder {
                                     )
                     )
                     .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
+                    .addInputValue(new InputValue().setName(NOT_INPUT_NAME).setType("Boolean").setDefaultValue("false"))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
         } else if (inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
@@ -930,6 +932,7 @@ public class DocumentBuilder {
                                     )
                     )
                     .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
+                    .addInputValue(new InputValue().setName(NOT_INPUT_NAME).setType("Boolean").setDefaultValue("false"))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
         } else if (inputType.equals(InputType.MUTATION_ARGUMENTS)) {
@@ -975,6 +978,7 @@ public class DocumentBuilder {
         if (inputType.equals(InputType.QUERY_ARGUMENTS) || inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
             field.addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.ORDER_BY))
                     .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
+                    .addArgument(new InputValue().setName(NOT_INPUT_NAME).setType("Boolean").setDefaultValue("false"))
                     .addArgument(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addArgument(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
                     .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
@@ -1032,6 +1036,7 @@ public class DocumentBuilder {
                     )
                     .addInputValue(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.ORDER_BY))
                     .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
+                    .addInputValue(new InputValue().setName(NOT_INPUT_NAME).setType("Boolean").setDefaultValue("false"))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
                     .addInputValue(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
@@ -1066,6 +1071,7 @@ public class DocumentBuilder {
                     )
                     .addInputValue(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(objectTypeDefinitionContext.name().getText() + InputType.ORDER_BY))
                     .addInputValue(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))))
+                    .addInputValue(new InputValue().setName(NOT_INPUT_NAME).setType("Boolean").setDefaultValue("false"))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
                     .addInputValue(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
@@ -1128,7 +1134,8 @@ public class DocumentBuilder {
                 );
 
         if (inputType.equals(InputType.QUERY_ARGUMENTS) || inputType.equals(InputType.SUBSCRIPTION_ARGUMENTS)) {
-            field.addArgument(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
+            field.addArgument(new InputValue().setName(NOT_INPUT_NAME).setType("Boolean").setDefaultValue("false"))
+                    .addArgument(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addArgument(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
                     .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
                     .addArgument(new InputValue().setName(LAST_INPUT_NAME).setType("Int"))
@@ -1182,6 +1189,7 @@ public class DocumentBuilder {
                                             )
                                     )
                     )
+                    .addInputValue(new InputValue().setName(NOT_INPUT_NAME).setType("Boolean").setDefaultValue("false"))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
                     .addInputValue(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
@@ -1214,6 +1222,7 @@ public class DocumentBuilder {
                                             )
                                     )
                     )
+                    .addInputValue(new InputValue().setName(NOT_INPUT_NAME).setType("Boolean").setDefaultValue("false"))
                     .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                     .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))))
                     .addInputValue(new InputValue().setName(FIRST_INPUT_NAME).setType("Int"))
@@ -1508,6 +1517,7 @@ public class DocumentBuilder {
                 )
                 .setName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION)
                 .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.EXPRESSION))
+                .addInputValue(new InputValue().setName(NOT_INPUT_NAME).setType("Boolean").setDefaultValue("false"))
                 .addInputValue(new InputValue().setName("cond").setType("Conditional").setDefaultValue("AND"))
                 .addInputValue(new InputValue().setName("exs").setType(new ListType(new TypeName(objectTypeDefinitionContext.name().getText() + InputType.EXPRESSION))));
     }

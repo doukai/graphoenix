@@ -67,6 +67,7 @@ import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.GROUP_BY_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.LAST_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.NOT_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.OFFSET_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.ORDER_BY_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.SORT_INPUT_NAME;
@@ -79,7 +80,7 @@ public class GraphQLArgumentsToWhere {
     private final IGraphQLFieldMapManager mapper;
     private final DBNameUtil dbNameUtil;
     private final DBValueUtil dbValueUtil;
-    private final String[] EXCLUDE_INPUT = {DEPRECATED_INPUT_NAME, FIRST_INPUT_NAME, LAST_INPUT_NAME, OFFSET_INPUT_NAME, AFTER_INPUT_NAME, BEFORE_INPUT_NAME, GROUP_BY_INPUT_NAME, ORDER_BY_INPUT_NAME, SORT_INPUT_NAME, LIST_INPUT_NAME};
+    private final String[] EXCLUDE_INPUT = {DEPRECATED_INPUT_NAME, FIRST_INPUT_NAME, LAST_INPUT_NAME, OFFSET_INPUT_NAME, AFTER_INPUT_NAME, BEFORE_INPUT_NAME, GROUP_BY_INPUT_NAME, ORDER_BY_INPUT_NAME, SORT_INPUT_NAME, LIST_INPUT_NAME, NOT_INPUT_NAME};
 
     @Inject
     public GraphQLArgumentsToWhere(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, DBNameUtil dbNameUtil, DBValueUtil dbValueUtil) {
@@ -97,7 +98,7 @@ public class GraphQLArgumentsToWhere {
             return Optional.of(isFalseExpression(dbNameUtil.fieldToColumn(manager.getFieldTypeName(fieldDefinitionContext.type()), DEPRECATED_FIELD_NAME, level)));
         }
         Stream<Expression> expressionStream = argumentsToExpressionList(fieldDefinitionContext.type(), fieldDefinitionContext.argumentsDefinition(), argumentsContext, level);
-        Optional<Expression> multipleExpression = expressionStreamToMultipleExpression(expressionStream, hasOrConditional(argumentsContext, fieldDefinitionContext.argumentsDefinition()));
+        Optional<Expression> multipleExpression = expressionStreamToMultipleExpression(expressionStream, hasOrConditional(argumentsContext, fieldDefinitionContext.argumentsDefinition()), isNot(argumentsContext));
         Optional<Expression> notDeprecatedExpression = notDeprecatedExpression(fieldDefinitionContext.type(), fieldDefinitionContext.argumentsDefinition().inputValueDefinition(), argumentsContext, level);
         if (multipleExpression.isPresent() && notDeprecatedExpression.isPresent()) {
             return Optional.of(new MultiAndExpression(Arrays.asList(multipleExpression.get(), notDeprecatedExpression.get())));
@@ -115,7 +116,7 @@ public class GraphQLArgumentsToWhere {
         Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinitionContext = manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()));
         if (inputObjectTypeDefinitionContext.isPresent()) {
             Stream<Expression> expressionStream = objectValueWithVariableToExpressionList(typeContext, inputObjectTypeDefinitionContext.get().inputObjectValueDefinitions(), objectValueWithVariableContext, level);
-            Optional<Expression> multipleExpression = expressionStreamToMultipleExpression(expressionStream, hasOrConditional(objectValueWithVariableContext, inputObjectTypeDefinitionContext.get()));
+            Optional<Expression> multipleExpression = expressionStreamToMultipleExpression(expressionStream, hasOrConditional(objectValueWithVariableContext, inputObjectTypeDefinitionContext.get()), isNot(objectValueWithVariableContext));
             Optional<Expression> notDeprecatedExpression = notDeprecatedExpression(typeContext, inputObjectTypeDefinitionContext.get().inputObjectValueDefinitions().inputValueDefinition(), objectValueWithVariableContext, level);
             if (multipleExpression.isPresent() && notDeprecatedExpression.isPresent()) {
                 return Optional.of(new MultiAndExpression(Arrays.asList(multipleExpression.get(), notDeprecatedExpression.get())));
@@ -136,7 +137,7 @@ public class GraphQLArgumentsToWhere {
         Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinitionContext = manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()));
         if (inputObjectTypeDefinitionContext.isPresent()) {
             Stream<Expression> expressionStream = objectValueToExpressionList(typeContext, inputObjectTypeDefinitionContext.get().inputObjectValueDefinitions(), objectValueContext, level);
-            Optional<Expression> multipleExpression = expressionStreamToMultipleExpression(expressionStream, hasOrConditional(objectValueContext, inputObjectTypeDefinitionContext.get()));
+            Optional<Expression> multipleExpression = expressionStreamToMultipleExpression(expressionStream, hasOrConditional(objectValueContext, inputObjectTypeDefinitionContext.get()), isNot(objectValueContext));
             Optional<Expression> notDeprecatedExpression = notDeprecatedExpression(typeContext, inputObjectTypeDefinitionContext.get().inputObjectValueDefinitions().inputValueDefinition(), objectValueContext, level);
             if (multipleExpression.isPresent() && notDeprecatedExpression.isPresent()) {
                 return Optional.of(new MultiAndExpression(Arrays.asList(multipleExpression.get(), notDeprecatedExpression.get())));
@@ -150,16 +151,25 @@ public class GraphQLArgumentsToWhere {
         }
     }
 
-    protected Optional<Expression> expressionStreamToMultipleExpression(Stream<Expression> expressionStream, boolean hasOrConditional) {
+    protected Optional<Expression> expressionStreamToMultipleExpression(Stream<Expression> expressionStream, boolean hasOrConditional, boolean isNot) {
         List<Expression> expressionList = expressionStream.collect(Collectors.toList());
         if (expressionList.size() == 0) {
             return Optional.empty();
         } else if (expressionList.size() == 1) {
+            if (isNot) {
+                return Optional.of(new NotExpression(expressionList.get(0)));
+            }
             return Optional.of(expressionList.get(0));
         } else {
             if (hasOrConditional) {
+                if (isNot) {
+                    return Optional.of(new NotExpression(new MultiOrExpression(expressionList)));
+                }
                 return Optional.of(new MultiOrExpression(expressionList));
             } else {
+                if (isNot) {
+                    return Optional.of(new NotExpression(new MultiAndExpression(expressionList)));
+                }
                 return Optional.of(new MultiAndExpression(expressionList));
             }
         }
@@ -805,6 +815,30 @@ public class GraphQLArgumentsToWhere {
                 manager.getInputValueDefinitionFromInputObjectTypeDefinitionContext(inputObjectTypeDefinitionContext, objectFieldContext)
                         .map(inputValueDefinitionContext -> isOrConditional(inputValueDefinitionContext, objectFieldContext.value()))
                         .orElse(false));
+    }
+
+    private boolean isNot(GraphqlParser.ArgumentsContext argumentsContext) {
+        return argumentsContext.argument().stream().anyMatch(argumentContext ->
+                argumentContext.name().getText().equals(NOT_INPUT_NAME) &&
+                        argumentContext.valueWithVariable().BooleanValue() != null &&
+                        argumentContext.valueWithVariable().BooleanValue().getText().equals("true")
+        );
+    }
+
+    private boolean isNot(GraphqlParser.ObjectValueWithVariableContext valueWithVariableContext) {
+        return valueWithVariableContext.objectFieldWithVariable().stream().anyMatch(objectFieldWithVariableContext ->
+                objectFieldWithVariableContext.name().getText().equals(NOT_INPUT_NAME) &&
+                        objectFieldWithVariableContext.valueWithVariable().BooleanValue() != null &&
+                        objectFieldWithVariableContext.valueWithVariable().BooleanValue().getText().equals("true")
+        );
+    }
+
+    private boolean isNot(GraphqlParser.ObjectValueContext objectValueContext) {
+        return objectValueContext.objectField().stream().anyMatch(objectFieldContext ->
+                objectFieldContext.name().getText().equals(NOT_INPUT_NAME) &&
+                        objectFieldContext.value().BooleanValue() != null &&
+                        objectFieldContext.value().BooleanValue().getText().equals("true")
+        );
     }
 
     private boolean isOrConditional(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {

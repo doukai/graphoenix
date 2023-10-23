@@ -46,6 +46,9 @@ public class UserProfileExpression implements MetaExpression {
 
   private IntExpression userId;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -161,6 +164,14 @@ public class UserProfileExpression implements MetaExpression {
 
   public void setUserId(IntExpression userId) {
     this.userId = userId;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {

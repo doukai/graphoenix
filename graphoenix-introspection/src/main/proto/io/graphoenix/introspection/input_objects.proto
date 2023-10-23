@@ -29,8 +29,9 @@ message IntroSchemaExpression {
     optional io.graphoenix.core.grpc.StringExpression query_type_name = 16;
     optional io.graphoenix.core.grpc.StringExpression mutation_type_name = 17;
     optional io.graphoenix.core.grpc.StringExpression subscription_type_name = 18;
-    optional io.graphoenix.core.grpc.Conditional cond = 19;
-    repeated IntroSchemaExpression exs = 20;
+    optional bool not = 19;
+    optional io.graphoenix.core.grpc.Conditional cond = 20;
+    repeated IntroSchemaExpression exs = 21;
 }
 message IntroSchemaInput {
     optional string id = 1;
@@ -92,8 +93,9 @@ message IntroTypeExpression {
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 21;
     optional IntroTypeInterfacesExpression intro_type_interfaces = 22;
     optional IntroTypePossibleTypesExpression intro_type_possible_types = 23;
-    optional io.graphoenix.core.grpc.Conditional cond = 24;
-    repeated IntroTypeExpression exs = 25;
+    optional bool not = 24;
+    optional io.graphoenix.core.grpc.Conditional cond = 25;
+    repeated IntroTypeExpression exs = 26;
 }
 message IntroTypeInput {
     optional string name = 1;
@@ -156,8 +158,9 @@ message IntroFieldExpression {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 16;
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 17;
     optional io.graphoenix.core.grpc.StringExpression type_name = 18;
-    optional io.graphoenix.core.grpc.Conditional cond = 19;
-    repeated IntroFieldExpression exs = 20;
+    optional bool not = 19;
+    optional io.graphoenix.core.grpc.Conditional cond = 20;
+    repeated IntroFieldExpression exs = 21;
 }
 message IntroFieldInput {
     optional string id = 1;
@@ -217,8 +220,9 @@ message IntroInputValueExpression {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 17;
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 18;
     optional io.graphoenix.core.grpc.StringExpression type_name = 19;
-    optional io.graphoenix.core.grpc.Conditional cond = 20;
-    repeated IntroInputValueExpression exs = 21;
+    optional bool not = 20;
+    optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated IntroInputValueExpression exs = 22;
 }
 message IntroInputValueInput {
     optional string id = 1;
@@ -277,8 +281,9 @@ message IntroEnumValueExpression {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 15;
-    optional io.graphoenix.core.grpc.Conditional cond = 16;
-    repeated IntroEnumValueExpression exs = 17;
+    optional bool not = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated IntroEnumValueExpression exs = 18;
 }
 message IntroEnumValueInput {
     optional string id = 1;
@@ -332,8 +337,9 @@ message IntroDirectiveExpression {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 15;
     optional io.graphoenix.core.grpc.IntExpression schema_id = 16;
     optional IntroDirectiveLocationsExpression intro_directive_locations = 17;
-    optional io.graphoenix.core.grpc.Conditional cond = 18;
-    repeated IntroDirectiveExpression exs = 19;
+    optional bool not = 18;
+    optional io.graphoenix.core.grpc.Conditional cond = 19;
+    repeated IntroDirectiveExpression exs = 20;
 }
 message IntroDirectiveInput {
     optional string name = 1;
@@ -385,8 +391,9 @@ message IntroTypeInterfacesExpression {
     optional io.graphoenix.core.grpc.StringExpression update_time = 12;
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
-    optional io.graphoenix.core.grpc.Conditional cond = 15;
-    repeated IntroTypeInterfacesExpression exs = 16;
+    optional bool not = 15;
+    optional io.graphoenix.core.grpc.Conditional cond = 16;
+    repeated IntroTypeInterfacesExpression exs = 17;
 }
 message IntroTypeInterfacesInput {
     optional string id = 1;
@@ -434,8 +441,9 @@ message IntroTypePossibleTypesExpression {
     optional io.graphoenix.core.grpc.StringExpression update_time = 12;
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
-    optional io.graphoenix.core.grpc.Conditional cond = 15;
-    repeated IntroTypePossibleTypesExpression exs = 16;
+    optional bool not = 15;
+    optional io.graphoenix.core.grpc.Conditional cond = 16;
+    repeated IntroTypePossibleTypesExpression exs = 17;
 }
 message IntroTypePossibleTypesInput {
     optional string id = 1;
@@ -482,8 +490,9 @@ message IntroDirectiveLocationsExpression {
     optional io.graphoenix.core.grpc.StringExpression update_time = 11;
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 12;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 13;
-    optional io.graphoenix.core.grpc.Conditional cond = 14;
-    repeated IntroDirectiveLocationsExpression exs = 15;
+    optional bool not = 14;
+    optional io.graphoenix.core.grpc.Conditional cond = 15;
+    repeated IntroDirectiveLocationsExpression exs = 16;
 }
 message IntroDirectiveLocationsInput {
     optional string id = 1;
@@ -535,8 +544,9 @@ message IntroSchemaQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression mutation_type_name = 17;
     optional io.graphoenix.core.grpc.StringExpression subscription_type_name = 18;
     repeated string group_by = 19;
-    optional io.graphoenix.core.grpc.Conditional cond = 20;
-    repeated IntroSchemaExpression exs = 21;
+    optional bool not = 20;
+    optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated IntroSchemaExpression exs = 22;
 }
 message IntroSchemaListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -559,13 +569,14 @@ message IntroSchemaListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression subscription_type_name = 18;
     optional IntroSchemaOrderBy order_by = 19;
     repeated string group_by = 20;
-    optional io.graphoenix.core.grpc.Conditional cond = 21;
-    repeated IntroSchemaExpression exs = 22;
-    optional int32 first = 23;
-    optional int32 last = 24;
-    optional int32 offset = 25;
-    optional string after = 26;
-    optional string before = 27;
+    optional bool not = 21;
+    optional io.graphoenix.core.grpc.Conditional cond = 22;
+    repeated IntroSchemaExpression exs = 23;
+    optional int32 first = 24;
+    optional int32 last = 25;
+    optional int32 offset = 26;
+    optional string after = 27;
+    optional string before = 28;
 }
 message IntroSchemaConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -588,13 +599,14 @@ message IntroSchemaConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression subscription_type_name = 18;
     optional IntroSchemaOrderBy order_by = 19;
     repeated string group_by = 20;
-    optional io.graphoenix.core.grpc.Conditional cond = 21;
-    repeated IntroSchemaExpression exs = 22;
-    optional int32 first = 23;
-    optional int32 last = 24;
-    optional int32 offset = 25;
-    optional string after = 26;
-    optional string before = 27;
+    optional bool not = 21;
+    optional io.graphoenix.core.grpc.Conditional cond = 22;
+    repeated IntroSchemaExpression exs = 23;
+    optional int32 first = 24;
+    optional int32 last = 25;
+    optional int32 offset = 26;
+    optional string after = 27;
+    optional string before = 28;
 }
 message IntroTypeQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -621,8 +633,9 @@ message IntroTypeQueryArguments {
     optional IntroTypeInterfacesExpression intro_type_interfaces = 22;
     optional IntroTypePossibleTypesExpression intro_type_possible_types = 23;
     repeated string group_by = 24;
-    optional io.graphoenix.core.grpc.Conditional cond = 25;
-    repeated IntroTypeExpression exs = 26;
+    optional bool not = 25;
+    optional io.graphoenix.core.grpc.Conditional cond = 26;
+    repeated IntroTypeExpression exs = 27;
 }
 message IntroTypeListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -650,13 +663,14 @@ message IntroTypeListQueryArguments {
     optional IntroTypePossibleTypesExpression intro_type_possible_types = 23;
     optional IntroTypeOrderBy order_by = 24;
     repeated string group_by = 25;
-    optional io.graphoenix.core.grpc.Conditional cond = 26;
-    repeated IntroTypeExpression exs = 27;
-    optional int32 first = 28;
-    optional int32 last = 29;
-    optional int32 offset = 30;
-    optional string after = 31;
-    optional string before = 32;
+    optional bool not = 26;
+    optional io.graphoenix.core.grpc.Conditional cond = 27;
+    repeated IntroTypeExpression exs = 28;
+    optional int32 first = 29;
+    optional int32 last = 30;
+    optional int32 offset = 31;
+    optional string after = 32;
+    optional string before = 33;
 }
 message IntroTypeConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -684,13 +698,14 @@ message IntroTypeConnectionQueryArguments {
     optional IntroTypePossibleTypesExpression intro_type_possible_types = 23;
     optional IntroTypeOrderBy order_by = 24;
     repeated string group_by = 25;
-    optional io.graphoenix.core.grpc.Conditional cond = 26;
-    repeated IntroTypeExpression exs = 27;
-    optional int32 first = 28;
-    optional int32 last = 29;
-    optional int32 offset = 30;
-    optional string after = 31;
-    optional string before = 32;
+    optional bool not = 26;
+    optional io.graphoenix.core.grpc.Conditional cond = 27;
+    repeated IntroTypeExpression exs = 28;
+    optional int32 first = 29;
+    optional int32 last = 30;
+    optional int32 offset = 31;
+    optional string after = 32;
+    optional string before = 33;
 }
 message IntroFieldQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -712,8 +727,9 @@ message IntroFieldQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 17;
     optional io.graphoenix.core.grpc.StringExpression type_name = 18;
     repeated string group_by = 19;
-    optional io.graphoenix.core.grpc.Conditional cond = 20;
-    repeated IntroFieldExpression exs = 21;
+    optional bool not = 20;
+    optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated IntroFieldExpression exs = 22;
 }
 message IntroFieldListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -736,13 +752,14 @@ message IntroFieldListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression type_name = 18;
     optional IntroFieldOrderBy order_by = 19;
     repeated string group_by = 20;
-    optional io.graphoenix.core.grpc.Conditional cond = 21;
-    repeated IntroFieldExpression exs = 22;
-    optional int32 first = 23;
-    optional int32 last = 24;
-    optional int32 offset = 25;
-    optional string after = 26;
-    optional string before = 27;
+    optional bool not = 21;
+    optional io.graphoenix.core.grpc.Conditional cond = 22;
+    repeated IntroFieldExpression exs = 23;
+    optional int32 first = 24;
+    optional int32 last = 25;
+    optional int32 offset = 26;
+    optional string after = 27;
+    optional string before = 28;
 }
 message IntroFieldConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -765,13 +782,14 @@ message IntroFieldConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression type_name = 18;
     optional IntroFieldOrderBy order_by = 19;
     repeated string group_by = 20;
-    optional io.graphoenix.core.grpc.Conditional cond = 21;
-    repeated IntroFieldExpression exs = 22;
-    optional int32 first = 23;
-    optional int32 last = 24;
-    optional int32 offset = 25;
-    optional string after = 26;
-    optional string before = 27;
+    optional bool not = 21;
+    optional io.graphoenix.core.grpc.Conditional cond = 22;
+    repeated IntroFieldExpression exs = 23;
+    optional int32 first = 24;
+    optional int32 last = 25;
+    optional int32 offset = 26;
+    optional string after = 27;
+    optional string before = 28;
 }
 message IntroInputValueQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -794,8 +812,9 @@ message IntroInputValueQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 18;
     optional io.graphoenix.core.grpc.StringExpression type_name = 19;
     repeated string group_by = 20;
-    optional io.graphoenix.core.grpc.Conditional cond = 21;
-    repeated IntroInputValueExpression exs = 22;
+    optional bool not = 21;
+    optional io.graphoenix.core.grpc.Conditional cond = 22;
+    repeated IntroInputValueExpression exs = 23;
 }
 message IntroInputValueListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -819,13 +838,14 @@ message IntroInputValueListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression type_name = 19;
     optional IntroInputValueOrderBy order_by = 20;
     repeated string group_by = 21;
-    optional io.graphoenix.core.grpc.Conditional cond = 22;
-    repeated IntroInputValueExpression exs = 23;
-    optional int32 first = 24;
-    optional int32 last = 25;
-    optional int32 offset = 26;
-    optional string after = 27;
-    optional string before = 28;
+    optional bool not = 22;
+    optional io.graphoenix.core.grpc.Conditional cond = 23;
+    repeated IntroInputValueExpression exs = 24;
+    optional int32 first = 25;
+    optional int32 last = 26;
+    optional int32 offset = 27;
+    optional string after = 28;
+    optional string before = 29;
 }
 message IntroInputValueConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -849,13 +869,14 @@ message IntroInputValueConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression type_name = 19;
     optional IntroInputValueOrderBy order_by = 20;
     repeated string group_by = 21;
-    optional io.graphoenix.core.grpc.Conditional cond = 22;
-    repeated IntroInputValueExpression exs = 23;
-    optional int32 first = 24;
-    optional int32 last = 25;
-    optional int32 offset = 26;
-    optional string after = 27;
-    optional string before = 28;
+    optional bool not = 22;
+    optional io.graphoenix.core.grpc.Conditional cond = 23;
+    repeated IntroInputValueExpression exs = 24;
+    optional int32 first = 25;
+    optional int32 last = 26;
+    optional int32 offset = 27;
+    optional string after = 28;
+    optional string before = 29;
 }
 message IntroEnumValueQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -874,8 +895,9 @@ message IntroEnumValueQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 15;
     repeated string group_by = 16;
-    optional io.graphoenix.core.grpc.Conditional cond = 17;
-    repeated IntroEnumValueExpression exs = 18;
+    optional bool not = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated IntroEnumValueExpression exs = 19;
 }
 message IntroEnumValueListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -895,13 +917,14 @@ message IntroEnumValueListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 15;
     optional IntroEnumValueOrderBy order_by = 16;
     repeated string group_by = 17;
-    optional io.graphoenix.core.grpc.Conditional cond = 18;
-    repeated IntroEnumValueExpression exs = 19;
-    optional int32 first = 20;
-    optional int32 last = 21;
-    optional int32 offset = 22;
-    optional string after = 23;
-    optional string before = 24;
+    optional bool not = 18;
+    optional io.graphoenix.core.grpc.Conditional cond = 19;
+    repeated IntroEnumValueExpression exs = 20;
+    optional int32 first = 21;
+    optional int32 last = 22;
+    optional int32 offset = 23;
+    optional string after = 24;
+    optional string before = 25;
 }
 message IntroEnumValueConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -921,13 +944,14 @@ message IntroEnumValueConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 15;
     optional IntroEnumValueOrderBy order_by = 16;
     repeated string group_by = 17;
-    optional io.graphoenix.core.grpc.Conditional cond = 18;
-    repeated IntroEnumValueExpression exs = 19;
-    optional int32 first = 20;
-    optional int32 last = 21;
-    optional int32 offset = 22;
-    optional string after = 23;
-    optional string before = 24;
+    optional bool not = 18;
+    optional io.graphoenix.core.grpc.Conditional cond = 19;
+    repeated IntroEnumValueExpression exs = 20;
+    optional int32 first = 21;
+    optional int32 last = 22;
+    optional int32 offset = 23;
+    optional string after = 24;
+    optional string before = 25;
 }
 message IntroDirectiveQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -948,8 +972,9 @@ message IntroDirectiveQueryArguments {
     optional io.graphoenix.core.grpc.IntExpression schema_id = 16;
     optional IntroDirectiveLocationsExpression intro_directive_locations = 17;
     repeated string group_by = 18;
-    optional io.graphoenix.core.grpc.Conditional cond = 19;
-    repeated IntroDirectiveExpression exs = 20;
+    optional bool not = 19;
+    optional io.graphoenix.core.grpc.Conditional cond = 20;
+    repeated IntroDirectiveExpression exs = 21;
 }
 message IntroDirectiveListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -971,13 +996,14 @@ message IntroDirectiveListQueryArguments {
     optional IntroDirectiveLocationsExpression intro_directive_locations = 17;
     optional IntroDirectiveOrderBy order_by = 18;
     repeated string group_by = 19;
-    optional io.graphoenix.core.grpc.Conditional cond = 20;
-    repeated IntroDirectiveExpression exs = 21;
-    optional int32 first = 22;
-    optional int32 last = 23;
-    optional int32 offset = 24;
-    optional string after = 25;
-    optional string before = 26;
+    optional bool not = 20;
+    optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated IntroDirectiveExpression exs = 22;
+    optional int32 first = 23;
+    optional int32 last = 24;
+    optional int32 offset = 25;
+    optional string after = 26;
+    optional string before = 27;
 }
 message IntroDirectiveConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -999,13 +1025,14 @@ message IntroDirectiveConnectionQueryArguments {
     optional IntroDirectiveLocationsExpression intro_directive_locations = 17;
     optional IntroDirectiveOrderBy order_by = 18;
     repeated string group_by = 19;
-    optional io.graphoenix.core.grpc.Conditional cond = 20;
-    repeated IntroDirectiveExpression exs = 21;
-    optional int32 first = 22;
-    optional int32 last = 23;
-    optional int32 offset = 24;
-    optional string after = 25;
-    optional string before = 26;
+    optional bool not = 20;
+    optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated IntroDirectiveExpression exs = 22;
+    optional int32 first = 23;
+    optional int32 last = 24;
+    optional int32 offset = 25;
+    optional string after = 26;
+    optional string before = 27;
 }
 message IntroTypeInterfacesQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1023,8 +1050,9 @@ message IntroTypeInterfacesQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     repeated string group_by = 15;
-    optional io.graphoenix.core.grpc.Conditional cond = 16;
-    repeated IntroTypeInterfacesExpression exs = 17;
+    optional bool not = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated IntroTypeInterfacesExpression exs = 18;
 }
 message IntroTypeInterfacesListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1043,13 +1071,14 @@ message IntroTypeInterfacesListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional IntroTypeInterfacesOrderBy order_by = 15;
     repeated string group_by = 16;
-    optional io.graphoenix.core.grpc.Conditional cond = 17;
-    repeated IntroTypeInterfacesExpression exs = 18;
-    optional int32 first = 19;
-    optional int32 last = 20;
-    optional int32 offset = 21;
-    optional string after = 22;
-    optional string before = 23;
+    optional bool not = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated IntroTypeInterfacesExpression exs = 19;
+    optional int32 first = 20;
+    optional int32 last = 21;
+    optional int32 offset = 22;
+    optional string after = 23;
+    optional string before = 24;
 }
 message IntroTypeInterfacesConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1068,13 +1097,14 @@ message IntroTypeInterfacesConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional IntroTypeInterfacesOrderBy order_by = 15;
     repeated string group_by = 16;
-    optional io.graphoenix.core.grpc.Conditional cond = 17;
-    repeated IntroTypeInterfacesExpression exs = 18;
-    optional int32 first = 19;
-    optional int32 last = 20;
-    optional int32 offset = 21;
-    optional string after = 22;
-    optional string before = 23;
+    optional bool not = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated IntroTypeInterfacesExpression exs = 19;
+    optional int32 first = 20;
+    optional int32 last = 21;
+    optional int32 offset = 22;
+    optional string after = 23;
+    optional string before = 24;
 }
 message IntroTypePossibleTypesQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1092,8 +1122,9 @@ message IntroTypePossibleTypesQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     repeated string group_by = 15;
-    optional io.graphoenix.core.grpc.Conditional cond = 16;
-    repeated IntroTypePossibleTypesExpression exs = 17;
+    optional bool not = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated IntroTypePossibleTypesExpression exs = 18;
 }
 message IntroTypePossibleTypesListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1112,13 +1143,14 @@ message IntroTypePossibleTypesListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional IntroTypePossibleTypesOrderBy order_by = 15;
     repeated string group_by = 16;
-    optional io.graphoenix.core.grpc.Conditional cond = 17;
-    repeated IntroTypePossibleTypesExpression exs = 18;
-    optional int32 first = 19;
-    optional int32 last = 20;
-    optional int32 offset = 21;
-    optional string after = 22;
-    optional string before = 23;
+    optional bool not = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated IntroTypePossibleTypesExpression exs = 19;
+    optional int32 first = 20;
+    optional int32 last = 21;
+    optional int32 offset = 22;
+    optional string after = 23;
+    optional string before = 24;
 }
 message IntroTypePossibleTypesConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1137,13 +1169,14 @@ message IntroTypePossibleTypesConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional IntroTypePossibleTypesOrderBy order_by = 15;
     repeated string group_by = 16;
-    optional io.graphoenix.core.grpc.Conditional cond = 17;
-    repeated IntroTypePossibleTypesExpression exs = 18;
-    optional int32 first = 19;
-    optional int32 last = 20;
-    optional int32 offset = 21;
-    optional string after = 22;
-    optional string before = 23;
+    optional bool not = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated IntroTypePossibleTypesExpression exs = 19;
+    optional int32 first = 20;
+    optional int32 last = 21;
+    optional int32 offset = 22;
+    optional string after = 23;
+    optional string before = 24;
 }
 message IntroDirectiveLocationsQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1160,8 +1193,9 @@ message IntroDirectiveLocationsQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 12;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 13;
     repeated string group_by = 14;
-    optional io.graphoenix.core.grpc.Conditional cond = 15;
-    repeated IntroDirectiveLocationsExpression exs = 16;
+    optional bool not = 15;
+    optional io.graphoenix.core.grpc.Conditional cond = 16;
+    repeated IntroDirectiveLocationsExpression exs = 17;
 }
 message IntroDirectiveLocationsListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1179,13 +1213,14 @@ message IntroDirectiveLocationsListQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 13;
     optional IntroDirectiveLocationsOrderBy order_by = 14;
     repeated string group_by = 15;
-    optional io.graphoenix.core.grpc.Conditional cond = 16;
-    repeated IntroDirectiveLocationsExpression exs = 17;
-    optional int32 first = 18;
-    optional int32 last = 19;
-    optional int32 offset = 20;
-    optional string after = 21;
-    optional string before = 22;
+    optional bool not = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated IntroDirectiveLocationsExpression exs = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
 }
 message IntroDirectiveLocationsConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1203,13 +1238,14 @@ message IntroDirectiveLocationsConnectionQueryArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 13;
     optional IntroDirectiveLocationsOrderBy order_by = 14;
     repeated string group_by = 15;
-    optional io.graphoenix.core.grpc.Conditional cond = 16;
-    repeated IntroDirectiveLocationsExpression exs = 17;
-    optional int32 first = 18;
-    optional int32 last = 19;
-    optional int32 offset = 20;
-    optional string after = 21;
-    optional string before = 22;
+    optional bool not = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated IntroDirectiveLocationsExpression exs = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
 }
 message IntroSchemaMutationArguments {
     optional string id = 1;
@@ -1596,8 +1632,9 @@ message IntroSchemaSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression mutation_type_name = 17;
     optional io.graphoenix.core.grpc.StringExpression subscription_type_name = 18;
     repeated string group_by = 19;
-    optional io.graphoenix.core.grpc.Conditional cond = 20;
-    repeated IntroSchemaExpression exs = 21;
+    optional bool not = 20;
+    optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated IntroSchemaExpression exs = 22;
 }
 message IntroSchemaListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1620,13 +1657,14 @@ message IntroSchemaListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression subscription_type_name = 18;
     optional IntroSchemaOrderBy order_by = 19;
     repeated string group_by = 20;
-    optional io.graphoenix.core.grpc.Conditional cond = 21;
-    repeated IntroSchemaExpression exs = 22;
-    optional int32 first = 23;
-    optional int32 last = 24;
-    optional int32 offset = 25;
-    optional string after = 26;
-    optional string before = 27;
+    optional bool not = 21;
+    optional io.graphoenix.core.grpc.Conditional cond = 22;
+    repeated IntroSchemaExpression exs = 23;
+    optional int32 first = 24;
+    optional int32 last = 25;
+    optional int32 offset = 26;
+    optional string after = 27;
+    optional string before = 28;
 }
 message IntroSchemaConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1649,13 +1687,14 @@ message IntroSchemaConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression subscription_type_name = 18;
     optional IntroSchemaOrderBy order_by = 19;
     repeated string group_by = 20;
-    optional io.graphoenix.core.grpc.Conditional cond = 21;
-    repeated IntroSchemaExpression exs = 22;
-    optional int32 first = 23;
-    optional int32 last = 24;
-    optional int32 offset = 25;
-    optional string after = 26;
-    optional string before = 27;
+    optional bool not = 21;
+    optional io.graphoenix.core.grpc.Conditional cond = 22;
+    repeated IntroSchemaExpression exs = 23;
+    optional int32 first = 24;
+    optional int32 last = 25;
+    optional int32 offset = 26;
+    optional string after = 27;
+    optional string before = 28;
 }
 message IntroTypeSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -1682,8 +1721,9 @@ message IntroTypeSubscriptionArguments {
     optional IntroTypeInterfacesExpression intro_type_interfaces = 22;
     optional IntroTypePossibleTypesExpression intro_type_possible_types = 23;
     repeated string group_by = 24;
-    optional io.graphoenix.core.grpc.Conditional cond = 25;
-    repeated IntroTypeExpression exs = 26;
+    optional bool not = 25;
+    optional io.graphoenix.core.grpc.Conditional cond = 26;
+    repeated IntroTypeExpression exs = 27;
 }
 message IntroTypeListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -1711,13 +1751,14 @@ message IntroTypeListSubscriptionArguments {
     optional IntroTypePossibleTypesExpression intro_type_possible_types = 23;
     optional IntroTypeOrderBy order_by = 24;
     repeated string group_by = 25;
-    optional io.graphoenix.core.grpc.Conditional cond = 26;
-    repeated IntroTypeExpression exs = 27;
-    optional int32 first = 28;
-    optional int32 last = 29;
-    optional int32 offset = 30;
-    optional string after = 31;
-    optional string before = 32;
+    optional bool not = 26;
+    optional io.graphoenix.core.grpc.Conditional cond = 27;
+    repeated IntroTypeExpression exs = 28;
+    optional int32 first = 29;
+    optional int32 last = 30;
+    optional int32 offset = 31;
+    optional string after = 32;
+    optional string before = 33;
 }
 message IntroTypeConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -1745,13 +1786,14 @@ message IntroTypeConnectionSubscriptionArguments {
     optional IntroTypePossibleTypesExpression intro_type_possible_types = 23;
     optional IntroTypeOrderBy order_by = 24;
     repeated string group_by = 25;
-    optional io.graphoenix.core.grpc.Conditional cond = 26;
-    repeated IntroTypeExpression exs = 27;
-    optional int32 first = 28;
-    optional int32 last = 29;
-    optional int32 offset = 30;
-    optional string after = 31;
-    optional string before = 32;
+    optional bool not = 26;
+    optional io.graphoenix.core.grpc.Conditional cond = 27;
+    repeated IntroTypeExpression exs = 28;
+    optional int32 first = 29;
+    optional int32 last = 30;
+    optional int32 offset = 31;
+    optional string after = 32;
+    optional string before = 33;
 }
 message IntroFieldSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1773,8 +1815,9 @@ message IntroFieldSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 17;
     optional io.graphoenix.core.grpc.StringExpression type_name = 18;
     repeated string group_by = 19;
-    optional io.graphoenix.core.grpc.Conditional cond = 20;
-    repeated IntroFieldExpression exs = 21;
+    optional bool not = 20;
+    optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated IntroFieldExpression exs = 22;
 }
 message IntroFieldListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1797,13 +1840,14 @@ message IntroFieldListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression type_name = 18;
     optional IntroFieldOrderBy order_by = 19;
     repeated string group_by = 20;
-    optional io.graphoenix.core.grpc.Conditional cond = 21;
-    repeated IntroFieldExpression exs = 22;
-    optional int32 first = 23;
-    optional int32 last = 24;
-    optional int32 offset = 25;
-    optional string after = 26;
-    optional string before = 27;
+    optional bool not = 21;
+    optional io.graphoenix.core.grpc.Conditional cond = 22;
+    repeated IntroFieldExpression exs = 23;
+    optional int32 first = 24;
+    optional int32 last = 25;
+    optional int32 offset = 26;
+    optional string after = 27;
+    optional string before = 28;
 }
 message IntroFieldConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1826,13 +1870,14 @@ message IntroFieldConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression type_name = 18;
     optional IntroFieldOrderBy order_by = 19;
     repeated string group_by = 20;
-    optional io.graphoenix.core.grpc.Conditional cond = 21;
-    repeated IntroFieldExpression exs = 22;
-    optional int32 first = 23;
-    optional int32 last = 24;
-    optional int32 offset = 25;
-    optional string after = 26;
-    optional string before = 27;
+    optional bool not = 21;
+    optional io.graphoenix.core.grpc.Conditional cond = 22;
+    repeated IntroFieldExpression exs = 23;
+    optional int32 first = 24;
+    optional int32 last = 25;
+    optional int32 offset = 26;
+    optional string after = 27;
+    optional string before = 28;
 }
 message IntroInputValueSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1855,8 +1900,9 @@ message IntroInputValueSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 18;
     optional io.graphoenix.core.grpc.StringExpression type_name = 19;
     repeated string group_by = 20;
-    optional io.graphoenix.core.grpc.Conditional cond = 21;
-    repeated IntroInputValueExpression exs = 22;
+    optional bool not = 21;
+    optional io.graphoenix.core.grpc.Conditional cond = 22;
+    repeated IntroInputValueExpression exs = 23;
 }
 message IntroInputValueListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1880,13 +1926,14 @@ message IntroInputValueListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression type_name = 19;
     optional IntroInputValueOrderBy order_by = 20;
     repeated string group_by = 21;
-    optional io.graphoenix.core.grpc.Conditional cond = 22;
-    repeated IntroInputValueExpression exs = 23;
-    optional int32 first = 24;
-    optional int32 last = 25;
-    optional int32 offset = 26;
-    optional string after = 27;
-    optional string before = 28;
+    optional bool not = 22;
+    optional io.graphoenix.core.grpc.Conditional cond = 23;
+    repeated IntroInputValueExpression exs = 24;
+    optional int32 first = 25;
+    optional int32 last = 26;
+    optional int32 offset = 27;
+    optional string after = 28;
+    optional string before = 29;
 }
 message IntroInputValueConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1910,13 +1957,14 @@ message IntroInputValueConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression type_name = 19;
     optional IntroInputValueOrderBy order_by = 20;
     repeated string group_by = 21;
-    optional io.graphoenix.core.grpc.Conditional cond = 22;
-    repeated IntroInputValueExpression exs = 23;
-    optional int32 first = 24;
-    optional int32 last = 25;
-    optional int32 offset = 26;
-    optional string after = 27;
-    optional string before = 28;
+    optional bool not = 22;
+    optional io.graphoenix.core.grpc.Conditional cond = 23;
+    repeated IntroInputValueExpression exs = 24;
+    optional int32 first = 25;
+    optional int32 last = 26;
+    optional int32 offset = 27;
+    optional string after = 28;
+    optional string before = 29;
 }
 message IntroEnumValueSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1935,8 +1983,9 @@ message IntroEnumValueSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 15;
     repeated string group_by = 16;
-    optional io.graphoenix.core.grpc.Conditional cond = 17;
-    repeated IntroEnumValueExpression exs = 18;
+    optional bool not = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated IntroEnumValueExpression exs = 19;
 }
 message IntroEnumValueListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1956,13 +2005,14 @@ message IntroEnumValueListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 15;
     optional IntroEnumValueOrderBy order_by = 16;
     repeated string group_by = 17;
-    optional io.graphoenix.core.grpc.Conditional cond = 18;
-    repeated IntroEnumValueExpression exs = 19;
-    optional int32 first = 20;
-    optional int32 last = 21;
-    optional int32 offset = 22;
-    optional string after = 23;
-    optional string before = 24;
+    optional bool not = 18;
+    optional io.graphoenix.core.grpc.Conditional cond = 19;
+    repeated IntroEnumValueExpression exs = 20;
+    optional int32 first = 21;
+    optional int32 last = 22;
+    optional int32 offset = 23;
+    optional string after = 24;
+    optional string before = 25;
 }
 message IntroEnumValueConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -1982,13 +2032,14 @@ message IntroEnumValueConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression of_type_name = 15;
     optional IntroEnumValueOrderBy order_by = 16;
     repeated string group_by = 17;
-    optional io.graphoenix.core.grpc.Conditional cond = 18;
-    repeated IntroEnumValueExpression exs = 19;
-    optional int32 first = 20;
-    optional int32 last = 21;
-    optional int32 offset = 22;
-    optional string after = 23;
-    optional string before = 24;
+    optional bool not = 18;
+    optional io.graphoenix.core.grpc.Conditional cond = 19;
+    repeated IntroEnumValueExpression exs = 20;
+    optional int32 first = 21;
+    optional int32 last = 22;
+    optional int32 offset = 23;
+    optional string after = 24;
+    optional string before = 25;
 }
 message IntroDirectiveSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -2009,8 +2060,9 @@ message IntroDirectiveSubscriptionArguments {
     optional io.graphoenix.core.grpc.IntExpression schema_id = 16;
     optional IntroDirectiveLocationsExpression intro_directive_locations = 17;
     repeated string group_by = 18;
-    optional io.graphoenix.core.grpc.Conditional cond = 19;
-    repeated IntroDirectiveExpression exs = 20;
+    optional bool not = 19;
+    optional io.graphoenix.core.grpc.Conditional cond = 20;
+    repeated IntroDirectiveExpression exs = 21;
 }
 message IntroDirectiveListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -2032,13 +2084,14 @@ message IntroDirectiveListSubscriptionArguments {
     optional IntroDirectiveLocationsExpression intro_directive_locations = 17;
     optional IntroDirectiveOrderBy order_by = 18;
     repeated string group_by = 19;
-    optional io.graphoenix.core.grpc.Conditional cond = 20;
-    repeated IntroDirectiveExpression exs = 21;
-    optional int32 first = 22;
-    optional int32 last = 23;
-    optional int32 offset = 24;
-    optional string after = 25;
-    optional string before = 26;
+    optional bool not = 20;
+    optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated IntroDirectiveExpression exs = 22;
+    optional int32 first = 23;
+    optional int32 last = 24;
+    optional int32 offset = 25;
+    optional string after = 26;
+    optional string before = 27;
 }
 message IntroDirectiveConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression name = 1;
@@ -2060,13 +2113,14 @@ message IntroDirectiveConnectionSubscriptionArguments {
     optional IntroDirectiveLocationsExpression intro_directive_locations = 17;
     optional IntroDirectiveOrderBy order_by = 18;
     repeated string group_by = 19;
-    optional io.graphoenix.core.grpc.Conditional cond = 20;
-    repeated IntroDirectiveExpression exs = 21;
-    optional int32 first = 22;
-    optional int32 last = 23;
-    optional int32 offset = 24;
-    optional string after = 25;
-    optional string before = 26;
+    optional bool not = 20;
+    optional io.graphoenix.core.grpc.Conditional cond = 21;
+    repeated IntroDirectiveExpression exs = 22;
+    optional int32 first = 23;
+    optional int32 last = 24;
+    optional int32 offset = 25;
+    optional string after = 26;
+    optional string before = 27;
 }
 message IntroTypeInterfacesSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -2084,8 +2138,9 @@ message IntroTypeInterfacesSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     repeated string group_by = 15;
-    optional io.graphoenix.core.grpc.Conditional cond = 16;
-    repeated IntroTypeInterfacesExpression exs = 17;
+    optional bool not = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated IntroTypeInterfacesExpression exs = 18;
 }
 message IntroTypeInterfacesListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -2104,13 +2159,14 @@ message IntroTypeInterfacesListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional IntroTypeInterfacesOrderBy order_by = 15;
     repeated string group_by = 16;
-    optional io.graphoenix.core.grpc.Conditional cond = 17;
-    repeated IntroTypeInterfacesExpression exs = 18;
-    optional int32 first = 19;
-    optional int32 last = 20;
-    optional int32 offset = 21;
-    optional string after = 22;
-    optional string before = 23;
+    optional bool not = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated IntroTypeInterfacesExpression exs = 19;
+    optional int32 first = 20;
+    optional int32 last = 21;
+    optional int32 offset = 22;
+    optional string after = 23;
+    optional string before = 24;
 }
 message IntroTypeInterfacesConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -2129,13 +2185,14 @@ message IntroTypeInterfacesConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional IntroTypeInterfacesOrderBy order_by = 15;
     repeated string group_by = 16;
-    optional io.graphoenix.core.grpc.Conditional cond = 17;
-    repeated IntroTypeInterfacesExpression exs = 18;
-    optional int32 first = 19;
-    optional int32 last = 20;
-    optional int32 offset = 21;
-    optional string after = 22;
-    optional string before = 23;
+    optional bool not = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated IntroTypeInterfacesExpression exs = 19;
+    optional int32 first = 20;
+    optional int32 last = 21;
+    optional int32 offset = 22;
+    optional string after = 23;
+    optional string before = 24;
 }
 message IntroTypePossibleTypesSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -2153,8 +2210,9 @@ message IntroTypePossibleTypesSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 13;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     repeated string group_by = 15;
-    optional io.graphoenix.core.grpc.Conditional cond = 16;
-    repeated IntroTypePossibleTypesExpression exs = 17;
+    optional bool not = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated IntroTypePossibleTypesExpression exs = 18;
 }
 message IntroTypePossibleTypesListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -2173,13 +2231,14 @@ message IntroTypePossibleTypesListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional IntroTypePossibleTypesOrderBy order_by = 15;
     repeated string group_by = 16;
-    optional io.graphoenix.core.grpc.Conditional cond = 17;
-    repeated IntroTypePossibleTypesExpression exs = 18;
-    optional int32 first = 19;
-    optional int32 last = 20;
-    optional int32 offset = 21;
-    optional string after = 22;
-    optional string before = 23;
+    optional bool not = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated IntroTypePossibleTypesExpression exs = 19;
+    optional int32 first = 20;
+    optional int32 last = 21;
+    optional int32 offset = 22;
+    optional string after = 23;
+    optional string before = 24;
 }
 message IntroTypePossibleTypesConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -2198,13 +2257,14 @@ message IntroTypePossibleTypesConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 14;
     optional IntroTypePossibleTypesOrderBy order_by = 15;
     repeated string group_by = 16;
-    optional io.graphoenix.core.grpc.Conditional cond = 17;
-    repeated IntroTypePossibleTypesExpression exs = 18;
-    optional int32 first = 19;
-    optional int32 last = 20;
-    optional int32 offset = 21;
-    optional string after = 22;
-    optional string before = 23;
+    optional bool not = 17;
+    optional io.graphoenix.core.grpc.Conditional cond = 18;
+    repeated IntroTypePossibleTypesExpression exs = 19;
+    optional int32 first = 20;
+    optional int32 last = 21;
+    optional int32 offset = 22;
+    optional string after = 23;
+    optional string before = 24;
 }
 message IntroDirectiveLocationsSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -2221,8 +2281,9 @@ message IntroDirectiveLocationsSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression create_group_id = 12;
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 13;
     repeated string group_by = 14;
-    optional io.graphoenix.core.grpc.Conditional cond = 15;
-    repeated IntroDirectiveLocationsExpression exs = 16;
+    optional bool not = 15;
+    optional io.graphoenix.core.grpc.Conditional cond = 16;
+    repeated IntroDirectiveLocationsExpression exs = 17;
 }
 message IntroDirectiveLocationsListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -2240,13 +2301,14 @@ message IntroDirectiveLocationsListSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 13;
     optional IntroDirectiveLocationsOrderBy order_by = 14;
     repeated string group_by = 15;
-    optional io.graphoenix.core.grpc.Conditional cond = 16;
-    repeated IntroDirectiveLocationsExpression exs = 17;
-    optional int32 first = 18;
-    optional int32 last = 19;
-    optional int32 offset = 20;
-    optional string after = 21;
-    optional string before = 22;
+    optional bool not = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated IntroDirectiveLocationsExpression exs = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
 }
 message IntroDirectiveLocationsConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -2264,11 +2326,12 @@ message IntroDirectiveLocationsConnectionSubscriptionArguments {
     optional io.graphoenix.core.grpc.StringExpression intro_typename = 13;
     optional IntroDirectiveLocationsOrderBy order_by = 14;
     repeated string group_by = 15;
-    optional io.graphoenix.core.grpc.Conditional cond = 16;
-    repeated IntroDirectiveLocationsExpression exs = 17;
-    optional int32 first = 18;
-    optional int32 last = 19;
-    optional int32 offset = 20;
-    optional string after = 21;
-    optional string before = 22;
+    optional bool not = 16;
+    optional io.graphoenix.core.grpc.Conditional cond = 17;
+    repeated IntroDirectiveLocationsExpression exs = 18;
+    optional int32 first = 19;
+    optional int32 last = 20;
+    optional int32 offset = 21;
+    optional string after = 22;
+    optional string before = 23;
 }

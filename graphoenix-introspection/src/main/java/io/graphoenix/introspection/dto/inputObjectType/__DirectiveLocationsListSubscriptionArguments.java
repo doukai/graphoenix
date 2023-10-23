@@ -51,6 +51,9 @@ public class __DirectiveLocationsListSubscriptionArguments implements MetaExpres
 
   private Collection<String> groupBy;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -184,6 +187,14 @@ public class __DirectiveLocationsListSubscriptionArguments implements MetaExpres
 
   public void setGroupBy(Collection<String> groupBy) {
     this.groupBy = groupBy;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {

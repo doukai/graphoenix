@@ -8,6 +8,7 @@ public class Hammurabi {
     public static final String META_INTERFACE_NAME = "Meta";
     public static final String DEPRECATED_FIELD_NAME = "isDeprecated";
     public static final String DEPRECATED_INPUT_NAME = "includeDeprecated";
+    public static final String NOT_INPUT_NAME = "not";
     public static final String LIST_INPUT_NAME = "list";
     public static final String WHERE_INPUT_NAME = "where";
     public static final String FIRST_INPUT_NAME = "first";
@@ -18,7 +19,7 @@ public class Hammurabi {
     public static final String ORDER_BY_INPUT_NAME = "orderBy";
     public static final String GROUP_BY_INPUT_NAME = "groupBy";
     public static final String SORT_INPUT_NAME = "sort";
-    public static final String[] EXCLUDE_INPUT = {DEPRECATED_INPUT_NAME, FIRST_INPUT_NAME, LAST_INPUT_NAME, OFFSET_INPUT_NAME, AFTER_INPUT_NAME, BEFORE_INPUT_NAME, GROUP_BY_INPUT_NAME, ORDER_BY_INPUT_NAME, SORT_INPUT_NAME, LIST_INPUT_NAME, WHERE_INPUT_NAME};
+    public static final String[] EXCLUDE_INPUT = {DEPRECATED_INPUT_NAME, FIRST_INPUT_NAME, LAST_INPUT_NAME, OFFSET_INPUT_NAME, AFTER_INPUT_NAME, BEFORE_INPUT_NAME, GROUP_BY_INPUT_NAME, ORDER_BY_INPUT_NAME, SORT_INPUT_NAME, LIST_INPUT_NAME, WHERE_INPUT_NAME, NOT_INPUT_NAME};
     public static final String FUNC_DIRECTIVE_NAME = "func";
     public static final String CURSOR_DIRECTIVE_NAME = "cursor";
     public static final String INVOKE_DIRECTIVE_NAME = "invoke";

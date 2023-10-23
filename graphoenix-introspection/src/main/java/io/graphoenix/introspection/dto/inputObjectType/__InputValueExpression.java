@@ -56,6 +56,9 @@ public class __InputValueExpression implements MetaExpression {
 
   private StringExpression typeName;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -211,6 +214,14 @@ public class __InputValueExpression implements MetaExpression {
 
   public void setTypeName(StringExpression typeName) {
     this.typeName = typeName;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {

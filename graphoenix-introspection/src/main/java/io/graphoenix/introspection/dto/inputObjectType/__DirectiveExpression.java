@@ -54,6 +54,9 @@ public class __DirectiveExpression implements MetaExpression {
 
   private __DirectiveLocationsExpression __directiveLocations;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -193,6 +196,14 @@ public class __DirectiveExpression implements MetaExpression {
 
   public void set__directiveLocations(__DirectiveLocationsExpression __directiveLocations) {
     this.__directiveLocations = __directiveLocations;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {

@@ -52,6 +52,9 @@ public class OrganizationConnectionSubscriptionArguments implements MetaExpressi
 
   private Collection<String> groupBy;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -193,6 +196,14 @@ public class OrganizationConnectionSubscriptionArguments implements MetaExpressi
 
   public void setGroupBy(Collection<String> groupBy) {
     this.groupBy = groupBy;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {
