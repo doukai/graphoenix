@@ -17,12 +17,6 @@ public interface ComponentProxyProcessor {
                                        ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
     }
 
-    default void processComponentModule(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
-    }
-
-    default void processModule(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
-    }
-
-    default void processModuleContext(CompilationUnit moduleCompilationUnit, BlockStmt moduleContextStaticInitializer) {
+    default void processModuleContext(CompilationUnit moduleCompilationUnit, BlockStmt staticInitializer) {
     }
 }

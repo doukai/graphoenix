@@ -2,43 +2,30 @@ package io.graphoenix.inject;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.MethodReferenceExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.SuperExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.ReturnStmt;
-import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.google.auto.service.AutoService;
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.Streams;
-import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
 import io.graphoenix.inject.error.InjectionProcessException;
 import io.graphoenix.spi.context.BaseModuleContext;
 import io.graphoenix.spi.context.ModuleContext;
@@ -49,7 +36,6 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Produces;
-import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
@@ -67,7 +53,6 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -78,12 +63,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.inject.error.InjectionProcessErrorType.CANNOT_GET_COMPILATION_UNIT;
-import static io.graphoenix.inject.error.InjectionProcessErrorType.COMPONENT_GET_METHOD_NOT_EXIST;
 import static io.graphoenix.inject.error.InjectionProcessErrorType.CONSTRUCTOR_NOT_EXIST;
 import static io.graphoenix.inject.error.InjectionProcessErrorType.INSTANCE_TYPE_NOT_EXIST;
-import static io.graphoenix.inject.error.InjectionProcessErrorType.MODULE_PROVIDERS_METHOD_NOT_EXIST;
 import static io.graphoenix.inject.error.InjectionProcessErrorType.PROVIDER_TYPE_NOT_EXIST;
-import static io.graphoenix.inject.error.InjectionProcessErrorType.TYPE_ARGUMENT_NOT_EXIST;
 import static javax.lang.model.SourceVersion.RELEASE_11;
 
 @SupportedAnnotationTypes({
@@ -155,35 +137,20 @@ public class InjectProcessor extends AbstractProcessor {
                 );
 
         List<CompilationUnit> componentProxyCompilationUnits = typeElements.stream()
+                .filter(typeElement -> typeElement.getAnnotation(ConfigProperties.class) == null)
                 .map(this::buildComponentProxy)
                 .collect(Collectors.toList());
         componentProxyCompilationUnits.forEach(compilationUnit -> processorManager.writeToFiler(compilationUnit));
         Logger.debug("all proxy class build success");
 
-        CompilationUnit moduleCompilationUnit = buildModule(singletonSet, dependentSet, applicationScopedSet, requestScopedSet, sessionScopedSet, transactionScopedSet, componentProxyCompilationUnits);
-        processorManager.writeToFiler(moduleCompilationUnit);
-        Logger.debug("module class build success");
-
-        List<CompilationUnit> componentProxyComponentCompilationUnits = componentProxyCompilationUnits.stream()
-                .map(componentProxyCompilationUnit -> buildComponentProxyComponent(componentProxyCompilationUnit, moduleCompilationUnit))
-                .collect(Collectors.toList());
-        componentProxyComponentCompilationUnits.forEach(compilationUnit -> processorManager.writeToFiler(compilationUnit));
-        Logger.debug("all proxy component class build success");
-
-        CompilationUnit moduleContextCompilationUnit = buildModuleContext(componentProxyComponentCompilationUnits, moduleCompilationUnit);
+        CompilationUnit moduleContextCompilationUnit = buildModuleContext(typeElements.stream().flatMap(typeElement -> processorManager.parse(typeElement).stream()).collect(Collectors.toList()));
         processorManager.writeToFiler(moduleContextCompilationUnit);
         Logger.debug("module context class build success");
 
-        List<CompilationUnit> producesModuleCompilationUnits = buildProducesModuleStream(singletonSet, dependentSet, applicationScopedSet, requestScopedSet, sessionScopedSet, transactionScopedSet, configPropertiesSet).collect(Collectors.toList());
-        producesModuleCompilationUnits.forEach(producesModuleCompilationUnit -> {
+        List<CompilationUnit> producesContextCompilationUnits = buildProducesContextStream(singletonSet, dependentSet, applicationScopedSet, requestScopedSet, sessionScopedSet, transactionScopedSet, configPropertiesSet).collect(Collectors.toList());
+        producesContextCompilationUnits.forEach(producesModuleCompilationUnit -> {
                     processorManager.writeToFiler(producesModuleCompilationUnit);
-                    Logger.debug("produces module class class build success");
-                    List<CompilationUnit> producesComponentCompilationUnits = buildProducesComponentStream(producesModuleCompilationUnit).collect(Collectors.toList());
-                    producesComponentCompilationUnits.forEach(compilationUnit -> processorManager.writeToFiler(compilationUnit));
-                    Logger.debug("produces module component class build success");
-                    CompilationUnit producesModuleContextCompilationUnit = buildModuleContext(producesComponentCompilationUnits, producesModuleCompilationUnit);
-                    processorManager.writeToFiler(producesModuleContextCompilationUnit);
-                    Logger.debug("produces module context class build success");
+                    Logger.debug("produces context class build success");
                 }
         );
         Logger.debug("all produces module class build success");
@@ -283,493 +250,93 @@ public class InjectProcessor extends AbstractProcessor {
         return componentProxyCompilationUnit;
     }
 
-    private Stream<CompilationUnit> buildProducesComponentProxyStream(TypeElement typeElement) {
-        return processorManager.parse(typeElement).map(this::buildProducesComponentProxyStream).orElseThrow(() -> new InjectionProcessException(CANNOT_GET_COMPILATION_UNIT.bind(typeElement.getQualifiedName().toString())));
-    }
+    private Expression buildScopeFactoryGetMethodExpression(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, String factoryName) {
+        String qualifiedName = processorManager.getQualifiedNameByDeclaration(componentClassDeclaration);
+        moduleCompilationUnit.addImport(Mono.class)
+                .addImport(PublisherBuilder.class)
+                .addImport("io.graphoenix.core.context." + factoryName);
 
-    private Stream<CompilationUnit> buildProducesComponentProxyStream(CompilationUnit componentCompilationUnit) {
-        return buildProducesComponentProxyStream(
-                processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit)
-        );
-    }
-
-    private Stream<CompilationUnit> buildProducesComponentProxyStream(ClassOrInterfaceDeclaration componentClassDeclaration) {
-        return componentClassDeclaration.getMethods().stream()
-                .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Produces.class))
-                .flatMap(methodDeclaration -> {
-                            if (methodDeclaration.getType().isClassOrInterfaceType() && (processorManager.getQualifiedNameByType(methodDeclaration.getType()).equals(Mono.class.getName()) || processorManager.getQualifiedNameByType(methodDeclaration.getType()).equals(PublisherBuilder.class.getName()))) {
-                                return processorManager.getMethodReturnReferenceType(methodDeclaration)
-                                        .map(resolvedReferenceType -> resolvedReferenceType.getTypeParametersMap().get(0).b.asReferenceType())
-                                        .map(resolvedReferenceType -> processorManager.getCompilationUnitByResolvedReferenceType(resolvedReferenceType))
-                                        .map(compilationUnit ->
-                                                buildComponentProxy(
-                                                        compilationUnit,
-                                                        methodDeclaration.getAnnotationByClass(Named.class).orElse(null),
-                                                        methodDeclaration.getAnnotationByClass(Default.class).orElse(null)
-                                                )
-                                        );
-
+        return componentClassDeclaration.getMembers().stream()
+                .filter(bodyDeclaration -> bodyDeclaration.isAnnotationPresent(Produces.class))
+                .filter(bodyDeclaration -> bodyDeclaration.isConstructorDeclaration() || bodyDeclaration.isMethodDeclaration())
+                .findFirst()
+                .map(bodyDeclaration -> {
+                            if (bodyDeclaration.isConstructorDeclaration()) {
+                                return new MethodCallExpr()
+                                        .setName("get")
+                                        .addArgument(new ClassExpr().setType(qualifiedName))
+                                        .addArgument(
+                                                new LambdaExpr()
+                                                        .setEnclosingParameters(true)
+                                                        .setBody(
+                                                                new ExpressionStmt()
+                                                                        .setExpression(
+                                                                                new ObjectCreationExpr()
+                                                                                        .setType(qualifiedName + "Proxy")
+                                                                                        .setArguments(
+                                                                                                bodyDeclaration.asConstructorDeclaration().getParameters().stream()
+                                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                        .collect(Collectors.toCollection(NodeList::new))
+                                                                                        )
+                                                                        )
+                                                        )
+                                        )
+                                        .setScope(new NameExpr(factoryName));
                             } else {
-                                return processorManager.getMethodReturnReferenceType(methodDeclaration)
-                                        .map(resolvedReferenceType -> processorManager.getCompilationUnitByResolvedReferenceType(resolvedReferenceType))
-                                        .map(compilationUnit ->
-                                                buildComponentProxy(
-                                                        compilationUnit,
-                                                        methodDeclaration.getAnnotationByClass(Named.class).orElse(null),
-                                                        methodDeclaration.getAnnotationByClass(Default.class).orElse(null)
-                                                )
-                                        );
+                                return new MethodCallExpr()
+                                        .setName("get")
+                                        .addArgument(new ClassExpr().setType(qualifiedName))
+                                        .addArgument(
+                                                new LambdaExpr()
+                                                        .setEnclosingParameters(true)
+                                                        .setBody(
+                                                                new ExpressionStmt()
+                                                                        .setExpression(
+                                                                                new MethodCallExpr()
+                                                                                        .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
+                                                                                        .setArguments(
+                                                                                                bodyDeclaration.asMethodDeclaration().getParameters().stream()
+                                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                        .collect(Collectors.toCollection(NodeList::new))
+                                                                                        )
+                                                                                        .setScope(new NameExpr(qualifiedName + "Proxy"))
+                                                                        )
+                                                        )
+                                        )
+                                        .setScope(new NameExpr(factoryName));
                             }
                         }
+                )
+                .orElseGet(() ->
+                        new MethodCallExpr()
+                                .setName("get")
+                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
+                                .addArgument(
+                                        new LambdaExpr()
+                                                .setEnclosingParameters(true)
+                                                .setBody(
+                                                        new ExpressionStmt()
+                                                                .setExpression(
+                                                                        new ObjectCreationExpr()
+                                                                                .setType(qualifiedName + "Proxy")
+                                                                                .setArguments(
+                                                                                        componentClassDeclaration.getConstructors().stream()
+                                                                                                .findFirst()
+                                                                                                .map(constructorDeclaration ->
+                                                                                                        constructorDeclaration.getParameters().stream()
+                                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                                                                )
+                                                                                                .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(qualifiedName)))
+                                                                                )
+                                                                )
+                                                )
+                                )
+                                .setScope(new NameExpr(factoryName))
                 );
-    }
-
-    private CompilationUnit buildModule(Set<? extends Element> singletonSet,
-                                        Set<? extends Element> dependentSet,
-                                        Set<? extends Element> applicationScopedSet,
-                                        Set<? extends Element> requestScopedSet,
-                                        Set<? extends Element> sessionScopedSet,
-                                        Set<? extends Element> transactionScopedSet,
-                                        List<CompilationUnit> componentProxyCompilationUnits) {
-
-        ClassOrInterfaceDeclaration moduleClassDeclaration = new ClassOrInterfaceDeclaration()
-                .setPublic(true)
-                .setName("PackageModule" + round.get())
-                .addAnnotation(Module.class)
-                .addAnnotation(new NormalAnnotationExpr().addPair("value", new StringLiteralExpr(getClass().getName())).setName(Generated.class.getSimpleName()));
-
-        CompilationUnit moduleCompilationUnit = new CompilationUnit().addType(moduleClassDeclaration)
-                .setPackageDeclaration(processorManager.getRootPackageName())
-                .addImport(Module.class)
-                .addImport(Provides.class)
-                .addImport(javax.inject.Singleton.class)
-                .addImport(Generated.class)
-                .addImport("io.graphoenix.core.context.BeanContext");
-
-        Streams.concat(singletonSet.stream(), applicationScopedSet.stream())
-                .filter(element -> element.getAnnotation(Generated.class) == null)
-                .filter(element -> element.getKind().isClass())
-                .map(element -> (TypeElement) element)
-                .map(typeElement -> processorManager.getCompilationUnitBySourceCode(typeElement))
-                .forEach(componentCompilationUnit -> buildProvidesMethod(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, true, getComponentProxyCompilationUnit(componentCompilationUnit, componentProxyCompilationUnits)));
-
-        requestScopedSet.stream()
-                .filter(element -> element.getAnnotation(Generated.class) == null)
-                .filter(element -> element.getKind().isClass())
-                .map(element -> (TypeElement) element)
-                .map(typeElement -> processorManager.getCompilationUnitBySourceCode(typeElement))
-                .forEach(componentCompilationUnit -> buildRequestScopeProvidesMethod(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, getComponentProxyCompilationUnit(componentCompilationUnit, componentProxyCompilationUnits)));
-
-        sessionScopedSet.stream()
-                .filter(element -> element.getAnnotation(Generated.class) == null)
-                .filter(element -> element.getKind().isClass())
-                .map(element -> (TypeElement) element)
-                .map(typeElement -> processorManager.getCompilationUnitBySourceCode(typeElement))
-                .forEach(componentCompilationUnit -> buildSessionScopeProvidesMethod(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, getComponentProxyCompilationUnit(componentCompilationUnit, componentProxyCompilationUnits)));
-
-        transactionScopedSet.stream()
-                .filter(element -> element.getAnnotation(Generated.class) == null)
-                .filter(element -> element.getKind().isClass())
-                .map(element -> (TypeElement) element)
-                .map(typeElement -> processorManager.getCompilationUnitBySourceCode(typeElement))
-                .forEach(componentCompilationUnit -> buildTransactionScopeProvidesMethod(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, getComponentProxyCompilationUnit(componentCompilationUnit, componentProxyCompilationUnits)));
-
-        dependentSet.stream()
-                .filter(element -> element.getAnnotation(Generated.class) == null)
-                .filter(element -> element.getKind().isClass())
-                .map(element -> (TypeElement) element)
-                .map(typeElement -> processorManager.getCompilationUnitBySourceCode(typeElement))
-                .forEach(componentCompilationUnit -> buildProvidesMethod(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, false, getComponentProxyCompilationUnit(componentCompilationUnit, componentProxyCompilationUnits)));
-
-        componentProxyProcessors
-                .forEach(componentProxyProcessor -> {
-                            Logger.debug("processModule {}", componentProxyProcessor.getClass().getName());
-                            componentProxyProcessor.processModule(moduleCompilationUnit, moduleClassDeclaration);
-                        }
-                );
-        Logger.info("{} package module class build success", processorManager.getQualifiedNameByDeclaration(moduleClassDeclaration));
-        return moduleCompilationUnit;
-    }
-
-    private void buildProvidesMethod(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration, CompilationUnit componentCompilationUnit, boolean isSingleton, CompilationUnit componentProxyCompilationUnit) {
-        ClassOrInterfaceDeclaration componentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit);
-        ClassOrInterfaceDeclaration componentProxyClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit);
-
-        moduleCompilationUnit.addImport(processorManager.getNameByDeclaration(componentProxyClassDeclaration));
-
-        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString).replaceAll("\\.", "_")), Modifier.Keyword.PUBLIC)
-                .addAnnotation(Provides.class)
-                .setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString));
-        if (isSingleton) {
-            methodDeclaration.addAnnotation(javax.inject.Singleton.class);
-        }
-
-        methodDeclaration.createBody().addStatement(buildProvidesMethodReturnStmt(moduleCompilationUnit, componentProxyClassDeclaration));
-//        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentClassDeclaration);
-//        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentProxyClassDeclaration);
-    }
-
-    private void buildRequestScopeProvidesMethod(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration, CompilationUnit componentCompilationUnit, CompilationUnit componentProxyCompilationUnit) {
-        ClassOrInterfaceDeclaration componentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit);
-        ClassOrInterfaceDeclaration componentProxyClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit);
-
-        moduleCompilationUnit.addImport(processorManager.getNameByDeclaration(componentProxyClassDeclaration));
-
-        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString).replaceAll("\\.", "_")), Modifier.Keyword.PUBLIC)
-                .addAnnotation(Provides.class)
-                .setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(new ClassOrInterfaceType().setName(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString))));
-
-        methodDeclaration.createBody().addStatement(buildRequestScopeProvidesMethodReturnStmt(moduleCompilationUnit, processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit), componentProxyClassDeclaration));
-//        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentClassDeclaration);
-//        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentProxyClassDeclaration);
-    }
-
-    private void buildSessionScopeProvidesMethod(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration, CompilationUnit componentCompilationUnit, CompilationUnit componentProxyCompilationUnit) {
-        ClassOrInterfaceDeclaration componentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit);
-        ClassOrInterfaceDeclaration componentProxyClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit);
-
-        moduleCompilationUnit.addImport(processorManager.getNameByDeclaration(componentProxyClassDeclaration));
-
-        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString).replaceAll("\\.", "_")), Modifier.Keyword.PUBLIC)
-                .addAnnotation(Provides.class)
-                .setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(new ClassOrInterfaceType().setName(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString))));
-
-        methodDeclaration.createBody().addStatement(buildSessionScopeProvidesMethodReturnStmt(moduleCompilationUnit, processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit), componentProxyClassDeclaration));
-//        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentClassDeclaration);
-//        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentProxyClassDeclaration);
-    }
-
-    private void buildTransactionScopeProvidesMethod(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration, CompilationUnit componentCompilationUnit, CompilationUnit componentProxyCompilationUnit) {
-        ClassOrInterfaceDeclaration componentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit);
-        ClassOrInterfaceDeclaration componentProxyClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit);
-
-        moduleCompilationUnit.addImport(processorManager.getNameByDeclaration(componentProxyClassDeclaration));
-
-        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString).replaceAll("\\.", "_")), Modifier.Keyword.PUBLIC)
-                .addAnnotation(Provides.class)
-                .setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(new ClassOrInterfaceType().setName(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString))));
-
-        methodDeclaration.createBody().addStatement(buildTransactionScopeProvidesMethodReturnStmt(moduleCompilationUnit, processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit), componentProxyClassDeclaration));
-//        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentClassDeclaration);
-//        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentProxyClassDeclaration);
-    }
-
-    private ReturnStmt buildProvidesMethodReturnStmt(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
-        return new ReturnStmt(
-                componentProxyClassDeclaration.getMembers().stream()
-                        .filter(bodyDeclaration -> bodyDeclaration.isAnnotationPresent(Produces.class))
-                        .filter(bodyDeclaration -> bodyDeclaration.isConstructorDeclaration() || bodyDeclaration.isMethodDeclaration())
-                        .findFirst()
-                        .map(bodyDeclaration -> {
-                                    if (bodyDeclaration.isConstructorDeclaration()) {
-                                        return new ObjectCreationExpr()
-                                                .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
-                                                .setArguments(
-                                                        bodyDeclaration.asConstructorDeclaration().getParameters().stream()
-                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                .collect(Collectors.toCollection(NodeList::new))
-                                                );
-                                    } else {
-                                        moduleCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration));
-                                        return new MethodCallExpr()
-                                                .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
-                                                .setArguments(
-                                                        bodyDeclaration.asMethodDeclaration().getParameters().stream()
-                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                .collect(Collectors.toCollection(NodeList::new))
-                                                )
-                                                .setScope(new NameExpr(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString)));
-                                    }
-                                }
-                        )
-                        .orElseGet(() ->
-                                new ObjectCreationExpr()
-                                        .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
-                                        .setArguments(
-                                                componentProxyClassDeclaration.getConstructors().stream()
-                                                        .findFirst()
-                                                        .map(constructorDeclaration ->
-                                                                constructorDeclaration.getParameters().stream()
-                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                        .collect(Collectors.toCollection(NodeList::new))
-                                                        )
-                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(componentProxyClassDeclaration.getNameAsString())))
-                                        )
-                        )
-        );
-    }
-
-    private ReturnStmt buildRequestScopeProvidesMethodReturnStmt(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
-        moduleCompilationUnit.addImport(Mono.class)
-                .addImport(PublisherBuilder.class)
-                .addImport("io.graphoenix.core.context.RequestScopeInstanceFactory");
-        return new ReturnStmt(
-                componentProxyClassDeclaration.getMembers().stream()
-                        .filter(bodyDeclaration -> bodyDeclaration.isAnnotationPresent(Produces.class))
-                        .filter(bodyDeclaration -> bodyDeclaration.isConstructorDeclaration() || bodyDeclaration.isMethodDeclaration())
-                        .findFirst()
-                        .map(bodyDeclaration -> {
-                                    if (bodyDeclaration.isConstructorDeclaration()) {
-                                        return new MethodCallExpr()
-                                                .setName("get")
-                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
-                                                .addArgument(
-                                                        new LambdaExpr()
-                                                                .setEnclosingParameters(true)
-                                                                .setBody(
-                                                                        new ExpressionStmt()
-                                                                                .setExpression(
-                                                                                        new ObjectCreationExpr()
-                                                                                                .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
-                                                                                                .setArguments(
-                                                                                                        bodyDeclaration.asConstructorDeclaration().getParameters().stream()
-                                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                                                .collect(Collectors.toCollection(NodeList::new))
-                                                                                                )
-                                                                                )
-                                                                )
-                                                )
-                                                .setScope(new NameExpr("RequestScopeInstanceFactory"));
-                                    } else {
-                                        moduleCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration));
-                                        return new MethodCallExpr()
-                                                .setName("get")
-                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
-                                                .addArgument(
-                                                        new LambdaExpr()
-                                                                .setEnclosingParameters(true)
-                                                                .setBody(
-                                                                        new ExpressionStmt()
-                                                                                .setExpression(
-                                                                                        new MethodCallExpr()
-                                                                                                .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
-                                                                                                .setArguments(
-                                                                                                        bodyDeclaration.asMethodDeclaration().getParameters().stream()
-                                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                                                .collect(Collectors.toCollection(NodeList::new))
-                                                                                                )
-                                                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString)))
-                                                                                )
-                                                                )
-                                                )
-                                                .setScope(new NameExpr("RequestScopeInstanceFactory"));
-                                    }
-                                }
-                        )
-                        .orElseGet(() ->
-                                new MethodCallExpr()
-                                        .setName("get")
-                                        .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
-                                        .addArgument(
-                                                new LambdaExpr()
-                                                        .setEnclosingParameters(true)
-                                                        .setBody(
-                                                                new ExpressionStmt()
-                                                                        .setExpression(
-                                                                                new ObjectCreationExpr()
-                                                                                        .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
-                                                                                        .setArguments(
-                                                                                                componentProxyClassDeclaration.getConstructors().stream()
-                                                                                                        .findFirst()
-                                                                                                        .map(constructorDeclaration ->
-                                                                                                                constructorDeclaration.getParameters().stream()
-                                                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                                                        .collect(Collectors.toCollection(NodeList::new))
-                                                                                                        )
-                                                                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(componentProxyClassDeclaration.getNameAsString())))
-                                                                                        )
-                                                                        )
-                                                        )
-                                        )
-                                        .setScope(new NameExpr("RequestScopeInstanceFactory"))
-                        )
-        );
-    }
-
-    private ReturnStmt buildSessionScopeProvidesMethodReturnStmt(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
-        moduleCompilationUnit.addImport(Mono.class)
-                .addImport(PublisherBuilder.class)
-                .addImport("io.graphoenix.core.context.SessionScopeInstanceFactory");
-        return new ReturnStmt(
-                componentProxyClassDeclaration.getMembers().stream()
-                        .filter(bodyDeclaration -> bodyDeclaration.isAnnotationPresent(Produces.class))
-                        .filter(bodyDeclaration -> bodyDeclaration.isConstructorDeclaration() || bodyDeclaration.isMethodDeclaration())
-                        .findFirst()
-                        .map(bodyDeclaration -> {
-                                    if (bodyDeclaration.isConstructorDeclaration()) {
-                                        return new MethodCallExpr()
-                                                .setName("get")
-                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
-                                                .addArgument(
-                                                        new LambdaExpr()
-                                                                .setEnclosingParameters(true)
-                                                                .setBody(
-                                                                        new ExpressionStmt()
-                                                                                .setExpression(
-                                                                                        new ObjectCreationExpr()
-                                                                                                .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
-                                                                                                .setArguments(
-                                                                                                        bodyDeclaration.asConstructorDeclaration().getParameters().stream()
-                                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                                                .collect(Collectors.toCollection(NodeList::new))
-                                                                                                )
-                                                                                )
-                                                                )
-                                                )
-                                                .setScope(new NameExpr("SessionScopeInstanceFactory"));
-                                    } else {
-                                        moduleCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration));
-                                        return new MethodCallExpr()
-                                                .setName("get")
-                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
-                                                .addArgument(
-                                                        new LambdaExpr()
-                                                                .setEnclosingParameters(true)
-                                                                .setBody(
-                                                                        new ExpressionStmt()
-                                                                                .setExpression(
-                                                                                        new MethodCallExpr()
-                                                                                                .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
-                                                                                                .setArguments(
-                                                                                                        bodyDeclaration.asMethodDeclaration().getParameters().stream()
-                                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                                                .collect(Collectors.toCollection(NodeList::new))
-                                                                                                )
-                                                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString)))
-                                                                                )
-                                                                )
-                                                )
-                                                .setScope(new NameExpr("SessionScopeInstanceFactory"));
-                                    }
-                                }
-                        )
-                        .orElseGet(() ->
-                                new MethodCallExpr()
-                                        .setName("get")
-                                        .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
-                                        .addArgument(
-                                                new LambdaExpr()
-                                                        .setEnclosingParameters(true)
-                                                        .setBody(
-                                                                new ExpressionStmt()
-                                                                        .setExpression(
-                                                                                new ObjectCreationExpr()
-                                                                                        .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
-                                                                                        .setArguments(
-                                                                                                componentProxyClassDeclaration.getConstructors().stream()
-                                                                                                        .findFirst()
-                                                                                                        .map(constructorDeclaration ->
-                                                                                                                constructorDeclaration.getParameters().stream()
-                                                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                                                        .collect(Collectors.toCollection(NodeList::new))
-                                                                                                        )
-                                                                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(componentProxyClassDeclaration.getNameAsString())))
-                                                                                        )
-                                                                        )
-                                                        )
-                                        )
-                                        .setScope(new NameExpr("SessionScopeInstanceFactory"))
-                        )
-        );
-    }
-
-    private ReturnStmt buildTransactionScopeProvidesMethodReturnStmt(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
-        moduleCompilationUnit.addImport(Mono.class)
-                .addImport(PublisherBuilder.class)
-                .addImport("io.graphoenix.core.context.TransactionScopeInstanceFactory");
-        return new ReturnStmt(
-                componentProxyClassDeclaration.getMembers().stream()
-                        .filter(bodyDeclaration -> bodyDeclaration.isAnnotationPresent(Produces.class))
-                        .filter(bodyDeclaration -> bodyDeclaration.isConstructorDeclaration() || bodyDeclaration.isMethodDeclaration())
-                        .findFirst()
-                        .map(bodyDeclaration -> {
-                                    if (bodyDeclaration.isConstructorDeclaration()) {
-                                        return new MethodCallExpr()
-                                                .setName("get")
-                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
-                                                .addArgument(
-                                                        new LambdaExpr()
-                                                                .setEnclosingParameters(true)
-                                                                .setBody(
-                                                                        new ExpressionStmt()
-                                                                                .setExpression(
-                                                                                        new ObjectCreationExpr()
-                                                                                                .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
-                                                                                                .setArguments(
-                                                                                                        bodyDeclaration.asConstructorDeclaration().getParameters().stream()
-                                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                                                .collect(Collectors.toCollection(NodeList::new))
-                                                                                                )
-                                                                                )
-                                                                )
-                                                )
-                                                .setScope(new NameExpr("TransactionScopeInstanceFactory"));
-                                    } else {
-                                        moduleCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration));
-                                        return new MethodCallExpr()
-                                                .setName("get")
-                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
-                                                .addArgument(
-                                                        new LambdaExpr()
-                                                                .setEnclosingParameters(true)
-                                                                .setBody(
-                                                                        new ExpressionStmt()
-                                                                                .setExpression(
-                                                                                        new MethodCallExpr()
-                                                                                                .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
-                                                                                                .setArguments(
-                                                                                                        bodyDeclaration.asMethodDeclaration().getParameters().stream()
-                                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                                                .collect(Collectors.toCollection(NodeList::new))
-                                                                                                )
-                                                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString)))
-                                                                                )
-                                                                )
-                                                )
-                                                .setScope(new NameExpr("TransactionScopeInstanceFactory"));
-                                    }
-                                }
-                        )
-                        .orElseGet(() ->
-                                new MethodCallExpr()
-                                        .setName("get")
-                                        .addArgument(new ClassExpr().setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString)))
-                                        .addArgument(
-                                                new LambdaExpr()
-                                                        .setEnclosingParameters(true)
-                                                        .setBody(
-                                                                new ExpressionStmt()
-                                                                        .setExpression(
-                                                                                new ObjectCreationExpr()
-                                                                                        .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
-                                                                                        .setArguments(
-                                                                                                componentProxyClassDeclaration.getConstructors().stream()
-                                                                                                        .findFirst()
-                                                                                                        .map(constructorDeclaration ->
-                                                                                                                constructorDeclaration.getParameters().stream()
-                                                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                                                        .collect(Collectors.toCollection(NodeList::new))
-                                                                                                        )
-                                                                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(componentProxyClassDeclaration.getNameAsString())))
-                                                                                        )
-                                                                        )
-                                                        )
-                                        )
-                                        .setScope(new NameExpr("TransactionScopeInstanceFactory"))
-                        )
-        );
     }
 
     private MethodCallExpr getBeanGetMethodCallExpr(NodeWithAnnotations<?> nodeWithAnnotations, CompilationUnit belongCompilationUnit, ClassOrInterfaceType classOrInterfaceType) {
@@ -825,26 +392,13 @@ public class InjectProcessor extends AbstractProcessor {
         return methodCallExpr;
     }
 
-    private CompilationUnit getComponentProxyCompilationUnit(CompilationUnit componentCompilationUnit, List<CompilationUnit> componentProxyCompilationUnits) {
-        return componentProxyCompilationUnits.stream()
-                .filter(componentProxyCompilationUnit ->
-                        processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).getFullyQualifiedName().stream()
-                                .anyMatch(className ->
-                                        processorManager.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit).getExtendedTypes().stream()
-                                                .anyMatch(classOrInterfaceType -> processorManager.getQualifiedNameByType(classOrInterfaceType).equals(className))
-                                )
-                )
-                .findFirst()
-                .orElseThrow(() -> new InjectionProcessException(CANNOT_GET_COMPILATION_UNIT.bind(processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).getNameAsString())));
-    }
-
-    private Stream<CompilationUnit> buildProducesModuleStream(Set<? extends Element> singletonSet,
-                                                              Set<? extends Element> dependentSet,
-                                                              Set<? extends Element> applicationScopedSet,
-                                                              Set<? extends Element> requestScopedSet,
-                                                              Set<? extends Element> sessionScopedSet,
-                                                              Set<? extends Element> transactionScopedSet,
-                                                              Set<? extends Element> configPropertiesSet) {
+    private Stream<CompilationUnit> buildProducesContextStream(Set<? extends Element> singletonSet,
+                                                               Set<? extends Element> dependentSet,
+                                                               Set<? extends Element> applicationScopedSet,
+                                                               Set<? extends Element> requestScopedSet,
+                                                               Set<? extends Element> sessionScopedSet,
+                                                               Set<? extends Element> transactionScopedSet,
+                                                               Set<? extends Element> configPropertiesSet) {
 
         return Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream(), requestScopedSet.stream(), sessionScopedSet.stream(), transactionScopedSet.stream(), configPropertiesSet.stream())
                 .filter(element -> element.getAnnotation(Generated.class) == null)
@@ -857,519 +411,375 @@ public class InjectProcessor extends AbstractProcessor {
                 )
                 .map(compilationUnit -> {
                             ClassOrInterfaceDeclaration classOrInterfaceDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit);
-                            ClassOrInterfaceDeclaration moduleClassDeclaration = new ClassOrInterfaceDeclaration()
+                            ClassOrInterfaceDeclaration moduleContextInterfaceDeclaration = new ClassOrInterfaceDeclaration()
                                     .setPublic(true)
-                                    .setName(classOrInterfaceDeclaration.getNameAsString() + "Module")
-                                    .addAnnotation(Module.class)
-                                    .addAnnotation(new NormalAnnotationExpr().addPair("value", new StringLiteralExpr(getClass().getName())).setName(Generated.class.getSimpleName()));
+                                    .setName(classOrInterfaceDeclaration.getNameAsString() + "_Context")
+                                    .addAnnotation(
+                                            new SingleMemberAnnotationExpr()
+                                                    .setMemberValue(new ClassExpr().setType(ModuleContext.class))
+                                                    .setName(AutoService.class.getSimpleName())
+                                    )
+                                    .addAnnotation(new NormalAnnotationExpr().addPair("value", new StringLiteralExpr(getClass().getName())).setName(Generated.class.getSimpleName()))
+                                    .addExtendedType(BaseModuleContext.class);
 
-                            CompilationUnit moduleCompilationUnit = new CompilationUnit().addType(moduleClassDeclaration)
-                                    .addImport(Module.class)
-                                    .addImport(Provides.class)
-                                    .addImport(javax.inject.Singleton.class)
+                            CompilationUnit moduleContextCompilationUnit = new CompilationUnit()
+                                    .addType(moduleContextInterfaceDeclaration)
+                                    .addImport(AutoService.class)
+                                    .addImport(ModuleContext.class)
+                                    .addImport(BaseModuleContext.class)
                                     .addImport(Generated.class)
                                     .addImport("io.graphoenix.core.context.BeanContext");
 
-                            NodeList<ClassOrInterfaceType> extendedTypes = classOrInterfaceDeclaration.getExtendedTypes().stream()
-                                    .map(classOrInterfaceType -> {
-                                                ClassOrInterfaceType classOrInterfaceTypeClone = classOrInterfaceType.clone();
-                                                classOrInterfaceTypeClone.setParentNode(moduleClassDeclaration);
-                                                return classOrInterfaceTypeClone;
-                                            }
-                                    )
-                                    .collect(Collectors.toCollection(NodeList::new));
+                            compilationUnit.getPackageDeclaration().ifPresent(packageDeclaration -> moduleContextCompilationUnit.setPackageDeclaration(packageDeclaration.getNameAsString()));
 
-                            NodeList<ClassOrInterfaceType> implementedTypes = classOrInterfaceDeclaration.getImplementedTypes().stream()
-                                    .map(classOrInterfaceType -> {
-                                                ClassOrInterfaceType classOrInterfaceTypeClone = classOrInterfaceType.clone();
-                                                classOrInterfaceTypeClone.setParentNode(moduleClassDeclaration);
-                                                return classOrInterfaceTypeClone;
-                                            }
-                                    )
-                                    .collect(Collectors.toCollection(NodeList::new));
+                            BlockStmt staticInitializer = moduleContextInterfaceDeclaration.addStaticInitializer();
 
-                            NodeList<BodyDeclaration<?>> members = classOrInterfaceDeclaration.getMembers().stream()
-                                    .map(bodyDeclaration -> {
-                                                BodyDeclaration<?> BodyDeclarationClone = bodyDeclaration.clone();
-                                                BodyDeclarationClone.setParentNode(moduleClassDeclaration);
-                                                return BodyDeclarationClone;
-                                            }
-                                    )
-                                    .collect(Collectors.toCollection(NodeList::new));
-
-                            compilationUnit.getPackageDeclaration().ifPresent(packageDeclaration -> moduleCompilationUnit.setPackageDeclaration(packageDeclaration.getNameAsString()));
-                            compilationUnit.getImports().forEach(moduleCompilationUnit::addImport);
-
-                            moduleClassDeclaration.setExtendedTypes(extendedTypes);
-                            moduleClassDeclaration.setImplementedTypes(implementedTypes);
-                            moduleClassDeclaration.setMembers(members);
-                            moduleClassDeclaration.getConstructors().forEach(constructorDeclaration -> constructorDeclaration.setName(moduleClassDeclaration.getNameAsString()));
-
-                            moduleClassDeclaration.getFields().stream()
-                                    .filter(fieldDeclaration -> fieldDeclaration.isAnnotationPresent(Inject.class))
-                                    .forEach(fieldDeclaration -> {
-                                                List<VariableDeclarator> removeVariableDeclaratorList = new ArrayList<>();
-                                                fieldDeclaration.getVariables()
-                                                        .forEach(variableDeclarator -> {
-                                                                    if (variableDeclarator.getType().isClassOrInterfaceType()) {
-                                                                        moduleClassDeclaration.getMethods().stream()
-                                                                                .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Produces.class))
-                                                                                .forEach(methodDeclaration -> {
-                                                                                            methodDeclaration.findAll(FieldAccessExpr.class).stream()
-                                                                                                    .filter(fieldAccessExpr -> fieldAccessExpr.getScope().isThisExpr() || fieldAccessExpr.getScope() == null)
-                                                                                                    .filter(fieldAccessExpr -> fieldAccessExpr.getNameAsString().equals(variableDeclarator.getNameAsString()))
-                                                                                                    .forEach(fieldAccessExpr ->
-                                                                                                            fieldAccessExpr.getParentNode()
-                                                                                                                    .ifPresent(node -> {
-                                                                                                                                node.replace(
-                                                                                                                                        fieldAccessExpr,
-                                                                                                                                        getBeanGetMethodCallExpr(fieldDeclaration, moduleCompilationUnit, variableDeclarator.getType().asClassOrInterfaceType())
-                                                                                                                                );
-                                                                                                                                removeVariableDeclaratorList.add(variableDeclarator);
-                                                                                                                            }
-                                                                                                                    )
-                                                                                                    );
-                                                                                            methodDeclaration.findAll(NameExpr.class).stream()
-                                                                                                    .filter(nameExpr -> nameExpr.getNameAsString().equals(variableDeclarator.getNameAsString()))
-                                                                                                    .forEach(nameExpr ->
-                                                                                                            nameExpr.getParentNode()
-                                                                                                                    .ifPresent(node -> {
-                                                                                                                                node.replace(
-                                                                                                                                        nameExpr,
-                                                                                                                                        getBeanGetMethodCallExpr(fieldDeclaration, moduleCompilationUnit, variableDeclarator.getType().asClassOrInterfaceType())
-                                                                                                                                );
-                                                                                                                                removeVariableDeclaratorList.add(variableDeclarator);
-                                                                                                                            }
-                                                                                                                    )
-                                                                                                    );
-                                                                                        }
-                                                                                );
-                                                                    }
-                                                                }
-                                                        );
-                                                fieldDeclaration.getVariables().removeAll(removeVariableDeclaratorList);
-                                                fieldDeclaration.getAnnotationByClass(Inject.class).ifPresent(Node::remove);
-                                                if (fieldDeclaration.getVariables().size() == 0) {
-                                                    fieldDeclaration.remove();
-                                                }
-                                            }
-                                    );
-
-                            moduleClassDeclaration.getConstructors().stream()
-                                    .filter(constructorDeclaration -> constructorDeclaration.isAnnotationPresent(Inject.class))
-                                    .forEach(constructorDeclaration -> {
-                                                constructorDeclaration.getBody().getStatements().stream()
-                                                        .filter(Statement::isExpressionStmt)
-                                                        .map(statement -> statement.asExpressionStmt().getExpression())
-                                                        .filter(Expression::isAssignExpr)
-                                                        .map(Expression::asAssignExpr)
-                                                        .filter(assignExpr -> assignExpr.getTarget().isFieldAccessExpr())
-                                                        .filter(assignExpr ->
-                                                                assignExpr.getTarget().asFieldAccessExpr().getScope() == null ||
-                                                                        assignExpr.getTarget().asFieldAccessExpr().getScope().isThisExpr()
-                                                        )
-                                                        .filter(assignExpr -> assignExpr.getValue().isNameExpr())
-                                                        .forEach(assignExpr -> {
-                                                                    constructorDeclaration.getParameters().stream()
-                                                                            .filter(parameter -> assignExpr.getValue().isNameExpr())
-                                                                            .filter(parameter -> parameter.getNameAsString().equals(assignExpr.getValue().asNameExpr().getNameAsString()))
-                                                                            .forEach(parameter ->
-                                                                                    moduleClassDeclaration.getMethods().stream()
-                                                                                            .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Produces.class))
-                                                                                            .forEach(methodDeclaration -> {
-                                                                                                        methodDeclaration.findAll(FieldAccessExpr.class).stream()
-                                                                                                                .filter(fieldAccessExpr -> fieldAccessExpr.getScope().isThisExpr() || fieldAccessExpr.getScope() == null)
-                                                                                                                .filter(fieldAccessExpr -> fieldAccessExpr.getNameAsString().equals(assignExpr.getTarget().asFieldAccessExpr().getNameAsString()))
-                                                                                                                .forEach(fieldAccessExpr -> {
-                                                                                                                            fieldAccessExpr.getParentNode()
-                                                                                                                                    .ifPresent(node ->
-                                                                                                                                            node.replace(
-                                                                                                                                                    fieldAccessExpr,
-                                                                                                                                                    getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType())
-                                                                                                                                            )
-                                                                                                                                    );
-                                                                                                                            moduleClassDeclaration.getFields().stream().flatMap(fieldDeclaration -> fieldDeclaration.getVariables().stream())
-                                                                                                                                    .filter(variableDeclarator -> assignExpr.getTarget().asFieldAccessExpr().getNameAsString().equals(variableDeclarator.getNameAsString()))
-                                                                                                                                    .findFirst()
-                                                                                                                                    .ifPresent(Node::remove);
-                                                                                                                        }
-                                                                                                                );
-                                                                                                        methodDeclaration.findAll(NameExpr.class).stream()
-                                                                                                                .filter(nameExpr -> nameExpr.getNameAsString().equals(assignExpr.getTarget().asFieldAccessExpr().getNameAsString()))
-                                                                                                                .forEach(nameExpr -> {
-                                                                                                                            nameExpr.getParentNode()
-                                                                                                                                    .ifPresent(node ->
-                                                                                                                                            node.replace(
-                                                                                                                                                    nameExpr,
-                                                                                                                                                    getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType())
-                                                                                                                                            )
-                                                                                                                                    );
-                                                                                                                            moduleClassDeclaration.getFields().stream().flatMap(fieldDeclaration -> fieldDeclaration.getVariables().stream())
-                                                                                                                                    .filter(variableDeclarator -> assignExpr.getTarget().asFieldAccessExpr().getNameAsString().equals(variableDeclarator.getNameAsString()))
-                                                                                                                                    .findFirst()
-                                                                                                                                    .ifPresent(Node::remove);
-                                                                                                                        }
-                                                                                                                );
-                                                                                                    }
-                                                                                            )
-
-                                                                            );
-                                                                    constructorDeclaration.getAnnotationByClass(Inject.class).ifPresent(Node::remove);
-                                                                }
-                                                        );
-                                                constructorDeclaration.getParameters().clear();
-                                                constructorDeclaration.getBody().getStatements().clear();
-                                                moduleClassDeclaration.getFields().stream()
-                                                        .filter(fieldDeclaration -> fieldDeclaration.getVariables().size() == 0)
-                                                        .forEach(Node::remove);
-                                            }
-                                    );
-
-                            moduleClassDeclaration.getMethods().stream()
+                            classOrInterfaceDeclaration.getMethods().stream()
                                     .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Produces.class))
                                     .forEach(producesMethodDeclaration -> {
-                                                producesMethodDeclaration.addAnnotation(Provides.class);
-                                                if (producesMethodDeclaration.isAnnotationPresent(ApplicationScoped.class)) {
-                                                    producesMethodDeclaration.addAnnotation(javax.inject.Singleton.class);
+                                                String qualifiedName = processorManager.getQualifiedNameByType(producesMethodDeclaration.getType());
+                                                if (producesMethodDeclaration.isAnnotationPresent(Singleton.class) || producesMethodDeclaration.isAnnotationPresent(ApplicationScoped.class)) {
+                                                    ClassOrInterfaceDeclaration holderClassOrInterfaceDeclaration = new ClassOrInterfaceDeclaration();
+                                                    holderClassOrInterfaceDeclaration.setName(qualifiedName.replaceAll("\\.", "_") + "Holder");
+                                                    holderClassOrInterfaceDeclaration.setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC);
+                                                    holderClassOrInterfaceDeclaration.addFieldWithInitializer(
+                                                                    qualifiedName,
+                                                                    "INSTANCE",
+                                                                    new MethodCallExpr()
+                                                                            .setName(producesMethodDeclaration.getName())
+                                                                            .setArguments(
+                                                                                    producesMethodDeclaration.getParameters().stream()
+                                                                                            .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleContextCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                            .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                            .collect(Collectors.toCollection(NodeList::new))
+                                                                            )
+                                                                            .setScope(
+                                                                                    new MethodCallExpr()
+                                                                                            .setName("get")
+                                                                                            .setScope(new NameExpr().setName("BeanContext"))
+                                                                                            .addArgument(new ClassExpr().setType(processorManager.getQualifiedNameByDeclaration(classOrInterfaceDeclaration)))
+                                                                            )
+                                                            )
+                                                            .setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
+
+                                                    moduleContextInterfaceDeclaration.addMember(holderClassOrInterfaceDeclaration);
+
+                                                    addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, null, true);
+
+                                                    Optional<StringLiteralExpr> nameStringExpr = producesMethodDeclaration.getAnnotationByClass(Named.class)
+                                                            .flatMap(processorManager::findAnnotationValue)
+                                                            .map(Expression::asStringLiteralExpr);
+                                                    nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, true));
+
+                                                    Optional<StringLiteralExpr> defaultStringExpr = producesMethodDeclaration.getAnnotationByClass(Default.class)
+                                                            .map(annotationExpr -> new StringLiteralExpr("default"));
+                                                    defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, true));
+
+                                                    processorManager.getCompilationUnitByQualifiedNameOptional(qualifiedName)
+                                                            .flatMap(returnTypeCompilationUnit -> processorManager.getPublicClassOrInterfaceDeclarationOptional(returnTypeCompilationUnit))
+                                                            .ifPresent(returnTypeClassOrInterfaceDeclaration -> {
+                                                                        returnTypeClassOrInterfaceDeclaration.getExtendedTypes()
+                                                                                .forEach(extendedType -> {
+                                                                                            String putClassQualifiedName = processorManager.getQualifiedNameByType(extendedType);
+                                                                                            addPutTypeProducerStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, null, true);
+                                                                                            nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, true));
+                                                                                            defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, true));
+                                                                                        }
+                                                                                );
+
+                                                                        returnTypeClassOrInterfaceDeclaration.getImplementedTypes()
+                                                                                .forEach(implementedType -> {
+                                                                                            String putClassQualifiedName = processorManager.getQualifiedNameByType(implementedType);
+                                                                                            addPutTypeProducerStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, null, true);
+                                                                                            nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, true));
+                                                                                            defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, true));
+                                                                                        }
+                                                                                );
+
+                                                                    }
+                                                            );
+                                                } else {
+                                                    addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, null, false);
+
+                                                    Optional<StringLiteralExpr> nameStringExpr = producesMethodDeclaration.getAnnotationByClass(Named.class)
+                                                            .flatMap(processorManager::findAnnotationValue)
+                                                            .map(Expression::asStringLiteralExpr);
+                                                    nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, false));
+
+                                                    Optional<StringLiteralExpr> defaultStringExpr = producesMethodDeclaration.getAnnotationByClass(Default.class)
+                                                            .map(annotationExpr -> new StringLiteralExpr("default"));
+                                                    defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, false));
+
+                                                    processorManager.getCompilationUnitByQualifiedNameOptional(qualifiedName)
+                                                            .flatMap(returnTypeCompilationUnit -> processorManager.getPublicClassOrInterfaceDeclarationOptional(returnTypeCompilationUnit))
+                                                            .ifPresent(returnTypeClassOrInterfaceDeclaration -> {
+                                                                        returnTypeClassOrInterfaceDeclaration.getExtendedTypes()
+                                                                                .forEach(extendedType -> {
+                                                                                            String putClassQualifiedName = processorManager.getQualifiedNameByType(extendedType);
+                                                                                            addPutTypeProducerStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, null, false);
+                                                                                            nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, false));
+                                                                                            defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, false));
+                                                                                        }
+                                                                                );
+
+                                                                        returnTypeClassOrInterfaceDeclaration.getImplementedTypes()
+                                                                                .forEach(implementedType -> {
+                                                                                            String putClassQualifiedName = processorManager.getQualifiedNameByType(implementedType);
+                                                                                            addPutTypeProducerStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, null, false);
+                                                                                            nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, false));
+                                                                                            defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, false));
+                                                                                        }
+                                                                                );
+
+                                                                    }
+                                                            );
                                                 }
-                                                if (producesMethodDeclaration.isAnnotationPresent(Singleton.class)) {
-                                                    producesMethodDeclaration.addAnnotation(javax.inject.Singleton.class);
-                                                }
-                                                producesMethodDeclaration.getAnnotationByClass(Produces.class).ifPresent(Node::remove);
-                                                producesMethodDeclaration.getAnnotationByClass(ApplicationScoped.class).ifPresent(Node::remove);
-                                                producesMethodDeclaration.getAnnotationByClass(RequestScoped.class).ifPresent(Node::remove);
-                                                producesMethodDeclaration.getAnnotationByClass(SessionScoped.class).ifPresent(Node::remove);
-                                                producesMethodDeclaration.getAnnotationByClass(Singleton.class).ifPresent(Node::remove);
-                                                producesMethodDeclaration.getAnnotationByClass(Dependent.class).ifPresent(Node::remove);
-                                                producesMethodDeclaration.getAnnotationByClass(Named.class).ifPresent(Node::remove);
-                                                producesMethodDeclaration.getAnnotationByClass(Default.class).ifPresent(Node::remove);
                                             }
                                     );
-                            processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, classOrInterfaceDeclaration);
-                            componentProxyProcessors
-                                    .forEach(componentProxyProcessor -> {
-                                                Logger.debug("processComponentModule {}", componentProxyProcessor.getClass().getName());
-                                                componentProxyProcessor.processComponentModule(moduleCompilationUnit, moduleClassDeclaration);
-                                            }
-                                    );
-                            Logger.info("{} module class build success", processorManager.getQualifiedNameByDeclaration(moduleClassDeclaration));
-                            return moduleCompilationUnit;
+                            return moduleContextCompilationUnit;
                         }
                 );
     }
 
-    private CompilationUnit buildComponentProxyComponent(CompilationUnit componentProxyCompilationUnit, CompilationUnit moduleCompilationUnit) {
-        return buildComponentProxyComponent(
-                componentProxyCompilationUnit,
-                processorManager.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit),
-                processorManager.getPublicClassOrInterfaceDeclaration(moduleCompilationUnit)
-        );
-    }
-
-    private CompilationUnit buildComponentProxyComponent(CompilationUnit componentProxyCompilationUnit, ClassOrInterfaceDeclaration componentProxyClassDeclaration, ClassOrInterfaceDeclaration moduleClassDeclaration) {
-
-        ArrayInitializerExpr modules = new ArrayInitializerExpr();
-        modules.getValues().add(new ClassExpr().setType(moduleClassDeclaration.getNameAsString()));
-
-        ClassOrInterfaceDeclaration componentProxyComponentInterfaceDeclaration = new ClassOrInterfaceDeclaration()
-                .setPublic(true)
-                .setInterface(true)
-                .setName(componentProxyClassDeclaration.getNameAsString() + "_Component")
-                .addAnnotation(new NormalAnnotationExpr().addPair("modules", modules).setName(Component.class.getSimpleName()));
-
-        MethodDeclaration providesMethodDeclaration = moduleClassDeclaration.getMethods().stream()
-                .filter(methodDeclaration -> {
-                            if (methodDeclaration.getType().isClassOrInterfaceType() && (processorManager.getQualifiedNameByType(methodDeclaration.getType()).equals(Mono.class.getName()) || processorManager.getQualifiedNameByType(methodDeclaration.getType()).equals(PublisherBuilder.class.getName()))) {
-                                return processorManager.getMethodReturnReferenceType(methodDeclaration)
-                                        .map(resolvedReferenceType -> resolvedReferenceType.getTypeParametersMap().get(0).b.asReferenceType())
-                                        .anyMatch(resolvedReferenceType ->
-                                                resolvedReferenceType.getQualifiedName().equals(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration)) ||
-                                                        componentProxyClassDeclaration.getExtendedTypes().stream().anyMatch(extendType -> processorManager.getQualifiedNameByType(extendType).equals(resolvedReferenceType.getQualifiedName())));
-
-                            } else {
-                                return processorManager.getMethodReturnReferenceType(methodDeclaration)
-                                        .anyMatch(resolvedReferenceType ->
-                                                resolvedReferenceType.getQualifiedName().equals(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration)) ||
-                                                        componentProxyClassDeclaration.getExtendedTypes().stream().anyMatch(extendType -> processorManager.getQualifiedNameByType(extendType).equals(resolvedReferenceType.getQualifiedName())));
-                            }
-                        }
-                )
-                .findFirst()
-                .orElseThrow(() -> new InjectionProcessException(MODULE_PROVIDERS_METHOD_NOT_EXIST.bind(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration))));
-
-        Type typeClone = providesMethodDeclaration.getType().clone();
-
-        if (providesMethodDeclaration.isAnnotationPresent(javax.inject.Singleton.class)) {
-            componentProxyComponentInterfaceDeclaration.addAnnotation(javax.inject.Singleton.class);
-        }
-
-        typeClone.setParentNode(componentProxyComponentInterfaceDeclaration);
-
-        componentProxyComponentInterfaceDeclaration.addMethod("get").setType(typeClone).removeBody();
-
-        CompilationUnit componentProxyComponentCompilationUnit = new CompilationUnit()
-                .addType(componentProxyComponentInterfaceDeclaration)
-                .addImport(Component.class);
-
-        componentProxyClassDeclaration.getAnnotationByClass(Named.class)
-                .ifPresent(annotationExpr -> {
-                            AnnotationExpr AnnotationExprClone = annotationExpr.clone();
-                            AnnotationExprClone.setParentNode(componentProxyClassDeclaration);
-                            componentProxyComponentInterfaceDeclaration.addAnnotation(AnnotationExprClone);
-                            componentProxyComponentCompilationUnit.addImport(Named.class);
-                        }
-                );
-
-        componentProxyClassDeclaration.getAnnotationByClass(Default.class)
-                .ifPresent(annotationExpr -> {
-                            AnnotationExpr AnnotationExprClone = annotationExpr.clone();
-                            AnnotationExprClone.setParentNode(componentProxyClassDeclaration);
-                            componentProxyComponentInterfaceDeclaration.addAnnotation(AnnotationExprClone);
-                            componentProxyComponentCompilationUnit.addImport(Default.class);
-                        }
-                );
-
-        componentProxyCompilationUnit.getPackageDeclaration()
-                .ifPresent(packageDeclaration -> componentProxyComponentCompilationUnit.setPackageDeclaration(packageDeclaration.getNameAsString()));
-
-        componentProxyComponentCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(moduleClassDeclaration));
-
-        processorManager.importAllClassOrInterfaceType(componentProxyComponentInterfaceDeclaration, componentProxyClassDeclaration);
-        processorManager.importAllClassOrInterfaceType(componentProxyComponentInterfaceDeclaration, moduleClassDeclaration);
-        Logger.info("{} component class build success", processorManager.getQualifiedNameByDeclaration(componentProxyComponentInterfaceDeclaration));
-        return componentProxyComponentCompilationUnit;
-    }
-
-    private Stream<CompilationUnit> buildProducesComponentStream(CompilationUnit moduleCompilationUnit) {
-        return buildProducesComponentStream(
-                moduleCompilationUnit,
-                processorManager.getPublicClassOrInterfaceDeclaration(moduleCompilationUnit)
-        );
-    }
-
-    private Stream<CompilationUnit> buildProducesComponentStream(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
-
-        return moduleClassDeclaration.getMethods().stream()
-                .filter(moduleMethodDeclaration -> moduleMethodDeclaration.isAnnotationPresent(Provides.class))
-                .map(providesMethodDeclaration -> {
-                            ArrayInitializerExpr modules = new ArrayInitializerExpr();
-                            modules.getValues().add(new ClassExpr().setType(moduleClassDeclaration.getNameAsString()));
-
-                            ClassOrInterfaceDeclaration producesComponentInterfaceDeclaration = new ClassOrInterfaceDeclaration()
-                                    .setPublic(true)
-                                    .setInterface(true)
-                                    .addAnnotation(new NormalAnnotationExpr().addPair("modules", modules).setName(Component.class.getSimpleName()));
-
-                            String returnTypeName = processorManager.getQualifiedNameByType(providesMethodDeclaration.getType());
-                            if (providesMethodDeclaration.getType().isClassOrInterfaceType() && returnTypeName.equals(PublisherBuilder.class.getName()) || returnTypeName.equals(Mono.class.getName())) {
-                                producesComponentInterfaceDeclaration.setName(providesMethodDeclaration.getType().asClassOrInterfaceType().getTypeArguments().orElseThrow(() -> new InjectionProcessException(TYPE_ARGUMENT_NOT_EXIST)).get(0).toString().replaceAll("\\.", "_") + "_Component");
-                            } else {
-                                producesComponentInterfaceDeclaration.setName(providesMethodDeclaration.getType().toString().replaceAll("\\.", "_") + "_Component");
-                            }
-
-                            Type typeClone = providesMethodDeclaration.getType().clone();
-
-                            if (providesMethodDeclaration.isAnnotationPresent(javax.inject.Singleton.class)) {
-                                producesComponentInterfaceDeclaration.addAnnotation(javax.inject.Singleton.class);
-                            }
-
-                            typeClone.setParentNode(producesComponentInterfaceDeclaration);
-
-                            producesComponentInterfaceDeclaration.addMethod("get").setType(typeClone).removeBody();
-
-                            CompilationUnit producesComponentCompilationUnit = new CompilationUnit()
-                                    .addType(producesComponentInterfaceDeclaration)
-                                    .addImport(Component.class);
-
-                            providesMethodDeclaration.getAnnotationByClass(Named.class)
-                                    .ifPresent(annotationExpr -> {
-                                                AnnotationExpr AnnotationExprClone = annotationExpr.clone();
-                                                AnnotationExprClone.setParentNode(producesComponentInterfaceDeclaration);
-                                                producesComponentInterfaceDeclaration.addAnnotation(AnnotationExprClone);
-                                                producesComponentCompilationUnit.addImport(Named.class);
-                                            }
-                                    );
-
-
-                            providesMethodDeclaration.getAnnotationByClass(Default.class)
-                                    .ifPresent(annotationExpr -> {
-                                                AnnotationExpr AnnotationExprClone = annotationExpr.clone();
-                                                AnnotationExprClone.setParentNode(producesComponentInterfaceDeclaration);
-                                                producesComponentInterfaceDeclaration.addAnnotation(AnnotationExprClone);
-                                                producesComponentCompilationUnit.addImport(Default.class);
-                                            }
-                                    );
-
-                            moduleCompilationUnit.getPackageDeclaration()
-                                    .ifPresent(packageDeclaration -> producesComponentCompilationUnit.setPackageDeclaration(packageDeclaration.getNameAsString()));
-
-                            producesComponentCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(moduleClassDeclaration));
-
-                            processorManager.importAllClassOrInterfaceType(producesComponentInterfaceDeclaration, moduleClassDeclaration);
-                            Logger.info("{} component class build success", processorManager.getQualifiedNameByDeclaration(producesComponentInterfaceDeclaration));
-                            return producesComponentCompilationUnit;
-                        }
-                );
-    }
-
-    private CompilationUnit buildModuleContext(List<CompilationUnit> componentProxyComponentCompilationUnits, CompilationUnit moduleCompilationUnit) {
-        return buildModuleContext(componentProxyComponentCompilationUnits, moduleCompilationUnit, processorManager.getPublicClassOrInterfaceDeclaration(moduleCompilationUnit));
-    }
-
-    private CompilationUnit buildModuleContext(List<CompilationUnit> componentProxyComponentCompilationUnits, CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
+    private CompilationUnit buildModuleContext(List<CompilationUnit> componentCompilationUnits) {
 
         ClassOrInterfaceDeclaration moduleContextInterfaceDeclaration = new ClassOrInterfaceDeclaration()
                 .setPublic(true)
-                .setName(moduleClassDeclaration.getNameAsString() + "_Context")
+                .setName(processorManager.getRootPackageName().replaceAll("\\.", "_") + "_Context")
                 .addAnnotation(
                         new SingleMemberAnnotationExpr()
                                 .setMemberValue(new ClassExpr().setType(ModuleContext.class))
                                 .setName(AutoService.class.getSimpleName())
                 )
+                .addAnnotation(new NormalAnnotationExpr().addPair("value", new StringLiteralExpr(getClass().getName())).setName(Generated.class.getSimpleName()))
                 .addExtendedType(BaseModuleContext.class);
 
         CompilationUnit moduleContextCompilationUnit = new CompilationUnit()
                 .addType(moduleContextInterfaceDeclaration)
                 .addImport(AutoService.class)
                 .addImport(ModuleContext.class)
-                .addImport(BaseModuleContext.class);
+                .addImport(BaseModuleContext.class)
+                .addImport(Generated.class)
+                .addImport("io.graphoenix.core.context.BeanContext");
 
-        moduleCompilationUnit.getPackageDeclaration().ifPresent(packageDeclaration -> moduleContextCompilationUnit.setPackageDeclaration(packageDeclaration.getNameAsString()));
+        BlockStmt staticInitializer = moduleContextInterfaceDeclaration.addStaticInitializer();
 
-        BlockStmt blockStmt = moduleContextInterfaceDeclaration.addStaticInitializer();
+        componentCompilationUnits.forEach(compilationUnit ->
+                processorManager.getPublicClassOrInterfaceDeclarationOptional(compilationUnit)
+                        .ifPresent(classOrInterfaceDeclaration -> {
+                                    String qualifiedName = processorManager.getQualifiedNameByDeclaration(classOrInterfaceDeclaration);
+                                    if (classOrInterfaceDeclaration.isAnnotationPresent(Singleton.class) || classOrInterfaceDeclaration.isAnnotationPresent(ApplicationScoped.class)) {
+                                        ClassOrInterfaceDeclaration holderClassOrInterfaceDeclaration = new ClassOrInterfaceDeclaration();
+                                        holderClassOrInterfaceDeclaration.setName(qualifiedName.replaceAll("\\.", "_") + "Holder");
+                                        holderClassOrInterfaceDeclaration.setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC);
+                                        holderClassOrInterfaceDeclaration.addFieldWithInitializer(
+                                                        qualifiedName,
+                                                        "INSTANCE",
+                                                        new ObjectCreationExpr()
+                                                                .setType(qualifiedName + "Proxy")
+                                                                .setArguments(
+                                                                        classOrInterfaceDeclaration.getConstructors().stream()
+                                                                                .findFirst()
+                                                                                .map(constructorDeclaration ->
+                                                                                        constructorDeclaration.getParameters().stream()
+                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleContextCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                                                )
+                                                                                .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(classOrInterfaceDeclaration.getNameAsString())))
+                                                                )
+                                                )
+                                                .setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
+                                        moduleContextInterfaceDeclaration.addMember(holderClassOrInterfaceDeclaration);
+                                        addPutTypeStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, null, true);
 
-        componentProxyComponentCompilationUnits.forEach(
-                componentProxyComponentCompilationUnit -> {
-                    ClassOrInterfaceDeclaration componentProxyComponentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentProxyComponentCompilationUnit);
-                    Optional<String> packageNameOptional = componentProxyComponentCompilationUnit.getPackageDeclaration().map(NodeWithName::getNameAsString);
+                                        Optional<StringLiteralExpr> nameStringExpr = classOrInterfaceDeclaration.getAnnotationByClass(Named.class)
+                                                .flatMap(processorManager::findAnnotationValue)
+                                                .map(Expression::asStringLiteralExpr);
 
-                    String packagePrefix = packageNameOptional.map(name -> name + ".").orElse("");
-                    String variablePrefix = packageNameOptional.map(name -> name.replaceAll("\\.", "_")).map(name -> name + "_").orElse("");
+                                        nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, stringLiteralExpr, true));
 
-                    String daggerClassName = packagePrefix + "Dagger" + componentProxyComponentClassDeclaration.getNameAsString();
-                    String daggerVariableName = variablePrefix + "dagger" + componentProxyComponentClassDeclaration.getNameAsString();
+                                        Optional<StringLiteralExpr> defaultStringExpr = classOrInterfaceDeclaration.getAnnotationByClass(Default.class)
+                                                .map(annotationExpr -> new StringLiteralExpr("default"));
 
-                    ClassOrInterfaceType componentType = componentProxyComponentClassDeclaration.getMembers().stream()
-                            .filter(BodyDeclaration::isMethodDeclaration)
-                            .map(BodyDeclaration::asMethodDeclaration)
-                            .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals("get"))
-                            .map(MethodDeclaration::getType)
-                            .filter(Type::isClassOrInterfaceType)
-                            .map(Type::asClassOrInterfaceType)
-                            .findFirst()
-                            .orElseThrow(() -> new InjectionProcessException(COMPONENT_GET_METHOD_NOT_EXIST.bind(componentProxyComponentClassDeclaration.getNameAsString())));
+                                        defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, stringLiteralExpr, true));
 
-                    boolean isPublisherBuilder = processorManager.getQualifiedNameByType(componentType).equals(PublisherBuilder.class.getName());
-                    if (isPublisherBuilder) {
-                        moduleContextCompilationUnit.addImport(Mono.class);
-                    }
-                    if (processorManager.getQualifiedNameByType(componentType).equals(Mono.class.getName()) || processorManager.getQualifiedNameByType(componentType).equals(PublisherBuilder.class.getName())) {
-                        Optional<NodeList<Type>> typeArguments = componentType.getTypeArguments();
-                        if (typeArguments.isPresent()) {
-                            if (typeArguments.get().get(0) != null && typeArguments.get().get(0).isClassOrInterfaceType()) {
-                                componentType = typeArguments.get().get(0).asClassOrInterfaceType();
-                            }
-                        }
-                    }
-//                    moduleContextCompilationUnit.addImport(processorManager.getQualifiedNameByType(componentType));
+                                        classOrInterfaceDeclaration.getExtendedTypes()
+                                                .forEach(extendedType -> {
+                                                            String putClassQualifiedName = processorManager.getQualifiedNameByType(extendedType);
+                                                            addPutTypeStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, null, true);
+                                                            nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, stringLiteralExpr, true));
+                                                            defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, stringLiteralExpr, true));
+                                                        }
+                                                );
 
-                    blockStmt.addStatement(new VariableDeclarationExpr()
-                            .addVariable(
-                                    new VariableDeclarator()
-                                            .setType(packagePrefix + componentProxyComponentClassDeclaration.getNameAsString())
-                                            .setName(daggerVariableName)
-                                            .setInitializer(
-                                                    new MethodCallExpr()
-                                                            .setName("create")
-                                                            .setScope(new NameExpr().setName(daggerClassName))
-                                            )
-                            )
-                    );
+                                        classOrInterfaceDeclaration.getImplementedTypes()
+                                                .forEach(implementedType -> {
+                                                            String putClassQualifiedName = processorManager.getQualifiedNameByType(implementedType);
+                                                            addPutTypeStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, null, true);
+                                                            nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, stringLiteralExpr, true));
+                                                            defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, stringLiteralExpr, true));
+                                                        }
+                                                );
+                                    } else if (!classOrInterfaceDeclaration.isAnnotationPresent(ConfigProperties.class)) {
+                                        addPutTypeStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, null, false);
 
-                    addPutTypeStatement(blockStmt, componentType, null, daggerVariableName, isPublisherBuilder);
+                                        Optional<StringLiteralExpr> nameStringExpr = classOrInterfaceDeclaration.getAnnotationByClass(Named.class)
+                                                .flatMap(processorManager::findAnnotationValue)
+                                                .map(Expression::asStringLiteralExpr);
 
-                    Optional<StringLiteralExpr> nameStringExpr = componentProxyComponentClassDeclaration.getAnnotationByClass(Named.class)
-                            .flatMap(processorManager::findAnnotationValue)
-                            .map(Expression::asStringLiteralExpr);
+                                        nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, stringLiteralExpr, false));
 
-                    if (nameStringExpr.isPresent()) {
-                        addPutTypeStatement(blockStmt, componentType, nameStringExpr.get(), daggerVariableName, isPublisherBuilder);
-                    }
+                                        Optional<StringLiteralExpr> defaultStringExpr = classOrInterfaceDeclaration.getAnnotationByClass(Default.class)
+                                                .map(annotationExpr -> new StringLiteralExpr("default"));
 
-                    Optional<StringLiteralExpr> defaultStringExpr = componentProxyComponentClassDeclaration.getAnnotationByClass(Default.class)
-                            .map(annotationExpr -> new StringLiteralExpr("default"));
+                                        defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, stringLiteralExpr, false));
 
-                    if (defaultStringExpr.isPresent()) {
-                        addPutTypeStatement(blockStmt, componentType, defaultStringExpr.get(), daggerVariableName, isPublisherBuilder);
-                    }
+                                        classOrInterfaceDeclaration.getExtendedTypes()
+                                                .forEach(extendedType -> {
+                                                            String putClassQualifiedName = processorManager.getQualifiedNameByType(extendedType);
+                                                            addPutTypeStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, null, false);
+                                                            nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, stringLiteralExpr, false));
+                                                            defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, stringLiteralExpr, false));
+                                                        }
+                                                );
 
-                    CompilationUnit componentCompilationUnit = processorManager.getCompilationUnitByClassOrInterfaceType(componentType);
-                    ClassOrInterfaceDeclaration componentDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit);
-                    componentDeclaration.getExtendedTypes()
-                            .forEach(extendedType -> {
-                                        addPutTypeStatement(blockStmt, extendedType, null, daggerVariableName, isPublisherBuilder);
-                                        nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(blockStmt, extendedType, stringLiteralExpr, daggerVariableName, isPublisherBuilder));
-                                        defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(blockStmt, extendedType, stringLiteralExpr, daggerVariableName, isPublisherBuilder));
-//                                        moduleContextCompilationUnit.addImport(processorManager.getQualifiedNameByType(extendedType));
+                                        classOrInterfaceDeclaration.getImplementedTypes()
+                                                .forEach(implementedType -> {
+                                                            String putClassQualifiedName = processorManager.getQualifiedNameByType(implementedType);
+                                                            addPutTypeStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, null, false);
+                                                            nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, stringLiteralExpr, false));
+                                                            defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(staticInitializer, putClassQualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, stringLiteralExpr, false));
+                                                        }
+                                                );
                                     }
-                            );
-                    componentDeclaration.getImplementedTypes()
-                            .forEach(implementedType -> {
-                                        addPutTypeStatement(blockStmt, implementedType, null, daggerVariableName, isPublisherBuilder);
-                                        nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(blockStmt, implementedType, stringLiteralExpr, daggerVariableName, isPublisherBuilder));
-                                        defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(blockStmt, implementedType, stringLiteralExpr, daggerVariableName, isPublisherBuilder));
-//                                        moduleContextCompilationUnit.addImport(processorManager.getQualifiedNameByType(implementedType));
-                                    }
-                            );
-                }
+                                }
+                        )
         );
         componentProxyProcessors.forEach(componentProxyProcessor -> {
                     Logger.debug("processModuleContext {}", componentProxyProcessor.getClass().getName());
-                    componentProxyProcessor.processModuleContext(moduleContextCompilationUnit, blockStmt);
+                    componentProxyProcessor.processModuleContext(moduleContextCompilationUnit, staticInitializer);
                 }
         );
         Logger.info("{} module context class build success", processorManager.getQualifiedNameByDeclaration(moduleContextInterfaceDeclaration));
         return moduleContextCompilationUnit;
     }
 
-    private void addPutTypeStatement(BlockStmt blockStmt, ClassOrInterfaceType classOrInterfaceType, StringLiteralExpr nameStringExpr, String daggerVariableName, boolean isPublisherBuilder) {
+    private void addPutTypeStatement(BlockStmt staticInitializer, String putClassQualifiedName, CompilationUnit moduleContextCompilationUnit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, StringLiteralExpr nameStringExpr, boolean isSingleton) {
+        String factoryName = null;
+        if (classOrInterfaceDeclaration.isAnnotationPresent(RequestScoped.class)) {
+            factoryName = "RequestScopeInstanceFactory";
+        } else if (classOrInterfaceDeclaration.isAnnotationPresent(SessionScoped.class)) {
+            factoryName = "SessionScopeInstanceFactory";
+        } else if (classOrInterfaceDeclaration.isAnnotationPresent(TransactionScoped.class)) {
+            factoryName = "TransactionScopeInstanceFactory";
+        }
+
         Expression supplierExpression;
-        if (isPublisherBuilder) {
+        String instanceClassQualifiedName = processorManager.getQualifiedNameByDeclaration(classOrInterfaceDeclaration);
+        if (isSingleton) {
+            supplierExpression = new LambdaExpr()
+                    .setEnclosingParameters(true)
+                    .setBody(
+                            new ExpressionStmt()
+                                    .setExpression(
+                                            new FieldAccessExpr()
+                                                    .setName("INSTANCE")
+                                                    .setScope(new NameExpr(instanceClassQualifiedName.replaceAll("\\.", "_") + "Holder"))
+                                    )
+                    );
+        } else {
+            supplierExpression = new LambdaExpr()
+                    .setEnclosingParameters(true)
+                    .setBody(
+                            new ExpressionStmt()
+                                    .setExpression(
+                                            factoryName != null ?
+                                                    buildScopeFactoryGetMethodExpression(moduleContextCompilationUnit, classOrInterfaceDeclaration, factoryName) :
+                                                    new ObjectCreationExpr()
+                                                            .setType(instanceClassQualifiedName + "Proxy")
+                                                            .setArguments(
+                                                                    classOrInterfaceDeclaration.getConstructors().stream()
+                                                                            .findFirst()
+                                                                            .map(constructorDeclaration ->
+                                                                                    constructorDeclaration.getParameters().stream()
+                                                                                            .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleContextCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                            .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                            .collect(Collectors.toCollection(NodeList::new))
+                                                                            )
+                                                                            .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(classOrInterfaceDeclaration.getNameAsString())))
+                                                            )
+                                    )
+                    );
+        }
+        if (nameStringExpr != null) {
+            staticInitializer.addStatement(
+                    new MethodCallExpr()
+                            .setName("put")
+                            .addArgument(new ClassExpr().setType(putClassQualifiedName))
+                            .addArgument(nameStringExpr)
+                            .addArgument(supplierExpression)
+            );
+        } else {
+            staticInitializer.addStatement(
+                    new MethodCallExpr()
+                            .setName("put")
+                            .addArgument(new ClassExpr().setType(putClassQualifiedName))
+                            .addArgument(supplierExpression)
+            );
+        }
+    }
+
+    private void addPutTypeProducerStatement(BlockStmt staticInitializer, String putClassQualifiedName, CompilationUnit moduleContextCompilationUnit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, MethodDeclaration methodDeclaration, StringLiteralExpr nameStringExpr, boolean isSingleton) {
+        Expression supplierExpression;
+        String instanceClassQualifiedName = processorManager.getQualifiedNameByType(methodDeclaration.getType());
+        if (isSingleton) {
+            supplierExpression = new LambdaExpr()
+                    .setEnclosingParameters(true)
+                    .setBody(
+                            new ExpressionStmt()
+                                    .setExpression(
+                                            new FieldAccessExpr()
+                                                    .setName("INSTANCE")
+                                                    .setScope(new NameExpr(instanceClassQualifiedName.replaceAll("\\.", "_") + "Holder"))
+                                    )
+                    );
+        } else {
             supplierExpression = new LambdaExpr()
                     .setEnclosingParameters(true)
                     .setBody(
                             new ExpressionStmt()
                                     .setExpression(
                                             new MethodCallExpr()
-                                                    .setName("from")
-                                                    .addArgument(
-                                                            new MethodCallExpr()
-                                                                    .setName("buildRs")
-                                                                    .setScope(
-                                                                            new MethodCallExpr()
-                                                                                    .setName("get")
-                                                                                    .setScope(new NameExpr(daggerVariableName))
-                                                                    )
+                                                    .setName(methodDeclaration.getName())
+                                                    .setArguments(
+                                                            methodDeclaration.getParameters().stream()
+                                                                    .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleContextCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                    .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                    .collect(Collectors.toCollection(NodeList::new))
                                                     )
-                                                    .setScope(new NameExpr("Mono"))
+                                                    .setScope(
+                                                            new MethodCallExpr()
+                                                                    .setName("get")
+                                                                    .setScope(new NameExpr().setName("BeanContext"))
+                                                                    .addArgument(new ClassExpr().setType(processorManager.getQualifiedNameByDeclaration(classOrInterfaceDeclaration)))
+                                                    )
                                     )
                     );
-        } else {
-            supplierExpression = new MethodReferenceExpr().setIdentifier("get").setScope(new NameExpr().setName(daggerVariableName));
         }
         if (nameStringExpr != null) {
-            blockStmt.addStatement(
+            staticInitializer.addStatement(
                     new MethodCallExpr()
                             .setName("put")
-                            .addArgument(new ClassExpr().setType(processorManager.getQualifiedNameByType(classOrInterfaceType)))
+                            .addArgument(new ClassExpr().setType(putClassQualifiedName))
                             .addArgument(nameStringExpr)
                             .addArgument(supplierExpression)
             );
         } else {
-            blockStmt.addStatement(
+            staticInitializer.addStatement(
                     new MethodCallExpr()
                             .setName("put")
-                            .addArgument(new ClassExpr().setType(processorManager.getQualifiedNameByType(classOrInterfaceType)))
+                            .addArgument(new ClassExpr().setType(putClassQualifiedName))
                             .addArgument(supplierExpression)
             );
         }
