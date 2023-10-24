@@ -464,6 +464,7 @@ public class ProcessorManager {
         return methodDeclaration.findAll(ReturnStmt.class).stream()
                 .map(ReturnStmt::getExpression)
                 .flatMap(Optional::stream)
+                .filter(expression -> !expression.isMethodReferenceExpr())
                 .map(javaSymbolSolver::calculateType);
     }
 

@@ -3,14 +3,7 @@ package io.graphoenix.config;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.expr.AssignExpr;
-import com.github.javaparser.ast.expr.ClassExpr;
-import com.github.javaparser.ast.expr.LambdaExpr;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
@@ -27,8 +20,7 @@ import org.eclipse.microprofile.config.spi.Converter;
 
 import java.util.List;
 
-import static io.graphoenix.inject.error.InjectionProcessErrorType.CONFIG_PROPERTIES_PREFIX_NOT_EXIST;
-import static io.graphoenix.inject.error.InjectionProcessErrorType.CONFIG_PROPERTY_NOT_EXIST;
+import static io.graphoenix.inject.error.InjectionProcessErrorType.*;
 
 @AutoService(ComponentProxyProcessor.class)
 public class ConfigProcessor implements ComponentProxyProcessor {
@@ -96,7 +88,7 @@ public class ConfigProcessor implements ComponentProxyProcessor {
     }
 
     @Override
-    public void processModuleContext(CompilationUnit moduleCompilationUnit, BlockStmt staticInitializer) {
+    public void processModuleContext(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, BlockStmt staticInitializer) {
         configPropertiesCompilationUnitLis
                 .forEach(compilationUnit -> {
                             moduleCompilationUnit.addImport(Config.class).addImport(ConfigProvider.class);
@@ -112,6 +104,19 @@ public class ConfigProcessor implements ComponentProxyProcessor {
                                     )
                                     .orElseThrow(() -> new InjectionProcessException(CONFIG_PROPERTIES_PREFIX_NOT_EXIST.bind(processorManager.getQualifiedNameByDeclaration(configClassDeclaration))));
 
+                            ClassOrInterfaceDeclaration holderClassOrInterfaceDeclaration = new ClassOrInterfaceDeclaration();
+                            holderClassOrInterfaceDeclaration.setName(putClassQualifiedName.replaceAll("\\.", "_") + "Holder");
+                            holderClassOrInterfaceDeclaration.setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC);
+                            holderClassOrInterfaceDeclaration.addFieldWithInitializer(
+                                    putClassQualifiedName,
+                                    "INSTANCE",
+                                    getConfigMethodCall(
+                                            configClassDeclaration.getFullyQualifiedName().orElseGet(configClassDeclaration::getNameAsString),
+                                            propertyName,
+                                            new StringLiteralExpr(Try.of(() -> (String) ConfigProperties.class.getMethod("prefix").getDefaultValue()).get())
+                                    )
+                            ).setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
+                            classOrInterfaceDeclaration.addMember(holderClassOrInterfaceDeclaration);
 
                             staticInitializer.addStatement(
                                     new MethodCallExpr()
@@ -123,11 +128,9 @@ public class ConfigProcessor implements ComponentProxyProcessor {
                                                             .setBody(
                                                                     new ExpressionStmt()
                                                                             .setExpression(
-                                                                                    getConfigMethodCall(
-                                                                                            configClassDeclaration.getFullyQualifiedName().orElseGet(configClassDeclaration::getNameAsString),
-                                                                                            propertyName,
-                                                                                            new StringLiteralExpr(Try.of(() -> (String) ConfigProperties.class.getMethod("prefix").getDefaultValue()).get())
-                                                                                    )
+                                                                                    new FieldAccessExpr()
+                                                                                            .setName("INSTANCE")
+                                                                                            .setScope(new NameExpr(putClassQualifiedName.replaceAll("\\.", "_") + "Holder"))
                                                                             )
                                                             )
                                             )
@@ -153,7 +156,6 @@ public class ConfigProcessor implements ComponentProxyProcessor {
                                                                         .addArgument(new ClassExpr().setType(typeName))
                                                                         .setScope(new MethodCallExpr().setName("getConfig").setScope(new NameExpr("ConfigProvider")))
                                                         )
-
                                         )
                                 )
                 )

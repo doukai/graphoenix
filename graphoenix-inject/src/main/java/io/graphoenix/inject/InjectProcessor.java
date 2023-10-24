@@ -438,42 +438,57 @@ public class InjectProcessor extends AbstractProcessor {
                                     .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Produces.class))
                                     .forEach(producesMethodDeclaration -> {
                                                 String qualifiedName = processorManager.getQualifiedNameByType(producesMethodDeclaration.getType());
+                                                if (qualifiedName.equals(Mono.class.getName()) || qualifiedName.equals(PublisherBuilder.class.getName())) {
+                                                    qualifiedName = producesMethodDeclaration.getType().resolve().asReferenceType().getTypeParametersMap().get(0).b.asReferenceType().getQualifiedName();
+                                                }
+
                                                 if (producesMethodDeclaration.isAnnotationPresent(Singleton.class) || producesMethodDeclaration.isAnnotationPresent(ApplicationScoped.class)) {
                                                     ClassOrInterfaceDeclaration holderClassOrInterfaceDeclaration = new ClassOrInterfaceDeclaration();
                                                     holderClassOrInterfaceDeclaration.setName(qualifiedName.replaceAll("\\.", "_") + "Holder");
                                                     holderClassOrInterfaceDeclaration.setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC);
                                                     holderClassOrInterfaceDeclaration.addFieldWithInitializer(
-                                                                    qualifiedName,
-                                                                    "INSTANCE",
-                                                                    new MethodCallExpr()
-                                                                            .setName(producesMethodDeclaration.getName())
-                                                                            .setArguments(
-                                                                                    producesMethodDeclaration.getParameters().stream()
-                                                                                            .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleContextCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                            .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                            .collect(Collectors.toCollection(NodeList::new))
-                                                                            )
-                                                                            .setScope(
-                                                                                    new MethodCallExpr()
-                                                                                            .setName("get")
-                                                                                            .setScope(new NameExpr().setName("BeanContext"))
-                                                                                            .addArgument(new ClassExpr().setType(processorManager.getQualifiedNameByDeclaration(classOrInterfaceDeclaration)))
-                                                                            )
-                                                            )
+                                                            qualifiedName,
+                                                            "INSTANCE",
+                                                            new MethodCallExpr()
+                                                                    .setName(producesMethodDeclaration.getName())
+                                                                    .setArguments(
+                                                                            producesMethodDeclaration.getParameters().stream()
+                                                                                    .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleContextCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                    .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                    .collect(Collectors.toCollection(NodeList::new))
+                                                                    )
+                                                                    .setScope(
+                                                                            new MethodCallExpr()
+                                                                                    .setName("get")
+                                                                                    .setScope(new NameExpr().setName("BeanContext"))
+                                                                                    .addArgument(new ClassExpr().setType(processorManager.getQualifiedNameByDeclaration(classOrInterfaceDeclaration)))
+                                                                    )
+                                                    )
                                                             .setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
 
                                                     moduleContextInterfaceDeclaration.addMember(holderClassOrInterfaceDeclaration);
 
                                                     addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, null, true);
 
+                                                    processorManager.getMethodReturnReferenceType(producesMethodDeclaration)
+                                                            .forEach(resolvedReferenceType ->
+                                                                    addPutTypeProducerStatement(staticInitializer, resolvedReferenceType.getQualifiedName(), moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, null, true)
+                                                            );
+
                                                     Optional<StringLiteralExpr> nameStringExpr = producesMethodDeclaration.getAnnotationByClass(Named.class)
                                                             .flatMap(processorManager::findAnnotationValue)
                                                             .map(Expression::asStringLiteralExpr);
-                                                    nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, true));
+
+                                                    if (nameStringExpr.isPresent()) {
+                                                        addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, nameStringExpr.get(), true);
+                                                    }
 
                                                     Optional<StringLiteralExpr> defaultStringExpr = producesMethodDeclaration.getAnnotationByClass(Default.class)
                                                             .map(annotationExpr -> new StringLiteralExpr("default"));
-                                                    defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, true));
+
+                                                    if (defaultStringExpr.isPresent()) {
+                                                        addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, defaultStringExpr.get(), true);
+                                                    }
 
                                                     processorManager.getCompilationUnitByQualifiedNameOptional(qualifiedName)
                                                             .flatMap(returnTypeCompilationUnit -> processorManager.getPublicClassOrInterfaceDeclarationOptional(returnTypeCompilationUnit))
@@ -504,11 +519,15 @@ public class InjectProcessor extends AbstractProcessor {
                                                     Optional<StringLiteralExpr> nameStringExpr = producesMethodDeclaration.getAnnotationByClass(Named.class)
                                                             .flatMap(processorManager::findAnnotationValue)
                                                             .map(Expression::asStringLiteralExpr);
-                                                    nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, false));
+                                                    if (nameStringExpr.isPresent()) {
+                                                        addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, nameStringExpr.get(), false);
+                                                    }
 
                                                     Optional<StringLiteralExpr> defaultStringExpr = producesMethodDeclaration.getAnnotationByClass(Default.class)
                                                             .map(annotationExpr -> new StringLiteralExpr("default"));
-                                                    defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, stringLiteralExpr, false));
+                                                    if (defaultStringExpr.isPresent()) {
+                                                        addPutTypeProducerStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, producesMethodDeclaration, defaultStringExpr.get(), false);
+                                                    }
 
                                                     processorManager.getCompilationUnitByQualifiedNameOptional(qualifiedName)
                                                             .flatMap(returnTypeCompilationUnit -> processorManager.getPublicClassOrInterfaceDeclarationOptional(returnTypeCompilationUnit))
@@ -573,22 +592,22 @@ public class InjectProcessor extends AbstractProcessor {
                                         holderClassOrInterfaceDeclaration.setName(qualifiedName.replaceAll("\\.", "_") + "Holder");
                                         holderClassOrInterfaceDeclaration.setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC);
                                         holderClassOrInterfaceDeclaration.addFieldWithInitializer(
-                                                        qualifiedName,
-                                                        "INSTANCE",
-                                                        new ObjectCreationExpr()
-                                                                .setType(qualifiedName + "Proxy")
-                                                                .setArguments(
-                                                                        classOrInterfaceDeclaration.getConstructors().stream()
-                                                                                .findFirst()
-                                                                                .map(constructorDeclaration ->
-                                                                                        constructorDeclaration.getParameters().stream()
-                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleContextCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                                .collect(Collectors.toCollection(NodeList::new))
-                                                                                )
-                                                                                .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(classOrInterfaceDeclaration.getNameAsString())))
-                                                                )
-                                                )
+                                                qualifiedName,
+                                                "INSTANCE",
+                                                new ObjectCreationExpr()
+                                                        .setType(qualifiedName + "Proxy")
+                                                        .setArguments(
+                                                                classOrInterfaceDeclaration.getConstructors().stream()
+                                                                        .findFirst()
+                                                                        .map(constructorDeclaration ->
+                                                                                constructorDeclaration.getParameters().stream()
+                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleContextCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                        .collect(Collectors.toCollection(NodeList::new))
+                                                                        )
+                                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(classOrInterfaceDeclaration.getNameAsString())))
+                                                        )
+                                        )
                                                 .setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
                                         moduleContextInterfaceDeclaration.addMember(holderClassOrInterfaceDeclaration);
                                         addPutTypeStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, null, true);
@@ -658,7 +677,7 @@ public class InjectProcessor extends AbstractProcessor {
         );
         componentProxyProcessors.forEach(componentProxyProcessor -> {
                     Logger.debug("processModuleContext {}", componentProxyProcessor.getClass().getName());
-                    componentProxyProcessor.processModuleContext(moduleContextCompilationUnit, staticInitializer);
+                    componentProxyProcessor.processModuleContext(moduleContextCompilationUnit, moduleContextInterfaceDeclaration, staticInitializer);
                 }
         );
         Logger.info("{} module context class build success", processorManager.getQualifiedNameByDeclaration(moduleContextInterfaceDeclaration));
@@ -674,9 +693,8 @@ public class InjectProcessor extends AbstractProcessor {
         } else if (classOrInterfaceDeclaration.isAnnotationPresent(TransactionScoped.class)) {
             factoryName = "TransactionScopeInstanceFactory";
         }
-
+        String qualifiedName = processorManager.getQualifiedNameByDeclaration(classOrInterfaceDeclaration);
         Expression supplierExpression;
-        String instanceClassQualifiedName = processorManager.getQualifiedNameByDeclaration(classOrInterfaceDeclaration);
         if (isSingleton) {
             supplierExpression = new LambdaExpr()
                     .setEnclosingParameters(true)
@@ -685,7 +703,7 @@ public class InjectProcessor extends AbstractProcessor {
                                     .setExpression(
                                             new FieldAccessExpr()
                                                     .setName("INSTANCE")
-                                                    .setScope(new NameExpr(instanceClassQualifiedName.replaceAll("\\.", "_") + "Holder"))
+                                                    .setScope(new NameExpr(qualifiedName.replaceAll("\\.", "_") + "Holder"))
                                     )
                     );
         } else {
@@ -697,7 +715,7 @@ public class InjectProcessor extends AbstractProcessor {
                                             factoryName != null ?
                                                     buildScopeFactoryGetMethodExpression(moduleContextCompilationUnit, classOrInterfaceDeclaration, factoryName) :
                                                     new ObjectCreationExpr()
-                                                            .setType(instanceClassQualifiedName + "Proxy")
+                                                            .setType(qualifiedName + "Proxy")
                                                             .setArguments(
                                                                     classOrInterfaceDeclaration.getConstructors().stream()
                                                                             .findFirst()
@@ -732,7 +750,11 @@ public class InjectProcessor extends AbstractProcessor {
 
     private void addPutTypeProducerStatement(BlockStmt staticInitializer, String putClassQualifiedName, CompilationUnit moduleContextCompilationUnit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, MethodDeclaration methodDeclaration, StringLiteralExpr nameStringExpr, boolean isSingleton) {
         Expression supplierExpression;
-        String instanceClassQualifiedName = processorManager.getQualifiedNameByType(methodDeclaration.getType());
+        String qualifiedName = processorManager.getQualifiedNameByType(methodDeclaration.getType());
+        if (qualifiedName.equals(Mono.class.getName()) || qualifiedName.equals(PublisherBuilder.class.getName())) {
+            qualifiedName = methodDeclaration.getType().resolve().asReferenceType().getTypeParametersMap().get(0).b.asReferenceType().getQualifiedName();
+        }
+
         if (isSingleton) {
             supplierExpression = new LambdaExpr()
                     .setEnclosingParameters(true)
@@ -741,7 +763,7 @@ public class InjectProcessor extends AbstractProcessor {
                                     .setExpression(
                                             new FieldAccessExpr()
                                                     .setName("INSTANCE")
-                                                    .setScope(new NameExpr(instanceClassQualifiedName.replaceAll("\\.", "_") + "Holder"))
+                                                    .setScope(new NameExpr(qualifiedName.replaceAll("\\.", "_") + "Holder"))
                                     )
                     );
         } else {
