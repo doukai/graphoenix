@@ -7,7 +7,7 @@ import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 

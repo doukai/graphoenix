@@ -5,7 +5,7 @@ import io.graphoenix.core.context.BeanContext;
 import io.vavr.CheckedFunction2;
 import jakarta.json.*;
 import jakarta.json.spi.JsonProvider;
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 

@@ -43,6 +43,9 @@ public class ProductExpression implements MetaExpression {
 
   private StringExpression __typename;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -142,6 +145,14 @@ public class ProductExpression implements MetaExpression {
 
   public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {

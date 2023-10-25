@@ -52,6 +52,9 @@ public class GoodExpression implements MetaExpression {
 
   private IntExpression merchantId;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -191,6 +194,14 @@ public class GoodExpression implements MetaExpression {
 
   public void setMerchantId(IntExpression merchantId) {
     this.merchantId = merchantId;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {

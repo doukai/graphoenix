@@ -438,8 +438,15 @@ public class InjectProcessor extends AbstractProcessor {
                                     .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Produces.class))
                                     .forEach(producesMethodDeclaration -> {
                                                 String qualifiedName = processorManager.getQualifiedNameByType(producesMethodDeclaration.getType());
+                                                String fieldTypeName = qualifiedName;
                                                 if (qualifiedName.equals(Mono.class.getName()) || qualifiedName.equals(PublisherBuilder.class.getName())) {
-                                                    qualifiedName = producesMethodDeclaration.getType().resolve().asReferenceType().getTypeParametersMap().get(0).b.asReferenceType().getQualifiedName();
+                                                    String parameterType = producesMethodDeclaration.getType().resolve().asReferenceType().getTypeParametersMap().get(0).b.asReferenceType().getQualifiedName();
+                                                    if (qualifiedName.equals(Mono.class.getName())) {
+                                                        fieldTypeName = Mono.class.getName() + "<" + parameterType + ">";
+                                                    } else {
+                                                        fieldTypeName = PublisherBuilder.class.getName() + "<" + parameterType + ">";
+                                                    }
+                                                    qualifiedName = parameterType;
                                                 }
 
                                                 if (producesMethodDeclaration.isAnnotationPresent(Singleton.class) || producesMethodDeclaration.isAnnotationPresent(ApplicationScoped.class)) {
@@ -447,23 +454,23 @@ public class InjectProcessor extends AbstractProcessor {
                                                     holderClassOrInterfaceDeclaration.setName(qualifiedName.replaceAll("\\.", "_") + "Holder");
                                                     holderClassOrInterfaceDeclaration.setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC);
                                                     holderClassOrInterfaceDeclaration.addFieldWithInitializer(
-                                                            qualifiedName,
-                                                            "INSTANCE",
-                                                            new MethodCallExpr()
-                                                                    .setName(producesMethodDeclaration.getName())
-                                                                    .setArguments(
-                                                                            producesMethodDeclaration.getParameters().stream()
-                                                                                    .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleContextCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                    .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                    .collect(Collectors.toCollection(NodeList::new))
-                                                                    )
-                                                                    .setScope(
-                                                                            new MethodCallExpr()
-                                                                                    .setName("get")
-                                                                                    .setScope(new NameExpr().setName("BeanContext"))
-                                                                                    .addArgument(new ClassExpr().setType(processorManager.getQualifiedNameByDeclaration(classOrInterfaceDeclaration)))
-                                                                    )
-                                                    )
+                                                                    fieldTypeName,
+                                                                    "INSTANCE",
+                                                                    new MethodCallExpr()
+                                                                            .setName(producesMethodDeclaration.getName())
+                                                                            .setArguments(
+                                                                                    producesMethodDeclaration.getParameters().stream()
+                                                                                            .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleContextCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                            .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                            .collect(Collectors.toCollection(NodeList::new))
+                                                                            )
+                                                                            .setScope(
+                                                                                    new MethodCallExpr()
+                                                                                            .setName("get")
+                                                                                            .setScope(new NameExpr().setName("BeanContext"))
+                                                                                            .addArgument(new ClassExpr().setType(processorManager.getQualifiedNameByDeclaration(classOrInterfaceDeclaration)))
+                                                                            )
+                                                            )
                                                             .setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
 
                                                     moduleContextInterfaceDeclaration.addMember(holderClassOrInterfaceDeclaration);
@@ -592,22 +599,22 @@ public class InjectProcessor extends AbstractProcessor {
                                         holderClassOrInterfaceDeclaration.setName(qualifiedName.replaceAll("\\.", "_") + "Holder");
                                         holderClassOrInterfaceDeclaration.setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC);
                                         holderClassOrInterfaceDeclaration.addFieldWithInitializer(
-                                                qualifiedName,
-                                                "INSTANCE",
-                                                new ObjectCreationExpr()
-                                                        .setType(qualifiedName + "Proxy")
-                                                        .setArguments(
-                                                                classOrInterfaceDeclaration.getConstructors().stream()
-                                                                        .findFirst()
-                                                                        .map(constructorDeclaration ->
-                                                                                constructorDeclaration.getParameters().stream()
-                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleContextCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                        .collect(Collectors.toCollection(NodeList::new))
-                                                                        )
-                                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(classOrInterfaceDeclaration.getNameAsString())))
-                                                        )
-                                        )
+                                                        qualifiedName,
+                                                        "INSTANCE",
+                                                        new ObjectCreationExpr()
+                                                                .setType(qualifiedName + "Proxy")
+                                                                .setArguments(
+                                                                        classOrInterfaceDeclaration.getConstructors().stream()
+                                                                                .findFirst()
+                                                                                .map(constructorDeclaration ->
+                                                                                        constructorDeclaration.getParameters().stream()
+                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleContextCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                                                )
+                                                                                .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(classOrInterfaceDeclaration.getNameAsString())))
+                                                                )
+                                                )
                                                 .setModifiers(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
                                         moduleContextInterfaceDeclaration.addMember(holderClassOrInterfaceDeclaration);
                                         addPutTypeStatement(staticInitializer, qualifiedName, moduleContextCompilationUnit, classOrInterfaceDeclaration, null, true);

@@ -56,6 +56,9 @@ public class MerchantExpression implements MetaExpression {
 
   private MerchantDirectorExpression merchantDirector;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -203,6 +206,14 @@ public class MerchantExpression implements MetaExpression {
 
   public void setMerchantDirector(MerchantDirectorExpression merchantDirector) {
     this.merchantDirector = merchantDirector;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {

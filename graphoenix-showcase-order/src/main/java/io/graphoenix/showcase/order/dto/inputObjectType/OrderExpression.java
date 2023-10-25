@@ -47,6 +47,9 @@ public class OrderExpression implements MetaExpression {
 
   private IntExpression buyerId;
 
+  @DefaultValue("false")
+  private Boolean not;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -162,6 +165,14 @@ public class OrderExpression implements MetaExpression {
 
   public void setBuyerId(IntExpression buyerId) {
     this.buyerId = buyerId;
+  }
+
+  public Boolean getNot() {
+    return this.not;
+  }
+
+  public void setNot(Boolean not) {
+    this.not = not;
   }
 
   public Conditional getCond() {

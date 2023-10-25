@@ -28,7 +28,7 @@ public class RabbitMQProducer {
         connectionFactory.setPort(rabbitMQConfig.getPort());
         connectionFactory.setUsername(rabbitMQConfig.getUsername());
         connectionFactory.setPassword(rabbitMQConfig.getPassword());
-        return Mono.fromCallable(connectionFactory::newConnection).cache();
+        return Mono.fromCallable(() -> connectionFactory.newConnection()).cache();
     }
 
     @Produces
