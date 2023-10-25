@@ -269,107 +269,115 @@ public class OperationInterfaceImplementer {
         String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
 
         if (argumentTypeNames.length > 0) {
+            String argumentTypeName0 = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
             if (className.equals(Mono.class.getCanonicalName())) {
-                String monoArgumentTypeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
-                String[] monoArgumentTypeArgumentNames = TYPE_NAME_UTIL.getArgumentTypeNames(typeName);
+                String[] monoArgumentTypeArgumentNames = TYPE_NAME_UTIL.getArgumentTypeNames(argumentTypeName0);
                 if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
                     if (monoArgumentTypeArgumentNames.length > 0) {
-                        Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(monoArgumentTypeName);
+                        Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(argumentTypeName0);
+                        String operationTypePackageName = monoArgumentTypeArgumentNames[0].substring(0, monoArgumentTypeArgumentNames[0].lastIndexOf("."));
                         if (collectionImplementationClassName.isPresent()) {
                             return CodeBlock.of(
                                     "return operationDAO.findAsync($L, $L, $T.class).mapNotNull($T::$L).mapNotNull($T::new)",
                                     resourceFieldName,
                                     mapOf,
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
+                                    ClassName.get(operationTypePackageName, queryTypeName),
+                                    ClassName.get(operationTypePackageName, queryTypeName),
                                     typeManager.getFieldGetterMethodName(fieldName),
                                     collectionImplementationClassName.get()
                             );
                         }
                     }
+                    String operationTypePackageName = argumentTypeName0.substring(0, argumentTypeName0.lastIndexOf("."));
                     return CodeBlock.of(
                             "return operationDAO.findAsync($L, $L, $T.class).mapNotNull($T::$L)",
                             resourceFieldName,
                             mapOf,
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
+                            ClassName.get(operationTypePackageName, queryTypeName),
+                            ClassName.get(operationTypePackageName, queryTypeName),
                             typeManager.getFieldGetterMethodName(fieldName)
                     );
                 } else if (operationDefinitionContext.operationType().MUTATION() != null) {
                     if (monoArgumentTypeArgumentNames.length > 0) {
-                        Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(monoArgumentTypeName);
+                        Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(argumentTypeName0);
+                        String operationTypePackageName = monoArgumentTypeArgumentNames[0].substring(0, monoArgumentTypeArgumentNames[0].lastIndexOf("."));
                         if (collectionImplementationClassName.isPresent()) {
                             return CodeBlock.of(
                                     "return operationDAO.saveAsync($L, $L, $T.class).mapNotNull($T::$L).mapNotNull($T::new)",
                                     resourceFieldName,
                                     mapOf,
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
+                                    ClassName.get(operationTypePackageName, mutationTypeName),
+                                    ClassName.get(operationTypePackageName, mutationTypeName),
                                     typeManager.getFieldGetterMethodName(fieldName),
                                     collectionImplementationClassName.get()
                             );
                         }
                     }
+                    String operationTypePackageName = argumentTypeName0.substring(0, argumentTypeName0.lastIndexOf("."));
                     return CodeBlock.of(
                             "return operationDAO.saveAsync($L, $L, $T.class).mapNotNull($T::$L)",
                             resourceFieldName,
                             mapOf,
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
+                            ClassName.get(operationTypePackageName, mutationTypeName),
+                            ClassName.get(operationTypePackageName, mutationTypeName),
                             typeManager.getFieldGetterMethodName(fieldName)
                     );
                 }
             } else if (className.equals(PublisherBuilder.class.getCanonicalName())) {
-                String publisherArgumentTypeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
-                String[] publisherArgumentTypeArgumentNames = TYPE_NAME_UTIL.getArgumentTypeNames(typeName);
+                String[] publisherArgumentTypeArgumentNames = TYPE_NAME_UTIL.getArgumentTypeNames(argumentTypeName0);
                 if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
                     if (publisherArgumentTypeArgumentNames.length > 0) {
-                        Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(publisherArgumentTypeName);
+                        Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(argumentTypeName0);
+                        String operationTypePackageName = publisherArgumentTypeArgumentNames[0].substring(0, publisherArgumentTypeArgumentNames[0].lastIndexOf("."));
                         if (collectionImplementationClassName.isPresent()) {
                             return CodeBlock.of(
                                     "return operationDAO.findAsyncBuilder($L, $L, $T.class).mapNotNull($T::$L).mapNotNull($T::new)",
                                     resourceFieldName,
                                     mapOf,
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
+                                    ClassName.get(operationTypePackageName, queryTypeName),
+                                    ClassName.get(operationTypePackageName, queryTypeName),
                                     typeManager.getFieldGetterMethodName(fieldName),
                                     collectionImplementationClassName.get()
                             );
                         }
                     }
+                    String operationTypePackageName = argumentTypeName0.substring(0, argumentTypeName0.lastIndexOf("."));
                     return CodeBlock.of(
                             "return operationDAO.findAsyncBuilder($L, $L, $T.class).mapNotNull($T::$L)",
                             resourceFieldName,
                             mapOf,
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
+                            ClassName.get(operationTypePackageName, queryTypeName),
+                            ClassName.get(operationTypePackageName, queryTypeName),
                             typeManager.getFieldGetterMethodName(fieldName)
                     );
                 } else if (operationDefinitionContext.operationType().MUTATION() != null) {
                     if (publisherArgumentTypeArgumentNames.length > 0) {
-                        Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(publisherArgumentTypeName);
+                        Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(argumentTypeName0);
+                        String operationTypePackageName = publisherArgumentTypeArgumentNames[0].substring(0, publisherArgumentTypeArgumentNames[0].lastIndexOf("."));
                         if (collectionImplementationClassName.isPresent()) {
                             return CodeBlock.of(
                                     "return operationDAO.saveAsyncBuilder($L, $L, $T.class).mapNotNull($T::$L).mapNotNull($T::new)",
                                     resourceFieldName,
                                     mapOf,
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
+                                    ClassName.get(operationTypePackageName, mutationTypeName),
+                                    ClassName.get(operationTypePackageName, mutationTypeName),
                                     typeManager.getFieldGetterMethodName(fieldName),
                                     collectionImplementationClassName.get()
                             );
                         }
                     }
+                    String operationTypePackageName = argumentTypeName0.substring(0, argumentTypeName0.lastIndexOf("."));
                     return CodeBlock.of(
                             "return operationDAO.saveAsyncBuilder($L, $L, $T.class).mapNotNull($T::$L)",
                             resourceFieldName,
                             mapOf,
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
+                            ClassName.get(operationTypePackageName, mutationTypeName),
+                            ClassName.get(operationTypePackageName, mutationTypeName),
                             typeManager.getFieldGetterMethodName(fieldName)
                     );
                 }
             } else {
+                String operationTypePackageName = argumentTypeName0.substring(0, argumentTypeName0.lastIndexOf("."));
                 if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
                     Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(typeName);
                     return collectionImplementationClassName
@@ -379,7 +387,7 @@ public class OperationInterfaceImplementer {
                                             collectionClassName,
                                             resourceFieldName,
                                             mapOf,
-                                            ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
+                                            ClassName.get(operationTypePackageName, queryTypeName),
                                             typeManager.getFieldGetterMethodName(fieldName)
                                     )
                             ).orElseGet(() ->
@@ -387,7 +395,7 @@ public class OperationInterfaceImplementer {
                                             "return operationDAO.find($L, $L, $T.class).$L()",
                                             resourceFieldName,
                                             mapOf,
-                                            ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
+                                            ClassName.get(operationTypePackageName, queryTypeName),
                                             typeManager.getFieldGetterMethodName(fieldName)
                                     )
                             );
@@ -400,7 +408,7 @@ public class OperationInterfaceImplementer {
                                             collectionTypeName,
                                             resourceFieldName,
                                             mapOf,
-                                            ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
+                                            ClassName.get(operationTypePackageName, mutationTypeName),
                                             typeManager.getFieldGetterMethodName(fieldName)
                                     )
                             ).orElseGet(() ->
@@ -408,19 +416,20 @@ public class OperationInterfaceImplementer {
                                             "return operationDAO.save($L, $L, $T.class).$L()",
                                             resourceFieldName,
                                             mapOf,
-                                            ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
+                                            ClassName.get(operationTypePackageName, mutationTypeName),
                                             typeManager.getFieldGetterMethodName(fieldName)
                                     )
                             );
                 }
             }
         } else {
+            String operationTypePackageName = className.substring(0, className.lastIndexOf("."));
             if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
                 return CodeBlock.of(
                         "return operationDAO.find($L, $L, $T.class).$L()",
                         resourceFieldName,
                         mapOf,
-                        ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
+                        ClassName.get(operationTypePackageName, queryTypeName),
                         typeManager.getFieldGetterMethodName(fieldName)
                 );
             } else if (operationDefinitionContext.operationType().MUTATION() != null) {
@@ -428,7 +437,7 @@ public class OperationInterfaceImplementer {
                         "return operationDAO.save($L, $L, $T.class).$L()",
                         resourceFieldName,
                         mapOf,
-                        ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
+                        ClassName.get(operationTypePackageName, mutationTypeName),
                         typeManager.getFieldGetterMethodName(fieldName)
                 );
             }
