@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.structure.dto.inputObjectType.grpc";
+
+package io.graphoenix.structure.grpc;
+
+import "io/graphoenix/structure/enums.proto";
+import "io/graphoenix/core/input_objects.proto";
+
+message TreeStructExpression {
+    optional io.graphoenix.core.grpc.StringExpression path = 1;
+    optional io.graphoenix.core.grpc.IntExpression deep = 2;
+}
+message TreeStructInput {
+    optional string path = 1;
+    optional int32 deep = 2;
+}
+message NamedStructExpression {
+    optional io.graphoenix.core.grpc.StringExpression name = 1;
+    optional io.graphoenix.core.grpc.StringExpression description = 2;
+}
+message NamedStructInput {
+    optional string name = 1;
+    optional string description = 2;
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.structure.grpc";
+
+package io.graphoenix.structure.grpc;
+
+import "io/graphoenix/structure/enums.proto";
+import "io/graphoenix/structure/objects.proto";
+import "io/graphoenix/structure/interfaces.proto";
+import "io/graphoenix/structure/input_objects.proto";
+

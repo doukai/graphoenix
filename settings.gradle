@@ -25,4 +25,5 @@ include 'graphoenix-showcase-order'
 include 'graphoenix-showcase-order-app'
 include 'graphoenix-subscriptions'
 include 'graphoenix-json-path'
+include 'graphoenix-structure'
 

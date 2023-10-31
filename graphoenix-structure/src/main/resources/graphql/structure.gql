@@ -1,0 +1,9 @@
+interface TreeStruct {
+    path: String!
+    deep: Int
+}
+
+interface NamedStruct {
+    name: String!
+    description: String
+}
