@@ -1,6 +1,8 @@
 interface TreeStruct {
+    name: String
     path: String
     deep: Int
+    parentId: String
 }
 
 interface NamedStruct {
