@@ -9,12 +9,16 @@ import "io/graphoenix/structure/enums.proto";
 import "io/graphoenix/core/input_objects.proto";
 
 message TreeStructExpression {
-    optional io.graphoenix.core.grpc.StringExpression path = 1;
-    optional io.graphoenix.core.grpc.IntExpression deep = 2;
+    optional io.graphoenix.core.grpc.StringExpression name = 1;
+    optional io.graphoenix.core.grpc.StringExpression path = 2;
+    optional io.graphoenix.core.grpc.IntExpression deep = 3;
+    optional io.graphoenix.core.grpc.StringExpression parent_id = 4;
 }
 message TreeStructInput {
-    optional string path = 1;
-    optional int32 deep = 2;
+    optional string name = 1;
+    optional string path = 2;
+    optional int32 deep = 3;
+    optional string parent_id = 4;
 }
 message NamedStructExpression {
     optional io.graphoenix.core.grpc.StringExpression name = 1;

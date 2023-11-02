@@ -4,13 +4,11 @@ import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.String;
 import org.eclipse.microprofile.graphql.Interface;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Interface
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
 public interface NamedStruct {
-  @NonNull
   String name = null;
 
   String description = null;

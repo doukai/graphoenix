@@ -10,6 +10,10 @@ import org.eclipse.microprofile.graphql.Input;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
 public interface TreeStructExpression {
+  StringExpression getName();
+
+  void setName(StringExpression name);
+
   StringExpression getPath();
 
   void setPath(StringExpression path);
@@ -17,4 +21,8 @@ public interface TreeStructExpression {
   IntExpression getDeep();
 
   void setDeep(IntExpression deep);
+
+  StringExpression getParentId();
+
+  void setParentId(StringExpression parentId);
 }

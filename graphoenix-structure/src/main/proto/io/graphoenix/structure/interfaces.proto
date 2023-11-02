@@ -8,10 +8,12 @@ package io.graphoenix.structure.grpc;
 import "io/graphoenix/structure/enums.proto";
 
 message TreeStruct {
-    string path = 1;
-    optional int32 deep = 2;
+    optional string name = 1;
+    optional string path = 2;
+    optional int32 deep = 3;
+    optional string parent_id = 4;
 }
 message NamedStruct {
-    string name = 1;
+    optional string name = 1;
     optional string description = 2;
 }

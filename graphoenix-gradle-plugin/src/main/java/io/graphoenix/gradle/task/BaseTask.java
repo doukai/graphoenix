@@ -502,12 +502,16 @@ public class BaseTask extends DefaultTask {
     }
 
     protected String getTypeName(Type type) {
-        if (type.isArrayType()) {
-            return getTypeName(type.asArrayType().getElementType()) + "[]";
-        } else if (type.isPrimitiveType()) {
-            return type.asPrimitiveType().resolve().name();
-        } else if (type.isClassOrInterfaceType()) {
-            return type.asClassOrInterfaceType().resolve().asReferenceType().getQualifiedName();
+        try {
+            if (type.isArrayType()) {
+                return getTypeName(type.asArrayType().getElementType()) + "[]";
+            } else if (type.isPrimitiveType()) {
+                return type.asPrimitiveType().resolve().name();
+            } else if (type.isClassOrInterfaceType()) {
+                return type.asClassOrInterfaceType().resolve().asReferenceType().getQualifiedName();
+            }
+        } catch (UnsolvedSymbolException e) {
+            Logger.warn(e);
         }
         return type.asString();
     }

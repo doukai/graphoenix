@@ -10,6 +10,10 @@ import org.eclipse.microprofile.graphql.Input;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
 public interface TreeStructInput {
+  String getName();
+
+  void setName(String name);
+
   String getPath();
 
   void setPath(String path);
@@ -17,4 +21,8 @@ public interface TreeStructInput {
   Integer getDeep();
 
   void setDeep(Integer deep);
+
+  String getParentId();
+
+  void setParentId(String parentId);
 }
