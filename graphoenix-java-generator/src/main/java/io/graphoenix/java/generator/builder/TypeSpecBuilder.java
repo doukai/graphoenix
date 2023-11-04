@@ -53,6 +53,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
@@ -122,10 +123,10 @@ public class TypeSpecBuilder {
             );
         }
         if (objectTypeDefinitionContext.description() != null) {
-            builder.addJavadoc("$S", objectTypeDefinitionContext.description().getText());
+            builder.addJavadoc("$L", DOCUMENT_UTIL.getStringValue(objectTypeDefinitionContext.description().StringValue()));
             builder.addAnnotation(
                     AnnotationSpec.builder(Description.class)
-                            .addMember("value", "$S", objectTypeDefinitionContext.description().getText())
+                            .addMember("value", "$S", DOCUMENT_UTIL.getStringValue(objectTypeDefinitionContext.description().StringValue()))
                             .build()
             );
         }
@@ -166,10 +167,10 @@ public class TypeSpecBuilder {
             );
         }
         if (inputObjectTypeDefinitionContext.description() != null) {
-            builder.addJavadoc("$S", inputObjectTypeDefinitionContext.description().getText());
+            builder.addJavadoc("$L", DOCUMENT_UTIL.getStringValue(inputObjectTypeDefinitionContext.description().StringValue()));
             builder.addAnnotation(
                     AnnotationSpec.builder(Description.class)
-                            .addMember("value", "$S", inputObjectTypeDefinitionContext.description().getText())
+                            .addMember("value", "$S", DOCUMENT_UTIL.getStringValue(inputObjectTypeDefinitionContext.description().StringValue()))
                             .build()
             );
         }
@@ -186,10 +187,10 @@ public class TypeSpecBuilder {
         enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition()
                 .forEach(enumValueDefinitionContext -> builder.addEnumConstant(enumValueDefinitionContext.enumValue().enumValueName().getText()));
         if (enumTypeDefinitionContext.description() != null) {
-            builder.addJavadoc("$S", enumTypeDefinitionContext.description().getText());
+            builder.addJavadoc("$L", DOCUMENT_UTIL.getStringValue(enumTypeDefinitionContext.description().StringValue()));
             builder.addAnnotation(
                     AnnotationSpec.builder(Description.class)
-                            .addMember("value", "$S", enumTypeDefinitionContext.description().getText())
+                            .addMember("value", "$S", DOCUMENT_UTIL.getStringValue(enumTypeDefinitionContext.description().StringValue()))
                             .build()
             );
         }
@@ -219,10 +220,10 @@ public class TypeSpecBuilder {
             );
         }
         if (interfaceTypeDefinitionContext.description() != null) {
-            builder.addJavadoc("$S", interfaceTypeDefinitionContext.description().getText());
+            builder.addJavadoc("$L", DOCUMENT_UTIL.getStringValue(interfaceTypeDefinitionContext.description().StringValue()));
             builder.addAnnotation(
                     AnnotationSpec.builder(Description.class)
-                            .addMember("value", "$S", interfaceTypeDefinitionContext.description().getText())
+                            .addMember("value", "$S", DOCUMENT_UTIL.getStringValue(interfaceTypeDefinitionContext.description().StringValue()))
                             .build()
             );
         }
@@ -262,10 +263,10 @@ public class TypeSpecBuilder {
                         .build()
         );
         if (directiveDefinitionContext.description() != null) {
-            builder.addJavadoc("$S", directiveDefinitionContext.description().getText());
+            builder.addJavadoc("$L", DOCUMENT_UTIL.getStringValue(directiveDefinitionContext.description().StringValue()));
             builder.addAnnotation(
                     AnnotationSpec.builder(Description.class)
-                            .addMember("value", "$S", directiveDefinitionContext.description().getText())
+                            .addMember("value", "$S", DOCUMENT_UTIL.getStringValue(directiveDefinitionContext.description().StringValue()))
                             .build()
             );
         }
@@ -293,10 +294,10 @@ public class TypeSpecBuilder {
                         .build()
         );
         if (inputObjectTypeDefinitionContext.description() != null) {
-            builder.addJavadoc("$S", inputObjectTypeDefinitionContext.description().getText());
+            builder.addJavadoc("$L", DOCUMENT_UTIL.getStringValue(inputObjectTypeDefinitionContext.description().StringValue()));
             builder.addAnnotation(
                     AnnotationSpec.builder(Description.class)
-                            .addMember("value", "$S", inputObjectTypeDefinitionContext.description().getText())
+                            .addMember("value", "$S", DOCUMENT_UTIL.getStringValue(inputObjectTypeDefinitionContext.description().StringValue()))
                             .build()
             );
         }
@@ -353,10 +354,10 @@ public class TypeSpecBuilder {
             builder.addAnnotation(NonNull.class);
         }
         if (fieldDefinitionContext.description() != null) {
-            builder.addJavadoc("$S", fieldDefinitionContext.description().getText());
+            builder.addJavadoc("$L", DOCUMENT_UTIL.getStringValue(fieldDefinitionContext.description().StringValue()));
             builder.addAnnotation(
                     AnnotationSpec.builder(Description.class)
-                            .addMember("value", "$S", fieldDefinitionContext.description().getText())
+                            .addMember("value", "$S", DOCUMENT_UTIL.getStringValue(fieldDefinitionContext.description().StringValue()))
                             .build()
             );
         }
@@ -375,10 +376,10 @@ public class TypeSpecBuilder {
             builder.addAnnotation(NonNull.class);
         }
         if (fieldDefinitionContext.description() != null) {
-            builder.addJavadoc("$S", fieldDefinitionContext.description().getText());
+            builder.addJavadoc("$L", DOCUMENT_UTIL.getStringValue(fieldDefinitionContext.description().StringValue()));
             builder.addAnnotation(
                     AnnotationSpec.builder(Description.class)
-                            .addMember("value", "$S", fieldDefinitionContext.description().getText())
+                            .addMember("value", "$S", DOCUMENT_UTIL.getStringValue(fieldDefinitionContext.description().StringValue()))
                             .build()
             );
         }
@@ -397,10 +398,10 @@ public class TypeSpecBuilder {
             builder.addAnnotation(NonNull.class);
         }
         if (inputValueDefinitionContext.description() != null) {
-            builder.addJavadoc("$S", inputValueDefinitionContext.description().getText());
+            builder.addJavadoc("$L", DOCUMENT_UTIL.getStringValue(inputValueDefinitionContext.description().StringValue()));
             builder.addAnnotation(
                     AnnotationSpec.builder(Description.class)
-                            .addMember("value", "$S", inputValueDefinitionContext.description().getText())
+                            .addMember("value", "$S", DOCUMENT_UTIL.getStringValue(inputValueDefinitionContext.description().StringValue()))
                             .build()
             );
         }
@@ -425,10 +426,10 @@ public class TypeSpecBuilder {
             builder.addAnnotation(NonNull.class);
         }
         if (inputValueDefinitionContext.description() != null) {
-            builder.addJavadoc("$S", inputValueDefinitionContext.description().getText());
+            builder.addJavadoc("$L", DOCUMENT_UTIL.getStringValue(inputValueDefinitionContext.description().StringValue()));
             builder.addAnnotation(
                     AnnotationSpec.builder(Description.class)
-                            .addMember("value", "$S", inputValueDefinitionContext.description().getText())
+                            .addMember("value", "$S", DOCUMENT_UTIL.getStringValue(inputValueDefinitionContext.description().StringValue()))
                             .build()
             );
         }
@@ -448,10 +449,10 @@ public class TypeSpecBuilder {
             builder.defaultValue(buildDefaultValue(inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value()));
         }
         if (inputValueDefinitionContext.description() != null) {
-            builder.addJavadoc("$S", inputValueDefinitionContext.description().getText());
+            builder.addJavadoc("$L", DOCUMENT_UTIL.getStringValue(inputValueDefinitionContext.description().StringValue()));
             builder.addAnnotation(
                     AnnotationSpec.builder(Description.class)
-                            .addMember("value", "$S", inputValueDefinitionContext.description().getText())
+                            .addMember("value", "$S", DOCUMENT_UTIL.getStringValue(inputValueDefinitionContext.description().StringValue()))
                             .build()
             );
         }
@@ -1102,17 +1103,18 @@ public class TypeSpecBuilder {
                                                 .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
                                                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
-                                                .map(fieldDefinitionContext ->
-                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
-                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + EXPRESSION_SUFFIX + (layer + 1)))
-                                                                .defaultValue(
-                                                                        CodeBlock.of(
-                                                                                "@$T",
-                                                                                ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + EXPRESSION_SUFFIX + (layer + 1))
-                                                                        )
-                                                                )
-                                                                .build()
+                                                .map(fieldDefinitionContext -> {
+                                                            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                                                            String inputAnnotationName = manager.getInputObject(fieldTypeName + EXPRESSION_SUFFIX)
+                                                                    .flatMap(manager::getAnnotationName)
+                                                                    .orElseGet(() -> graphQLConfig.getAnnotationPackageName() + fieldTypeName + EXPRESSION_SUFFIX);
+                                                            ClassName inputAnnotationClassName = TYPE_NAME_UTIL.toClassName(inputAnnotationName + (layer + 1));
+                                                            return MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                    .returns(inputAnnotationClassName)
+                                                                    .defaultValue(CodeBlock.of("@$T", inputAnnotationClassName))
+                                                                    .build();
+                                                        }
                                                 )
                                                 .collect(Collectors.toList())
                                 ).addMethod(
@@ -1165,8 +1167,8 @@ public class TypeSpecBuilder {
                                                     .map(fieldDefinitionContext ->
                                                             MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                    .returns(buildType(fieldDefinitionContext.type(), true, layer))
-                                                                    .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type(), layer))
+                                                                    .returns(buildType(fieldDefinitionContext.type(), true))
+                                                                    .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type()))
                                                                     .build()
                                                     )
                                                     .collect(Collectors.toList())
@@ -1185,24 +1187,30 @@ public class TypeSpecBuilder {
                                     );
                             if (layer < graphQLConfig.getInputLayers() - 1) {
                                 builder.addMethods(
-                                                manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                        .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                        .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
-                                                        .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-                                                        .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
-                                                        .map(fieldDefinitionContext ->
-                                                                MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
-                                                                        .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                        .returns(
-                                                                                manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
-                                                                                        ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + INPUT_SUFFIX + (layer + 1))) :
-                                                                                        ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + INPUT_SUFFIX + (layer + 1))
-                                                                        )
-                                                                        .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type(), layer + 1))
-                                                                        .build()
-                                                        )
-                                                        .collect(Collectors.toList())
-                                        )
+                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
+                                                .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                                                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                                                .map(fieldDefinitionContext -> {
+                                                            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                                                            String inputAnnotationName = manager.getInputObject(fieldTypeName + INPUT_SUFFIX)
+                                                                    .flatMap(manager::getAnnotationName)
+                                                                    .orElseGet(() -> graphQLConfig.getAnnotationPackageName() + fieldTypeName + INPUT_SUFFIX);
+                                                            ClassName inputAnnotationClassName = TYPE_NAME_UTIL.toClassName(inputAnnotationName + (layer + 1));
+                                                            return MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                    .returns(
+                                                                            manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
+                                                                                    ArrayTypeName.of(inputAnnotationClassName) :
+                                                                                    inputAnnotationClassName
+                                                                    )
+                                                                    .defaultValue(CodeBlock.of("@$T", inputAnnotationClassName))
+                                                                    .build();
+                                                        }
+                                                )
+                                                .collect(Collectors.toList())
+                                )
                                         .addMethod(
                                                 MethodSpec.methodBuilder(LIST_INPUT_NAME)
                                                         .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -1278,19 +1286,18 @@ public class TypeSpecBuilder {
                                                 .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
                                                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
-                                                .map(fieldDefinitionContext ->
-                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
-                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + ORDER_BY_SUFFIX + (layer + 1)))
-                                                                .defaultValue(
-                                                                        CodeBlock.of(
-                                                                                "@$T",
-                                                                                ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + ORDER_BY_SUFFIX + (layer + 1))
-                                                                        )
-                                                                )
-                                                                .build()
-
-
+                                                .map(fieldDefinitionContext -> {
+                                                            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                                                            String inputAnnotationName = manager.getInputObject(fieldTypeName + ORDER_BY_SUFFIX)
+                                                                    .flatMap(manager::getAnnotationName)
+                                                                    .orElseGet(() -> graphQLConfig.getAnnotationPackageName() + fieldTypeName + ORDER_BY_SUFFIX);
+                                                            ClassName inputAnnotationClassName = TYPE_NAME_UTIL.toClassName(inputAnnotationName + (layer + 1));
+                                                            return MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                    .returns(inputAnnotationClassName)
+                                                                    .defaultValue(CodeBlock.of("@$T", inputAnnotationClassName))
+                                                                    .build();
+                                                        }
                                                 )
                                                 .collect(Collectors.toList())
                                 );
