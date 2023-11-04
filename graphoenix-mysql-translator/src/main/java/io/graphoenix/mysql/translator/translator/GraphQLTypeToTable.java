@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 import static io.graphoenix.core.error.GraphQLErrorType.DEFINITION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_DEFINITION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 
 @ApplicationScoped
@@ -297,7 +298,9 @@ public class GraphQLTypeToTable {
                     typeNameContext.name().getText().equals("Time") ||
                     typeNameContext.name().getText().equals("DateTime") ||
                     typeNameContext.name().getText().equals("Timestamp")) {
-                columnSpecs.add("DEFAULT NULL");
+                if (!nonNull) {
+                    columnSpecs.add("DEFAULT NULL");
+                }
             }
         }
 
@@ -309,7 +312,7 @@ public class GraphQLTypeToTable {
         }
 
         if (fieldDefinitionContext.description() != null) {
-            columnSpecs.add("COMMENT " + dbNameUtil.graphqlDescriptionToDBComment(fieldDefinitionContext.description().getText()));
+            columnSpecs.add("COMMENT " + dbNameUtil.graphqlDescriptionToDBComment(DOCUMENT_UTIL.getStringValue(fieldDefinitionContext.description().StringValue())));
         }
         columnDefinition.setColumnSpecs(columnSpecs);
         return Optional.of(columnDefinition);
@@ -331,7 +334,7 @@ public class GraphQLTypeToTable {
 
         colDataType.setArgumentsStringList(manager.getEnum(manager.getFieldTypeName(fieldDefinitionContext.type())).map(enumTypeDefinitionContext -> enumTypeDefinitionContext.enumValueDefinitions()
                 .enumValueDefinition().stream()
-                .map(value -> dbNameUtil.stringValueToDBVarchar(value.getText())).collect(Collectors.toList())).orElse(Collections.emptyList()));
+                .map(value -> dbNameUtil.stringValueToDBVarchar(value.enumValue().enumValueName().getText())).collect(Collectors.toList())).orElse(Collections.emptyList()));
 
         return colDataType;
     }
@@ -398,7 +401,7 @@ public class GraphQLTypeToTable {
             directiveToTableOption(objectTypeDefinitionContext.directives()).ifPresent(tableOptionsList::addAll);
         }
         if (objectTypeDefinitionContext.description() != null) {
-            tableOptionsList.add("COMMENT " + dbNameUtil.graphqlDescriptionToDBComment(objectTypeDefinitionContext.description().getText()));
+            tableOptionsList.add("COMMENT " + dbNameUtil.graphqlDescriptionToDBComment(DOCUMENT_UTIL.getStringValue(objectTypeDefinitionContext.description().StringValue())));
         }
         return tableOptionsList;
     }

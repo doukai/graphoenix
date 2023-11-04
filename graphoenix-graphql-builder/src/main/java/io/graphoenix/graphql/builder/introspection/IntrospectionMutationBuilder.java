@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
 
@@ -185,7 +186,7 @@ public class IntrospectionMutationBuilder {
             }
 
             if (objectTypeDefinitionContext.description() != null) {
-                type.setDescription(objectTypeDefinitionContext.description().getText());
+                type.setDescription(DOCUMENT_UTIL.getStringValue(objectTypeDefinitionContext.description().StringValue()));
             }
             type.setFields(
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
@@ -211,7 +212,7 @@ public class IntrospectionMutationBuilder {
             }
 
             if (interfaceTypeDefinitionContext.description() != null) {
-                type.setDescription(interfaceTypeDefinitionContext.description().getText());
+                type.setDescription(DOCUMENT_UTIL.getStringValue(interfaceTypeDefinitionContext.description().StringValue()));
             }
             type.setFields(
                     interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
@@ -240,7 +241,7 @@ public class IntrospectionMutationBuilder {
         field.setName(fieldDefinitionContext.name().getText());
 
         if (fieldDefinitionContext.description() != null) {
-            field.setDescription(fieldDefinitionContext.description().getText());
+            field.setDescription(DOCUMENT_UTIL.getStringValue(fieldDefinitionContext.description().StringValue()));
         }
 
         if (fieldDefinitionContext.argumentsDefinition() != null) {
@@ -316,7 +317,7 @@ public class IntrospectionMutationBuilder {
 
         if (level == 0) {
             if (enumTypeDefinitionContext.description() != null) {
-                type.setDescription(enumTypeDefinitionContext.description().getText());
+                type.setDescription(DOCUMENT_UTIL.getStringValue(enumTypeDefinitionContext.description().StringValue()));
             }
             type.setEnumValues(
                     enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream()
@@ -332,7 +333,7 @@ public class IntrospectionMutationBuilder {
         enumValue.setName(enumValueDefinitionContext.enumValue().enumValueName().getText());
 
         if (enumValueDefinitionContext.description() != null) {
-            enumValue.setDescription(enumValueDefinitionContext.description().getText());
+            enumValue.setDescription(DOCUMENT_UTIL.getStringValue(enumValueDefinitionContext.description().StringValue()));
         }
         return enumValue;
     }
@@ -346,7 +347,7 @@ public class IntrospectionMutationBuilder {
         inputValue.setName(inputValueDefinitionContext.name().getText());
 
         if (inputValueDefinitionContext.description() != null) {
-            inputValue.setDescription(inputValueDefinitionContext.description().getText());
+            inputValue.setDescription(DOCUMENT_UTIL.getStringValue(inputValueDefinitionContext.description().StringValue()));
         }
 
         if (inputValueDefinitionContext.defaultValue() != null) {
@@ -372,7 +373,7 @@ public class IntrospectionMutationBuilder {
 
         if (level == 0) {
             if (inputObjectTypeDefinitionContext.description() != null) {
-                type.setDescription(inputObjectTypeDefinitionContext.description().getText());
+                type.setDescription(DOCUMENT_UTIL.getStringValue(inputObjectTypeDefinitionContext.description().StringValue()));
             }
             type.setInputFields(
                     inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
@@ -396,7 +397,7 @@ public class IntrospectionMutationBuilder {
 
         if (level == 0) {
             if (scalarTypeDefinitionContext.description() != null) {
-                type.setDescription(scalarTypeDefinitionContext.description().getText());
+                type.setDescription(DOCUMENT_UTIL.getStringValue(scalarTypeDefinitionContext.description().StringValue()));
             }
         }
         return type;
@@ -435,7 +436,7 @@ public class IntrospectionMutationBuilder {
         directive.setName(directiveDefinitionContext.name().getText());
 
         if (directiveDefinitionContext.description() != null) {
-            directive.setDescription(directiveDefinitionContext.description().getText());
+            directive.setDescription(DOCUMENT_UTIL.getStringValue(directiveDefinitionContext.description().StringValue()));
         }
 
         if (directiveDefinitionContext.argumentsDefinition() != null) {
