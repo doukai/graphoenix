@@ -665,9 +665,10 @@ public class DocumentBuilder {
     }
 
     public Field buildListObjectConnectionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         Field field = new Field()
                 .setName(fieldDefinitionContext.name().getText() + CONNECTION_SUFFIX)
-                .setType(manager.getFieldTypeName(fieldDefinitionContext.type()) + CONNECTION_SUFFIX)
+                .setType(fieldTypeName + CONNECTION_SUFFIX)
                 .addDirective(new io.graphoenix.core.operation.Directive()
                         .setName(CONNECTION_DIRECTIVE_NAME)
                         .addArgument("field", fieldDefinitionContext.name().getText())
@@ -678,6 +679,14 @@ public class DocumentBuilder {
                 .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setType("Int"))
                 .addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setType(manager.getFieldTypeName(fieldDefinitionContext.type()) + InputType.ORDER_BY))
                 .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setType(new ListType(new NonNullType(new TypeName("String")))));
+
+        manager.getFieldByDirective(fieldTypeName, CURSOR_DIRECTIVE_NAME)
+                .findFirst()
+                .or(() -> manager.getObjectTypeIDFieldDefinition(fieldTypeName))
+                .ifPresent(cursorFieldDefinitionContext ->
+                        field.addArgument(new InputValue().setName(AFTER_INPUT_NAME).setType(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                                .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setType(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                );
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> fieldObjectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(fieldDefinitionContext.type()));
         fieldObjectTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> field.addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.EXPRESSION)));
@@ -897,11 +906,11 @@ public class DocumentBuilder {
                                     .addArgument("interfaces",
                                             new ArrayValueWithVariable(
                                                     Stream.concat(
-                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
-                                                                            .flatMap(manager::getInterfaces)
-                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
-                                                                    Stream.of(META_INTERFACE_NAME)
-                                                            )
+                                                            Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                    .flatMap(manager::getInterfaces)
+                                                                    .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                            Stream.of(META_INTERFACE_NAME)
+                                                    )
                                                             .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
                                                             .distinct()
                                                             .collect(Collectors.toList())
@@ -920,11 +929,11 @@ public class DocumentBuilder {
                                     .addArgument("interfaces",
                                             new ArrayValueWithVariable(
                                                     Stream.concat(
-                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
-                                                                            .flatMap(manager::getInterfaces)
-                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
-                                                                    Stream.of(META_INTERFACE_NAME)
-                                                            )
+                                                            Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                    .flatMap(manager::getInterfaces)
+                                                                    .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                            Stream.of(META_INTERFACE_NAME)
+                                                    )
                                                             .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
                                                             .distinct()
                                                             .collect(Collectors.toList())
@@ -943,11 +952,11 @@ public class DocumentBuilder {
                                     .addArgument("interfaces",
                                             new ArrayValueWithVariable(
                                                     Stream.concat(
-                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
-                                                                            .flatMap(manager::getInterfaces)
-                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
-                                                                    Stream.of(META_INTERFACE_NAME)
-                                                            )
+                                                            Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                    .flatMap(manager::getInterfaces)
+                                                                    .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                            Stream.of(META_INTERFACE_NAME)
+                                                    )
                                                             .map(interfaceName -> interfaceName.concat(INPUT_SUFFIX))
                                                             .distinct()
                                                             .collect(Collectors.toList())
@@ -1023,11 +1032,11 @@ public class DocumentBuilder {
                                     .addArgument("interfaces",
                                             new ArrayValueWithVariable(
                                                     Stream.concat(
-                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
-                                                                            .flatMap(manager::getInterfaces)
-                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
-                                                                    Stream.of(META_INTERFACE_NAME)
-                                                            )
+                                                            Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                    .flatMap(manager::getInterfaces)
+                                                                    .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                            Stream.of(META_INTERFACE_NAME)
+                                                    )
                                                             .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
                                                             .distinct()
                                                             .collect(Collectors.toList())
@@ -1058,11 +1067,11 @@ public class DocumentBuilder {
                                     .addArgument("interfaces",
                                             new ArrayValueWithVariable(
                                                     Stream.concat(
-                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
-                                                                            .flatMap(manager::getInterfaces)
-                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
-                                                                    Stream.of(META_INTERFACE_NAME)
-                                                            )
+                                                            Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                    .flatMap(manager::getInterfaces)
+                                                                    .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                            Stream.of(META_INTERFACE_NAME)
+                                                    )
                                                             .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
                                                             .distinct()
                                                             .collect(Collectors.toList())
@@ -1093,11 +1102,11 @@ public class DocumentBuilder {
                                     .addArgument("interfaces",
                                             new ArrayValueWithVariable(
                                                     Stream.concat(
-                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
-                                                                            .flatMap(manager::getInterfaces)
-                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
-                                                                    Stream.of(META_INTERFACE_NAME)
-                                                            )
+                                                            Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                    .flatMap(manager::getInterfaces)
+                                                                    .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                            Stream.of(META_INTERFACE_NAME)
+                                                    )
                                                             .map(interfaceName -> interfaceName.concat(INPUT_SUFFIX))
                                                             .distinct()
                                                             .collect(Collectors.toList())
@@ -1178,11 +1187,11 @@ public class DocumentBuilder {
                                     .addArgument("interfaces",
                                             new ArrayValueWithVariable(
                                                     Stream.concat(
-                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
-                                                                            .flatMap(manager::getInterfaces)
-                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
-                                                                    Stream.of(META_INTERFACE_NAME)
-                                                            )
+                                                            Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                    .flatMap(manager::getInterfaces)
+                                                                    .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                            Stream.of(META_INTERFACE_NAME)
+                                                    )
                                                             .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
                                                             .distinct()
                                                             .collect(Collectors.toList())
@@ -1211,11 +1220,11 @@ public class DocumentBuilder {
                                     .addArgument("interfaces",
                                             new ArrayValueWithVariable(
                                                     Stream.concat(
-                                                                    Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
-                                                                            .flatMap(manager::getInterfaces)
-                                                                            .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
-                                                                    Stream.of(META_INTERFACE_NAME)
-                                                            )
+                                                            Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                    .flatMap(manager::getInterfaces)
+                                                                    .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                            Stream.of(META_INTERFACE_NAME)
+                                                    )
                                                             .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
                                                             .distinct()
                                                             .collect(Collectors.toList())
@@ -1406,11 +1415,11 @@ public class DocumentBuilder {
                                 .addArgument("interfaces",
                                         new ArrayValueWithVariable(
                                                 Stream.concat(
-                                                                Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
-                                                                        .flatMap(manager::getInterfaces)
-                                                                        .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
-                                                                Stream.of(META_INTERFACE_NAME)
-                                                        )
+                                                        Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                .flatMap(manager::getInterfaces)
+                                                                .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                        Stream.of(META_INTERFACE_NAME)
+                                                )
                                                         .map(interfaceName -> interfaceName.concat(INPUT_SUFFIX))
                                                         .distinct()
                                                         .collect(Collectors.toList())
@@ -1504,11 +1513,11 @@ public class DocumentBuilder {
                                 .addArgument("interfaces",
                                         new ArrayValueWithVariable(
                                                 Stream.concat(
-                                                                Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
-                                                                        .flatMap(manager::getInterfaces)
-                                                                        .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
-                                                                Stream.of(META_INTERFACE_NAME)
-                                                        )
+                                                        Stream.ofNullable(objectTypeDefinitionContext.implementsInterfaces())
+                                                                .flatMap(manager::getInterfaces)
+                                                                .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.name().getText()),
+                                                        Stream.of(META_INTERFACE_NAME)
+                                                )
                                                         .map(interfaceName -> interfaceName.concat(EXPRESSION_SUFFIX))
                                                         .distinct()
                                                         .collect(Collectors.toList())
