@@ -74,7 +74,7 @@ public class ApplicationProcessor extends BaseProcessor {
 
         try {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
-            configRegister.registerPackage(ApplicationProcessor.class.getClassLoader());
+            configRegister.registerPackage(ApplicationProcessor.class.getClassLoader(), true);
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             } else {

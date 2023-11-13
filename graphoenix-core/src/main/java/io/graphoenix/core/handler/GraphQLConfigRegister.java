@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -94,6 +93,10 @@ public class GraphQLConfigRegister {
     }
 
     public void registerPackage(ClassLoader classLoader) throws IOException, URISyntaxException {
+        registerPackage(classLoader, false);
+    }
+
+    public void registerPackage(ClassLoader classLoader, boolean application) throws IOException, URISyntaxException {
         Iterator<URL> urlIterator = Objects.requireNonNull(classLoader.getResources("META-INF/graphql")).asIterator();
         while (urlIterator.hasNext()) {
             URI uri = urlIterator.next().toURI();
@@ -108,7 +111,7 @@ public class GraphQLConfigRegister {
             try {
                 pathList.stream()
                         .filter(path -> !path.getFileName().toString().equals("main.gql"))
-//                        .filter(path -> !path.getFileName().toString().equals(graphQLConfig.getPackageName() + ".gql"))
+                        .filter(path -> application || !path.getFileName().toString().equals(graphQLConfig.getPackageName() + ".gql"))
                         .forEach(path -> {
                                     Try.run(() -> manager.mergePath(path));
                                     Logger.info("registered preset path {} from {}", path, classLoader.getName());
