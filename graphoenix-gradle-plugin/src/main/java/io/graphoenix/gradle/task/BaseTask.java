@@ -255,11 +255,11 @@ public class BaseTask extends DefaultTask {
                                                                                                     "parameters",
                                                                                                     new ArrayValueWithVariable(
                                                                                                             methodDeclaration.getParameters().stream()
-                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", getTypeName(parameter.getType())))
+                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", parameter.getType().toString()))
                                                                                                                     .collect(Collectors.toList())
                                                                                                     )
                                                                                             )
-                                                                                            .addArgument("returnClassName", getTypeName(methodDeclaration.getType()))
+                                                                                            .addArgument("returnClassName", methodDeclaration.getType().toString())
                                                                             )
                                                                             .addDirective(
                                                                                     new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
@@ -321,11 +321,11 @@ public class BaseTask extends DefaultTask {
                                                                                                                         "parameters",
                                                                                                                         new ArrayValueWithVariable(
                                                                                                                                 methodDeclaration.getParameters().stream()
-                                                                                                                                        .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", getTypeName(parameter.getType())))
+                                                                                                                                        .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", parameter.getType().toString()))
                                                                                                                                         .collect(Collectors.toList())
                                                                                                                         )
                                                                                                                 )
-                                                                                                                .addArgument("returnClassName", getTypeName(methodDeclaration.getType()))
+                                                                                                                .addArgument("returnClassName", methodDeclaration.getType().toString())
                                                                                                 )
                                                                                                 .addDirective(
                                                                                                         new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
@@ -379,11 +379,11 @@ public class BaseTask extends DefaultTask {
                                                                                                     "parameters",
                                                                                                     new ArrayValueWithVariable(
                                                                                                             methodDeclaration.getParameters().stream()
-                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", getTypeName(parameter.getType())))
+                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", parameter.getType().toString()))
                                                                                                                     .collect(Collectors.toList())
                                                                                                     )
                                                                                             )
-                                                                                            .addArgument("returnClassName", getTypeName(methodDeclaration.getType()))
+                                                                                            .addArgument("returnClassName", methodDeclaration.getType().toString())
                                                                             )
                                                                             .addDirective(
                                                                                     new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
@@ -435,11 +435,11 @@ public class BaseTask extends DefaultTask {
                                                                                                     "parameters",
                                                                                                     new ArrayValueWithVariable(
                                                                                                             methodDeclaration.getParameters().stream()
-                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", getTypeName(parameter.getType())))
+                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", parameter.getType().toString()))
                                                                                                                     .collect(Collectors.toList())
                                                                                                     )
                                                                                             )
-                                                                                            .addArgument("returnClassName", getTypeName(methodDeclaration.getType()))
+                                                                                            .addArgument("returnClassName", methodDeclaration.getType().toString())
                                                                             )
                                                                             .addDirective(
                                                                                     new Directive(PACKAGE_INFO_DIRECTIVE_NAME)

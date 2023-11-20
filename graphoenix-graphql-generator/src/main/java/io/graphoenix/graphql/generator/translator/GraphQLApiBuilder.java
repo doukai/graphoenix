@@ -49,7 +49,7 @@ public class GraphQLApiBuilder {
                                         "parameters",
                                         new ArrayValueWithVariable(
                                                 executableElement.getParameters().stream()
-                                                        .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", ELEMENT_UTIL.getTypeMirrorName(parameter.asType(), typeUtils)))
+                                                        .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", parameter.asType().toString()))
                                                         .collect(Collectors.toList())
                                         )
                                 )
@@ -98,7 +98,7 @@ public class GraphQLApiBuilder {
                                                 "parameters",
                                                 new ArrayValueWithVariable(
                                                         executableElement.getParameters().stream()
-                                                                .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", ELEMENT_UTIL.getTypeMirrorName(parameter.asType(), typeUtils)))
+                                                                .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", parameter.asType().toString()))
                                                                 .collect(Collectors.toList())
                                                 )
                                         )

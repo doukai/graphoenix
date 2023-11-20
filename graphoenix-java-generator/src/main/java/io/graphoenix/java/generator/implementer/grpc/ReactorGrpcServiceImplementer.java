@@ -353,7 +353,8 @@ public class ReactorGrpcServiceImplementer {
             String returnClassName = typeManager.getReturnClassName(fieldDefinitionContext);
             CodeBlock parametersCodeBlock = CodeBlock.join(parameters.stream()
                     .map(parameter ->
-                            CodeBlock.of("argumentBuilder.get().getArgument(selectionContext, $S, $T.class)",
+                            CodeBlock.of("($T)argumentBuilder.get().getArgument(selectionContext, $S, $T.class)",
+                                    TYPE_UTIL.getTypeName(parameter.getValue()),
                                     parameter.getKey(),
                                     TYPE_UTIL.getTypeName(parameter.getValue())
                             )
