@@ -49,11 +49,11 @@ public class GraphQLApiBuilder {
                                         "parameters",
                                         new ArrayValueWithVariable(
                                                 executableElement.getParameters().stream()
-                                                        .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", parameter.asType().toString()))
+                                                        .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", ELEMENT_UTIL.getTypeMirrorName(parameter.asType(), typeUtils)))
                                                         .collect(Collectors.toList())
                                         )
                                 )
-                                .addArgument("returnClassName", executableElement.getReturnType().toString())
+                                .addArgument("returnClassName", ELEMENT_UTIL.getTypeMirrorName(executableElement.getReturnType(), typeUtils))
                 )
                 .addDirective(
                         new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
@@ -98,11 +98,11 @@ public class GraphQLApiBuilder {
                                                 "parameters",
                                                 new ArrayValueWithVariable(
                                                         executableElement.getParameters().stream()
-                                                                .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", parameter.asType().toString()))
+                                                                .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", ELEMENT_UTIL.getTypeMirrorName(parameter.asType(), typeUtils)))
                                                                 .collect(Collectors.toList())
                                                 )
                                         )
-                                        .addArgument("returnClassName", executableElement.getReturnType().toString())
+                                        .addArgument("returnClassName", ELEMENT_UTIL.getTypeMirrorName(executableElement.getReturnType(), typeUtils))
                         )
                         .addDirective(
                                 new Directive(PACKAGE_INFO_DIRECTIVE_NAME)

@@ -18,7 +18,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.lang.model.element.*;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.math.BigDecimal;
@@ -35,6 +37,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
 import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
 import static io.graphoenix.spi.dto.type.OperationType.QUERY;
+import static javax.lang.model.type.TypeKind.ARRAY;
 
 public enum ElementUtil {
     ELEMENT_UTIL;
@@ -171,14 +174,14 @@ public enum ElementUtil {
 
     public String executableElementToTypeName(ExecutableElement executableElement, Types types) {
         TypeMirror typeMirror;
-        String typeMirrorName = getTypeMirrorName(executableElement.getReturnType(), types);
-        if (typeMirrorName.equals(Flux.class.getCanonicalName())) {
+        String typeName = getTypeName(executableElement.getReturnType(), types);
+        if (typeName.equals(Flux.class.getCanonicalName())) {
             typeMirror = ((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0);
             return "[" + elementToTypeName(executableElement, typeMirror, types) + "]";
-        } else if (typeMirrorName.equals(Mono.class.getCanonicalName())) {
+        } else if (typeName.equals(Mono.class.getCanonicalName())) {
             typeMirror = ((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0);
             return elementToTypeName(executableElement, typeMirror, types);
-        } else if (typeMirrorName.equals(PublisherBuilder.class.getCanonicalName())) {
+        } else if (typeName.equals(PublisherBuilder.class.getCanonicalName())) {
             typeMirror = ((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0);
             return elementToTypeName(executableElement, typeMirror, types);
         } else {
@@ -189,14 +192,14 @@ public enum ElementUtil {
 
     public String variableElementToTypeName(VariableElement variableElement, Types types) {
         TypeMirror typeMirror;
-        String typeMirrorName = getTypeMirrorName(variableElement.asType(), types);
-        if (typeMirrorName.equals(Flux.class.getCanonicalName())) {
+        String typeName = getTypeName(variableElement.asType(), types);
+        if (typeName.equals(Flux.class.getCanonicalName())) {
             typeMirror = ((DeclaredType) variableElement.asType()).getTypeArguments().get(0);
             return "[" + elementToTypeName(variableElement, typeMirror, types) + "]";
-        } else if (typeMirrorName.equals(Mono.class.getCanonicalName())) {
+        } else if (typeName.equals(Mono.class.getCanonicalName())) {
             typeMirror = ((DeclaredType) variableElement.asType()).getTypeArguments().get(0);
             return elementToTypeName(variableElement, typeMirror, types);
-        } else if (typeMirrorName.equals(PublisherBuilder.class.getCanonicalName())) {
+        } else if (typeName.equals(PublisherBuilder.class.getCanonicalName())) {
             typeMirror = ((DeclaredType) variableElement.asType()).getTypeArguments().get(0);
             return elementToTypeName(variableElement, typeMirror, types);
         } else {
@@ -206,53 +209,55 @@ public enum ElementUtil {
     }
 
     public String elementToTypeName(Element element, TypeMirror typeMirror, Types types) {
-        String typeName;
-        String typeMirrorName = getTypeMirrorName(typeMirror, types);
+        String objectTypeName;
+        String typeName = getTypeName(typeMirror, types);
         if (element.getAnnotation(Id.class) != null) {
-            typeName = "ID";
-        } else if (typeMirrorName.equals(int.class.getCanonicalName()) ||
-                typeMirrorName.equals(long.class.getCanonicalName()) ||
-                typeMirrorName.equals(short.class.getCanonicalName()) ||
-                typeMirrorName.equals(byte.class.getCanonicalName()) ||
-                typeMirrorName.equals(Integer.class.getCanonicalName()) ||
-                typeMirrorName.equals(Long.class.getCanonicalName()) ||
-                typeMirrorName.equals(Short.class.getCanonicalName()) ||
-                typeMirrorName.equals(Byte.class.getCanonicalName())) {
-            typeName = "Int";
-        } else if (typeMirrorName.equals(float.class.getCanonicalName()) ||
-                typeMirrorName.equals(double.class.getCanonicalName()) ||
-                typeMirrorName.equals(Float.class.getCanonicalName()) ||
-                typeMirrorName.equals(Double.class.getCanonicalName())) {
-            typeName = "Float";
-        } else if (typeMirrorName.equals(char.class.getCanonicalName()) ||
-                typeMirrorName.equals(String.class.getCanonicalName()) ||
-                typeMirrorName.equals(Character.class.getCanonicalName())) {
-            typeName = "String";
-        } else if (typeMirrorName.equals(boolean.class.getCanonicalName()) ||
-                typeMirrorName.equals(Boolean.class.getCanonicalName())) {
-            typeName = "Boolean";
-        } else if (typeMirrorName.equals(BigInteger.class.getCanonicalName())) {
-            typeName = "BigInteger";
-        } else if (typeMirrorName.equals(BigDecimal.class.getCanonicalName())) {
-            typeName = "BigDecimal";
-        } else if (typeMirrorName.equals(LocalDate.class.getCanonicalName())) {
-            typeName = "Date";
-        } else if (typeMirrorName.equals(LocalTime.class.getCanonicalName())) {
-            typeName = "Time";
-        } else if (typeMirrorName.equals(LocalDateTime.class.getCanonicalName())) {
-            typeName = "DateTime";
-        } else if (typeMirrorName.equals(Collection.class.getCanonicalName()) ||
-                typeMirrorName.equals(List.class.getCanonicalName()) ||
-                typeMirrorName.equals(Set.class.getCanonicalName())) {
-            typeName = "[" + elementToTypeName(element, ((DeclaredType) typeMirror).getTypeArguments().get(0), types) + "]";
+            objectTypeName = "ID";
+        } else if (typeMirror.getKind().equals(ARRAY)) {
+            objectTypeName = "[" + elementToTypeName(element, ((ArrayType) typeMirror).getComponentType(), types) + "]";
+        }  else if (typeName.equals(int.class.getCanonicalName()) ||
+                typeName.equals(long.class.getCanonicalName()) ||
+                typeName.equals(short.class.getCanonicalName()) ||
+                typeName.equals(byte.class.getCanonicalName()) ||
+                typeName.equals(Integer.class.getCanonicalName()) ||
+                typeName.equals(Long.class.getCanonicalName()) ||
+                typeName.equals(Short.class.getCanonicalName()) ||
+                typeName.equals(Byte.class.getCanonicalName())) {
+            objectTypeName = "Int";
+        } else if (typeName.equals(float.class.getCanonicalName()) ||
+                typeName.equals(double.class.getCanonicalName()) ||
+                typeName.equals(Float.class.getCanonicalName()) ||
+                typeName.equals(Double.class.getCanonicalName())) {
+            objectTypeName = "Float";
+        } else if (typeName.equals(char.class.getCanonicalName()) ||
+                typeName.equals(String.class.getCanonicalName()) ||
+                typeName.equals(Character.class.getCanonicalName())) {
+            objectTypeName = "String";
+        } else if (typeName.equals(boolean.class.getCanonicalName()) ||
+                typeName.equals(Boolean.class.getCanonicalName())) {
+            objectTypeName = "Boolean";
+        } else if (typeName.equals(BigInteger.class.getCanonicalName())) {
+            objectTypeName = "BigInteger";
+        } else if (typeName.equals(BigDecimal.class.getCanonicalName())) {
+            objectTypeName = "BigDecimal";
+        } else if (typeName.equals(LocalDate.class.getCanonicalName())) {
+            objectTypeName = "Date";
+        } else if (typeName.equals(LocalTime.class.getCanonicalName())) {
+            objectTypeName = "Time";
+        } else if (typeName.equals(LocalDateTime.class.getCanonicalName())) {
+            objectTypeName = "DateTime";
+        } else if (typeName.equals(Collection.class.getCanonicalName()) ||
+                typeName.equals(List.class.getCanonicalName()) ||
+                typeName.equals(Set.class.getCanonicalName())) {
+            objectTypeName = "[" + elementToTypeName(element, ((DeclaredType) typeMirror).getTypeArguments().get(0), types) + "]";
         } else {
-            typeName = getNameFromElement(types.asElement(typeMirror));
+            objectTypeName = getNameFromElement(types.asElement(typeMirror));
         }
 
         if (element.getAnnotation(NonNull.class) != null || typeMirror.getKind().isPrimitive()) {
-            return typeName + "!";
+            return objectTypeName + "!";
         } else {
-            return typeName;
+            return objectTypeName;
         }
     }
 
@@ -265,66 +270,67 @@ public enum ElementUtil {
     }
 
     public String elementToInputTypeName(Element element, TypeMirror typeMirror, Types types) {
-        String typeName;
-        String typeMirrorName = getTypeMirrorName(typeMirror, types);
+        String inputTypeName;
+        String typeName = getTypeName(typeMirror, types);
         if (element.getAnnotation(Id.class) != null) {
-            typeName = "ID";
-        } else if (typeMirrorName.equals(int.class.getCanonicalName()) ||
-                typeMirrorName.equals(long.class.getCanonicalName()) ||
-                typeMirrorName.equals(short.class.getCanonicalName()) ||
-                typeMirrorName.equals(byte.class.getCanonicalName()) ||
-                typeMirrorName.equals(Integer.class.getCanonicalName()) ||
-                typeMirrorName.equals(Long.class.getCanonicalName()) ||
-                typeMirrorName.equals(Short.class.getCanonicalName()) ||
-                typeMirrorName.equals(Byte.class.getCanonicalName())) {
-            typeName = "Int";
-        } else if (typeMirrorName.equals(float.class.getCanonicalName()) ||
-                typeMirrorName.equals(double.class.getCanonicalName()) ||
-                typeMirrorName.equals(Float.class.getCanonicalName()) ||
-                typeMirrorName.equals(Double.class.getCanonicalName())) {
-            typeName = "Float";
-        } else if (typeMirrorName.equals(char.class.getCanonicalName()) ||
-                typeMirrorName.equals(String.class.getCanonicalName()) ||
-                typeMirrorName.equals(Character.class.getCanonicalName())) {
-            typeName = "String";
-        } else if (typeMirrorName.equals(boolean.class.getCanonicalName()) ||
-                typeMirrorName.equals(Boolean.class.getCanonicalName())) {
-            typeName = "Boolean";
-        } else if (typeMirrorName.equals(BigInteger.class.getCanonicalName())) {
-            typeName = "BigInteger";
-        } else if (typeMirrorName.equals(BigDecimal.class.getCanonicalName())) {
-            typeName = "BigDecimal";
-        } else if (typeMirrorName.equals(LocalDate.class.getCanonicalName())) {
-            typeName = "Date";
-        } else if (typeMirrorName.equals(LocalTime.class.getCanonicalName())) {
-            typeName = "Time";
-        } else if (typeMirrorName.equals(LocalDateTime.class.getCanonicalName())) {
-            typeName = "DateTime";
+            inputTypeName = "ID";
+        } else if (typeMirror.getKind().equals(ARRAY)) {
+            inputTypeName = "[" + elementToInputTypeName(element, ((ArrayType) typeMirror).getComponentType(), types) + "]";
+        } else if (typeName.equals(int.class.getCanonicalName()) ||
+                typeName.equals(long.class.getCanonicalName()) ||
+                typeName.equals(short.class.getCanonicalName()) ||
+                typeName.equals(byte.class.getCanonicalName()) ||
+                typeName.equals(Integer.class.getCanonicalName()) ||
+                typeName.equals(Long.class.getCanonicalName()) ||
+                typeName.equals(Short.class.getCanonicalName()) ||
+                typeName.equals(Byte.class.getCanonicalName())) {
+            inputTypeName = "Int";
+        } else if (typeName.equals(float.class.getCanonicalName()) ||
+                typeName.equals(double.class.getCanonicalName()) ||
+                typeName.equals(Float.class.getCanonicalName()) ||
+                typeName.equals(Double.class.getCanonicalName())) {
+            inputTypeName = "Float";
+        } else if (typeName.equals(char.class.getCanonicalName()) ||
+                typeName.equals(String.class.getCanonicalName()) ||
+                typeName.equals(Character.class.getCanonicalName())) {
+            inputTypeName = "String";
+        } else if (typeName.equals(boolean.class.getCanonicalName()) ||
+                typeName.equals(Boolean.class.getCanonicalName())) {
+            inputTypeName = "Boolean";
+        } else if (typeName.equals(BigInteger.class.getCanonicalName())) {
+            inputTypeName = "BigInteger";
+        } else if (typeName.equals(BigDecimal.class.getCanonicalName())) {
+            inputTypeName = "BigDecimal";
+        } else if (typeName.equals(LocalDate.class.getCanonicalName())) {
+            inputTypeName = "Date";
+        } else if (typeName.equals(LocalTime.class.getCanonicalName())) {
+            inputTypeName = "Time";
+        } else if (typeName.equals(LocalDateTime.class.getCanonicalName())) {
+            inputTypeName = "DateTime";
         } else if (types.asElement(typeMirror).getKind().equals(ElementKind.ENUM)) {
-            typeName = getNameFromElement(types.asElement(typeMirror));
-        } else if (typeMirrorName.equals(Collection.class.getCanonicalName()) ||
-                typeMirrorName.equals(List.class.getCanonicalName()) ||
-                typeMirrorName.equals(Set.class.getCanonicalName())) {
-
+            inputTypeName = getNameFromElement(types.asElement(typeMirror));
+        } else if (typeName.equals(Collection.class.getCanonicalName()) ||
+                typeName.equals(List.class.getCanonicalName()) ||
+                typeName.equals(Set.class.getCanonicalName())) {
             if (element.getKind().equals(ElementKind.METHOD)) {
-                typeName = "[" + elementToInputTypeName(element, ((DeclaredType) ((ExecutableElement) element).getReturnType()).getTypeArguments().get(0), types) + "]";
+                inputTypeName = "[" + elementToInputTypeName(element, ((DeclaredType) ((ExecutableElement) element).getReturnType()).getTypeArguments().get(0), types) + "]";
             } else if (element.getKind().equals(ElementKind.FIELD) || element.getKind().equals(ElementKind.PARAMETER)) {
-                typeName = "[" + elementToInputTypeName(element, ((DeclaredType) element.asType()).getTypeArguments().get(0), types) + "]";
+                inputTypeName = "[" + elementToInputTypeName(element, ((DeclaredType) element.asType()).getTypeArguments().get(0), types) + "]";
             } else {
-                throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeMirrorName));
+                throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeName));
             }
         } else {
-            if (typeMirrorName.endsWith(INPUT_SUFFIX)) {
-                typeName = getNameFromElement(types.asElement(typeMirror));
+            if (typeName.endsWith(INPUT_SUFFIX)) {
+                inputTypeName = getNameFromElement(types.asElement(typeMirror));
             } else {
-                typeName = getNameFromElement(types.asElement(typeMirror)) + INPUT_SUFFIX;
+                inputTypeName = getNameFromElement(types.asElement(typeMirror)) + INPUT_SUFFIX;
             }
         }
 
         if (element.getAnnotation(NonNull.class) != null || typeMirror.getKind().isPrimitive()) {
-            return typeName + "!";
+            return inputTypeName + "!";
         } else {
-            return typeName;
+            return inputTypeName;
         }
     }
 
@@ -349,7 +355,30 @@ public enum ElementUtil {
     public String getTypeMirrorName(TypeMirror typeMirror, Types types) {
         if (typeMirror.getKind().isPrimitive()) {
             return typeMirror.getKind().toString().toLowerCase();
+        } else if (typeMirror.getKind().equals(ARRAY)) {
+            return getTypeMirrorName(((ArrayType) typeMirror).getComponentType(), types) + "[]";
+        } else if (typeMirror.getKind().equals(TypeKind.DECLARED)) {
+            DeclaredType declaredType = (DeclaredType) typeMirror;
+            if (declaredType.getTypeArguments() != null && !declaredType.getTypeArguments().isEmpty()) {
+                return ((TypeElement) types.asElement(declaredType)).getQualifiedName().toString() +
+                        "<" +
+                        declaredType.getTypeArguments().stream().map(argumentTypeMirror -> getTypeMirrorName(argumentTypeMirror, types))
+                                .collect(Collectors.joining(", "))
+                        + ">";
+            }
+            return ((TypeElement) types.asElement(declaredType)).getQualifiedName().toString();
         }
-        return ((TypeElement) types.asElement(typeMirror)).getQualifiedName().toString();
+        throw new RuntimeException("illegal typeMirror: " + typeMirror);
+    }
+
+    public String getTypeName(TypeMirror typeMirror, Types types) {
+        if (typeMirror.getKind().isPrimitive()) {
+            return typeMirror.getKind().toString().toLowerCase();
+        } else if (typeMirror.getKind().equals(ARRAY)) {
+            return getTypeName(((ArrayType) typeMirror).getComponentType(), types) + "[]";
+        } else if (typeMirror.getKind().equals(TypeKind.DECLARED)) {
+            return ((TypeElement) types.asElement(typeMirror)).getQualifiedName().toString();
+        }
+        throw new RuntimeException("illegal typeMirror: " + typeMirror);
     }
 }

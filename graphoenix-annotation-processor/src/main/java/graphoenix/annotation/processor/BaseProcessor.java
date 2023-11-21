@@ -239,7 +239,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                                             .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", ELEMENT_UTIL.getTypeMirrorName(parameter.asType(), typeUtils)))
                                                                             .collect(Collectors.toList())
                                                             ),
-                                                            "returnClassName", executableElement.getReturnType().toString()
+                                                            "returnClassName", ELEMENT_UTIL.getTypeMirrorName(executableElement.getReturnType(), typeUtils)
                                                     );
                                                     Optional<Directive> invokes = Stream.ofNullable(inputObjectType.getDirectives())
                                                             .flatMap(Collection::stream)
@@ -282,7 +282,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
                                                                             .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", ELEMENT_UTIL.getTypeMirrorName(parameter.asType(), typeUtils)))
                                                                             .collect(Collectors.toList())
                                                             ),
-                                                            "returnClassName", executableElement.getReturnType().toString()
+                                                            "returnClassName", ELEMENT_UTIL.getTypeMirrorName(executableElement.getReturnType(), typeUtils)
                                                     );
                                                     Optional<Directive> invokes = Stream.ofNullable(inputObjectType.getDirectives())
                                                             .flatMap(Collection::stream)

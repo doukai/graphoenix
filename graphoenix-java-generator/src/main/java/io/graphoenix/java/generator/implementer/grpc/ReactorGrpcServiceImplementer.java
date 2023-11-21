@@ -356,7 +356,7 @@ public class ReactorGrpcServiceImplementer {
                             CodeBlock.of("($T)argumentBuilder.get().getArgument(selectionContext, $S, $T.class)",
                                     TYPE_UTIL.getTypeName(parameter.getValue()),
                                     parameter.getKey(),
-                                    TYPE_UTIL.getTypeName(parameter.getValue())
+                                    TYPE_UTIL.getClassName(parameter.getValue())
                             )
                     )
                     .collect(Collectors.toList()), ", ");
