@@ -156,10 +156,8 @@ input Invoke {
 }
 
 input InvokeParameter {
+    name: String
     className: String
-    methodName: String
-    parameters: [InvokeParameter]
-    returnClassName: String
 }
 
 directive @dataType(
